@@ -71,6 +71,10 @@ search workflow.
   `http.server`, validated end-to-end with Playwright browser fallback. Tests
   skip cleanly when Playwright/browser binaries are unavailable. No external
   network access required.
+- Job registry concurrency limits: `POST /crawl` rejects with HTTP 429 when
+  active background jobs reach the configured limit. Defaults to 4, configurable
+  via `CLM_MAX_ACTIVE_JOBS` env var. Active-job counting and registration happen
+  under one lock. Completed and failed jobs free their slots.
 - Local Git repository initialized on 2026-05-07 for project history and
   rollback.
 - Remote Git repository configured:
@@ -84,7 +88,7 @@ search workflow.
 
 ```text
 python -m unittest discover autonomous_crawler\tests
-Ran 84 tests (skipped=3)
+Ran 94 tests (skipped=3)
 OK
 ```
 
@@ -95,7 +99,8 @@ OK
   cards and Baidu-style ranking lists.
 - `site_spec_draft` detail selectors are drafts when only a list page is known.
 - API interception is not fully integrated into the graph.
-- FastAPI background jobs use in-memory registry; jobs are lost on process restart.
+- FastAPI background jobs use in-memory registry; jobs are lost on process
+  restart. Completed/failed registry entries do not have TTL cleanup yet.
 - Storage is local SQLite only; no dashboard yet.
 - Redis is still unused.
 - Multiple Codex agents can now coordinate by document convention, but there is
@@ -131,3 +136,4 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed
 6. ~~Add real browser SPA smoke validation.~~ Done 2026-05-06.
 7. ~~Initialize local Git repository and employee memory model.~~ Done 2026-05-07.
 8. ~~Configure remote Git repository and add ADR/runbook foundation.~~ Done 2026-05-07.
+9. ~~Add background job registry concurrency limit.~~ Done 2026-05-07.

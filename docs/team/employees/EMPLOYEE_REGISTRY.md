@@ -28,10 +28,10 @@ LLM-2026-003
 | Employee ID | Display Name | Default Strength | Current Project Role | Status |
 |---|---|---|---|---|
 | LLM-2026-000 | Supervisor Codex | project supervision, architecture, review | Project Supervisor | active |
-| LLM-2026-001 | Worker Alpha | browser/executor implementation, API boundary work | API Job Worker | assigned |
+| LLM-2026-001 | Worker Alpha | browser/executor implementation, API boundary work | Unassigned | standby |
 | LLM-2026-002 | Worker Beta | QA and error-path hardening | Error Path QA Worker | active |
 | LLM-2026-003 | Worker Gamma | storage/CLI and strategy support | Unassigned | standby |
-| LLM-2026-004 | Worker Delta | onboarding, project reading, risk identification | Documentation Worker | assigned |
+| LLM-2026-004 | Worker Delta | onboarding, project reading, risk identification | Unassigned | standby |
 
 ## Assignment Rule
 

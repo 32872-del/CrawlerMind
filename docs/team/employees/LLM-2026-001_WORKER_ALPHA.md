@@ -6,7 +6,7 @@ Display Name: Worker Alpha
 
 Permanent Employee ID: `LLM-2026-001`
 
-Current Project Role: API Job Worker
+Current Project Role: Unassigned
 
 ## Current Strength Profile
 
@@ -24,16 +24,18 @@ Current Project Role: API Job Worker
   `docs/team/acceptance/2026-05-06_fastapi_background_jobs_ACCEPTED.md`
 - Real Browser SPA Smoke:
   `docs/team/acceptance/2026-05-06_real_browser_spa_smoke_ACCEPTED.md`
+- Job Registry Concurrency Limits:
+  `docs/team/acceptance/2026-05-07_job_registry_limits_ACCEPTED.md`
 
 ## Current Assignment
 
-- Job Registry Concurrency Limits:
-  `docs/team/assignments/2026-05-07_LLM-2026-001_JOB_REGISTRY_LIMITS.md`
+- Awaiting next scoped assignment.
 
 ## Current Notes
 
-This employee completed Browser Fallback, FastAPI Background Jobs, and Real
-Browser SPA Smoke. The employee ID is stable; no active assignment is open.
+This employee completed Browser Fallback, FastAPI Background Jobs, Real Browser
+SPA Smoke, and Job Registry Concurrency Limits. The employee ID is stable; no
+active assignment is open.
 
 ## Persistent Memory
 
@@ -51,6 +53,6 @@ Known risks:
 
 Next suitable assignments:
 
-- Job registry persistence or concurrency limits.
+- Job registry persistence or TTL cleanup.
 - Browser artifact cleanup policy.
 - Additional browser smoke fixtures.

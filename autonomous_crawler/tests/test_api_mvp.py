@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import tempfile
+import threading
 import time
 import unittest
 from pathlib import Path
@@ -9,7 +10,17 @@ from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 
 from autonomous_crawler.api import app as app_module
-from autonomous_crawler.api.app import create_app, _register_job, _update_job, _get_job, _jobs, _jobs_lock
+from autonomous_crawler.api.app import (
+    create_app,
+    _count_active_jobs,
+    _get_job,
+    _jobs,
+    _jobs_lock,
+    _max_active_jobs,
+    _register_job,
+    _try_register_job,
+    _update_job,
+)
 
 
 class FastAPIMVPTests(unittest.TestCase):
@@ -197,6 +208,172 @@ class JobRegistryTests(unittest.TestCase):
 
     def test_get_nonexistent_job_returns_none(self) -> None:
         self.assertIsNone(_get_job("nonexistent"))
+
+
+class ConcurrencyLimitTests(unittest.TestCase):
+    """Tests for the active job concurrency guard."""
+
+    def setUp(self) -> None:
+        with _jobs_lock:
+            _jobs.clear()
+
+    def _make_client(self) -> TestClient:
+        return TestClient(create_app())
+
+    def _blocking_workflow(self, block_event: "threading.Event"):
+        def _wf(**kwargs):
+            block_event.wait(timeout=10)
+            return {
+                "status": "completed",
+                "extracted_data": {"items": [], "item_count": 0, "confidence": 0},
+                "validation_result": {"is_valid": False},
+            }
+        return _wf
+
+    @patch("autonomous_crawler.api.app.save_crawl_result")
+    @patch("autonomous_crawler.api.app.run_crawl_workflow")
+    def test_accepted_when_below_limit(self, mock_wf, mock_save) -> None:
+        """POST /crawl should succeed when active jobs < limit."""
+        block = threading.Event()
+        mock_wf.side_effect = self._blocking_workflow(block)
+        mock_save.return_value = "ok"
+
+        with patch.dict("os.environ", {"CLM_MAX_ACTIVE_JOBS": "2"}, clear=False):
+            client = self._make_client()
+            resp = client.post(
+                "/crawl",
+                json={"user_goal": "test", "target_url": "https://example.com"},
+            )
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.json()["status"], "running")
+
+            block.set()
+            time.sleep(0.3)
+
+    @patch("autonomous_crawler.api.app.save_crawl_result")
+    @patch("autonomous_crawler.api.app.run_crawl_workflow")
+    def test_rejected_when_at_limit(self, mock_wf, mock_save) -> None:
+        """POST /crawl should return 429 when active jobs == limit."""
+        block = threading.Event()
+        mock_wf.side_effect = self._blocking_workflow(block)
+        mock_save.return_value = "ok"
+
+        with patch.dict("os.environ", {"CLM_MAX_ACTIVE_JOBS": "1"}, clear=False):
+            client = self._make_client()
+
+            # First request fills the slot
+            resp1 = client.post(
+                "/crawl",
+                json={"user_goal": "first", "target_url": "https://example.com"},
+            )
+            self.assertEqual(resp1.status_code, 200)
+
+            # Second request should be rejected
+            resp2 = client.post(
+                "/crawl",
+                json={"user_goal": "second", "target_url": "https://example.com"},
+            )
+            self.assertEqual(resp2.status_code, 429)
+            self.assertIn("too many active jobs", resp2.json()["detail"])
+
+            block.set()
+            time.sleep(0.3)
+
+    @patch("autonomous_crawler.api.app.save_crawl_result")
+    @patch("autonomous_crawler.api.app.run_crawl_workflow")
+    def test_completed_jobs_do_not_count_as_active(self, mock_wf, mock_save) -> None:
+        """After a job completes, it should free up a slot."""
+        mock_wf.return_value = {
+            "status": "completed",
+            "extracted_data": {"items": [], "item_count": 0, "confidence": 0},
+            "validation_result": {"is_valid": False},
+        }
+        mock_save.return_value = "ok"
+
+        with patch.dict("os.environ", {"CLM_MAX_ACTIVE_JOBS": "1"}, clear=False):
+            client = self._make_client()
+
+            # Fill the slot
+            resp1 = client.post(
+                "/crawl",
+                json={"user_goal": "first", "target_url": "https://example.com"},
+            )
+            self.assertEqual(resp1.status_code, 200)
+
+            # Wait for the background thread to complete
+            time.sleep(0.5)
+
+            # Slot should be free now
+            resp2 = client.post(
+                "/crawl",
+                json={"user_goal": "second", "target_url": "https://example.com"},
+            )
+            self.assertEqual(resp2.status_code, 200)
+
+    @patch("autonomous_crawler.api.app.save_crawl_result")
+    @patch("autonomous_crawler.api.app.run_crawl_workflow")
+    def test_failed_jobs_do_not_count_as_active(self, mock_wf, mock_save) -> None:
+        """After a job fails, it should free up a slot."""
+        mock_wf.side_effect = RuntimeError("boom")
+        mock_save.return_value = "ok"
+
+        with patch.dict("os.environ", {"CLM_MAX_ACTIVE_JOBS": "1"}, clear=False):
+            client = self._make_client()
+
+            # Fill the slot with a job that will fail
+            resp1 = client.post(
+                "/crawl",
+                json={"user_goal": "first", "target_url": "https://example.com"},
+            )
+            self.assertEqual(resp1.status_code, 200)
+
+            # Wait for the background thread to fail
+            time.sleep(0.5)
+
+            # Slot should be free now
+            resp2 = client.post(
+                "/crawl",
+                json={"user_goal": "second", "target_url": "https://example.com"},
+            )
+            self.assertEqual(resp2.status_code, 200)
+
+    def test_count_active_jobs_counts_only_running(self) -> None:
+        """_count_active_jobs should not count completed or failed jobs."""
+        _register_job("a", "g", "https://x.com")
+        _register_job("b", "g", "https://x.com")
+        _update_job("b", status="completed")
+        _register_job("c", "g", "https://x.com")
+        _update_job("c", status="failed")
+
+        self.assertEqual(_count_active_jobs(), 1)
+
+    def test_try_register_job_is_atomic_limit_gate(self) -> None:
+        """_try_register_job should check active count and register under one lock."""
+        with patch.dict("os.environ", {"CLM_MAX_ACTIVE_JOBS": "1"}, clear=False):
+            self.assertTrue(_try_register_job("a", "g", "https://x.com"))
+            self.assertFalse(_try_register_job("b", "g", "https://x.com"))
+            self.assertIsNone(_get_job("b"))
+
+    def test_max_active_jobs_reads_env_var(self) -> None:
+        """_max_active_jobs should read from CLM_MAX_ACTIVE_JOBS env var."""
+        with patch.dict("os.environ", {"CLM_MAX_ACTIVE_JOBS": "7"}, clear=False):
+            self.assertEqual(_max_active_jobs(), 7)
+
+    def test_max_active_jobs_defaults_to_4(self) -> None:
+        """_max_active_jobs should default to 4 when env var is not set."""
+        env = {k: v for k, v in __import__("os").environ.items() if k != "CLM_MAX_ACTIVE_JOBS"}
+        with patch.dict("os.environ", env, clear=True):
+            self.assertEqual(_max_active_jobs(), 4)
+
+    def test_max_active_jobs_falls_back_on_invalid(self) -> None:
+        """_max_active_jobs should fall back to 4 on invalid env var."""
+        with patch.dict("os.environ", {"CLM_MAX_ACTIVE_JOBS": "not-a-number"}, clear=False):
+            self.assertEqual(_max_active_jobs(), 4)
+
+    def test_max_active_jobs_falls_back_on_zero(self) -> None:
+        """_max_active_jobs should fall back to 4 on zero."""
+        with patch.dict("os.environ", {"CLM_MAX_ACTIVE_JOBS": "0"}, clear=False):
+            self.assertEqual(_max_active_jobs(), 4)
 
 
 if __name__ == "__main__":

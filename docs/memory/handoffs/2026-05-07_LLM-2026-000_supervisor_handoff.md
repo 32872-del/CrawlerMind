@@ -10,6 +10,18 @@ Git repository was initialized locally on 2026-05-07 at:
 F:\datawork\agent
 ```
 
+Remote repository:
+
+```text
+https://github.com/32872-del/CrawlerMind.git
+```
+
+Current branch:
+
+```text
+main
+```
+
 The supervisor/worker workflow is file-based under:
 
 ```text
@@ -27,6 +39,8 @@ Accepted 2026-05-06 work includes:
 - FastAPI background jobs
 - real browser SPA smoke
 - Worker Delta onboarding and project-state audit
+- Git remote setup
+- ADR/runbook foundation
 
 Employee memory files now include persistent-memory sections.
 
@@ -56,27 +70,22 @@ OK
 
 - Planner/Strategy are still deterministic and not LLM-assisted.
 - Background job registry is in-memory.
-- No remote Git repository is configured yet.
 - No branch/lock automation exists yet.
 - Human still relays messages between LLM workers.
 
 ## Next Recommended Action
 
-Create initial Git commit.
-
-Then add:
+Start each session with:
 
 ```text
-docs/decisions/
-docs/runbooks/
+git pull origin main
 ```
 
-Useful first ADRs:
+Then review active assignments from:
 
-- deterministic fallback requirement
-- in-memory job registry as local MVP decision
-- employee memory model
-- explicit fnspider routing
+```text
+docs/team/TEAM_BOARD.md
+```
 
 ## Files To Read First
 

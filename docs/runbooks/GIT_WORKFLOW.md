@@ -14,6 +14,12 @@ Local repository:
 F:\datawork\agent
 ```
 
+Remote repository:
+
+```text
+https://github.com/32872-del/CrawlerMind.git
+```
+
 Initialized:
 
 ```text
@@ -25,6 +31,7 @@ Initialized:
 Run:
 
 ```text
+git pull origin main
 git status
 ```
 

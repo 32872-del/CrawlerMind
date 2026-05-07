@@ -1,5 +1,13 @@
 # ADR-XXX: Title
 
+Copy this template to the next sequential filename:
+
+```text
+ADR-00N-short-title.md
+```
+
+Replace `ADR-XXX` in the heading before submitting.
+
 ## Status
 
 Proposed | Accepted | Deprecated

@@ -23,6 +23,16 @@ relevant docs/decisions/*
 latest docs/memory/handoffs/*
 ```
 
+Before docs-only work, also run:
+
+```text
+git pull origin main
+git status --short
+```
+
+If unrelated files are already modified, do not touch them. Mention the dirty
+scope in your completion note.
+
 ## Required Confirmation
 
 Before editing, reply:
@@ -36,6 +46,7 @@ Known risks I inherit:
 Files I may edit:
 Files I must avoid:
 Open questions:
+Latest handoff checked against team board and daily report: yes/no
 I understand I am taking over persisted state, not role-playing: yes/no
 ```
 

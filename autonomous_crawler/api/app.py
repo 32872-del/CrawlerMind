@@ -1,6 +1,7 @@
 """FastAPI service boundary for the autonomous crawler MVP."""
 from __future__ import annotations
 
+import os
 import threading
 import uuid
 from datetime import datetime, timezone
@@ -40,16 +41,17 @@ def _utc_now_iso() -> str:
 
 def _register_job(task_id: str, user_goal: str, target_url: str) -> None:
     with _jobs_lock:
-        _jobs[task_id] = {
-            "task_id": task_id,
-            "status": "running",
-            "user_goal": user_goal,
-            "target_url": target_url,
-            "item_count": 0,
-            "is_valid": False,
-            "error": "",
-            "created_at": _utc_now_iso(),
-        }
+        _jobs[task_id] = _new_job_record(task_id, user_goal, target_url)
+
+
+def _try_register_job(task_id: str, user_goal: str, target_url: str) -> bool:
+    """Register a running job if the active-job limit has not been reached."""
+    with _jobs_lock:
+        active_jobs = sum(1 for job in _jobs.values() if job["status"] == "running")
+        if active_jobs >= _max_active_jobs():
+            return False
+        _jobs[task_id] = _new_job_record(task_id, user_goal, target_url)
+        return True
 
 
 def _update_job(task_id: str, **kwargs: Any) -> None:
@@ -66,6 +68,35 @@ def _get_job(task_id: str) -> dict[str, Any] | None:
 def _remove_job(task_id: str) -> None:
     with _jobs_lock:
         _jobs.pop(task_id, None)
+
+
+def _new_job_record(task_id: str, user_goal: str, target_url: str) -> dict[str, Any]:
+    return {
+        "task_id": task_id,
+        "status": "running",
+        "user_goal": user_goal,
+        "target_url": target_url,
+        "item_count": 0,
+        "is_valid": False,
+        "error": "",
+        "created_at": _utc_now_iso(),
+    }
+
+
+def _max_active_jobs() -> int:
+    """Return the maximum number of concurrent active jobs."""
+    raw = os.environ.get("CLM_MAX_ACTIVE_JOBS", "4")
+    try:
+        val = int(raw)
+        return val if val > 0 else 4
+    except ValueError:
+        return 4
+
+
+def _count_active_jobs() -> int:
+    """Count jobs that are still actively running."""
+    with _jobs_lock:
+        return sum(1 for j in _jobs.values() if j["status"] == "running")
 
 
 def _background_crawl(task_id: str, user_goal: str, target_url: str, max_retries: int) -> None:
@@ -105,7 +136,11 @@ def create_app() -> FastAPI:
     def crawl(request: CrawlRequest) -> dict[str, Any]:
         task_id = str(uuid.uuid4())[:8]
 
-        _register_job(task_id, request.user_goal, request.target_url)
+        if not _try_register_job(task_id, request.user_goal, request.target_url):
+            raise HTTPException(
+                status_code=429,
+                detail=f"too many active jobs ({_max_active_jobs()} max)",
+            )
 
         thread = threading.Thread(
             target=_background_crawl,

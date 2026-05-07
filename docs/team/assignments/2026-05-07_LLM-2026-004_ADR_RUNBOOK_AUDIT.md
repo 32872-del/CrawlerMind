@@ -6,7 +6,7 @@ Employee ID: `LLM-2026-004`
 
 Project Role: `ROLE-DOCS`
 
-Status: `assigned`
+Status: `accepted`
 
 Supervisor: `LLM-2026-000`
 

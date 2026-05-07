@@ -6,7 +6,7 @@ Display Name: Worker Delta
 
 Permanent Employee ID: `LLM-2026-004`
 
-Current Project Role: Documentation Worker
+Current Project Role: Unassigned
 
 ## Current Strength Profile
 
@@ -23,17 +23,18 @@ Current Project Role: Documentation Worker
   `docs/team/acceptance/2026-05-06_worker_delta_onboarding_ACCEPTED.md`
 - Project State Consistency Audit:
   `docs/team/acceptance/2026-05-06_project_state_audit_ACCEPTED.md`
+- ADR And Runbook Audit:
+  `docs/team/acceptance/2026-05-07_adr_runbook_audit_ACCEPTED.md`
 
 ## Current Assignment
 
-- ADR And Runbook Audit:
-  `docs/team/assignments/2026-05-07_LLM-2026-004_ADR_RUNBOOK_AUDIT.md`
+- Awaiting next scoped assignment.
 
 ## Current Notes
 
-This employee completed onboarding and a documentation-only project-state
-audit. No active assignment is open. Assign narrow follow-up work until
-implementation style is evaluated.
+This employee completed onboarding, a documentation-only project-state audit,
+and an ADR/runbook audit. No active assignment is open. Assign narrow follow-up
+work until implementation style is evaluated.
 
 ## Persistent Memory
 
