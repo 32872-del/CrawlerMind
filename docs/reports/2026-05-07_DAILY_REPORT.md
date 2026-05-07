@@ -172,11 +172,28 @@ records, runbooks, and next worker assignments.
 - Added 7 focused tests for Planner validation and Strategy merge priority.
   Total: 142 suite tests (3 skipped).
 
+### OpenAI-Compatible LLM Provider Adapter (Supervisor)
+
+- Added `autonomous_crawler/llm/openai_compatible.py`:
+  - `OpenAICompatibleConfig`
+  - `OpenAICompatibleAdvisor`
+  - `build_advisor_from_env()`
+  - provider-neutral error types
+  - fenced JSON parsing support
+- Adapter targets the common `/chat/completions` API shape used by many
+  OpenAI-compatible providers and local gateways.
+- `run_skeleton.py` now supports `--llm`, `--no-llm`, and
+  `CLM_LLM_ENABLED`.
+- Rewrote `run_skeleton.py` as ASCII-only to remove earlier mojibake in the
+  script entrypoint.
+- Added 17 fake-client tests using `httpx.MockTransport`; no API key and no
+  network required. Total: 159 suite tests (3 skipped).
+
 ## Verification
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 142 tests (skipped=3)
+Ran 159 tests (skipped=3)
 OK
 
 python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py run_results.py
@@ -192,10 +209,11 @@ OK
 - Completed/failed job registry entries now have TTL cleanup; persistence is
   still deferred.
 - LLM Advisor Phase A interfaces implemented and accepted; Phase B/C merge
-  hardening implemented. Real provider adapter is still pending.
+  hardening implemented; OpenAI-compatible provider adapter added. Real
+  provider smoke test still pending.
 
 ## Next Day Plan
 
-1. Add OpenAI-compatible provider adapter and CLI opt-in path.
-2. Run one real LLM-assisted smoke test with a configured provider.
+1. Run one real LLM-assisted smoke test with a configured provider.
+2. Add FastAPI opt-in support for LLM advisors after CLI smoke passes.
 3. Collect more real site samples before automatic engine selection.

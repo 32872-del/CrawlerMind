@@ -1,35 +1,37 @@
 #!/usr/bin/env python3
-"""Test script to verify the LangGraph skeleton runs end-to-end.
+"""Run the Crawler-Mind LangGraph workflow from the command line.
 
-Usage:
-    python run_skeleton.py "采集 tatuum.com 所有商品的标题和价格" https://www.tatuum.com
-    python run_skeleton.py "抓取商品数据" https://example.com
+Examples:
+    python run_skeleton.py "collect product titles and prices" https://example.com
+    python run_skeleton.py --llm "collect top 30 hot searches" https://top.baidu.com/board?tab=realtime
 """
 from __future__ import annotations
 
 import json
+import os
 import sys
 import time
 from datetime import datetime
 
-# Add project root to path
+# Add project root to path when running this script directly.
 sys.path.insert(0, ".")
 
-from autonomous_crawler.workflows.crawl_graph import compile_crawl_graph
+from autonomous_crawler.llm import OpenAICompatibleAdvisor
+from autonomous_crawler.llm import LLMConfigurationError
 from autonomous_crawler.storage import save_crawl_result
+from autonomous_crawler.workflows.crawl_graph import compile_crawl_graph
 
 
-def run_crawl(user_goal: str, target_url: str) -> dict:
+def run_crawl(user_goal: str, target_url: str, use_llm: bool = False) -> dict:
     """Run the crawl workflow and return the final state."""
     print("=" * 70)
-    print(f"Autonomous Crawl Agent - Skeleton Test")
-    print(f"=" * 70)
+    print("Autonomous Crawl Agent - Skeleton Test")
+    print("=" * 70)
     print(f"Goal: {user_goal}")
     print(f"URL:  {target_url}")
     print(f"Time: {datetime.now().isoformat()}")
-    print(f"-" * 70)
+    print("-" * 70)
 
-    # Build initial state
     initial_state = {
         "user_goal": user_goal,
         "target_url": target_url,
@@ -47,27 +49,33 @@ def run_crawl(user_goal: str, target_url: str) -> dict:
         "messages": [],
     }
 
-    # Compile and run graph
-    app = compile_crawl_graph()
+    try:
+        advisor = OpenAICompatibleAdvisor.from_env() if use_llm else None
+    except LLMConfigurationError as exc:
+        raise SystemExit(f"LLM configuration error: {exc}") from exc
+    app = compile_crawl_graph(
+        planning_advisor=advisor,
+        strategy_advisor=advisor,
+    )
 
     start_time = time.time()
     final_state = app.invoke(initial_state)
     elapsed = time.time() - start_time
 
-    # Print results
     print(f"\n{'=' * 70}")
-    print(f"RESULTS")
+    print("RESULTS")
     print(f"{'=' * 70}")
     print(f"Final Status: {final_state.get('status', 'unknown')}")
     print(f"Elapsed: {elapsed:.2f}s")
     print(f"Retries: {final_state.get('retries', 0)}")
+    print(f"LLM Enabled: {final_state.get('llm_enabled', False)}")
+    if final_state.get("llm_errors"):
+        print(f"LLM Errors: {final_state['llm_errors']}")
 
-    # Print workflow messages
-    print(f"\n--- Workflow Log ---")
+    print("\n--- Workflow Log ---")
     for msg in final_state.get("messages", []):
         print(f"  {msg}")
 
-    # Print extracted data summary
     extracted = final_state.get("extracted_data", {})
     items = extracted.get("items", [])
     print(f"\n--- Extracted Data ({len(items)} items) ---")
@@ -83,27 +91,38 @@ def run_crawl(user_goal: str, target_url: str) -> dict:
                 parts.append(item["link"])
             print("  - " + " | ".join(str(part) for part in parts))
         else:
-            print(f"  - {item.get('title', '?')}: {item.get('price', '?')} | {item.get('image', '')}")
+            title = item.get("title", "?")
+            price = item.get("price", "?")
+            image = item.get("image", "")
+            print(f"  - {title}: {price} | {image}")
 
-    # Print validation result
     validation = final_state.get("validation_result", {})
-    print(f"\n--- Validation ---")
+    print("\n--- Validation ---")
     print(f"  Valid: {validation.get('is_valid', False)}")
     print(f"  Completeness: {validation.get('completeness', 0):.0%}")
     if validation.get("anomalies"):
         print(f"  Anomalies: {validation['anomalies']}")
 
-    # Print strategy
     strategy = final_state.get("crawl_strategy", {})
-    print(f"\n--- Strategy ---")
+    print("\n--- Strategy ---")
     print(f"  Mode: {strategy.get('mode', '?')}")
     print(f"  Method: {strategy.get('extraction_method', '?')}")
     print(f"  Rationale: {strategy.get('rationale', '?')}")
 
-    # Save full state to file
+    decisions = final_state.get("llm_decisions") or []
+    if decisions:
+        print(f"\n--- LLM Decisions ({len(decisions)}) ---")
+        for decision in decisions:
+            print(
+                "  - "
+                f"{decision.get('node')}: "
+                f"accepted={decision.get('accepted_fields', [])}, "
+                f"rejected={decision.get('rejected_fields', [])}, "
+                f"fallback={decision.get('fallback_used', False)}"
+            )
+
     output_path = "dev_logs/skeleton_run_result.json"
     with open(output_path, "w", encoding="utf-8") as f:
-        # Convert non-serializable types
         serializable = json.loads(json.dumps(final_state, default=str))
         json.dump(serializable, f, indent=2, ensure_ascii=False)
     print(f"\nFull state saved to: {output_path}")
@@ -114,7 +133,27 @@ def run_crawl(user_goal: str, target_url: str) -> dict:
     return final_state
 
 
+def _llm_enabled_from_env() -> bool:
+    return os.environ.get("CLM_LLM_ENABLED", "").strip().lower() in {
+        "1", "true", "yes", "on",
+    }
+
+
+def _parse_cli_args(argv: list[str]) -> tuple[str, str, bool]:
+    args = list(argv)
+    use_llm = _llm_enabled_from_env()
+    if "--llm" in args:
+        use_llm = True
+        args.remove("--llm")
+    if "--no-llm" in args:
+        use_llm = False
+        args.remove("--no-llm")
+
+    goal = args[0] if len(args) > 0 else "collect product titles and prices"
+    url = args[1] if len(args) > 1 else "https://www.tatuum.com"
+    return goal, url, use_llm
+
+
 if __name__ == "__main__":
-    goal = sys.argv[1] if len(sys.argv) > 1 else "采集商品的标题和价格"
-    url = sys.argv[2] if len(sys.argv) > 2 else "https://www.tatuum.com"
-    run_crawl(goal, url)
+    goal_arg, url_arg, llm_flag = _parse_cli_args(sys.argv[1:])
+    run_crawl(goal_arg, url_arg, use_llm=llm_flag)

@@ -106,12 +106,17 @@ search workflow.
   filling missing selectors or replacing known fallback selectors. Advisor
   mode changes cannot downgrade browser mode, and deterministic max_items are
   preserved on conflict.
+- OpenAI-compatible provider adapter added for optional real LLM-assisted
+  Planner/Strategy runs. It reads `CLM_LLM_BASE_URL`, `CLM_LLM_MODEL`,
+  optional `CLM_LLM_API_KEY`, and related tuning env vars. The adapter is
+  opt-in through `run_skeleton.py --llm` or `CLM_LLM_ENABLED=1`; normal tests
+  use fake clients and require no API key or network.
 
 ## Current Test Status
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 142 tests (skipped=3)
+Ran 159 tests (skipped=3)
 OK
 ```
 
@@ -158,7 +163,7 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed
 4. Add optional LLM Planner/Strategy with deterministic fallback. Design
    drafted, audited, revised, and accepted 2026-05-07; Phase A interfaces
    implemented and accepted 2026-05-07. Phase B/C merge hardening implemented
-   2026-05-07. Real provider adapter pending.
+   2026-05-07. OpenAI-compatible provider adapter added 2026-05-07.
 5. ~~Add background job execution for FastAPI crawl requests.~~ Done 2026-05-06.
 6. ~~Add real browser SPA smoke validation.~~ Done 2026-05-06.
 7. ~~Initialize local Git repository and employee memory model.~~ Done 2026-05-07.

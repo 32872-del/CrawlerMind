@@ -18,6 +18,7 @@ Current capabilities:
 - Result inspection/export CLI.
 - Git-backed team workflow with employee memory, ADRs, runbooks, and supervisor
   acceptance records.
+- Optional OpenAI-compatible LLM advisor adapter for Planner/Strategy.
 
 ## Quick Start
 
@@ -55,6 +56,19 @@ python run_results.py items <task_id>
 python run_results.py export-json <task_id> output.json
 python run_results.py export-csv <task_id> output.csv
 ```
+
+Run with an OpenAI-compatible LLM advisor:
+
+```text
+$env:CLM_LLM_BASE_URL='https://api.openai.com/v1'
+$env:CLM_LLM_MODEL='gpt-4o-mini'
+$env:CLM_LLM_API_KEY='...'
+python run_skeleton.py --llm "collect product titles and prices" https://example.com
+```
+
+Compatible providers usually only require changing `CLM_LLM_BASE_URL`,
+`CLM_LLM_MODEL`, and `CLM_LLM_API_KEY`. Local OpenAI-compatible servers can omit
+`CLM_LLM_API_KEY`.
 
 Start API service:
 
@@ -103,6 +117,7 @@ autonomous_crawler/
   tests/        Unit and integration tests
   tools/        Recon and adapter tools
   workflows/    LangGraph graph
+  llm/          Optional provider-neutral LLM advisors
 
 docs/
   blueprints/   Long-term architecture and capability blueprints

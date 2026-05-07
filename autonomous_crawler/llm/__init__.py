@@ -5,6 +5,14 @@ from .audit import (
     redact_preview,
     MAX_PREVIEW_LENGTH,
 )
+from .openai_compatible import (
+    LLMConfigurationError,
+    LLMResponseError,
+    OpenAICompatibleAdvisor,
+    OpenAICompatibleConfig,
+    build_advisor_from_env,
+    parse_json_object,
+)
 
 __all__ = [
     "PlanningAdvisor",
@@ -12,4 +20,10 @@ __all__ = [
     "build_decision_record",
     "redact_preview",
     "MAX_PREVIEW_LENGTH",
+    "LLMConfigurationError",
+    "LLMResponseError",
+    "OpenAICompatibleAdvisor",
+    "OpenAICompatibleConfig",
+    "build_advisor_from_env",
+    "parse_json_object",
 ]
