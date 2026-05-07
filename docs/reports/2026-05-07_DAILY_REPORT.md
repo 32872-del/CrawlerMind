@@ -189,11 +189,21 @@ records, runbooks, and next worker assignments.
 - Added 17 fake-client tests using `httpx.MockTransport`; no API key and no
   network required. Total: 159 suite tests (3 skipped).
 
+### Simplified User Entrypoint (Supervisor)
+
+- Added `clm_config.example.json`.
+- Added `run_simple.py`.
+- Simplified README and Chinese quick-start runbook around a three-step flow:
+  install dependencies, copy/fill config, run.
+- Added 5 config/entrypoint tests.
+- Verified `python run_simple.py "collect product titles and prices"
+  mock://catalog`.
+
 ## Verification
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 159 tests (skipped=3)
+Ran 164 tests (skipped=3)
 OK
 
 python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py run_results.py

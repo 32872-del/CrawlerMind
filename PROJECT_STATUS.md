@@ -111,12 +111,15 @@ search workflow.
   optional `CLM_LLM_API_KEY`, and related tuning env vars. The adapter is
   opt-in through `run_skeleton.py --llm` or `CLM_LLM_ENABLED=1`; normal tests
   use fake clients and require no API key or network.
+- Simplified user entrypoint added: copy `clm_config.example.json` to
+  `clm_config.json`, fill API settings, then run `python run_simple.py "<goal>"
+  "<url>"`. Missing config falls back to deterministic mode.
 
 ## Current Test Status
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 159 tests (skipped=3)
+Ran 164 tests (skipped=3)
 OK
 ```
 

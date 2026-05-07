@@ -16,13 +16,18 @@ from datetime import datetime
 # Add project root to path when running this script directly.
 sys.path.insert(0, ".")
 
-from autonomous_crawler.llm import OpenAICompatibleAdvisor
+from autonomous_crawler.llm import OpenAICompatibleAdvisor, PlanningAdvisor
 from autonomous_crawler.llm import LLMConfigurationError
 from autonomous_crawler.storage import save_crawl_result
 from autonomous_crawler.workflows.crawl_graph import compile_crawl_graph
 
 
-def run_crawl(user_goal: str, target_url: str, use_llm: bool = False) -> dict:
+def run_crawl(
+    user_goal: str,
+    target_url: str,
+    use_llm: bool = False,
+    advisor: PlanningAdvisor | None = None,
+) -> dict:
     """Run the crawl workflow and return the final state."""
     print("=" * 70)
     print("Autonomous Crawl Agent - Skeleton Test")
@@ -50,7 +55,7 @@ def run_crawl(user_goal: str, target_url: str, use_llm: bool = False) -> dict:
     }
 
     try:
-        advisor = OpenAICompatibleAdvisor.from_env() if use_llm else None
+        advisor = advisor or (OpenAICompatibleAdvisor.from_env() if use_llm else None)
     except LLMConfigurationError as exc:
         raise SystemExit(f"LLM configuration error: {exc}") from exc
     app = compile_crawl_graph(

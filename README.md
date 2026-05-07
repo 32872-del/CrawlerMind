@@ -1,6 +1,68 @@
-# Autonomous Crawl Agent
+# Crawler-Mind
 
-An early MVP for an autonomous crawling agent.
+一个可接入 LLM API 的采集 Agent MVP。
+
+## 最简单用法
+
+1. 安装依赖：
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+2. 复制配置并填 API：
+
+```powershell
+Copy-Item clm_config.example.json clm_config.json
+notepad clm_config.json
+```
+
+3. 运行：
+
+```powershell
+python run_simple.py "collect product titles and prices" https://example.com
+```
+
+如果还没有 API，可以先跑本地 mock：
+
+```powershell
+python run_simple.py "collect product titles and prices" mock://catalog
+```
+
+## 配置文件
+
+`clm_config.json` 示例：
+
+```json
+{
+  "llm": {
+    "enabled": true,
+    "base_url": "https://api.openai.com/v1",
+    "model": "gpt-4o-mini",
+    "api_key": "replace-with-your-api-key"
+  }
+}
+```
+
+兼容 OpenAI-compatible API。换供应商时通常只改：
+
+- `base_url`
+- `model`
+- `api_key`
+
+## 当前真实状态
+
+已经能做到：
+
+- 安装依赖
+- 填一个 API 配置
+- 用 `run_simple.py` 运行一次 LLM-assisted 采集流程
+
+还没做到：
+
+- FastAPI 里一键启用 LLM
+- 对任意网站都稳定成功
+- 自动处理所有复杂分页/API 拦截
 
 Current capabilities:
 
