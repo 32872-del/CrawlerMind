@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.claude/
+
+autonomous_crawler/engines/runtime/
+autonomous_crawler/storage/runtime/
+autonomous_crawler/tools/runtime/
+autonomous_crawler/tools/runtime/screenshots/
+autonomous_crawler/site_specs/*.tmp.json
+autonomous_crawler/site_specs/run_*.json
+dev_logs/skeleton_run_result.json
+agent_packages/
+*.zip
+*.tmp
+*.log

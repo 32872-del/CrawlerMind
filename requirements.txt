@@ -1,0 +1,15 @@
+beautifulsoup4
+botasaurus
+curl_cffi
+fake_useragent
+fastapi
+httpx
+langchain-core
+langchain-openai
+langgraph
+loguru
+lxml
+playwright
+pydantic
+redis
+uvicorn

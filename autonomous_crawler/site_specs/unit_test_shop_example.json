@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "site": "shop_example",
+  "goal": "collect products",
+  "mode": "curl_cffi",
+  "start_urls": [
+    {
+      "url": "https://shop.example/products"
+    }
+  ],
+  "pagination": {
+    "max_pages": 1
+  },
+  "list": {
+    "item_container": ".catalog-card",
+    "item_link": ".product-link@href"
+  },
+  "detail": {
+    "title": ".product-name",
+    "price": ".product-price",
+    "image_src": ".product-photo@src"
+  },
+  "variants": {},
+  "wait_selector": ".catalog-card",
+  "sleep_time": 0,
+  "scroll_count": 0,
+  "scroll_delay": 1.0,
+  "dedupe": [
+    "url"
+  ],
+  "required_fields": [
+    "handle",
+    "title",
+    "image_src",
+    "price"
+  ],
+  "source": "autonomous_crawler.strategy",
+  "driver": {}
+}

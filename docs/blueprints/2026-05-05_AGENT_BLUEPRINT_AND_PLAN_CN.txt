@@ -1,0 +1,723 @@
+自主爬虫 Agent 项目蓝图与短期计划
+日期：2026-05-05
+项目路径：F:\datawork\agent
+
+============================================================
+一、项目总目标
+============================================================
+
+本项目的长期目标是开发一个“非常厉害的爬虫 Agent”。
+
+它不只是一个可配置爬虫，也不只是一个固定流程的采集 pipeline，而是一个能够理解自然语言任务、自主分析网站结构、自动选择采集策略、执行采集、验证结果，并能逐步积累经验的自主型采集系统。
+
+长期目标能力包括：
+
+1. 理解自然语言采集需求
+2. 自动分析目标网站结构
+3. 判断页面类型、渲染方式、数据加载方式和反爬风险
+4. 自动选择 HTTP、Browser、API、fnspider 等采集策略
+5. 自动提取结构化数据
+6. 自动校验数据质量
+7. 失败后能够重新分析和自愈
+8. 支持结果存储、历史查询和服务化调用
+9. 未来支持视觉页面理解、站点心智模型和策略记忆
+
+一句话概括：
+
+当前先做一个稳定、可测试、可迁移的本地 Agent 服务 MVP；未来逐步升级为能“看懂网页、理解网站、自己制定采集计划”的真正自主爬虫 Agent。
+
+
+============================================================
+二、当前项目阶段
+============================================================
+
+当前项目处于早期 MVP 阶段，但已经不是空架子。
+
+已经完成：
+
+1. LangGraph 工作流骨架
+
+   当前主流程为：
+
+   Planner -> Recon -> Strategy -> Executor -> Extractor -> Validator
+
+2. 百度热搜真实端到端采集
+
+   已经可以通过完整 Agent 链路采集百度实时热搜榜前 30 条。
+
+   验证结果：
+
+   - Final Status: completed
+   - Extracted Data: 30 items
+   - Validation: passed
+
+3. 静态 HTML Recon 能力
+
+   当前 Recon 可以完成：
+
+   - 框架检测
+   - 渲染方式检测
+   - 反爬关键词检测
+   - API hint 发现
+   - 重复 DOM 容器推断
+   - 字段 CSS selector 推断
+
+4. 结构化提取能力
+
+   当前支持：
+
+   - title
+   - price
+   - image
+   - link
+   - rank
+   - hot_score
+   - summary
+   - max_items 截断
+
+5. SQLite 本地结果存储
+
+   当前结果数据库路径：
+
+   autonomous_crawler/storage/runtime/crawl_results.sqlite3
+
+   当前包含两张表：
+
+   - crawl_tasks：保存任务元数据、最终状态、校验结果和时间戳
+   - crawl_items：保存每条提取结果
+
+6. FastAPI MVP
+
+   当前已经实现：
+
+   - GET /health
+   - POST /crawl
+   - GET /crawl/{task_id}
+   - GET /history
+
+   当前 API 是同步执行版本，还没有后台任务队列。
+
+7. fnspider 内置集成
+
+   已经将成熟的 fnspider 框架内置到当前项目：
+
+   autonomous_crawler/engines/fnspider
+
+   项目不再依赖外部 F:\datawork\spider_Uvex 文件夹，方便打包迁移。
+
+8. 文档与协作结构
+
+   当前已经规范化：
+
+   - docs/blueprints/：长期蓝图
+   - docs/plans/：短期计划
+   - docs/reviews/：工程评审
+   - docs/reports/：每日汇报
+   - docs/process/：协作规范
+   - dev_logs/：开发者日志
+
+9. 测试状态
+
+   当前测试：
+
+   python -m unittest discover autonomous_crawler\tests
+   Ran 24 tests
+   OK
+
+
+============================================================
+三、当前项目评分
+============================================================
+
+按“地基”来评估，当前大约完成 40% 左右。
+
+已经比较扎实的部分：
+
+1. LangGraph 主流程完整
+2. 真实百度热搜采集跑通
+3. 静态 HTML Recon 有真实逻辑，不是占位符
+4. SQLite 存储层可用
+5. FastAPI 服务边界已建立
+6. 测试和日志体系开始成型
+7. 项目可迁移性较好
+
+仍然明显欠缺的部分：
+
+1. Planner 和 Strategy 仍是规则驱动，不是真正 LLM 推理
+2. Browser Mode 还没实现
+3. API Intercept Mode 还没实现
+4. 没有视觉页面理解能力
+5. 没有站点心智模型
+6. 没有多页面编排和自动翻页
+7. 没有选择器自愈
+8. 没有反爬对抗能力
+9. 没有后台任务队列
+10. 多 Codex 协作目前只有文档规范，还没有自动锁或 ownership 工具
+
+
+============================================================
+四、核心架构蓝图
+============================================================
+
+项目核心架构如下：
+
+用户请求
+  -> Planner
+  -> Recon
+  -> Strategy
+  -> Executor
+  -> Extractor
+  -> Validator
+  -> Storage/API
+
+
+1. Planner
+
+职责：
+
+- 理解用户自然语言目标
+- 判断采集任务类型
+- 提取目标字段
+- 提取约束条件，例如前 30 条、价格范围、关键词等
+
+当前状态：
+
+- 已实现规则版本
+- 支持中文关键词
+- 支持 ranking_list 与 product_list 初步区分
+- 支持 max_items 提取
+
+未来目标：
+
+- 接入 LLM
+- 支持复杂任务理解
+- 保留规则 Planner 作为 fallback
+
+
+2. Recon
+
+职责：
+
+- 分析目标网站
+- 判断页面结构
+- 判断渲染方式
+- 发现 API hint
+- 检测反爬风险
+- 推断可用选择器
+
+当前状态：
+
+- 静态 HTML 解析能力较好
+- 对百度热搜这类榜单页可推断出有效 selector
+
+未来目标：
+
+- 加入浏览器渲染 Recon
+- 加入截图与视觉理解
+- 加入站点探索能力
+
+
+3. Strategy
+
+职责：
+
+- 根据 Recon 结果选择采集策略
+- 生成执行配置
+- 选择 HTTP、Browser、API、fnspider 等执行路径
+- 处理重试反馈
+
+当前状态：
+
+- 规则分支选择策略
+- ranking_list 可稳定走 DOM 解析
+
+未来目标：
+
+- 接入 LLM Strategy
+- 引入策略模板库
+- 支持探索-利用决策
+
+
+4. Executor
+
+职责：
+
+- 真正执行采集请求
+- 获取 HTML、浏览器渲染 DOM、API 响应或 fnspider 结果
+
+当前状态：
+
+- HTTP 模式可用
+- mock fixture 可用
+- fnspider 适配器可用
+
+未来目标：
+
+- 实现 Browser Mode
+- 实现 API Intercept Mode
+- 增加请求频率控制、代理、Cookie、Session 管理
+
+
+5. Extractor
+
+职责：
+
+- 从原始 HTML/API/engine result 中提取结构化数据
+- 清洗字段
+- 计算置信度
+
+当前状态：
+
+- 支持 CSS selector
+- 支持 @attr 语法
+- 支持 price 清洗
+- 支持榜单字段
+
+未来目标：
+
+- 支持多页合并
+- 支持详情页提取
+- 支持 LLM 兜底提取
+- 支持视觉字段识别结果映射
+
+
+6. Validator
+
+职责：
+
+- 验证数据完整性
+- 发现异常
+- 决定是否重试
+
+当前状态：
+
+- 基于目标字段完整性验证
+- 支持重复 URL 检测
+- 支持基础异常报告
+
+未来目标：
+
+- 语义级校验
+- 区分临时失败与结构性失败
+- 触发重新 Recon 或自愈流程
+
+
+7. Storage/API
+
+职责：
+
+- 保存任务状态
+- 保存结果数据
+- 支持查询和历史记录
+- 对外提供服务接口
+
+当前状态：
+
+- SQLite 存储完成
+- FastAPI 基础接口完成
+
+未来目标：
+
+- 后台任务队列
+- 结果导出
+- 任务监控
+- Dashboard
+
+
+============================================================
+五、能力等级路线图
+============================================================
+
+Level 1：HTML Pipeline
+
+状态：当前阶段。
+
+能力：
+
+- 静态 HTML 抓取
+- DOM selector 推断
+- 结构化提取
+- 校验
+- 存储
+- FastAPI 同步接口
+
+局限：
+
+- 只能处理静态 HTML 或 SSR 页面
+- 泛化能力有限
+
+
+Level 2：Browser Rendering
+
+目标：
+
+- 实现 Playwright 浏览器模式
+- 支持 SPA 页面
+- 获取渲染后的 DOM
+- 可保存截图作为调试 artifact
+
+完成后意义：
+
+- 可以处理更多现代网站
+- 为视觉理解做准备
+
+
+Level 3：Visual Page Understanding
+
+目标：
+
+- 截图成为 Recon 的一等输入
+- 使用多模态模型理解页面布局
+- 识别页面类型、主内容区域、列表卡片、字段位置、分页控件
+- 将视觉区域映射回 DOM 元素
+
+完成后意义：
+
+- 不再完全依赖 class/id
+- 能处理 hash class、复杂布局和改版页面
+
+
+Level 4：Site Mental Model
+
+目标：
+
+- 理解整个网站，而不是只分析一个页面
+- 建立首页、分类页、列表页、详情页之间的关系
+- 判断翻页机制
+- 判断数据在哪些页面上
+- 制定采集计划
+
+完成后意义：
+
+- Agent 可以先探索，再批量执行
+- 不再是一上来就采一个 URL
+
+
+Level 5：Autonomous Agent
+
+目标：
+
+- LLM-assisted Planner
+- LLM-assisted Strategy
+- LLM-assisted Validator
+- 失败诊断
+- 选择器自愈
+- 站点记忆
+- 策略复用
+- 越用越聪明
+
+完成后意义：
+
+- 从“可配置采集系统”升级为真正的“自主爬虫 Agent”
+
+
+============================================================
+六、短期计划
+============================================================
+
+短期目标：
+
+把当前项目稳定成一个可维护、可调用、可调试的本地 Agent 服务。
+
+当前不急着直接做视觉 LLM，因为那会引入模型、截图、坐标映射、成本和稳定性问题。更稳的路线是先打牢服务、存储、CLI、错误路径和浏览器基础。
+
+
+优先级 1：结果读取 CLI
+
+目标：
+
+增加一个命令行工具，用于查看 SQLite 中保存的采集结果。
+
+建议文件：
+
+run_results.py
+
+建议能力：
+
+1. list：列出最近任务
+2. show：查看某个 task_id 的摘要
+3. items：查看某个 task_id 的提取结果
+4. export-json：导出 JSON
+5. export-csv：导出 CSV
+
+意义：
+
+- 不需要手动打开 SQLite
+- 方便调试
+- 方便多个 Codex 查看任务历史
+
+
+优先级 2：错误路径测试
+
+目标：
+
+补齐真实项目最容易失败的路径。
+
+需要测试：
+
+1. 不支持的 URL scheme
+2. HTTP 请求失败
+3. 空 HTML
+4. 畸形 selector
+5. 无数据提取
+6. 重试耗尽
+7. 反爬关键词命中
+8. 失败任务是否能持久化
+
+意义：
+
+- 让项目不只会跑 happy path
+- 为后续 Browser 和 LLM 接入打基础
+
+
+优先级 3：fnspider 选择机制
+
+目标：
+
+决定 Agent 什么时候使用内置 fnspider，什么时候使用当前轻量 HTTP pipeline。
+
+需要设计：
+
+1. Strategy 自动选择
+2. 用户显式指定
+3. 站点配置优先
+4. fallback 机制
+
+意义：
+
+- 把成熟爬虫框架真正变成 Agent 能力，而不是孤立适配器
+
+
+优先级 4：Browser Mode 原型
+
+目标：
+
+实现 Playwright 浏览器执行模式。
+
+建议能力：
+
+1. 打开页面
+2. 等待 DOMContentLoaded 或 networkidle
+3. 获取渲染后 HTML
+4. 可选截图
+5. 返回 raw_html 给 Extractor
+
+触发条件：
+
+1. Recon 检测为 SPA
+2. HTTP HTML 内容太少
+3. DOM 推断无候选
+4. Strategy 显式选择 browser
+
+意义：
+
+- 支持现代 JS 页面
+- 为视觉理解做准备
+
+
+优先级 5：LLM Planner/Strategy 设计
+
+目标：
+
+先设计接口，不急着强依赖模型。
+
+原则：
+
+1. LLM 是增强，不是唯一通道
+2. 没有 API key 时系统仍能跑
+3. LLM 输出必须结构化
+4. LLM 决策要保存到 final_state
+5. 当前规则 Planner/Strategy 必须保留为 fallback
+
+意义：
+
+- 从 pipeline 逐步升级为 Agent
+- 但不牺牲稳定性
+
+
+============================================================
+七、文档和协作规范
+============================================================
+
+为了支持未来多个 Codex 一起开发，项目文档已经开始规范化。
+
+目录规则：
+
+1. 根目录
+
+   只保留入口文件：
+
+   - README.md
+   - PROJECT_STATUS.md
+   - requirements.txt
+   - run_skeleton.py
+   - run_baidu_hot_test.py
+   - run_results.py（未来新增）
+
+2. docs/blueprints/
+
+   放长期蓝图。
+
+3. docs/plans/
+
+   放短期计划。
+
+4. docs/reviews/
+
+   放工程评审。
+
+5. docs/reports/
+
+   放每日汇报。
+
+   命名格式：
+
+   YYYY-MM-DD_DAILY_REPORT.md
+
+6. docs/process/
+
+   放开发规范和协作规则。
+
+7. dev_logs/
+
+   只放开发者日志。
+
+   命名格式：
+
+   YYYY-MM-DD_HH-MM_short_topic.md
+
+
+多人协作规则：
+
+1. 每个 Codex 开始前先读：
+
+   - PROJECT_STATUS.md
+   - 最新 docs/reports/
+   - docs/plans/ 当前短期计划
+   - docs/process/COLLABORATION_GUIDE.md
+
+2. 每个 Codex 应该认领清晰模块：
+
+   - API Codex：autonomous_crawler/api/
+   - Storage Codex：autonomous_crawler/storage/
+   - Browser Codex：browser executor 相关文件
+   - Planner/Strategy Codex：planner.py、strategy.py、prompts/
+   - Recon Codex：html_recon.py、recon_tools.py
+   - Docs Codex：docs/、README.md、PROJECT_STATUS.md
+
+3. 不要随意修改别人负责的文件。
+
+4. 如果必须改共享文件，要在开发日志里说明。
+
+5. 每次任务完成必须：
+
+   - 写代码
+   - 跑测试
+   - 更新相关文档
+   - 写 dev log
+   - 必要时更新 PROJECT_STATUS.md
+
+
+============================================================
+八、当前风险
+============================================================
+
+1. 还不是真正 Agent
+
+   当前 Planner 和 Strategy 仍是规则逻辑。
+
+2. Browser Mode 缺失
+
+   现代 SPA 网站暂时处理不了。
+
+3. API Intercept 缺失
+
+   还不能自动抓取 XHR/Fetch/GraphQL 数据接口。
+
+4. 视觉理解缺失
+
+   当前只能解析 HTML，不能像人一样看网页。
+
+5. 多页面能力缺失
+
+   目前主要处理单页列表。
+
+6. 自愈能力缺失
+
+   selector 失效后还不能自动截图、重新识别、生成新 selector。
+
+7. 反爬能力弱
+
+   当前只是检测，缺少代理、Cookie、频率控制和浏览器指纹策略。
+
+8. 服务仍是同步执行
+
+   FastAPI 已有，但没有后台任务队列。
+
+
+============================================================
+九、推荐明天第一任务
+============================================================
+
+建议明天第一任务：
+
+实现 run_results.py。
+
+原因：
+
+1. 当前已经有 SQLite 存储，但查看结果不够方便
+2. 后续调试 Browser、LLM、错误路径时都需要快速查看历史任务
+3. 多个 Codex 协作时，CLI 是最简单的共同观察入口
+
+建议命令：
+
+1. 列出最近任务
+
+   python run_results.py list
+
+2. 查看任务摘要
+
+   python run_results.py show <task_id>
+
+3. 查看任务结果 items
+
+   python run_results.py items <task_id>
+
+4. 导出 JSON
+
+   python run_results.py export-json <task_id> output.json
+
+5. 导出 CSV
+
+   python run_results.py export-csv <task_id> output.csv
+
+
+============================================================
+十、结论
+============================================================
+
+这个项目当前已经不是概念草图，而是一个可运行、可测试、可服务化的早期 MVP。
+
+但它距离最终目标还有明显差距。
+
+最重要的长期方向是：
+
+1. 从解析 HTML 升级到理解网页
+2. 从单页分析升级到站点心智模型
+3. 从规则 pipeline 升级到 LLM-assisted Agent
+4. 从失败重试升级到失败诊断和自愈
+5. 从一次性运行升级到记忆和学习
+
+最重要的短期方向是：
+
+1. 稳定服务边界
+2. 提升调试和结果查看能力
+3. 补齐错误路径
+4. 实现 Browser Mode
+5. 再逐步接入 LLM 和视觉能力
+
+项目当前地基大约 40%。
+
+如果完成结果 CLI、错误路径测试和 Browser Mode，地基可以提升到 55% 左右。
+
+如果再完成 LLM Planner/Strategy 和视觉 Recon 原型，项目会真正开始接近“自主爬虫 Agent”的形态。
