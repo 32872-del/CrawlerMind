@@ -8,10 +8,12 @@ Priority (README Section 7):
 """
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Callable
 
 from .base import preserve_state
 from ..tools.site_spec_adapter import build_site_spec
+from ..llm.protocols import StrategyAdvisor
+from ..llm.audit import build_decision_record
 
 
 @preserve_state
@@ -149,3 +151,182 @@ def _preferred_engine(state: dict[str, Any]) -> str:
         if candidate:
             return str(candidate).strip().lower()
     return ""
+
+
+_STRATEGY_ALLOWED_MODES = frozenset({"http", "browser", "api_intercept"})
+_STRATEGY_ALLOWED_ENGINES = frozenset({"", "fnspider"})
+_STRATEGY_ALLOWED_WAIT_UNTIL = frozenset({"domcontentloaded", "load", "networkidle"})
+_STRATEGY_ALLOWED_FIELDS = frozenset({
+    "mode", "engine", "selectors", "wait_selector", "wait_until",
+    "max_items", "reasoning_summary",
+})
+_STRATEGY_ALLOWED_SELECTOR_KEYS = frozenset({
+    "item_container", "title", "price", "image", "link", "rank",
+    "hot_score", "summary", "description", "url", "stock", "size", "color",
+})
+
+
+def _validate_strategy_advisor_output(
+    advisor_output: dict[str, Any],
+    task_type: str,
+) -> tuple[dict[str, Any], list[str], list[str]]:
+    """Validate and filter strategy advisor output.
+
+    Returns (safe_fields, accepted_keys, rejected_keys).
+    """
+    safe: dict[str, Any] = {}
+    accepted: list[str] = []
+    rejected: list[str] = []
+
+    for key, value in advisor_output.items():
+        if key not in _STRATEGY_ALLOWED_FIELDS:
+            rejected.append(key)
+            continue
+
+        if key == "mode":
+            if value not in _STRATEGY_ALLOWED_MODES:
+                rejected.append(key)
+                continue
+            safe[key] = value
+            accepted.append(key)
+
+        elif key == "engine":
+            engine = str(value).strip().lower()
+            if engine not in _STRATEGY_ALLOWED_ENGINES:
+                rejected.append(key)
+                continue
+            if engine == "fnspider" and task_type != "product_list":
+                rejected.append(key)
+                continue
+            safe[key] = engine
+            accepted.append(key)
+
+        elif key == "wait_until":
+            if value not in _STRATEGY_ALLOWED_WAIT_UNTIL:
+                rejected.append(key)
+                continue
+            safe[key] = value
+            accepted.append(key)
+
+        elif key == "max_items":
+            if not isinstance(value, int) or value <= 0:
+                rejected.append(key)
+                continue
+            safe[key] = value
+            accepted.append(key)
+
+        elif key == "selectors":
+            if not isinstance(value, dict):
+                rejected.append(key)
+                continue
+            clean_selectors: dict[str, str] = {}
+            for sel_key, sel_val in value.items():
+                if sel_key not in _STRATEGY_ALLOWED_SELECTOR_KEYS:
+                    rejected.append(f"selectors.{sel_key}")
+                    continue
+                if not isinstance(sel_val, str) or not sel_val.strip():
+                    rejected.append(f"selectors.{sel_key}")
+                    continue
+                if len(sel_val) > 300:
+                    rejected.append(f"selectors.{sel_key}")
+                    continue
+                if any(c < "\x20" for c in sel_val):
+                    rejected.append(f"selectors.{sel_key}")
+                    continue
+                clean_selectors[sel_key] = sel_val
+            if clean_selectors:
+                safe[key] = clean_selectors
+                accepted.append(key)
+
+        elif key == "wait_selector":
+            if not isinstance(value, str) or not value.strip():
+                rejected.append(key)
+                continue
+            if len(value) > 300:
+                rejected.append(key)
+                continue
+            safe[key] = value
+            accepted.append(key)
+
+        else:
+            safe[key] = value
+            accepted.append(key)
+
+    return safe, accepted, rejected
+
+
+def make_strategy_node(
+    advisor: StrategyAdvisor | None = None,
+) -> Callable[[dict[str, Any]], dict[str, Any]]:
+    """Return a strategy node, optionally wrapping a strategy advisor.
+
+    When no advisor is provided, the returned node is equivalent to
+    ``strategy_node`` but always emits the LLM audit state fields.
+    """
+
+    def _node(state: dict[str, Any]) -> dict[str, Any]:
+        result = strategy_node(state)
+
+        existing_decisions: list[dict[str, Any]] = list(
+            state.get("llm_decisions") or []
+        )
+        existing_errors: list[str] = list(state.get("llm_errors") or [])
+
+        if advisor is None:
+            result["llm_enabled"] = state.get("llm_enabled", False)
+            result["llm_decisions"] = existing_decisions
+            result["llm_errors"] = existing_errors
+            return result
+
+        result["llm_enabled"] = True
+        decisions = existing_decisions
+        errors = existing_errors
+
+        recon_report = state.get("recon_report", {})
+        planner_output = {
+            "task_id": state.get("task_id"),
+            "recon_report": recon_report,
+            "user_goal": state.get("user_goal", ""),
+        }
+
+        try:
+            advisor_output = advisor.choose_strategy(planner_output, recon_report)
+            task_type = recon_report.get("task_type", "product_list")
+            safe_fields, accepted, rejected = _validate_strategy_advisor_output(
+                advisor_output, task_type,
+            )
+
+            strategy = result.get("crawl_strategy", {})
+            for key, value in safe_fields.items():
+                strategy[key] = value
+            result["crawl_strategy"] = strategy
+
+            decisions.append(build_decision_record(
+                node="strategy",
+                advisor=advisor,
+                input_summary=f"task_type={task_type}",
+                raw_response=advisor_output,
+                parsed_decision=safe_fields,
+                accepted_fields=accepted,
+                rejected_fields=rejected,
+                fallback_used=False,
+            ))
+
+        except Exception as exc:
+            errors.append(f"strategy advisor: {exc}")
+            decisions.append(build_decision_record(
+                node="strategy",
+                advisor=advisor,
+                input_summary=f"task_type={recon_report.get('task_type', 'unknown')}",
+                raw_response=str(exc),
+                parsed_decision={},
+                accepted_fields=[],
+                rejected_fields=list(_STRATEGY_ALLOWED_FIELDS),
+                fallback_used=True,
+            ))
+
+        result["llm_decisions"] = decisions
+        result["llm_errors"] = errors
+        return result
+
+    return _node

@@ -91,12 +91,20 @@ search workflow.
   `docs/plans/2026-05-07_LLM_PLANNER_STRATEGY_INTERFACE_DESIGN.md`.
 - Optional LLM Planner/Strategy design audited, revised, and accepted through
   ADR-005. Phase A implementation is assigned.
+- LLM Advisor Phase A interfaces implemented: provider-neutral advisor
+  protocols (`PlanningAdvisor`, `StrategyAdvisor`), closure-based node
+  factories (`make_planner_node`, `make_strategy_node`), graph injection
+  through `compile_crawl_graph(planning_advisor, strategy_advisor)`,
+  append-only LLM audit state (`llm_enabled`, `llm_decisions`,
+  `llm_errors`), bounded/redacted `raw_response_preview`, value-level
+  strategy validation (mode, engine, selectors, wait_until, max_items),
+  and 34 fake-advisor tests. No API key required.
 
 ## Current Test Status
 
 ```text
-python -m unittest discover autonomous_crawler\tests
-Ran 101 tests (skipped=3)
+python -m unittest discover -s autonomous_crawler/tests
+Ran 135 tests (skipped=3)
 OK
 ```
 
@@ -141,12 +149,14 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed
    automatic rules deferred until more site samples exist.
 3. ~~Add browser-mode fallback for pages where HTTP HTML is incomplete.~~ Done 2026-05-06.
 4. Add optional LLM Planner/Strategy with deterministic fallback. Design
-   drafted, audited, revised, and accepted 2026-05-07; Phase A implementation
-   assigned.
+   drafted, audited, revised, and accepted 2026-05-07; Phase A interfaces
+   implemented and accepted 2026-05-07. Phase B/C (advisor merge logic)
+   pending.
 5. ~~Add background job execution for FastAPI crawl requests.~~ Done 2026-05-06.
 6. ~~Add real browser SPA smoke validation.~~ Done 2026-05-06.
 7. ~~Initialize local Git repository and employee memory model.~~ Done 2026-05-07.
 8. ~~Configure remote Git repository and add ADR/runbook foundation.~~ Done 2026-05-07.
 9. ~~Add background job registry concurrency limit.~~ Done 2026-05-07.
 10. ~~Add background job registry TTL cleanup.~~ Done 2026-05-07.
-11. Implement LLM Advisor Phase A interfaces with fake-advisor tests.
+11. ~~Implement LLM Advisor Phase A interfaces with fake-advisor tests.~~
+    Done 2026-05-07.

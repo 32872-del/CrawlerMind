@@ -19,9 +19,9 @@ from operator import add
 
 from langgraph.graph import StateGraph, START, END
 
-from ..agents.planner import planner_node
+from ..agents.planner import planner_node, make_planner_node
 from ..agents.recon import recon_node
-from ..agents.strategy import strategy_node
+from ..agents.strategy import strategy_node, make_strategy_node
 from ..agents.executor import executor_node
 from ..agents.extractor import extractor_node
 from ..agents.validator import validator_node
@@ -59,14 +59,22 @@ def _route_after_recon(state: dict[str, Any]) -> str:
     return "continue"
 
 
-def build_crawl_graph() -> StateGraph:
-    """Build and return the crawl workflow graph (not compiled)."""
+def build_crawl_graph(
+    planning_advisor: Any = None,
+    strategy_advisor: Any = None,
+) -> StateGraph:
+    """Build and return the crawl workflow graph (not compiled).
+
+    When ``planning_advisor`` or ``strategy_advisor`` is provided, the
+    corresponding node is wrapped with optional LLM advisor logic.  When
+    ``None``, the deterministic node is used directly.
+    """
     graph = StateGraph(dict)
 
     # Register nodes
-    graph.add_node("planner", planner_node)
+    graph.add_node("planner", make_planner_node(planning_advisor))
     graph.add_node("recon", recon_node)
-    graph.add_node("strategy", strategy_node)
+    graph.add_node("strategy", make_strategy_node(strategy_advisor))
     graph.add_node("executor", executor_node)
     graph.add_node("extractor", extractor_node)
     graph.add_node("validator", validator_node)
@@ -99,7 +107,10 @@ def build_crawl_graph() -> StateGraph:
     return graph
 
 
-def compile_crawl_graph():
+def compile_crawl_graph(
+    planning_advisor: Any = None,
+    strategy_advisor: Any = None,
+):
     """Compile and return the runnable crawl graph."""
-    graph = build_crawl_graph()
+    graph = build_crawl_graph(planning_advisor, strategy_advisor)
     return graph.compile()

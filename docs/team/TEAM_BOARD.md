@@ -7,10 +7,10 @@ Last updated: 2026-05-07
 | Employee ID | Display Name | Current Project Role | Status | Current Assignment |
 |---|---|---|---|---|
 | LLM-2026-000 | Supervisor Codex | Project Supervisor | active | project direction, assignments, acceptance |
-| LLM-2026-001 | Worker Alpha | LLM Interface Worker | assigned | LLM Advisor Phase A Interfaces |
+| LLM-2026-001 | Worker Alpha | LLM Interface Worker | accepted | LLM Advisor Phase A Interfaces |
 | LLM-2026-002 | Worker Beta | Error Path QA Worker | accepted | Error-path hardening |
 | LLM-2026-003 | Worker Gamma | Unassigned | standby | none |
-| LLM-2026-004 | Worker Delta | Documentation Worker | assigned | LLM Phase A Docs / Readiness Audit |
+| LLM-2026-004 | Worker Delta | Documentation Worker | accepted | LLM Phase A Docs / Readiness Audit |
 
 ## Current Project Roles
 
@@ -21,9 +21,9 @@ Last updated: 2026-05-07
 | ROLE-QA | Error Path QA Worker | LLM-2026-002 | accepted |
 | ROLE-STORAGE | Storage / CLI Worker | LLM-2026-003 | accepted work completed |
 | ROLE-STRATEGY | Strategy / Engine Routing Worker | LLM-2026-003 | accepted work completed |
-| ROLE-API | API Job Worker | LLM-2026-001 | assigned |
-| ROLE-DOCS | Documentation Worker | LLM-2026-004 | assigned |
-| ROLE-LLM-INTERFACE | LLM Interface Worker | LLM-2026-001 | assigned |
+| ROLE-API | API Job Worker | LLM-2026-001 | accepted work completed |
+| ROLE-DOCS | Documentation Worker | LLM-2026-004 | accepted work completed |
+| ROLE-LLM-INTERFACE | LLM Interface Worker | LLM-2026-001 | accepted work completed |
 
 ## Assignment Records
 
@@ -38,8 +38,8 @@ Last updated: 2026-05-07
 | ADR And Runbook Audit | LLM-2026-004 | ROLE-DOCS | accepted | `docs/team/acceptance/2026-05-07_adr_runbook_audit_ACCEPTED.md` |
 | Job Registry TTL Cleanup | LLM-2026-001 | ROLE-API | accepted | `docs/team/acceptance/2026-05-07_job_registry_ttl_cleanup_ACCEPTED.md` |
 | LLM Interface Design Audit | LLM-2026-004 | ROLE-DOCS | accepted | `docs/team/acceptance/2026-05-07_llm_interface_doc_audit_ACCEPTED.md` |
-| LLM Advisor Phase A Interfaces | LLM-2026-001 | ROLE-LLM-INTERFACE | assigned | pending |
-| LLM Phase A Docs / Readiness Audit | LLM-2026-004 | ROLE-DOCS | assigned | pending |
+| LLM Advisor Phase A Interfaces | LLM-2026-001 | ROLE-LLM-INTERFACE | accepted | `docs/team/acceptance/2026-05-07_llm_phase_a_interfaces_ACCEPTED.md` |
+| LLM Phase A Docs / Readiness Audit | LLM-2026-004 | ROLE-DOCS | accepted | `docs/team/acceptance/2026-05-07_llm_phase_a_docs_audit_ACCEPTED.md` |
 
 ## Accepted Work Today
 
@@ -57,13 +57,15 @@ Last updated: 2026-05-07
 | ADR / Runbook Audit | LLM-2026-004 | `docs/team/acceptance/2026-05-07_adr_runbook_audit_ACCEPTED.md` | 9 findings, handoff/runbook cleanup applied |
 | Job Registry TTL Cleanup | LLM-2026-001 | `docs/team/acceptance/2026-05-07_job_registry_ttl_cleanup_ACCEPTED.md` | stale completed/failed in-memory jobs expire after configurable TTL |
 | LLM Interface Design Audit | LLM-2026-004 | `docs/team/acceptance/2026-05-07_llm_interface_doc_audit_ACCEPTED.md` | 10 findings drove advisor injection, validation, and audit-state design revision |
+| LLM Advisor Phase A Interfaces | LLM-2026-001 | `docs/team/acceptance/2026-05-07_llm_phase_a_interfaces_ACCEPTED.md` | optional advisor protocols, graph injection, audit records, validation, fake-advisor tests |
+| LLM Phase A Docs / Readiness Audit | LLM-2026-004 | `docs/team/acceptance/2026-05-07_llm_phase_a_docs_audit_ACCEPTED.md` | 7 findings, highest medium; acceptance checks applied |
 
 ## Upcoming Candidate Tasks
 
-1. LLM Advisor Phase A implementation with fake-advisor tests.
-2. Docs/readiness audit for the revised LLM Phase A contract.
-3. Site sample collection for automatic engine selection.
-4. Durable job registry design after the in-memory MVP stabilizes.
+1. LLM Phase B/C: Planner and Strategy advisor merge hardening.
+2. Site sample collection for automatic engine selection.
+3. Durable job registry design after the in-memory MVP stabilizes.
+4. Real provider adapter design after Phase B/C acceptance.
 
 ## Supervisor Notes
 

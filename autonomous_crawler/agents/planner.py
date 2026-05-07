@@ -3,9 +3,11 @@ from __future__ import annotations
 
 import re
 import uuid
-from typing import Any
+from typing import Any, Callable
 
 from .base import preserve_state
+from ..llm.protocols import PlanningAdvisor
+from ..llm.audit import build_decision_record
 
 
 FIELD_KEYWORDS = {
@@ -89,3 +91,120 @@ def _extract_max_items(user_goal: str) -> int | None:
         if match:
             return int(match.group(1))
     return None
+
+
+_PLANNER_ALLOWED_FIELDS = frozenset({
+    "task_type", "target_fields", "max_items",
+    "crawl_preferences", "constraints", "reasoning_summary",
+})
+
+
+def make_planner_node(
+    advisor: PlanningAdvisor | None = None,
+) -> Callable[[dict[str, Any]], dict[str, Any]]:
+    """Return a planner node, optionally wrapping a planning advisor.
+
+    When no advisor is provided, the returned node is equivalent to
+    ``planner_node`` but always emits the LLM audit state fields.
+    """
+
+    def _node(state: dict[str, Any]) -> dict[str, Any]:
+        result = planner_node(state)
+
+        if advisor is None:
+            result["llm_enabled"] = False
+            result["llm_decisions"] = []
+            result["llm_errors"] = []
+            return result
+
+        result["llm_enabled"] = True
+        decisions: list[dict[str, Any]] = list(state.get("llm_decisions") or [])
+        errors: list[str] = list(state.get("llm_errors") or [])
+
+        user_goal = state.get("user_goal", "")
+        target_url = state.get("target_url", "")
+        fallback_used = False
+        accepted: list[str] = []
+        rejected: list[str] = []
+
+        try:
+            advisor_output = advisor.plan(user_goal, target_url)
+            advisor_fields = {
+                k: v for k, v in advisor_output.items()
+                if k in _PLANNER_ALLOWED_FIELDS
+            }
+            rejected = [
+                k for k in advisor_output if k not in _PLANNER_ALLOWED_FIELDS
+            ]
+
+            recon = result.get("recon_report", {})
+
+            if "task_type" in advisor_fields:
+                recon["task_type"] = advisor_fields["task_type"]
+                accepted.append("task_type")
+
+            if "target_fields" in advisor_fields:
+                recon["target_fields"] = advisor_fields["target_fields"]
+                accepted.append("target_fields")
+
+            if "max_items" in advisor_fields:
+                constraints = recon.get("constraints", {})
+                existing = constraints.get("max_items")
+                advisor_val = advisor_fields["max_items"]
+                if existing and existing != advisor_val:
+                    rejected.append("max_items (conflict)")
+                else:
+                    constraints["max_items"] = advisor_val
+                    recon["constraints"] = constraints
+                    accepted.append("max_items")
+
+            if "constraints" in advisor_fields:
+                constraints = recon.get("constraints", {})
+                for k, v in advisor_fields["constraints"].items():
+                    if k not in constraints:
+                        constraints[k] = v
+                        accepted.append(f"constraints.{k}")
+                recon["constraints"] = constraints
+
+            if "crawl_preferences" in advisor_fields:
+                accepted.append("crawl_preferences")
+                recon["crawl_preferences"] = advisor_fields["crawl_preferences"]
+
+            result["recon_report"] = recon
+
+            decisions.append(build_decision_record(
+                node="planner",
+                advisor=advisor,
+                input_summary=f"goal={user_goal[:100]} url={target_url[:100]}",
+                raw_response=advisor_output,
+                parsed_decision=advisor_fields,
+                accepted_fields=accepted,
+                rejected_fields=rejected,
+                fallback_used=False,
+            ))
+
+        except Exception as exc:
+            fallback_used = True
+            errors.append(f"planner advisor: {exc}")
+            decisions.append(build_decision_record(
+                node="planner",
+                advisor=advisor,
+                input_summary=f"goal={user_goal[:100]} url={target_url[:100]}",
+                raw_response=str(exc),
+                parsed_decision={},
+                accepted_fields=[],
+                rejected_fields=list(_PLANNER_ALLOWED_FIELDS),
+                fallback_used=True,
+            ))
+
+        if fallback_used:
+            result.setdefault("messages", [])
+            result["messages"] = result.get("messages", []) + [
+                "[Planner] Advisor failed, using deterministic fallback"
+            ]
+
+        result["llm_decisions"] = decisions
+        result["llm_errors"] = errors
+        return result
+
+    return _node

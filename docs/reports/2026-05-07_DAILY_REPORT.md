@@ -118,11 +118,44 @@ records, runbooks, and next worker assignments.
 - Assigned `LLM-2026-004`:
   `LLM Phase A Docs / Readiness Audit`
 
+### LLM Advisor Phase A Interfaces (LLM-2026-001)
+
+- Added `autonomous_crawler/llm/` package:
+  - `protocols.py`: `PlanningAdvisor` and `StrategyAdvisor` runtime-checkable
+    Protocol definitions.
+  - `audit.py`: `build_decision_record()` with bounded/redacted
+    `raw_response_preview` (max 2000 chars), `redact_preview()` with secret
+    pattern matching for api_key, authorization, cookie, token, password,
+    secret.
+- Added `make_planner_node(advisor=None)` factory in `planner.py`:
+  - No advisor: deterministic output with `llm_enabled=False`, empty
+    decisions/errors.
+  - With advisor: validates allowed fields (`task_type`, `target_fields`,
+    `max_items`, `crawl_preferences`, `constraints`, `reasoning_summary`),
+    merges accepted fields into `recon_report`, normalizes `max_items` into
+    `constraints.max_items`, records decision/fallback in `llm_decisions`/
+    `llm_errors`.
+- Added `make_strategy_node(advisor=None)` factory in `strategy.py`:
+  - No advisor: deterministic output, preserves existing LLM state.
+  - With advisor: validates mode (`http`/`browser`/`api_intercept`), engine
+    (empty/`fnspider`, `fnspider` only for product_list), selectors (allowed
+    keys, max 300 chars, no control chars), `wait_until`, `max_items`.
+  - Appends to existing `llm_decisions`/`llm_errors` from planner.
+- Updated `build_crawl_graph()` and `compile_crawl_graph()` with optional
+  `planning_advisor`/`strategy_advisor` parameters.
+- Updated `agents/__init__.py` exports.
+- 34 new fake-advisor tests in `test_llm_advisors.py`. Total: 135 suite tests
+  (3 skipped).
+- Supervisor added two acceptance-hardening tests:
+  - full compiled graph preserves Planner and Strategy `llm_decisions` through
+    Validator
+  - JSON-shaped raw response secrets are redacted in `raw_response_preview`
+
 ## Verification
 
 ```text
-python -m unittest discover autonomous_crawler\tests
-Ran 101 tests (skipped=3)
+python -m unittest discover -s autonomous_crawler/tests
+Ran 135 tests (skipped=3)
 OK
 
 python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py run_results.py
@@ -137,13 +170,13 @@ OK
   persistence is deferred.
 - Completed/failed job registry entries now have TTL cleanup; persistence is
   still deferred.
-- Optional LLM Planner/Strategy remains unimplemented, but Phase A interface
-  work is now assigned with accepted design constraints.
+- LLM Advisor Phase A interfaces implemented and accepted; Phase B/C (advisor
+  merge logic with more detailed integration tests) pending.
 
 ## Next Day Plan
 
-1. Implement and review LLM Advisor Phase A interfaces.
-2. Keep 004 on docs/readiness audit for the revised LLM implementation
-   contract.
-3. After Phase A passes, decide whether Phase B should go to Planner advisor
-   merge logic or to durable job registry design.
+1. Start LLM Phase B/C: harden Planner and Strategy advisor merge behavior with
+   integration tests.
+2. Collect more real site samples before automatic engine selection.
+3. Defer real provider adapters until deterministic fallback and merge behavior
+   stay stable across more scenarios.
