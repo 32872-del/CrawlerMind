@@ -83,6 +83,8 @@ search workflow.
   persistent project state, while AI sessions temporarily operate that state.
 - ADR foundation added under `docs/decisions/`.
 - Runbooks added under `docs/runbooks/`.
+- Optional LLM Planner/Strategy interface design drafted under
+  `docs/plans/2026-05-07_LLM_PLANNER_STRATEGY_INTERFACE_DESIGN.md`.
 
 ## Current Test Status
 
@@ -131,7 +133,8 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed
    explicit strategy option.~~ Explicit strategy option done 2026-05-06;
    automatic rules deferred until more site samples exist.
 3. ~~Add browser-mode fallback for pages where HTTP HTML is incomplete.~~ Done 2026-05-06.
-4. Add optional LLM Planner/Strategy with deterministic fallback.
+4. Add optional LLM Planner/Strategy with deterministic fallback. Design drafted
+   2026-05-07; implementation pending audit.
 5. ~~Add background job execution for FastAPI crawl requests.~~ Done 2026-05-06.
 6. ~~Add real browser SPA smoke validation.~~ Done 2026-05-06.
 7. ~~Initialize local Git repository and employee memory model.~~ Done 2026-05-07.

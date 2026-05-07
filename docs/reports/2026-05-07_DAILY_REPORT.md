@@ -64,6 +64,20 @@ records, runbooks, and next worker assignments.
 - Found 9 issues, highest severity high.
 - Supervisor accepted the audit and updated stale handoff/runbook guidance.
 
+### LLM Planner / Strategy Interface Design
+
+- Added design plan:
+  `docs/plans/2026-05-07_LLM_PLANNER_STRATEGY_INTERFACE_DESIGN.md`.
+- Added proposed ADR-005:
+  `docs/decisions/ADR-005-llm-planner-strategy-must-be-optional.md`.
+- Design keeps deterministic fallback mandatory and LLM advisors injectable.
+- Assigned Worker Delta to audit the design before implementation.
+
+### New Assignments
+
+- Assigned `LLM-2026-001` to Job Registry TTL Cleanup.
+- Assigned `LLM-2026-004` to LLM Interface Design Audit.
+
 ## Verification
 
 ```text
@@ -86,7 +100,6 @@ OK
 
 ## Next Day Plan
 
-1. Begin optional LLM Planner/Strategy interface design with deterministic
-   fallback.
-2. Add job registry TTL cleanup or persistence design.
-3. Add ADRs for any new architecture decisions.
+1. Review and accept/rework Job Registry TTL Cleanup.
+2. Review and accept/rework LLM Interface Design Audit.
+3. If the audit passes, implement Phase A of LLM Planner/Strategy interfaces.

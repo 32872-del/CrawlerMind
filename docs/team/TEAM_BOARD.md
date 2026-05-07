@@ -7,10 +7,10 @@ Last updated: 2026-05-07
 | Employee ID | Display Name | Current Project Role | Status | Current Assignment |
 |---|---|---|---|---|
 | LLM-2026-000 | Supervisor Codex | Project Supervisor | active | project direction, assignments, acceptance |
-| LLM-2026-001 | Worker Alpha | Unassigned | standby | none |
+| LLM-2026-001 | Worker Alpha | API Job Worker | assigned | Job Registry TTL Cleanup |
 | LLM-2026-002 | Worker Beta | Error Path QA Worker | accepted | Error-path hardening |
 | LLM-2026-003 | Worker Gamma | Unassigned | standby | none |
-| LLM-2026-004 | Worker Delta | Unassigned | standby | none |
+| LLM-2026-004 | Worker Delta | Documentation Worker | assigned | LLM Interface Design Audit |
 
 ## Current Project Roles
 
@@ -21,8 +21,8 @@ Last updated: 2026-05-07
 | ROLE-QA | Error Path QA Worker | LLM-2026-002 | accepted |
 | ROLE-STORAGE | Storage / CLI Worker | LLM-2026-003 | accepted work completed |
 | ROLE-STRATEGY | Strategy / Engine Routing Worker | LLM-2026-003 | accepted work completed |
-| ROLE-API | API Job Worker | LLM-2026-001 | accepted |
-| ROLE-DOCS | Documentation Worker | LLM-2026-004 | accepted |
+| ROLE-API | API Job Worker | LLM-2026-001 | assigned |
+| ROLE-DOCS | Documentation Worker | LLM-2026-004 | assigned |
 
 ## Assignment Records
 
@@ -35,6 +35,8 @@ Last updated: 2026-05-07
 | Real Browser SPA Smoke | LLM-2026-001 | ROLE-BROWSER | accepted | `docs/team/acceptance/2026-05-06_real_browser_spa_smoke_ACCEPTED.md` |
 | Job Registry Concurrency Limits | LLM-2026-001 | ROLE-API | accepted | `docs/team/acceptance/2026-05-07_job_registry_limits_ACCEPTED.md` |
 | ADR And Runbook Audit | LLM-2026-004 | ROLE-DOCS | accepted | `docs/team/acceptance/2026-05-07_adr_runbook_audit_ACCEPTED.md` |
+| Job Registry TTL Cleanup | LLM-2026-001 | ROLE-API | assigned | pending |
+| LLM Interface Design Audit | LLM-2026-004 | ROLE-DOCS | assigned | pending |
 
 ## Accepted Work Today
 

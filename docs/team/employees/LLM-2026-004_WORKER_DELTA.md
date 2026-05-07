@@ -6,7 +6,7 @@ Display Name: Worker Delta
 
 Permanent Employee ID: `LLM-2026-004`
 
-Current Project Role: Unassigned
+Current Project Role: Documentation Worker
 
 ## Current Strength Profile
 
@@ -28,7 +28,8 @@ Current Project Role: Unassigned
 
 ## Current Assignment
 
-- Awaiting next scoped assignment.
+- LLM Interface Design Audit:
+  `docs/team/assignments/2026-05-07_LLM-2026-004_LLM_INTERFACE_DOC_AUDIT.md`
 
 ## Current Notes
 
