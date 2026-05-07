@@ -151,11 +151,32 @@ records, runbooks, and next worker assignments.
     Validator
   - JSON-shaped raw response secrets are redacted in `raw_response_preview`
 
+### LLM Advisor Phase B/C Merge Hardening (Supervisor)
+
+- Planner advisor output now has value-level validation before merge:
+  `task_type`, `target_fields`, `max_items`, `constraints`,
+  `crawl_preferences`, and `reasoning_summary`.
+- Invalid task types, invalid target fields, invalid max_items, non-scalar
+  constraints, and unsupported crawl preference keys are rejected and recorded
+  in `llm_decisions`.
+- Planner now promotes safe `crawl_preferences` to top-level state, so Strategy
+  can actually consume advisor engine preferences.
+- Strategy advisor fields now use conservative merge rules:
+  - strong deterministic recon selectors are preserved
+  - missing selectors can be filled by advisor output
+  - known fallback selectors can be replaced by advisor output
+  - deterministic `max_items` is preserved on conflict
+  - browser mode cannot be downgraded to HTTP by advisor output
+  - accepted/rejected fields record final merge results, not just schema
+    validity
+- Added 7 focused tests for Planner validation and Strategy merge priority.
+  Total: 142 suite tests (3 skipped).
+
 ## Verification
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 135 tests (skipped=3)
+Ran 142 tests (skipped=3)
 OK
 
 python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py run_results.py
@@ -170,13 +191,11 @@ OK
   persistence is deferred.
 - Completed/failed job registry entries now have TTL cleanup; persistence is
   still deferred.
-- LLM Advisor Phase A interfaces implemented and accepted; Phase B/C (advisor
-  merge logic with more detailed integration tests) pending.
+- LLM Advisor Phase A interfaces implemented and accepted; Phase B/C merge
+  hardening implemented. Real provider adapter is still pending.
 
 ## Next Day Plan
 
-1. Start LLM Phase B/C: harden Planner and Strategy advisor merge behavior with
-   integration tests.
-2. Collect more real site samples before automatic engine selection.
-3. Defer real provider adapters until deterministic fallback and merge behavior
-   stay stable across more scenarios.
+1. Add OpenAI-compatible provider adapter and CLI opt-in path.
+2. Run one real LLM-assisted smoke test with a configured provider.
+3. Collect more real site samples before automatic engine selection.

@@ -201,6 +201,45 @@ class TestPlanningAdvisorSuccess(unittest.TestCase):
         self.assertIn("unknown_field", decision["rejected_fields"])
         self.assertNotIn("unknown_field", decision["accepted_fields"])
 
+    def test_invalid_target_fields_are_rejected(self) -> None:
+        output = {
+            "target_fields": ["title", "drop_database"],
+            "task_type": "product_list",
+        }
+        advisor = _FakePlanningAdvisor(output)
+        node = make_planner_node(advisor)
+        result = node(_base_state(user_goal="collect products"))
+
+        recon = result["recon_report"]
+        self.assertEqual(recon["target_fields"], ["title"])
+        decision = result["llm_decisions"][0]
+        self.assertIn("target_fields.drop_database", decision["rejected_fields"])
+
+    def test_invalid_task_type_is_rejected(self) -> None:
+        output = {
+            "task_type": "delete_everything",
+            "target_fields": ["title"],
+        }
+        advisor = _FakePlanningAdvisor(output)
+        node = make_planner_node(advisor)
+        result = node(_base_state(user_goal="collect products"))
+
+        self.assertEqual(result["recon_report"]["task_type"], "product_list")
+        decision = result["llm_decisions"][0]
+        self.assertIn("task_type", decision["rejected_fields"])
+
+    def test_crawl_preferences_are_promoted_to_top_level_state(self) -> None:
+        output = {
+            "task_type": "product_list",
+            "crawl_preferences": {"engine": "fnspider"},
+        }
+        advisor = _FakePlanningAdvisor(output)
+        node = make_planner_node(advisor)
+        result = node(_base_state(user_goal="collect products"))
+
+        self.assertEqual(result["crawl_preferences"], {"engine": "fnspider"})
+        self.assertIn("crawl_preferences", result["llm_decisions"][0]["accepted_fields"])
+
     def test_max_items_conflict_preserves_deterministic_value(self) -> None:
         state = _base_state()
         # Force a deterministic max_items
@@ -260,8 +299,11 @@ class TestStrategyAdvisorSuccess(unittest.TestCase):
 
         strategy = result["crawl_strategy"]
         self.assertEqual(strategy["mode"], "browser")
-        self.assertEqual(strategy["max_items"], 5)
+        self.assertNotEqual(strategy["max_items"], 5)
         self.assertTrue(result["llm_enabled"])
+        decision = result["llm_decisions"][0]
+        self.assertIn("mode", decision["accepted_fields"])
+        self.assertIn("max_items (kept deterministic)", decision["rejected_fields"])
 
     def test_decision_record_created(self) -> None:
         advisor = _FakeStrategyAdvisor()
@@ -272,6 +314,68 @@ class TestStrategyAdvisorSuccess(unittest.TestCase):
         decision = result["llm_decisions"][0]
         self.assertEqual(decision["node"], "strategy")
         self.assertFalse(decision["fallback_used"])
+
+    def test_advisor_fills_missing_selector(self) -> None:
+        advisor = _FakeStrategyAdvisor({
+            "selectors": {"summary": ".summary"},
+        })
+        node = make_strategy_node(advisor)
+        result = node(_planned_state())
+
+        strategy = result["crawl_strategy"]
+        self.assertEqual(strategy["selectors"]["summary"], ".summary")
+        self.assertIn(
+            "selectors.summary",
+            result["llm_decisions"][0]["accepted_fields"],
+        )
+
+    def test_advisor_does_not_replace_strong_recon_selector(self) -> None:
+        advisor = _FakeStrategyAdvisor({
+            "selectors": {"title": ".advisor-title"},
+        })
+        node = make_strategy_node(advisor)
+        state = _planned_state()
+        state["recon_report"]["dom_structure"] = {
+            "product_selector": ".catalog-card",
+            "field_selectors": {"title": ".product-name"},
+        }
+        result = node(state)
+
+        strategy = result["crawl_strategy"]
+        self.assertEqual(strategy["selectors"]["title"], ".product-name")
+        decision = result["llm_decisions"][0]
+        self.assertIn(
+            "selectors.title (kept deterministic)",
+            decision["rejected_fields"],
+        )
+
+    def test_advisor_replaces_fallback_selector(self) -> None:
+        advisor = _FakeStrategyAdvisor({
+            "selectors": {"title": ".real-title"},
+        })
+        node = make_strategy_node(advisor)
+        result = node(_planned_state())
+
+        strategy = result["crawl_strategy"]
+        self.assertEqual(strategy["selectors"]["title"], ".real-title")
+        self.assertIn(
+            "selectors.title",
+            result["llm_decisions"][0]["accepted_fields"],
+        )
+
+    def test_advisor_mode_does_not_downgrade_browser(self) -> None:
+        advisor = _FakeStrategyAdvisor({"mode": "http"})
+        node = make_strategy_node(advisor)
+        state = _planned_state()
+        state["recon_report"]["rendering"] = "spa"
+        result = node(state)
+
+        strategy = result["crawl_strategy"]
+        self.assertEqual(strategy["mode"], "browser")
+        self.assertIn(
+            "mode (kept deterministic)",
+            result["llm_decisions"][0]["rejected_fields"],
+        )
 
 
 class TestStrategyAdvisorUnsafe(unittest.TestCase):

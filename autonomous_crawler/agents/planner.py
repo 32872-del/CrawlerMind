@@ -97,6 +97,10 @@ _PLANNER_ALLOWED_FIELDS = frozenset({
     "task_type", "target_fields", "max_items",
     "crawl_preferences", "constraints", "reasoning_summary",
 })
+_PLANNER_ALLOWED_TASK_TYPES = frozenset({"product_list", "ranking_list"})
+_PLANNER_ALLOWED_TARGET_FIELDS = frozenset(FIELD_KEYWORDS.keys()) | {"link"}
+_PLANNER_ALLOWED_PREFERENCE_KEYS = frozenset({"engine"})
+_PLANNER_ALLOWED_ENGINES = frozenset({"fnspider"})
 
 
 def make_planner_node(
@@ -129,13 +133,9 @@ def make_planner_node(
 
         try:
             advisor_output = advisor.plan(user_goal, target_url)
-            advisor_fields = {
-                k: v for k, v in advisor_output.items()
-                if k in _PLANNER_ALLOWED_FIELDS
-            }
-            rejected = [
-                k for k in advisor_output if k not in _PLANNER_ALLOWED_FIELDS
-            ]
+            advisor_fields, rejected = _validate_planner_advisor_output(
+                advisor_output
+            )
 
             recon = result.get("recon_report", {})
 
@@ -168,7 +168,13 @@ def make_planner_node(
 
             if "crawl_preferences" in advisor_fields:
                 accepted.append("crawl_preferences")
-                recon["crawl_preferences"] = advisor_fields["crawl_preferences"]
+                result["crawl_preferences"] = advisor_fields["crawl_preferences"]
+
+            if "reasoning_summary" in advisor_fields:
+                accepted.append("reasoning_summary")
+                recon["advisor_reasoning_summary"] = advisor_fields[
+                    "reasoning_summary"
+                ]
 
             result["recon_report"] = recon
 
@@ -208,3 +214,81 @@ def make_planner_node(
         return result
 
     return _node
+
+
+def _validate_planner_advisor_output(
+    advisor_output: dict[str, Any],
+) -> tuple[dict[str, Any], list[str]]:
+    """Validate planner advisor output before it can affect state."""
+    safe: dict[str, Any] = {}
+    rejected: list[str] = []
+
+    for key, value in advisor_output.items():
+        if key not in _PLANNER_ALLOWED_FIELDS:
+            rejected.append(key)
+            continue
+
+        if key == "task_type":
+            if value not in _PLANNER_ALLOWED_TASK_TYPES:
+                rejected.append(key)
+                continue
+            safe[key] = value
+
+        elif key == "target_fields":
+            if not isinstance(value, list):
+                rejected.append(key)
+                continue
+            fields: list[str] = []
+            for item in value:
+                field = str(item).strip()
+                if field in _PLANNER_ALLOWED_TARGET_FIELDS and field not in fields:
+                    fields.append(field)
+                else:
+                    rejected.append(f"target_fields.{item}")
+            if fields:
+                safe[key] = fields
+
+        elif key == "max_items":
+            if not isinstance(value, int) or value <= 0:
+                rejected.append(key)
+                continue
+            safe[key] = value
+
+        elif key == "constraints":
+            if not isinstance(value, dict):
+                rejected.append(key)
+                continue
+            clean_constraints: dict[str, Any] = {}
+            for constraint_key, constraint_value in value.items():
+                if isinstance(constraint_value, (str, int, float, bool)):
+                    clean_constraints[str(constraint_key)] = constraint_value
+                else:
+                    rejected.append(f"constraints.{constraint_key}")
+            if clean_constraints:
+                safe[key] = clean_constraints
+
+        elif key == "crawl_preferences":
+            if not isinstance(value, dict):
+                rejected.append(key)
+                continue
+            clean_preferences: dict[str, Any] = {}
+            engine = value.get("engine")
+            if engine:
+                normalized_engine = str(engine).strip().lower()
+                if normalized_engine in _PLANNER_ALLOWED_ENGINES:
+                    clean_preferences["engine"] = normalized_engine
+                else:
+                    rejected.append("crawl_preferences.engine")
+            for preference_key in value:
+                if preference_key not in _PLANNER_ALLOWED_PREFERENCE_KEYS:
+                    rejected.append(f"crawl_preferences.{preference_key}")
+            if clean_preferences:
+                safe[key] = clean_preferences
+
+        elif key == "reasoning_summary":
+            if isinstance(value, str) and value.strip():
+                safe[key] = value.strip()[:500]
+            else:
+                rejected.append(key)
+
+    return safe, rejected

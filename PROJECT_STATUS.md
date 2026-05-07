@@ -99,12 +99,19 @@ search workflow.
   `llm_errors`), bounded/redacted `raw_response_preview`, value-level
   strategy validation (mode, engine, selectors, wait_until, max_items),
   and 34 fake-advisor tests. No API key required.
+- LLM Advisor Phase B/C merge hardening implemented: Planner validates
+  advisor task types, target fields, max_items, constraints, and crawl
+  preferences before merge; Strategy now merges advisor suggestions
+  conservatively, preserving strong deterministic recon selectors and only
+  filling missing selectors or replacing known fallback selectors. Advisor
+  mode changes cannot downgrade browser mode, and deterministic max_items are
+  preserved on conflict.
 
 ## Current Test Status
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 135 tests (skipped=3)
+Ran 142 tests (skipped=3)
 OK
 ```
 
@@ -150,8 +157,8 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed
 3. ~~Add browser-mode fallback for pages where HTTP HTML is incomplete.~~ Done 2026-05-06.
 4. Add optional LLM Planner/Strategy with deterministic fallback. Design
    drafted, audited, revised, and accepted 2026-05-07; Phase A interfaces
-   implemented and accepted 2026-05-07. Phase B/C (advisor merge logic)
-   pending.
+   implemented and accepted 2026-05-07. Phase B/C merge hardening implemented
+   2026-05-07. Real provider adapter pending.
 5. ~~Add background job execution for FastAPI crawl requests.~~ Done 2026-05-06.
 6. ~~Add real browser SPA smoke validation.~~ Done 2026-05-06.
 7. ~~Initialize local Git repository and employee memory model.~~ Done 2026-05-07.

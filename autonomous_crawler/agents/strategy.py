@@ -164,6 +164,13 @@ _STRATEGY_ALLOWED_SELECTOR_KEYS = frozenset({
     "item_container", "title", "price", "image", "link", "rank",
     "hot_score", "summary", "description", "url", "stock", "size", "color",
 })
+_FALLBACK_SELECTORS = {
+    "item_container": ".product-item",
+    "title": ".product-title",
+    "price": ".product-price",
+    "image": ".product-image img@src",
+    "link": ".product-item a@href",
+}
 
 
 def _validate_strategy_advisor_output(
@@ -236,7 +243,6 @@ def _validate_strategy_advisor_output(
                 clean_selectors[sel_key] = sel_val
             if clean_selectors:
                 safe[key] = clean_selectors
-                accepted.append(key)
 
         elif key == "wait_selector":
             if not isinstance(value, str) or not value.strip():
@@ -253,6 +259,85 @@ def _validate_strategy_advisor_output(
             accepted.append(key)
 
     return safe, accepted, rejected
+
+
+def _merge_strategy_advisor_fields(
+    strategy: dict[str, Any],
+    safe_fields: dict[str, Any],
+) -> tuple[dict[str, Any], list[str], list[str]]:
+    """Merge safe advisor fields without clobbering strong deterministic data."""
+    merged = dict(strategy)
+    accepted: list[str] = []
+    rejected: list[str] = []
+
+    for key, value in safe_fields.items():
+        if key == "selectors":
+            existing = dict(merged.get("selectors") or {})
+            selector_updates: dict[str, str] = value
+            for selector_key, selector_value in selector_updates.items():
+                current = existing.get(selector_key, "")
+                if _can_replace_selector(selector_key, current):
+                    existing[selector_key] = selector_value
+                    accepted.append(f"selectors.{selector_key}")
+                else:
+                    rejected.append(f"selectors.{selector_key} (kept deterministic)")
+            merged["selectors"] = existing
+
+        elif key == "mode":
+            current_mode = merged.get("mode")
+            if current_mode == value or _mode_can_be_replaced(current_mode, value):
+                merged[key] = value
+                accepted.append(key)
+            else:
+                rejected.append(f"{key} (kept deterministic)")
+
+        elif key == "engine":
+            if not merged.get("engine"):
+                merged[key] = value
+                accepted.append(key)
+            elif merged.get("engine") == value:
+                accepted.append(key)
+            else:
+                rejected.append(f"{key} (kept deterministic)")
+
+        elif key == "max_items":
+            current_max = int(merged.get("max_items", 0) or 0)
+            if current_max <= 0 or current_max == value:
+                merged[key] = value
+                accepted.append(key)
+            else:
+                rejected.append(f"{key} (kept deterministic)")
+
+        elif key in {"wait_selector", "wait_until"}:
+            if not merged.get(key) or merged.get(key) == value:
+                merged[key] = value
+                accepted.append(key)
+            else:
+                rejected.append(f"{key} (kept deterministic)")
+
+        elif key == "reasoning_summary":
+            merged["advisor_reasoning_summary"] = value
+            accepted.append(key)
+
+    return merged, accepted, rejected
+
+
+def _can_replace_selector(selector_key: str, current: str) -> bool:
+    """Return whether an advisor selector can fill/replace a selector."""
+    if not current:
+        return True
+    if _FALLBACK_SELECTORS.get(selector_key) == current:
+        return True
+    return False
+
+
+def _mode_can_be_replaced(current: Any, suggested: Any) -> bool:
+    """Allow advisor mode upgrades only from deterministic fallback HTTP."""
+    if not current:
+        return True
+    if current == suggested:
+        return True
+    return current == "http" and suggested == "browser"
 
 
 def make_strategy_node(
@@ -292,14 +377,18 @@ def make_strategy_node(
         try:
             advisor_output = advisor.choose_strategy(planner_output, recon_report)
             task_type = recon_report.get("task_type", "product_list")
-            safe_fields, accepted, rejected = _validate_strategy_advisor_output(
+            safe_fields, _validation_accepted, validation_rejected = _validate_strategy_advisor_output(
                 advisor_output, task_type,
             )
 
             strategy = result.get("crawl_strategy", {})
-            for key, value in safe_fields.items():
-                strategy[key] = value
+            strategy, merge_accepted, merge_rejected = _merge_strategy_advisor_fields(
+                strategy,
+                safe_fields,
+            )
             result["crawl_strategy"] = strategy
+            accepted = merge_accepted
+            rejected = validation_rejected + merge_rejected
 
             decisions.append(build_decision_record(
                 node="strategy",

@@ -59,13 +59,14 @@ Last updated: 2026-05-07
 | LLM Interface Design Audit | LLM-2026-004 | `docs/team/acceptance/2026-05-07_llm_interface_doc_audit_ACCEPTED.md` | 10 findings drove advisor injection, validation, and audit-state design revision |
 | LLM Advisor Phase A Interfaces | LLM-2026-001 | `docs/team/acceptance/2026-05-07_llm_phase_a_interfaces_ACCEPTED.md` | optional advisor protocols, graph injection, audit records, validation, fake-advisor tests |
 | LLM Phase A Docs / Readiness Audit | LLM-2026-004 | `docs/team/acceptance/2026-05-07_llm_phase_a_docs_audit_ACCEPTED.md` | 7 findings, highest medium; acceptance checks applied |
+| LLM Advisor Phase B/C Merge Hardening | LLM-2026-000 | supervisor direct work | Planner validation and Strategy conservative merge rules |
 
 ## Upcoming Candidate Tasks
 
-1. LLM Phase B/C: Planner and Strategy advisor merge hardening.
-2. Site sample collection for automatic engine selection.
-3. Durable job registry design after the in-memory MVP stabilizes.
-4. Real provider adapter design after Phase B/C acceptance.
+1. OpenAI-compatible provider adapter with environment configuration.
+2. Real LLM-assisted smoke test.
+3. Site sample collection for automatic engine selection.
+4. Durable job registry design after the in-memory MVP stabilizes.
 
 ## Supervisor Notes
 
@@ -75,4 +76,4 @@ Last updated: 2026-05-07
 - Automatic fnspider selection is deferred until more real site samples exist.
 - Visual understanding remains blueprint-level and should not be started before
   browser artifacts exist.
-- LLM provider adapters are not approved yet; Phase A is interface-only.
+- LLM provider adapter can start now that Phase B/C merge hardening is in place.
