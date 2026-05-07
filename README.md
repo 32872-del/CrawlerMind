@@ -138,6 +138,7 @@ dev_logs/       Developer logs only
 - Collaboration rules: [docs/process/COLLABORATION_GUIDE.md](docs/process/COLLABORATION_GUIDE.md)
 - Decisions: [docs/decisions/](docs/decisions/)
 - Runbooks: [docs/runbooks/](docs/runbooks/)
+- Quick start guide: [docs/runbooks/QUICK_START_CN.md](docs/runbooks/QUICK_START_CN.md)
 - Employee memory model: [docs/memory/EMPLOYEE_MEMORY_MODEL.md](docs/memory/EMPLOYEE_MEMORY_MODEL.md)
 - LLM team workspace: [docs/team/TEAM_WORKSPACE.md](docs/team/TEAM_WORKSPACE.md)
 - New LLM onboarding: [docs/team/training/NEW_LLM_ONBOARDING.md](docs/team/training/NEW_LLM_ONBOARDING.md)
