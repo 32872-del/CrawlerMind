@@ -12,8 +12,10 @@ from fastapi.testclient import TestClient
 from autonomous_crawler.api import app as app_module
 from autonomous_crawler.api.app import (
     create_app,
+    _cleanup_stale_jobs,
     _count_active_jobs,
     _get_job,
+    _job_retention_seconds,
     _jobs,
     _jobs_lock,
     _max_active_jobs,
@@ -374,6 +376,90 @@ class ConcurrencyLimitTests(unittest.TestCase):
         """_max_active_jobs should fall back to 4 on zero."""
         with patch.dict("os.environ", {"CLM_MAX_ACTIVE_JOBS": "0"}, clear=False):
             self.assertEqual(_max_active_jobs(), 4)
+
+
+class TTLcleanupTests(unittest.TestCase):
+    """Tests for completed/failed job TTL cleanup."""
+
+    def setUp(self) -> None:
+        with _jobs_lock:
+            _jobs.clear()
+
+    def _age_job(self, task_id: str, seconds: int) -> None:
+        """Backdate a job's updated_at by the given number of seconds."""
+        from datetime import datetime, timezone, timedelta
+        old = (datetime.now(timezone.utc) - timedelta(seconds=seconds)).isoformat()
+        with _jobs_lock:
+            if task_id in _jobs:
+                _jobs[task_id]["updated_at"] = old
+
+    def test_completed_job_older_than_ttl_is_removed(self) -> None:
+        """A completed job older than TTL should be cleaned up."""
+        with patch.dict("os.environ", {"CLM_JOB_RETENTION_SECONDS": "60"}, clear=False):
+            _register_job("old-done", "g", "https://x.com")
+            _update_job("old-done", status="completed")
+            self._age_job("old-done", 120)
+
+            _cleanup_stale_jobs()
+
+            self.assertIsNone(_get_job("old-done"))
+
+    def test_failed_job_older_than_ttl_is_removed(self) -> None:
+        """A failed job older than TTL should be cleaned up."""
+        with patch.dict("os.environ", {"CLM_JOB_RETENTION_SECONDS": "60"}, clear=False):
+            _register_job("old-fail", "g", "https://x.com")
+            _update_job("old-fail", status="failed", error="boom")
+            self._age_job("old-fail", 120)
+
+            _cleanup_stale_jobs()
+
+            self.assertIsNone(_get_job("old-fail"))
+
+    def test_running_job_older_than_ttl_is_not_removed(self) -> None:
+        """A running job must never be removed, even if older than TTL."""
+        with patch.dict("os.environ", {"CLM_JOB_RETENTION_SECONDS": "60"}, clear=False):
+            _register_job("still-running", "g", "https://x.com")
+            self._age_job("still-running", 120)
+
+            _cleanup_stale_jobs()
+
+            self.assertIsNotNone(_get_job("still-running"))
+            self.assertEqual(_get_job("still-running")["status"], "running")
+
+    def test_recent_completed_job_remains_queryable(self) -> None:
+        """A recently completed job should not be cleaned up."""
+        with patch.dict("os.environ", {"CLM_JOB_RETENTION_SECONDS": "3600"}, clear=False):
+            _register_job("recent", "g", "https://x.com")
+            _update_job("recent", status="completed")
+
+            _cleanup_stale_jobs()
+
+            self.assertIsNotNone(_get_job("recent"))
+
+    def test_invalid_ttl_env_var_falls_back_to_default(self) -> None:
+        """Invalid CLM_JOB_RETENTION_SECONDS should fall back to 3600."""
+        with patch.dict("os.environ", {"CLM_JOB_RETENTION_SECONDS": "abc"}, clear=False):
+            self.assertEqual(_job_retention_seconds(), 3600)
+
+    def test_zero_ttl_env_var_falls_back_to_default(self) -> None:
+        """Zero CLM_JOB_RETENTION_SECONDS should fall back to 3600."""
+        with patch.dict("os.environ", {"CLM_JOB_RETENTION_SECONDS": "0"}, clear=False):
+            self.assertEqual(_job_retention_seconds(), 3600)
+
+    def test_cleanup_preserves_other_jobs(self) -> None:
+        """Only stale completed/failed jobs should be removed."""
+        with patch.dict("os.environ", {"CLM_JOB_RETENTION_SECONDS": "60"}, clear=False):
+            _register_job("stale", "g", "https://x.com")
+            _update_job("stale", status="completed")
+            self._age_job("stale", 120)
+
+            _register_job("keep", "g", "https://x.com")
+            _update_job("keep", status="completed")
+
+            _cleanup_stale_jobs()
+
+            self.assertIsNone(_get_job("stale"))
+            self.assertIsNotNone(_get_job("keep"))
 
 
 if __name__ == "__main__":

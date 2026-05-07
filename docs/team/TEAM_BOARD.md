@@ -7,10 +7,10 @@ Last updated: 2026-05-07
 | Employee ID | Display Name | Current Project Role | Status | Current Assignment |
 |---|---|---|---|---|
 | LLM-2026-000 | Supervisor Codex | Project Supervisor | active | project direction, assignments, acceptance |
-| LLM-2026-001 | Worker Alpha | API Job Worker | assigned | Job Registry TTL Cleanup |
+| LLM-2026-001 | Worker Alpha | LLM Interface Worker | assigned | LLM Advisor Phase A Interfaces |
 | LLM-2026-002 | Worker Beta | Error Path QA Worker | accepted | Error-path hardening |
 | LLM-2026-003 | Worker Gamma | Unassigned | standby | none |
-| LLM-2026-004 | Worker Delta | Documentation Worker | assigned | LLM Interface Design Audit |
+| LLM-2026-004 | Worker Delta | Documentation Worker | assigned | LLM Phase A Docs / Readiness Audit |
 
 ## Current Project Roles
 
@@ -23,6 +23,7 @@ Last updated: 2026-05-07
 | ROLE-STRATEGY | Strategy / Engine Routing Worker | LLM-2026-003 | accepted work completed |
 | ROLE-API | API Job Worker | LLM-2026-001 | assigned |
 | ROLE-DOCS | Documentation Worker | LLM-2026-004 | assigned |
+| ROLE-LLM-INTERFACE | LLM Interface Worker | LLM-2026-001 | assigned |
 
 ## Assignment Records
 
@@ -35,8 +36,10 @@ Last updated: 2026-05-07
 | Real Browser SPA Smoke | LLM-2026-001 | ROLE-BROWSER | accepted | `docs/team/acceptance/2026-05-06_real_browser_spa_smoke_ACCEPTED.md` |
 | Job Registry Concurrency Limits | LLM-2026-001 | ROLE-API | accepted | `docs/team/acceptance/2026-05-07_job_registry_limits_ACCEPTED.md` |
 | ADR And Runbook Audit | LLM-2026-004 | ROLE-DOCS | accepted | `docs/team/acceptance/2026-05-07_adr_runbook_audit_ACCEPTED.md` |
-| Job Registry TTL Cleanup | LLM-2026-001 | ROLE-API | assigned | pending |
-| LLM Interface Design Audit | LLM-2026-004 | ROLE-DOCS | assigned | pending |
+| Job Registry TTL Cleanup | LLM-2026-001 | ROLE-API | accepted | `docs/team/acceptance/2026-05-07_job_registry_ttl_cleanup_ACCEPTED.md` |
+| LLM Interface Design Audit | LLM-2026-004 | ROLE-DOCS | accepted | `docs/team/acceptance/2026-05-07_llm_interface_doc_audit_ACCEPTED.md` |
+| LLM Advisor Phase A Interfaces | LLM-2026-001 | ROLE-LLM-INTERFACE | assigned | pending |
+| LLM Phase A Docs / Readiness Audit | LLM-2026-004 | ROLE-DOCS | assigned | pending |
 
 ## Accepted Work Today
 
@@ -52,12 +55,15 @@ Last updated: 2026-05-07
 | Project State Audit | LLM-2026-004 | `docs/team/acceptance/2026-05-06_project_state_audit_ACCEPTED.md` | 9 consistency findings, cleanup applied |
 | Job Registry Limits | LLM-2026-001 | `docs/team/acceptance/2026-05-07_job_registry_limits_ACCEPTED.md` | active job cap with atomic registry gate |
 | ADR / Runbook Audit | LLM-2026-004 | `docs/team/acceptance/2026-05-07_adr_runbook_audit_ACCEPTED.md` | 9 findings, handoff/runbook cleanup applied |
+| Job Registry TTL Cleanup | LLM-2026-001 | `docs/team/acceptance/2026-05-07_job_registry_ttl_cleanup_ACCEPTED.md` | stale completed/failed in-memory jobs expire after configurable TTL |
+| LLM Interface Design Audit | LLM-2026-004 | `docs/team/acceptance/2026-05-07_llm_interface_doc_audit_ACCEPTED.md` | 10 findings drove advisor injection, validation, and audit-state design revision |
 
 ## Upcoming Candidate Tasks
 
-1. Optional LLM Planner/Strategy interface design.
-2. Site sample collection for automatic engine selection.
-3. Job registry persistence or TTL cleanup after concurrency limit MVP.
+1. LLM Advisor Phase A implementation with fake-advisor tests.
+2. Docs/readiness audit for the revised LLM Phase A contract.
+3. Site sample collection for automatic engine selection.
+4. Durable job registry design after the in-memory MVP stabilizes.
 
 ## Supervisor Notes
 
@@ -67,3 +73,4 @@ Last updated: 2026-05-07
 - Automatic fnspider selection is deferred until more real site samples exist.
 - Visual understanding remains blueprint-level and should not be started before
   browser artifacts exist.
+- LLM provider adapters are not approved yet; Phase A is interface-only.

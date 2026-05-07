@@ -78,11 +78,51 @@ records, runbooks, and next worker assignments.
 - Assigned `LLM-2026-001` to Job Registry TTL Cleanup.
 - Assigned `LLM-2026-004` to LLM Interface Design Audit.
 
+### Job Registry TTL Cleanup (LLM-2026-001)
+
+- Added `_job_retention_seconds()` reading `CLM_JOB_RETENTION_SECONDS` env var
+  (default 3600).
+- Added `_cleanup_stale_jobs()` removing completed/failed jobs older than TTL.
+- Added `_parse_iso()` for robust ISO timestamp parsing.
+- Jobs now track `updated_at` alongside `created_at`; `_update_job()` stamps it
+  automatically.
+- Cleanup runs opportunistically on POST /crawl and GET /crawl/{id}.
+- Running jobs are never removed by TTL cleanup.
+- 7 new TTL tests added. Total: 27 API tests, 101 suite tests.
+- Supervisor accepted the work after API, full-suite, and compile verification.
+
+### LLM Interface Design Audit (LLM-2026-004)
+
+- Completed docs-only audit:
+  `docs/team/audits/2026-05-07_LLM-2026-004_LLM_INTERFACE_DOC_AUDIT.md`.
+- Found 10 issues, highest severity high.
+- Key findings covered advisor injection, raw response persistence,
+  validation/merge rules, exact state placement, and timeout/test policy.
+- Supervisor accepted the audit and revised the design plan.
+
+### LLM Planner / Strategy Design Revision
+
+- Revised:
+  `docs/plans/2026-05-07_LLM_PLANNER_STRATEGY_INTERFACE_DESIGN.md`.
+- Accepted:
+  `docs/decisions/ADR-005-llm-planner-strategy-must-be-optional.md`.
+- Locked the Phase A implementation contract:
+  closure-based advisor injection, no provider construction in core nodes,
+  append-only top-level LLM audit state, bounded/redacted raw response previews,
+  value-level strategy validation, and fake-advisor tests only.
+
+### New Assignments After Acceptance
+
+- Assigned `LLM-2026-001`:
+  `LLM Advisor Phase A Interfaces`
+- Assigned `LLM-2026-004`:
+  `LLM Phase A Docs / Readiness Audit`
+
 ## Verification
 
 ```text
 python -m unittest discover autonomous_crawler\tests
-Ran 94 tests (skipped=3)
+Ran 101 tests (skipped=3)
 OK
 
 python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py run_results.py
@@ -95,11 +135,15 @@ OK
 - Employee memory is file-based and manual; no retrieval automation yet.
 - Job registry still uses in-memory state; concurrency limits added but
   persistence is deferred.
-- Completed/failed job registry entries still have no TTL cleanup.
-- Optional LLM Planner/Strategy remains unimplemented.
+- Completed/failed job registry entries now have TTL cleanup; persistence is
+  still deferred.
+- Optional LLM Planner/Strategy remains unimplemented, but Phase A interface
+  work is now assigned with accepted design constraints.
 
 ## Next Day Plan
 
-1. Review and accept/rework Job Registry TTL Cleanup.
-2. Review and accept/rework LLM Interface Design Audit.
-3. If the audit passes, implement Phase A of LLM Planner/Strategy interfaces.
+1. Implement and review LLM Advisor Phase A interfaces.
+2. Keep 004 on docs/readiness audit for the revised LLM implementation
+   contract.
+3. After Phase A passes, decide whether Phase B should go to Planner advisor
+   merge logic or to durable job registry design.

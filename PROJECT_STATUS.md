@@ -75,6 +75,10 @@ search workflow.
   active background jobs reach the configured limit. Defaults to 4, configurable
   via `CLM_MAX_ACTIVE_JOBS` env var. Active-job counting and registration happen
   under one lock. Completed and failed jobs free their slots.
+- Job registry TTL cleanup: completed/failed jobs are automatically removed
+  after a configurable retention period. Defaults to 3600 seconds, configurable
+  via `CLM_JOB_RETENTION_SECONDS` env var. Cleanup runs opportunistically on
+  request handling. Running jobs are never removed.
 - Local Git repository initialized on 2026-05-07 for project history and
   rollback.
 - Remote Git repository configured:
@@ -85,12 +89,14 @@ search workflow.
 - Runbooks added under `docs/runbooks/`.
 - Optional LLM Planner/Strategy interface design drafted under
   `docs/plans/2026-05-07_LLM_PLANNER_STRATEGY_INTERFACE_DESIGN.md`.
+- Optional LLM Planner/Strategy design audited, revised, and accepted through
+  ADR-005. Phase A implementation is assigned.
 
 ## Current Test Status
 
 ```text
 python -m unittest discover autonomous_crawler\tests
-Ran 94 tests (skipped=3)
+Ran 101 tests (skipped=3)
 OK
 ```
 
@@ -102,7 +108,8 @@ OK
 - `site_spec_draft` detail selectors are drafts when only a list page is known.
 - API interception is not fully integrated into the graph.
 - FastAPI background jobs use in-memory registry; jobs are lost on process
-  restart. Completed/failed registry entries do not have TTL cleanup yet.
+  restart. TTL cleanup limits stale completed/failed entries, but does not add
+  durability.
 - Storage is local SQLite only; no dashboard yet.
 - Redis is still unused.
 - Multiple Codex agents can now coordinate by document convention, but there is
@@ -133,10 +140,13 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed
    explicit strategy option.~~ Explicit strategy option done 2026-05-06;
    automatic rules deferred until more site samples exist.
 3. ~~Add browser-mode fallback for pages where HTTP HTML is incomplete.~~ Done 2026-05-06.
-4. Add optional LLM Planner/Strategy with deterministic fallback. Design drafted
-   2026-05-07; implementation pending audit.
+4. Add optional LLM Planner/Strategy with deterministic fallback. Design
+   drafted, audited, revised, and accepted 2026-05-07; Phase A implementation
+   assigned.
 5. ~~Add background job execution for FastAPI crawl requests.~~ Done 2026-05-06.
 6. ~~Add real browser SPA smoke validation.~~ Done 2026-05-06.
 7. ~~Initialize local Git repository and employee memory model.~~ Done 2026-05-07.
 8. ~~Configure remote Git repository and add ADR/runbook foundation.~~ Done 2026-05-07.
 9. ~~Add background job registry concurrency limit.~~ Done 2026-05-07.
+10. ~~Add background job registry TTL cleanup.~~ Done 2026-05-07.
+11. Implement LLM Advisor Phase A interfaces with fake-advisor tests.

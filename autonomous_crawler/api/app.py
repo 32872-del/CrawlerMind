@@ -57,6 +57,7 @@ def _try_register_job(task_id: str, user_goal: str, target_url: str) -> bool:
 def _update_job(task_id: str, **kwargs: Any) -> None:
     with _jobs_lock:
         if task_id in _jobs:
+            kwargs["updated_at"] = _utc_now_iso()
             _jobs[task_id].update(kwargs)
 
 
@@ -71,6 +72,7 @@ def _remove_job(task_id: str) -> None:
 
 
 def _new_job_record(task_id: str, user_goal: str, target_url: str) -> dict[str, Any]:
+    now = _utc_now_iso()
     return {
         "task_id": task_id,
         "status": "running",
@@ -79,7 +81,8 @@ def _new_job_record(task_id: str, user_goal: str, target_url: str) -> dict[str, 
         "item_count": 0,
         "is_valid": False,
         "error": "",
-        "created_at": _utc_now_iso(),
+        "created_at": now,
+        "updated_at": now,
     }
 
 
@@ -97,6 +100,38 @@ def _count_active_jobs() -> int:
     """Count jobs that are still actively running."""
     with _jobs_lock:
         return sum(1 for j in _jobs.values() if j["status"] == "running")
+
+
+def _job_retention_seconds() -> int:
+    """Return how long completed/failed jobs stay in the registry."""
+    raw = os.environ.get("CLM_JOB_RETENTION_SECONDS", "3600")
+    try:
+        val = int(raw)
+        return val if val > 0 else 3600
+    except ValueError:
+        return 3600
+
+
+def _cleanup_stale_jobs() -> None:
+    """Remove completed/failed jobs older than the retention TTL."""
+    ttl = _job_retention_seconds()
+    cutoff = datetime.now(timezone.utc).timestamp() - ttl
+    with _jobs_lock:
+        stale = [
+            tid for tid, job in _jobs.items()
+            if job["status"] != "running"
+            and _parse_iso(job.get("updated_at", "")) < cutoff
+        ]
+        for tid in stale:
+            del _jobs[tid]
+
+
+def _parse_iso(iso_str: str) -> float:
+    """Parse an ISO timestamp to epoch seconds; return 0.0 on failure."""
+    try:
+        return datetime.fromisoformat(iso_str).timestamp()
+    except (ValueError, TypeError):
+        return 0.0
 
 
 def _background_crawl(task_id: str, user_goal: str, target_url: str, max_retries: int) -> None:
@@ -134,6 +169,8 @@ def create_app() -> FastAPI:
 
     @app.post("/crawl", response_model=CrawlResponse)
     def crawl(request: CrawlRequest) -> dict[str, Any]:
+        _cleanup_stale_jobs()
+
         task_id = str(uuid.uuid4())[:8]
 
         if not _try_register_job(task_id, request.user_goal, request.target_url):
@@ -158,6 +195,8 @@ def create_app() -> FastAPI:
 
     @app.get("/crawl/{task_id}")
     def get_crawl(task_id: str) -> dict[str, Any]:
+        _cleanup_stale_jobs()
+
         # Check in-memory registry first (running/queued jobs)
         job = _get_job(task_id)
         if job:

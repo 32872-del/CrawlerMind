@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Date
 
@@ -31,19 +31,25 @@ keys.
 
 ## Decision
 
-Proposed decision:
-
 Planner and Strategy may use optional advisor interfaces, but deterministic
 fallback remains the default and required behavior.
 
 No API key should be required for normal tests.
 
+Advisors must be injected through graph construction, not created inside core
+nodes and not stored in graph state.
+
+LLM audit records must be bounded, redacted, and append-only.
+
 ## Consequences
 
 - Advisor implementations must be injectable and mockable.
 - LLM output must be validated before it can affect crawling.
-- LLM decisions should be recorded in final state for audit.
+- LLM decisions should be recorded in final state for audit, using bounded
+  previews instead of unbounded raw responses.
 - Provider-specific adapters should be separate from core graph logic.
+- Ranking-list tasks must continue to avoid advisor-driven `fnspider` routing
+  unless a future accepted ADR changes ADR-004.
 
 ## Follow-Up
 
@@ -53,4 +59,5 @@ Review design in:
 docs/plans/2026-05-07_LLM_PLANNER_STRATEGY_INTERFACE_DESIGN.md
 ```
 
-Accept or revise this ADR before implementation.
+This ADR was accepted after Worker Delta's design audit and the follow-up
+revision to the interface design plan.
