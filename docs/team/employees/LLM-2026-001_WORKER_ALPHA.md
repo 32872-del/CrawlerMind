@@ -6,7 +6,7 @@ Display Name: Worker Alpha
 
 Permanent Employee ID: `LLM-2026-001`
 
-Current Project Role: Unassigned
+Current Project Role: API Job Worker
 
 ## Current Strength Profile
 
@@ -27,7 +27,8 @@ Current Project Role: Unassigned
 
 ## Current Assignment
 
-- Awaiting next scoped assignment.
+- Job Registry Concurrency Limits:
+  `docs/team/assignments/2026-05-07_LLM-2026-001_JOB_REGISTRY_LIMITS.md`
 
 ## Current Notes
 

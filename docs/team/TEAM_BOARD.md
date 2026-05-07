@@ -1,16 +1,16 @@
 # Team Board
 
-Last updated: 2026-05-06
+Last updated: 2026-05-07
 
 ## Active Employees
 
 | Employee ID | Display Name | Current Project Role | Status | Current Assignment |
 |---|---|---|---|---|
 | LLM-2026-000 | Supervisor Codex | Project Supervisor | active | project direction, assignments, acceptance |
-| LLM-2026-001 | Worker Alpha | Unassigned | standby | none |
+| LLM-2026-001 | Worker Alpha | API Job Worker | assigned | Job Registry Concurrency Limits |
 | LLM-2026-002 | Worker Beta | Error Path QA Worker | accepted | Error-path hardening |
 | LLM-2026-003 | Worker Gamma | Unassigned | standby | none |
-| LLM-2026-004 | Worker Delta | Unassigned | standby | none |
+| LLM-2026-004 | Worker Delta | Documentation Worker | assigned | ADR And Runbook Audit |
 
 ## Current Project Roles
 
@@ -21,8 +21,8 @@ Last updated: 2026-05-06
 | ROLE-QA | Error Path QA Worker | LLM-2026-002 | accepted |
 | ROLE-STORAGE | Storage / CLI Worker | LLM-2026-003 | accepted work completed |
 | ROLE-STRATEGY | Strategy / Engine Routing Worker | LLM-2026-003 | accepted work completed |
-| ROLE-API | API Job Worker | LLM-2026-001 | accepted |
-| ROLE-DOCS | Documentation Worker | LLM-2026-004 | accepted |
+| ROLE-API | API Job Worker | LLM-2026-001 | assigned |
+| ROLE-DOCS | Documentation Worker | LLM-2026-004 | assigned |
 
 ## Assignment Records
 
@@ -33,6 +33,8 @@ Last updated: 2026-05-06
 | New worker onboarding and project orientation | LLM-2026-004 | Onboarding | accepted | `docs/team/acceptance/2026-05-06_worker_delta_onboarding_ACCEPTED.md` |
 | Project State Consistency Audit | LLM-2026-004 | ROLE-DOCS | accepted | `docs/team/acceptance/2026-05-06_project_state_audit_ACCEPTED.md` |
 | Real Browser SPA Smoke | LLM-2026-001 | ROLE-BROWSER | accepted | `docs/team/acceptance/2026-05-06_real_browser_spa_smoke_ACCEPTED.md` |
+| Job Registry Concurrency Limits | LLM-2026-001 | ROLE-API | assigned | pending |
+| ADR And Runbook Audit | LLM-2026-004 | ROLE-DOCS | assigned | pending |
 
 ## Accepted Work Today
 
@@ -50,8 +52,8 @@ Last updated: 2026-05-06
 ## Upcoming Candidate Tasks
 
 1. Optional LLM Planner/Strategy interface design.
-2. Job registry persistence or concurrency limits.
-3. Site sample collection for automatic engine selection.
+2. Site sample collection for automatic engine selection.
+3. Job registry persistence after concurrency limit MVP.
 
 ## Supervisor Notes
 

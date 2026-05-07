@@ -73,8 +73,12 @@ search workflow.
   network access required.
 - Local Git repository initialized on 2026-05-07 for project history and
   rollback.
+- Remote Git repository configured:
+  `https://github.com/32872-del/CrawlerMind.git`
 - Employee memory model added under `docs/memory/`: employee identity is
   persistent project state, while AI sessions temporarily operate that state.
+- ADR foundation added under `docs/decisions/`.
+- Runbooks added under `docs/runbooks/`.
 
 ## Current Test Status
 
@@ -96,7 +100,8 @@ OK
 - Redis is still unused.
 - Multiple Codex agents can now coordinate by document convention, but there is
   no automated lock/ownership system.
-- No remote Git repository is configured yet.
+- Remote Git exists, but branch policy and automated locking are not configured
+  yet.
 
 ## Next Development Goal
 
@@ -125,3 +130,4 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed
 5. ~~Add background job execution for FastAPI crawl requests.~~ Done 2026-05-06.
 6. ~~Add real browser SPA smoke validation.~~ Done 2026-05-06.
 7. ~~Initialize local Git repository and employee memory model.~~ Done 2026-05-07.
+8. ~~Configure remote Git repository and add ADR/runbook foundation.~~ Done 2026-05-07.

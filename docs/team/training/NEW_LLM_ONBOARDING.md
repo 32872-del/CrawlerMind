@@ -129,3 +129,9 @@ Developer logs are evidence. Acceptance records are project truth.
 Employee identity is permanent. Project role is temporary.
 
 AI sessions are replaceable. Employee memory is persistent.
+
+For takeover of an existing employee ID, also follow:
+
+```text
+docs/runbooks/EMPLOYEE_TAKEOVER.md
+```

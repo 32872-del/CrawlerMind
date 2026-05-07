@@ -16,6 +16,8 @@ Current capabilities:
 - Verified Baidu realtime hot-search smoke test.
 - Opt-in real browser SPA smoke test using a local JS fixture.
 - Result inspection/export CLI.
+- Git-backed team workflow with employee memory, ADRs, runbooks, and supervisor
+  acceptance records.
 
 ## Quick Start
 
@@ -119,6 +121,9 @@ dev_logs/       Developer logs only
 - Main blueprint: [docs/blueprints/AUTONOMOUS_CRAWL_AGENT_BLUEPRINT.md](docs/blueprints/AUTONOMOUS_CRAWL_AGENT_BLUEPRINT.md)
 - MCP blueprint: [docs/blueprints/MCP_BLUEPRINT.md](docs/blueprints/MCP_BLUEPRINT.md)
 - Collaboration rules: [docs/process/COLLABORATION_GUIDE.md](docs/process/COLLABORATION_GUIDE.md)
+- Decisions: [docs/decisions/](docs/decisions/)
+- Runbooks: [docs/runbooks/](docs/runbooks/)
+- Employee memory model: [docs/memory/EMPLOYEE_MEMORY_MODEL.md](docs/memory/EMPLOYEE_MEMORY_MODEL.md)
 - LLM team workspace: [docs/team/TEAM_WORKSPACE.md](docs/team/TEAM_WORKSPACE.md)
 - New LLM onboarding: [docs/team/training/NEW_LLM_ONBOARDING.md](docs/team/training/NEW_LLM_ONBOARDING.md)
 - Short-term plan: [docs/plans/2026-05-05_SHORT_TERM_PLAN.md](docs/plans/2026-05-05_SHORT_TERM_PLAN.md)
