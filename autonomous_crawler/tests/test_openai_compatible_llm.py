@@ -16,7 +16,9 @@ from autonomous_crawler.llm.openai_compatible import (
     LLMResponseError,
     OpenAICompatibleAdvisor,
     OpenAICompatibleConfig,
+    build_chat_completions_endpoint,
     build_advisor_from_env,
+    extract_chat_content,
     parse_json_object,
 )
 from autonomous_crawler.llm.protocols import PlanningAdvisor, StrategyAdvisor
@@ -43,6 +45,7 @@ class OpenAICompatibleConfigTests(unittest.TestCase):
             "CLM_LLM_TIMEOUT_SECONDS": "9.5",
             "CLM_LLM_TEMPERATURE": "0.2",
             "CLM_LLM_MAX_TOKENS": "321",
+            "CLM_LLM_USE_RESPONSE_FORMAT": "0",
         }
         with patch.dict(os.environ, env, clear=True):
             config = OpenAICompatibleConfig.from_env()
@@ -54,6 +57,7 @@ class OpenAICompatibleConfigTests(unittest.TestCase):
         self.assertEqual(config.timeout_seconds, 9.5)
         self.assertEqual(config.temperature, 0.2)
         self.assertEqual(config.max_tokens, 321)
+        self.assertFalse(config.use_response_format)
 
     def test_build_advisor_from_env_disabled_returns_none(self) -> None:
         with patch.dict(os.environ, {}, clear=True):
@@ -151,6 +155,34 @@ class OpenAICompatibleAdvisorTests(unittest.TestCase):
         self.assertEqual(result["task_type"], "product_list")
         self.assertNotIn("Authorization", requests[0].headers)
 
+    def test_base_url_without_v1_posts_to_v1_chat_completions(self) -> None:
+        requests: list[httpx.Request] = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            requests.append(request)
+            return httpx.Response(
+                200,
+                json={
+                    "choices": [
+                        {"message": {"content": '{"task_type": "ranking_list"}'}},
+                    ],
+                },
+            )
+
+        client = httpx.Client(transport=httpx.MockTransport(handler))
+        advisor = OpenAICompatibleAdvisor(
+            OpenAICompatibleConfig(
+                base_url="https://llm.example",
+                model="test-model",
+            ),
+            client=client,
+        )
+
+        result = advisor.plan("collect hot searches", "https://example.com")
+
+        self.assertEqual(result["task_type"], "ranking_list")
+        self.assertEqual(str(requests[0].url), "https://llm.example/v1/chat/completions")
+
     def test_choose_strategy_returns_json_object(self) -> None:
         advisor = self._advisor_with_response(
             json.dumps({
@@ -190,7 +222,10 @@ class OpenAICompatibleAdvisorTests(unittest.TestCase):
 
     def test_missing_content_raises_response_error(self) -> None:
         def handler(request: httpx.Request) -> httpx.Response:
-            return httpx.Response(200, json={"choices": [{"message": {}}]})
+            return httpx.Response(
+                200,
+                json={"error": {"message": "bad model", "token": "secret-token"}},
+            )
 
         client = httpx.Client(transport=httpx.MockTransport(handler))
         advisor = OpenAICompatibleAdvisor(
@@ -201,7 +236,10 @@ class OpenAICompatibleAdvisorTests(unittest.TestCase):
             client=client,
         )
 
-        with self.assertRaises(LLMResponseError):
+        with self.assertRaisesRegex(
+            LLMResponseError,
+            r"top_level_keys=\[error\].*token.*\[REDACTED\]",
+        ):
             advisor.plan("collect", "https://example.com")
 
     def test_non_json_content_raises_response_error(self) -> None:
@@ -209,6 +247,116 @@ class OpenAICompatibleAdvisorTests(unittest.TestCase):
 
         with self.assertRaises(LLMResponseError):
             advisor.plan("collect", "https://example.com")
+
+    def test_http_error_includes_safe_response_preview(self) -> None:
+        def handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(
+                401,
+                json={"error": {"message": "unauthorized", "api_key": "sk-secret"}},
+            )
+
+        client = httpx.Client(transport=httpx.MockTransport(handler))
+        advisor = OpenAICompatibleAdvisor(
+            OpenAICompatibleConfig(
+                base_url="https://llm.example/v1",
+                model="test-model",
+            ),
+            client=client,
+        )
+
+        with self.assertRaisesRegex(
+            LLMResponseError,
+            r"response_preview=.*api_key.*\[REDACTED\]",
+        ):
+            advisor.plan("collect", "https://example.com")
+
+    def test_response_format_unsupported_retries_without_it(self) -> None:
+        requests: list[httpx.Request] = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            requests.append(request)
+            if len(requests) == 1:
+                return httpx.Response(
+                    400,
+                    json={"error": {"message": "response_format is unsupported"}},
+                )
+            return httpx.Response(
+                200,
+                json={
+                    "choices": [
+                        {"message": {"content": '{"task_type": "ranking_list"}'}},
+                    ],
+                },
+            )
+
+        client = httpx.Client(transport=httpx.MockTransport(handler))
+        advisor = OpenAICompatibleAdvisor(
+            OpenAICompatibleConfig(
+                base_url="https://llm.example/v1",
+                model="test-model",
+            ),
+            client=client,
+        )
+
+        result = advisor.plan("collect", "https://example.com")
+
+        self.assertEqual(result["task_type"], "ranking_list")
+        self.assertEqual(len(requests), 2)
+        first_body = json.loads(requests[0].content.decode("utf-8"))
+        second_body = json.loads(requests[1].content.decode("utf-8"))
+        self.assertIn("response_format", first_body)
+        self.assertNotIn("response_format", second_body)
+
+    def test_text_choice_response_is_supported(self) -> None:
+        def handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(
+                200,
+                json={"choices": [{"text": '{"task_type": "product_list"}'}]},
+            )
+
+        client = httpx.Client(transport=httpx.MockTransport(handler))
+        advisor = OpenAICompatibleAdvisor(
+            OpenAICompatibleConfig(
+                base_url="https://llm.example/v1",
+                model="test-model",
+            ),
+            client=client,
+        )
+
+        result = advisor.plan("collect", "https://example.com")
+
+        self.assertEqual(result["task_type"], "product_list")
+
+    def test_content_parts_response_is_supported(self) -> None:
+        content = [
+            {"type": "text", "text": '{"task_type": '},
+            {"type": "text", "text": '"ranking_list"}'},
+        ]
+
+        self.assertEqual(
+            extract_chat_content({"choices": [{"message": {"content": content}}]}),
+            '{"task_type": "ranking_list"}',
+        )
+
+
+class EndpointBuilderTests(unittest.TestCase):
+    def test_root_base_url_adds_v1_chat_completions(self) -> None:
+        self.assertEqual(
+            build_chat_completions_endpoint("https://llm.example"),
+            "https://llm.example/v1/chat/completions",
+        )
+
+    def test_v1_base_url_adds_chat_completions(self) -> None:
+        self.assertEqual(
+            build_chat_completions_endpoint("https://llm.example/v1"),
+            "https://llm.example/v1/chat/completions",
+        )
+
+    def test_full_endpoint_is_unchanged(self) -> None:
+        self.assertEqual(
+            build_chat_completions_endpoint("https://llm.example/v1/chat/completions"),
+            "https://llm.example/v1/chat/completions",
+        )
 
 
 class ParseJsonObjectTests(unittest.TestCase):

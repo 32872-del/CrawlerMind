@@ -7,6 +7,7 @@
     "provider": "openai-compatible",
     "timeout_seconds": 30,
     "temperature": 0,
-    "max_tokens": 800
+    "max_tokens": 800,
+    "use_response_format": true
   }
 }

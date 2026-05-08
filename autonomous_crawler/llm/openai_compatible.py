@@ -14,6 +14,8 @@ from typing import Any
 
 import httpx
 
+from .audit import MAX_PREVIEW_LENGTH, redact_preview
+
 
 class LLMConfigurationError(ValueError):
     """Raised when LLM configuration is incomplete."""
@@ -34,6 +36,7 @@ class OpenAICompatibleConfig:
     timeout_seconds: float = 30.0
     temperature: float = 0.0
     max_tokens: int = 800
+    use_response_format: bool = True
 
     @classmethod
     def from_env(cls) -> "OpenAICompatibleConfig":
@@ -56,6 +59,7 @@ class OpenAICompatibleConfig:
             timeout_seconds=_float_env("CLM_LLM_TIMEOUT_SECONDS", 30.0),
             temperature=_float_env("CLM_LLM_TEMPERATURE", 0.0),
             max_tokens=_int_env("CLM_LLM_MAX_TOKENS", 800),
+            use_response_format=_bool_env("CLM_LLM_USE_RESPONSE_FORMAT", True),
         )
 
 
@@ -108,35 +112,59 @@ class OpenAICompatibleAdvisor:
         return self._chat_json(messages)
 
     def _chat_json(self, messages: list[dict[str, str]]) -> dict[str, Any]:
-        endpoint = self.config.base_url.rstrip("/") + "/chat/completions"
+        endpoint = build_chat_completions_endpoint(self.config.base_url)
         headers = {"Content-Type": "application/json"}
         if self.config.api_key:
             headers["Authorization"] = f"Bearer {self.config.api_key}"
 
-        body = {
+        body: dict[str, Any] = {
             "model": self.config.model,
             "messages": messages,
             "temperature": self.config.temperature,
             "max_tokens": self.config.max_tokens,
-            "response_format": {"type": "json_object"},
         }
+        if self.config.use_response_format:
+            body["response_format"] = {"type": "json_object"}
 
         try:
-            if self._client is not None:
-                response = self._client.post(endpoint, headers=headers, json=body)
-            else:
-                with httpx.Client(timeout=self.config.timeout_seconds) as client:
-                    response = client.post(endpoint, headers=headers, json=body)
+            response = self._post_chat_completion(endpoint, headers, body)
             response.raise_for_status()
+        except httpx.HTTPStatusError as exc:
+            if _should_retry_without_response_format(exc.response, body):
+                body = dict(body)
+                body.pop("response_format", None)
+                try:
+                    response = self._post_chat_completion(endpoint, headers, body)
+                    response.raise_for_status()
+                except httpx.HTTPStatusError as retry_exc:
+                    preview = _safe_response_preview(retry_exc.response)
+                    raise LLMResponseError(
+                        f"LLM request failed: {retry_exc}; response_preview={preview}"
+                    ) from retry_exc
+                except httpx.HTTPError as retry_exc:
+                    raise LLMResponseError(f"LLM request failed: {retry_exc}") from retry_exc
+            else:
+                preview = _safe_response_preview(exc.response)
+                raise LLMResponseError(
+                    f"LLM request failed: {exc}; response_preview={preview}"
+                ) from exc
         except httpx.HTTPError as exc:
             raise LLMResponseError(f"LLM request failed: {exc}") from exc
 
         try:
             raw = response.json()
-            content = raw["choices"][0]["message"]["content"]
-        except (KeyError, IndexError, TypeError, ValueError) as exc:
+        except ValueError as exc:
+            preview = _safe_response_preview(response)
             raise LLMResponseError(
-                "LLM response missing choices[0].message.content"
+                f"LLM response is not valid JSON; response_preview={preview}"
+            ) from exc
+
+        try:
+            content = extract_chat_content(raw)
+        except (KeyError, IndexError, TypeError) as exc:
+            raise LLMResponseError(
+                "LLM response missing usable chat content; "
+                f"{_response_shape_hint(raw)}"
             ) from exc
 
         try:
@@ -146,6 +174,17 @@ class OpenAICompatibleAdvisor:
         if not isinstance(parsed, dict):
             raise LLMResponseError("LLM response content is not a JSON object")
         return parsed
+
+    def _post_chat_completion(
+        self,
+        endpoint: str,
+        headers: dict[str, str],
+        body: dict[str, Any],
+    ) -> httpx.Response:
+        if self._client is not None:
+            return self._client.post(endpoint, headers=headers, json=body)
+        with httpx.Client(timeout=self.config.timeout_seconds) as client:
+            return client.post(endpoint, headers=headers, json=body)
 
 
 def build_advisor_from_env() -> OpenAICompatibleAdvisor | None:
@@ -157,6 +196,37 @@ def build_advisor_from_env() -> OpenAICompatibleAdvisor | None:
     return OpenAICompatibleAdvisor.from_env()
 
 
+def build_chat_completions_endpoint(base_url: str) -> str:
+    """Build a chat-completions endpoint from a provider base URL.
+
+    Accepted inputs:
+    - https://api.example.com -> https://api.example.com/v1/chat/completions
+    - https://api.example.com/v1 -> https://api.example.com/v1/chat/completions
+    - https://api.example.com/v1/chat/completions -> unchanged
+    """
+    cleaned = base_url.strip().rstrip("/")
+    lowered = cleaned.lower()
+    if lowered.endswith("/chat/completions"):
+        return cleaned
+    if lowered.endswith("/v1"):
+        return cleaned + "/chat/completions"
+    return cleaned + "/v1/chat/completions"
+
+
+def extract_chat_content(raw: Any) -> Any:
+    """Extract text content from common OpenAI-compatible response shapes."""
+    choice = raw["choices"][0]
+    message = choice.get("message") if isinstance(choice, dict) else None
+    if isinstance(message, dict) and "content" in message:
+        content = message["content"]
+        if isinstance(content, list):
+            return _join_content_parts(content)
+        return content
+    if isinstance(choice, dict) and "text" in choice:
+        return choice["text"]
+    raise KeyError("choices[0].message.content")
+
+
 def parse_json_object(text: str) -> Any:
     """Parse a JSON object, allowing fenced JSON output."""
     cleaned = text.strip()
@@ -164,6 +234,49 @@ def parse_json_object(text: str) -> Any:
     if fence:
         cleaned = fence.group(1).strip()
     return json.loads(cleaned)
+
+
+def _join_content_parts(parts: list[Any]) -> str:
+    chunks: list[str] = []
+    for part in parts:
+        if isinstance(part, str):
+            chunks.append(part)
+        elif isinstance(part, dict):
+            text = part.get("text") or part.get("content")
+            if isinstance(text, str):
+                chunks.append(text)
+    return "".join(chunks)
+
+
+def _response_shape_hint(raw: Any) -> str:
+    try:
+        preview = json.dumps(raw, ensure_ascii=False, default=str)
+    except Exception:
+        preview = str(raw)
+    preview = preview[:MAX_PREVIEW_LENGTH]
+    redacted, _ = redact_preview(preview)
+
+    if isinstance(raw, dict):
+        keys = ", ".join(sorted(str(key) for key in raw.keys()))
+        return f"top_level_keys=[{keys}], response_preview={redacted}"
+    return f"response_type={type(raw).__name__}, response_preview={redacted}"
+
+
+def _safe_response_preview(response: httpx.Response) -> str:
+    text = response.text[:MAX_PREVIEW_LENGTH]
+    redacted, _ = redact_preview(text)
+    return redacted
+
+
+def _should_retry_without_response_format(
+    response: httpx.Response,
+    body: dict[str, Any],
+) -> bool:
+    if "response_format" not in body:
+        return False
+    if response.status_code not in {400, 422}:
+        return False
+    return "response_format" in response.text.lower()
 
 
 def _bounded(value: Any, max_chars: int) -> Any:
@@ -187,6 +300,18 @@ def _int_env(name: str, default: int) -> int:
         return value if value > 0 else default
     except ValueError:
         return default
+
+
+def _bool_env(name: str, default: bool) -> bool:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    normalized = raw.strip().lower()
+    if normalized in {"1", "true", "yes", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "off"}:
+        return False
+    return default
 
 
 _PLANNER_SYSTEM_PROMPT = """You are the planning advisor for Crawler-Mind.

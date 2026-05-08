@@ -43,10 +43,12 @@ class RunSimpleConfigTests(unittest.TestCase):
                 "base_url": "https://llm.example/v1",
                 "model": "test-model",
                 "api_key": "test-key",
+                "use_response_format": False,
             }
         })
 
         self.assertIsInstance(advisor, OpenAICompatibleAdvisor)
+        self.assertFalse(advisor.config.use_response_format)
 
     def test_placeholder_key_is_rejected(self) -> None:
         with self.assertRaises(SystemExit):

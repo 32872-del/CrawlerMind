@@ -19,10 +19,13 @@ python run_simple.py "collect product titles and prices" https://example.com
     "enabled": true,
     "base_url": "https://api.openai.com/v1",
     "model": "gpt-4o-mini",
-    "api_key": "你的key"
+    "api_key": "你的key",
+    "use_response_format": true
   }
 }
 ```
+
+`base_url` 可以填根地址或 `/v1` 地址，CLM 会自动拼到 `/v1/chat/completions`。如果供应商报 `response_format` 不支持，把 `use_response_format` 改成 `false`。
 
 ## 没有 API 先试跑
 

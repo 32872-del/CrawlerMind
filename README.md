@@ -39,7 +39,8 @@ python run_simple.py "collect product titles and prices" mock://catalog
     "enabled": true,
     "base_url": "https://api.openai.com/v1",
     "model": "gpt-4o-mini",
-    "api_key": "replace-with-your-api-key"
+    "api_key": "replace-with-your-api-key",
+    "use_response_format": true
   }
 }
 ```
@@ -49,6 +50,8 @@ python run_simple.py "collect product titles and prices" mock://catalog
 - `base_url`
 - `model`
 - `api_key`
+
+`base_url` 可以填根地址或 `/v1` 地址；CLM 会自动拼到 `/v1/chat/completions`。如果供应商报 `response_format` 不支持，把 `use_response_format` 改成 `false`。
 
 ## 当前真实状态
 

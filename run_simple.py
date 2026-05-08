@@ -52,6 +52,7 @@ def build_simple_advisor(config: dict[str, Any]) -> OpenAICompatibleAdvisor | No
         timeout_seconds=float(llm.get("timeout_seconds", 30)),
         temperature=float(llm.get("temperature", 0)),
         max_tokens=int(llm.get("max_tokens", 800)),
+        use_response_format=bool(llm.get("use_response_format", True)),
     )
     return OpenAICompatibleAdvisor(llm_config)
 
