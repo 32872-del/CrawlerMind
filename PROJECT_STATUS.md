@@ -155,12 +155,19 @@ search workflow.
   empty challenge-page results to `ANTI_BOT_BLOCKED`. Added deterministic
   `mock://js-shell`, `mock://challenge`, and `mock://structured` fixtures plus
   focused tests.
+- P1 fetch-best-page policy added: new
+  `autonomous_crawler/tools/fetch_policy.py` scores fetch attempts across
+  `requests`, `curl_cffi`, and browser modes, records an escalation trace, and
+  selects the best HTML for Recon. Recon now stores
+  `recon_report.fetch.selected_mode`, `selected_score`, and `fetch_trace`.
+  Strategy keeps browser mode when Recon selected browser-rendered HTML. Pure
+  transport failures skip browser launch to avoid slow redundant failures.
 
 ## Current Test Status
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 225 tests (skipped=3)
+Ran 232 tests (skipped=3)
 OK
 ```
 
@@ -228,4 +235,5 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
     actively used, 23 focused tests, 215 total tests pass.
 15. Start P1 crawl capability iteration.
     - Access diagnostics done 2026-05-08.
-    - Fetch mode escalation and site-zoo fixtures next.
+    - Fetch mode escalation done 2026-05-08.
+    - Site-zoo fixtures next.

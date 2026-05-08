@@ -15,6 +15,7 @@ import httpx
 from bs4 import BeautifulSoup, Tag
 
 from .access_diagnostics import diagnose_access, detect_challenge
+from .fetch_policy import BestFetchResult, FetchAttempt, fetch_best_page
 
 
 DEFAULT_RECON_HEADERS = {
@@ -119,6 +120,27 @@ MOCK_STRUCTURED_HTML = """
 </html>
 """
 
+MOCK_RENDERED_HTML = """
+<html>
+  <body>
+    <main class="catalog-grid">
+      <article class="catalog-card">
+        <a class="product-link" href="/products/rendered">
+          <h2 class="product-name">Rendered Product</h2>
+          <span class="product-price">$42.00</span>
+        </a>
+      </article>
+      <article class="catalog-card">
+        <a class="product-link" href="/products/rendered-two">
+          <h2 class="product-name">Rendered Product Two</h2>
+          <span class="product-price">$84.00</span>
+        </a>
+      </article>
+    </main>
+  </body>
+</html>
+"""
+
 PRICE_RE = re.compile(
     r"(?i)(?:[$€£¥]\s*\d[\d\s,.]*|\d[\d\s,.]*(?:pln|usd|eur|gbp|cny|rmb|zł))"
 )
@@ -178,6 +200,67 @@ def fetch_html(url: str, headers: dict[str, str] | None = None) -> FetchResult:
             )
     except httpx.HTTPError as exc:
         return FetchResult(url=url, html="", error=str(exc))
+
+
+def fetch_best_html(url: str, headers: dict[str, str] | None = None) -> BestFetchResult:
+    """Fetch the best available HTML for recon, including deterministic mocks."""
+    mock = _mock_best_fetch(url)
+    if mock is not None:
+        return mock
+
+    parsed = urlparse(url)
+    if parsed.scheme not in {"http", "https"}:
+        attempt = FetchAttempt(mode="none", url=url, error=f"unsupported scheme: {url}")
+        attempt.score = -100
+        attempt.reasons = [f"error:{attempt.error}"]
+        return BestFetchResult(
+            url=url,
+            html="",
+            status_code=None,
+            mode="none",
+            score=-100,
+            attempts=[attempt],
+            error=attempt.error,
+        )
+
+    merged_headers = {**DEFAULT_RECON_HEADERS, **(headers or {})}
+    return fetch_best_page(url, headers=merged_headers)
+
+
+def _mock_best_fetch(url: str) -> BestFetchResult | None:
+    fixture_map = {
+        "mock://catalog": MOCK_PRODUCT_HTML,
+        "mock://ranking": MOCK_RANKING_HTML,
+        "mock://structured": MOCK_STRUCTURED_HTML,
+    }
+    if url in fixture_map:
+        attempt = FetchAttempt(mode="mock", url=url, html=fixture_map[url], status_code=200)
+        attempt.score, attempt.reasons = (100, ["mock_fixture"])
+        attempt.diagnostics = diagnose_access(attempt.html, url=url)
+        return BestFetchResult(url=url, html=attempt.html, status_code=200, mode="mock", score=100, attempts=[attempt])
+
+    if url == "mock://challenge":
+        attempt = FetchAttempt(mode="mock", url=url, html=MOCK_CHALLENGE_HTML, status_code=403)
+        attempt.score, attempt.reasons = (0, ["mock_challenge"])
+        attempt.diagnostics = diagnose_access(attempt.html, url=url)
+        return BestFetchResult(url=url, html=attempt.html, status_code=403, mode="mock", score=0, attempts=[attempt])
+
+    if url == "mock://js-shell":
+        http_attempt = FetchAttempt(mode="requests", url=url, html=MOCK_JS_SHELL_HTML, status_code=200)
+        http_attempt.score, http_attempt.reasons = (-5, ["mock_js_shell", "js_shell"])
+        http_attempt.diagnostics = diagnose_access(http_attempt.html, url=url)
+        browser_attempt = FetchAttempt(mode="browser", url=url, html=MOCK_RENDERED_HTML, status_code=200)
+        browser_attempt.score, browser_attempt.reasons = (90, ["mock_rendered", "dom_candidates"])
+        browser_attempt.diagnostics = diagnose_access(browser_attempt.html, url=url)
+        return BestFetchResult(
+            url=url,
+            html=MOCK_RENDERED_HTML,
+            status_code=200,
+            mode="browser",
+            score=90,
+            attempts=[http_attempt, browser_attempt],
+        )
+    return None
 
 
 def build_recon_report(url: str, html: str) -> dict[str, Any]:

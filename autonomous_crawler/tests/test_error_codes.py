@@ -256,7 +256,7 @@ class TestReconErrorCodes(unittest.TestCase):
         self.assertEqual(result["status"], "recon_failed")
         self.assertEqual(result["error_code"], FETCH_UNSUPPORTED_SCHEME)
 
-    @patch("autonomous_crawler.agents.recon.fetch_html")
+    @patch("autonomous_crawler.agents.recon.fetch_best_html")
     def test_http_error_in_recon(self, mock_fetch):
         from autonomous_crawler.agents.recon import recon_node
 

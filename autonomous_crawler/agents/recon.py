@@ -19,7 +19,7 @@ from typing import Any
 
 from .base import preserve_state
 from ..errors import FETCH_HTTP_ERROR, FETCH_UNSUPPORTED_SCHEME, RECON_FAILED, format_error_entry
-from ..tools.html_recon import build_recon_report, fetch_html
+from ..tools.html_recon import build_recon_report, fetch_best_html
 
 
 @preserve_state
@@ -33,7 +33,7 @@ def recon_node(state: dict[str, Any]) -> dict[str, Any]:
     target_url = state.get("target_url", "")
     existing_report = state.get("recon_report", {})
 
-    fetch_result = fetch_html(target_url)
+    fetch_result = fetch_best_html(target_url)
     if fetch_result.error:
         error_msg = fetch_result.error
         if "unsupported scheme" in error_msg.lower():
@@ -63,7 +63,10 @@ def recon_node(state: dict[str, Any]) -> dict[str, Any]:
         "fetch": {
             "status_code": fetch_result.status_code,
             "html_chars": len(fetch_result.html),
+            "selected_mode": fetch_result.mode,
+            "selected_score": fetch_result.score,
         },
+        "fetch_trace": fetch_result.to_trace(),
     }
 
     return {
@@ -74,7 +77,8 @@ def recon_node(state: dict[str, Any]) -> dict[str, Any]:
                 f"[Recon] Analyzed {target_url} - "
                 f"framework={recon_report['frontend_framework']}, "
                 f"items={recon_report['dom_structure'].get('item_count', 0)}, "
-                f"anti_bot={recon_report['anti_bot']['detected']}"
+                f"anti_bot={recon_report['anti_bot']['detected']}, "
+                f"fetch_mode={fetch_result.mode}"
             )
         ],
     }

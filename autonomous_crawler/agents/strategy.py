@@ -39,11 +39,13 @@ def strategy_node(state: dict[str, Any]) -> dict[str, Any]:
     api_endpoints = recon_report.get("api_endpoints", [])
     anti_bot = recon_report.get("anti_bot", {})
     rendering = recon_report.get("rendering", "static")
+    fetch = recon_report.get("fetch", {})
     access_diagnostics = recon_report.get("access_diagnostics", {})
     access_findings = set(access_diagnostics.get("findings", []))
     has_challenge = bool(access_diagnostics.get("signals", {}).get("challenge")) or bool(anti_bot.get("detected"))
     needs_browser = (
         rendering == "spa"
+        or fetch.get("selected_mode") == "browser"
         or has_challenge
         or "js_rendering_likely_required" in access_findings
     )

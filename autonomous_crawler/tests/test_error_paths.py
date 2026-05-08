@@ -130,7 +130,7 @@ class TestHTTPFailure(unittest.TestCase):
 
     def test_recon_handles_http_failure(self) -> None:
         """Recon should return recon_failed when fetch fails."""
-        with patch("autonomous_crawler.tools.html_recon.httpx.Client") as mock_client_cls:
+        with patch("autonomous_crawler.tools.fetch_policy.httpx.Client") as mock_client_cls:
             mock_client = MagicMock()
             mock_client.__enter__ = MagicMock(return_value=mock_client)
             mock_client.__exit__ = MagicMock(return_value=False)
@@ -398,7 +398,7 @@ class TestGraphErrorPropagation(unittest.TestCase):
 
     def test_graph_fails_on_unreachable_host(self) -> None:
         """Graph should complete (not hang) when host is unreachable."""
-        with patch("autonomous_crawler.tools.html_recon.httpx.Client") as mock_recon_client:
+        with patch("autonomous_crawler.tools.fetch_policy.httpx.Client") as mock_recon_client:
             mock_client = MagicMock()
             mock_client.__enter__ = MagicMock(return_value=mock_client)
             mock_client.__exit__ = MagicMock(return_value=False)

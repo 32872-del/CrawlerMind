@@ -53,8 +53,12 @@ class AccessDiagnosticsTests(unittest.TestCase):
         })
 
         diagnostics = state["recon_report"]["access_diagnostics"]
-        self.assertIn("js_rendering_likely_required", diagnostics["findings"])
-        self.assertEqual(state["recon_report"]["rendering"], "spa")
+        self.assertTrue(diagnostics["ok"])
+        self.assertEqual(state["recon_report"]["fetch"]["selected_mode"], "browser")
+        self.assertEqual(
+            state["recon_report"]["fetch_trace"]["attempts"][0]["mode"],
+            "requests",
+        )
 
     def test_strategy_routes_js_shell_to_browser_before_api_intercept(self) -> None:
         state = strategy_node({
