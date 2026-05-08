@@ -130,12 +130,16 @@ search workflow.
   base_url/model), background workflow passes advisor to graph compiler, and
   `llm_enabled`/`llm_decisions`/`llm_errors` are stored in persisted state.
   11 new tests (38 API tests, 186 suite tests).
+- LLM provider diagnostics added: `python run_simple.py --check-llm` validates
+  `clm_config.json`, prints the resolved endpoint without exposing the API key,
+  and sends a minimal JSON chat request through the same OpenAI-compatible
+  adapter path used by Planner/Strategy.
 
 ## Current Test Status
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 186 tests (skipped=3)
+Ran 192 tests (skipped=3)
 OK
 ```
 
@@ -148,6 +152,8 @@ OK
   cards and Baidu-style ranking lists.
 - `site_spec_draft` detail selectors are drafts when only a list page is known.
 - API interception is not fully integrated into the graph.
+- Dynamic/JS-heavy and Cloudflare-protected site coverage is not yet proven
+  beyond local SPA browser fallback smoke tests.
 - FastAPI background jobs use in-memory registry; jobs are lost on process
   restart. TTL cleanup limits stale completed/failed entries, but does not add
   durability.
@@ -163,7 +169,7 @@ OK
 Move from the local MVP toward a more robust crawl service:
 
 ```text
-durable jobs + LLM-assisted planning + broader site samples
+provider diagnostics + broader site samples + dynamic-page capability tests
 ```
 
 The last verified real LLM-assisted workflow is:
@@ -195,3 +201,5 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
 11. ~~Implement LLM Advisor Phase A interfaces with fake-advisor tests.~~
     Done 2026-05-07.
 12. ~~Add FastAPI opt-in LLM advisor support.~~ Done 2026-05-08.
+13. ~~Add simple LLM provider diagnostics.~~ Done 2026-05-08 with
+    `python run_simple.py --check-llm`.

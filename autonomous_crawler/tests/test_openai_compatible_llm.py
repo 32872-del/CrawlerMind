@@ -199,6 +199,30 @@ class OpenAICompatibleAdvisorTests(unittest.TestCase):
         self.assertEqual(result["mode"], "browser")
         self.assertEqual(result["selectors"]["title"], ".title")
 
+    def test_check_connection_uses_chat_json_path(self) -> None:
+        requests: list[httpx.Request] = []
+        advisor = self._advisor_with_response(
+            json.dumps({"ok": True, "reasoning_summary": "connection ok"}),
+            request_log=requests,
+        )
+
+        result = advisor.check_connection()
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(len(requests), 1)
+        body = json.loads(requests[0].content.decode("utf-8"))
+        self.assertIn("crawler-mind-llm-connection", body["messages"][1]["content"])
+
+    def test_endpoint_property_returns_resolved_endpoint(self) -> None:
+        advisor = OpenAICompatibleAdvisor(
+            OpenAICompatibleConfig(
+                base_url="https://llm.example",
+                model="test-model",
+            )
+        )
+
+        self.assertEqual(advisor.endpoint, "https://llm.example/v1/chat/completions")
+
     def test_protocol_compliance(self) -> None:
         advisor = self._advisor_with_response("{}")
 

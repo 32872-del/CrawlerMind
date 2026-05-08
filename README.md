@@ -23,6 +23,12 @@ notepad clm_config.json
 python run_simple.py "collect product titles and prices" https://example.com
 ```
 
+测试 LLM API 配置：
+
+```powershell
+python run_simple.py --check-llm
+```
+
 如果还没有 API，可以先跑本地 mock：
 
 ```powershell
@@ -63,7 +69,6 @@ python run_simple.py "collect product titles and prices" mock://catalog
 
 还没做到：
 
-- FastAPI 里一键启用 LLM
 - 对任意网站都稳定成功
 - 自动处理所有复杂分页/API 拦截
 
@@ -76,7 +81,8 @@ Current capabilities:
 - Playwright browser fallback for rendered SPA/anti-bot pages.
 - Structured extraction and validation.
 - SQLite result persistence.
-- FastAPI background-job service MVP with in-memory job registry.
+- FastAPI background-job service MVP with in-memory job registry and opt-in LLM
+  request config.
 - Bundled `fnspider` engine for project-local portability.
 - Verified Baidu realtime hot-search smoke test.
 - Opt-in real browser SPA smoke test using a local JS fixture.
@@ -134,6 +140,12 @@ python run_skeleton.py --llm "collect product titles and prices" https://example
 Compatible providers usually only require changing `CLM_LLM_BASE_URL`,
 `CLM_LLM_MODEL`, and `CLM_LLM_API_KEY`. Local OpenAI-compatible servers can omit
 `CLM_LLM_API_KEY`.
+
+Check `clm_config.json` before running a crawl:
+
+```text
+python run_simple.py --check-llm
+```
 
 Start API service:
 

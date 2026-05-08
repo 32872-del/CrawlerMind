@@ -69,9 +69,11 @@ What is still missing for a true autonomous agent:
 
 ### Short term
 
-- Add `run_simple.py --check-llm` or similar provider diagnostics.
+- Add `run_simple.py --check-llm` or similar provider diagnostics. Done
+  2026-05-08.
 - Add a few more real-site smoke targets.
 - Tighten FastAPI LLM config UX and error messages.
+- Add structured error codes for crawler and LLM failures.
 
 ### Mid term
 

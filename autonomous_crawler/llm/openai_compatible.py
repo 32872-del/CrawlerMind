@@ -111,8 +111,33 @@ class OpenAICompatibleAdvisor:
         ]
         return self._chat_json(messages)
 
+    def check_connection(self) -> dict[str, Any]:
+        """Run a minimal provider check using the same JSON path as advisors."""
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    "Return only one JSON object with keys ok and "
+                    "reasoning_summary. Do not include markdown."
+                ),
+            },
+            {
+                "role": "user",
+                "content": json.dumps(
+                    {"check": "crawler-mind-llm-connection"},
+                    ensure_ascii=False,
+                ),
+            },
+        ]
+        return self._chat_json(messages)
+
+    @property
+    def endpoint(self) -> str:
+        """Resolved chat-completions endpoint used by this advisor."""
+        return build_chat_completions_endpoint(self.config.base_url)
+
     def _chat_json(self, messages: list[dict[str, str]]) -> dict[str, Any]:
-        endpoint = build_chat_completions_endpoint(self.config.base_url)
+        endpoint = self.endpoint
         headers = {"Content-Type": "application/json"}
         if self.config.api_key:
             headers["Authorization"] = f"Bearer {self.config.api_key}"

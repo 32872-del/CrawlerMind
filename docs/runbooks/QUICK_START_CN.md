@@ -27,6 +27,12 @@ python run_simple.py "collect product titles and prices" https://example.com
 
 `base_url` 可以填根地址或 `/v1` 地址，CLM 会自动拼到 `/v1/chat/completions`。如果供应商报 `response_format` 不支持，把 `use_response_format` 改成 `false`。
 
+先检查 LLM API 配置：
+
+```powershell
+python run_simple.py --check-llm
+```
+
 ## 没有 API 先试跑
 
 ```powershell
@@ -34,6 +40,12 @@ python run_simple.py "collect product titles and prices" mock://catalog
 ```
 
 看到 `Final Status: completed` 就说明基础流程能跑。
+
+## 真实页面 smoke
+
+```powershell
+python run_simple.py "collect top 30 hot searches" "https://top.baidu.com/board?tab=realtime"
+```
 
 ## 常用命令
 
@@ -87,3 +99,9 @@ playwright install
 先用 `mock://catalog` 确认基础流程没问题，再换真实网站。
 
 当前阶段 LLM 只是辅助 Planner/Strategy，系统仍保留 deterministic fallback。
+
+如果怀疑 API 地址、模型名或 key 配错，先运行：
+
+```powershell
+python run_simple.py --check-llm
+```

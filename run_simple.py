@@ -3,15 +3,21 @@
 
 Usage:
     python run_simple.py "collect product titles and prices" https://example.com
+    python run_simple.py --check-llm
 """
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
 from typing import Any
 
-from autonomous_crawler.llm import OpenAICompatibleAdvisor, OpenAICompatibleConfig
+from autonomous_crawler.llm import (
+    LLMResponseError,
+    OpenAICompatibleAdvisor,
+    OpenAICompatibleConfig,
+)
 from run_skeleton import run_crawl
 
 
@@ -66,7 +72,77 @@ def run_simple(user_goal: str, target_url: str) -> dict[str, Any]:
     return run_crawl(user_goal, target_url, use_llm=True, advisor=advisor)
 
 
+def check_llm_config(path: Path = CONFIG_PATH) -> int:
+    """Validate config and run a minimal LLM provider check."""
+    print("=" * 70)
+    print("Crawler-Mind LLM Config Check")
+    print("=" * 70)
+    print(f"Config: {path}")
+
+    try:
+        config = load_simple_config(path)
+        advisor = build_simple_advisor(config)
+    except (OSError, json.JSONDecodeError, SystemExit, ValueError) as exc:
+        print("Status: failed")
+        print(f"Reason: {exc}")
+        return 1
+
+    if advisor is None:
+        print("Status: disabled")
+        print("Reason: llm.enabled is false or clm_config.json is missing")
+        return 1
+
+    print("Status: configured")
+    print(f"Provider: {advisor.config.provider}")
+    print(f"Model: {advisor.config.model}")
+    print(f"Endpoint: {advisor.endpoint}")
+    print(f"API key set: {'yes' if bool(advisor.config.api_key) else 'no'}")
+    print(f"Response format: {'on' if advisor.config.use_response_format else 'off'}")
+    print("-" * 70)
+
+    try:
+        result = advisor.check_connection()
+    except LLMResponseError as exc:
+        print("Connection: failed")
+        print(f"Reason: {exc}")
+        return 2
+    except Exception as exc:
+        print("Connection: failed")
+        print(f"Reason: {type(exc).__name__}: {exc}")
+        return 2
+
+    print("Connection: ok")
+    if "reasoning_summary" in result:
+        print(f"Summary: {result['reasoning_summary']}")
+    else:
+        print(f"Response keys: {', '.join(sorted(str(k) for k in result.keys()))}")
+    return 0
+
+
+def _parse_args(argv: list[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run Crawler-Mind simply.")
+    parser.add_argument(
+        "--check-llm",
+        action="store_true",
+        help="validate clm_config.json and test the configured LLM provider",
+    )
+    parser.add_argument(
+        "goal",
+        nargs="?",
+        default="collect product titles",
+        help="natural language crawl goal",
+    )
+    parser.add_argument(
+        "url",
+        nargs="?",
+        default="mock://catalog",
+        help="target URL or mock fixture URL",
+    )
+    return parser.parse_args(argv)
+
+
 if __name__ == "__main__":
-    goal = sys.argv[1] if len(sys.argv) > 1 else "collect product titles"
-    url = sys.argv[2] if len(sys.argv) > 2 else "mock://catalog"
-    run_simple(goal, url)
+    args = _parse_args(sys.argv[1:])
+    if args.check_llm:
+        raise SystemExit(check_llm_config())
+    run_simple(args.goal, args.url)
