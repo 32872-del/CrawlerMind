@@ -1,6 +1,7 @@
-"""API candidate discovery and safe JSON extraction helpers."""
+"""API candidate discovery and safe JSON/GraphQL extraction helpers."""
 from __future__ import annotations
 
+import json
 from typing import Any
 from urllib.parse import urljoin
 
@@ -37,6 +38,33 @@ def build_api_candidates(api_hints: list[str], base_url: str = "") -> list[dict[
     return sorted(candidates, key=lambda item: item["score"], reverse=True)
 
 
+def build_direct_json_candidate(url: str) -> dict[str, Any]:
+    """Return a Strategy-ready candidate for a URL that is already JSON."""
+    return {
+        "url": url,
+        "method": "GET",
+        "score": 60,
+        "reason": "target_url_is_json",
+    }
+
+
+def build_graphql_candidate(
+    url: str,
+    query: str,
+    variables: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Return a Strategy-ready candidate for an explicit GraphQL query."""
+    return {
+        "url": url,
+        "method": "POST",
+        "kind": "graphql",
+        "query": query,
+        "variables": variables or {},
+        "score": 70,
+        "reason": "explicit_graphql_query",
+    }
+
+
 def fetch_json_api(url: str, headers: dict[str, str] | None = None) -> dict[str, Any]:
     """Fetch a JSON API response, with deterministic mock support."""
     if url in {"mock://api/products", "mock://site-zoo/api-products"}:
@@ -57,12 +85,64 @@ def fetch_json_api(url: str, headers: dict[str, str] | None = None) -> dict[str,
         }
 
 
+def fetch_graphql_api(
+    url: str,
+    query: str,
+    variables: dict[str, Any] | None = None,
+    headers: dict[str, str] | None = None,
+) -> dict[str, Any]:
+    """POST a GraphQL query and return the decoded JSON response."""
+    if url == "mock://api/graphql-countries":
+        return {
+            "ok": True,
+            "url": url,
+            "data": {
+                "data": {
+                    "countries": [
+                        {"code": "CN", "name": "China", "capital": "Beijing"},
+                        {"code": "US", "name": "United States", "capital": "Washington D.C."},
+                    ]
+                }
+            },
+            "status_code": 200,
+        }
+
+    merged_headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        **(headers or {}),
+    }
+    payload = {"query": query, "variables": variables or {}}
+    with httpx.Client(
+        follow_redirects=True,
+        timeout=httpx.Timeout(20.0, connect=10.0),
+        headers=merged_headers,
+    ) as client:
+        response = client.post(url, content=json.dumps(payload))
+        response.raise_for_status()
+        return {
+            "ok": True,
+            "url": str(response.url),
+            "data": response.json(),
+            "status_code": response.status_code,
+        }
+
+
 def extract_records_from_json(data: Any) -> list[dict[str, Any]]:
     """Extract list-like records from common JSON response shapes."""
     if isinstance(data, list):
         return [item for item in data if isinstance(item, dict)]
     if not isinstance(data, dict):
         return []
+    if isinstance(data.get("children"), list):
+        records: list[dict[str, Any]] = []
+        for child in data["children"]:
+            if isinstance(child, dict) and isinstance(child.get("data"), dict):
+                records.append(child["data"])
+            elif isinstance(child, dict):
+                records.append(child)
+        if records:
+            return records
     for key in ("items", "products", "data", "results", "records"):
         value = data.get(key)
         if isinstance(value, list):
@@ -86,9 +166,11 @@ def normalize_api_records(records: list[dict[str, Any]], max_items: int = 0) -> 
         if "title" not in item:
             item["title"] = record.get("name") or record.get("label") or record.get("headline")
         if "link" not in item:
-            item["link"] = record.get("url") or record.get("href")
+            item["link"] = record.get("url") or record.get("href") or record.get("permalink")
         if "image" not in item:
             item["image"] = record.get("image") or record.get("image_src") or record.get("thumbnail")
+        if "hot_score" not in item:
+            item["hot_score"] = record.get("score") or record.get("ups") or record.get("heat")
         item.setdefault("index", index)
         if item.get("title"):
             normalized.append(item)

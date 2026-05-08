@@ -7,6 +7,8 @@ from autonomous_crawler.agents.recon import recon_node
 from autonomous_crawler.agents.strategy import strategy_node
 from autonomous_crawler.workflows.crawl_graph import compile_crawl_graph
 from autonomous_crawler.tools.api_candidates import (
+    build_direct_json_candidate,
+    fetch_graphql_api,
     build_api_candidates,
     extract_records_from_json,
     normalize_api_records,
@@ -29,6 +31,40 @@ class ApiInterceptTests(unittest.TestCase):
 
         self.assertEqual(items[0]["title"], "Alpha")
         self.assertEqual(items[0]["link"], "/p/a")
+
+    def test_extract_records_from_reddit_children_shape(self) -> None:
+        records = extract_records_from_json({
+            "data": {
+                "children": [
+                    {"kind": "t3", "data": {"title": "Alpha", "score": 12}},
+                    {"kind": "t3", "data": {"title": "Beta", "score": 8}},
+                ]
+            }
+        })
+
+        self.assertEqual(records[0]["title"], "Alpha")
+        self.assertEqual(records[0]["score"], 12)
+
+    def test_direct_json_candidate_marks_target_url_as_api(self) -> None:
+        candidate = build_direct_json_candidate("https://example.test/items.json")
+
+        self.assertEqual(candidate["url"], "https://example.test/items.json")
+        self.assertEqual(candidate["reason"], "target_url_is_json")
+
+    def test_recon_marks_json_payload_as_direct_api(self) -> None:
+        state = recon_node({
+            "target_url": "mock://json-direct",
+            "recon_report": {
+                "target_fields": ["title"],
+                "task_type": "product_list",
+            },
+            "messages": [],
+            "error_log": [],
+        })
+
+        recon = state["recon_report"]
+        self.assertEqual(recon["rendering"], "api")
+        self.assertEqual(recon["api_candidates"][0]["reason"], "target_url_is_json")
 
     def test_recon_adds_api_candidates(self) -> None:
         state = recon_node({
@@ -82,6 +118,35 @@ class ApiInterceptTests(unittest.TestCase):
         self.assertEqual(state["extracted_data"]["item_count"], 2)
         self.assertEqual(state["extracted_data"]["items"][0]["title"], "API Alpha")
 
+    def test_executor_graphql_intercept_extracts_mock_json(self) -> None:
+        state = executor_node({
+            "target_url": "mock://api/graphql-countries",
+            "crawl_strategy": {
+                "mode": "api_intercept",
+                "extraction_method": "graphql_json",
+                "api_endpoint": "mock://api/graphql-countries",
+                "graphql_query": "{ countries { code name capital } }",
+                "graphql_variables": {},
+                "headers": {},
+                "max_items": 2,
+            },
+            "messages": [],
+            "error_log": [],
+        })
+
+        self.assertEqual(state["status"], "executed")
+        self.assertEqual(state["extracted_data"]["item_count"], 2)
+        self.assertEqual(state["extracted_data"]["items"][0]["title"], "China")
+
+    def test_fetch_graphql_api_supports_mock_countries(self) -> None:
+        result = fetch_graphql_api(
+            "mock://api/graphql-countries",
+            "{ countries { code name capital } }",
+        )
+
+        records = extract_records_from_json(result["data"])
+        self.assertEqual(records[0]["code"], "CN")
+
     def test_graph_completes_api_intercept_fixture(self) -> None:
         app = compile_crawl_graph()
         final_state = app.invoke({
@@ -104,6 +169,61 @@ class ApiInterceptTests(unittest.TestCase):
         self.assertEqual(final_state["status"], "completed")
         self.assertEqual(final_state["crawl_strategy"]["mode"], "api_intercept")
         self.assertEqual(final_state["extracted_data"]["item_count"], 2)
+
+    def test_graph_completes_direct_json_fixture(self) -> None:
+        app = compile_crawl_graph()
+        final_state = app.invoke({
+            "user_goal": "collect product titles",
+            "target_url": "mock://json-direct",
+            "recon_report": {},
+            "crawl_strategy": {},
+            "visited_urls": [],
+            "raw_html": {},
+            "api_responses": [],
+            "extracted_data": {},
+            "validation_result": {},
+            "retries": 0,
+            "max_retries": 1,
+            "status": "pending",
+            "error_log": [],
+            "messages": [],
+        })
+
+        self.assertEqual(final_state["status"], "completed")
+        self.assertEqual(final_state["crawl_strategy"]["mode"], "api_intercept")
+        self.assertEqual(final_state["extracted_data"]["item_count"], 2)
+
+    def test_graph_completes_explicit_graphql_fixture(self) -> None:
+        app = compile_crawl_graph()
+        final_state = app.invoke({
+            "user_goal": "collect country names and capitals",
+            "target_url": "mock://api/graphql-countries",
+            "recon_report": {
+                "target_fields": ["title", "capital"],
+                "task_type": "product_list",
+                "constraints": {
+                    "graphql_query": "{ countries { code name capital } }",
+                    "max_items": 2,
+                },
+            },
+            "crawl_strategy": {},
+            "visited_urls": [],
+            "raw_html": {},
+            "api_responses": [],
+            "extracted_data": {},
+            "validation_result": {},
+            "retries": 0,
+            "max_retries": 1,
+            "status": "pending",
+            "error_log": [],
+            "messages": [],
+        })
+
+        self.assertEqual(final_state["status"], "completed")
+        self.assertEqual(final_state["recon_report"]["fetch"]["selected_mode"], "configured_api")
+        self.assertIn("capital", final_state["recon_report"]["target_fields"])
+        self.assertEqual(final_state["crawl_strategy"]["extraction_method"], "graphql_json")
+        self.assertEqual(final_state["extracted_data"]["items"][0]["capital"], "Beijing")
 
 
 if __name__ == "__main__":

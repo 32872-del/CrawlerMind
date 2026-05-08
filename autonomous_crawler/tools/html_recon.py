@@ -15,7 +15,7 @@ import httpx
 from bs4 import BeautifulSoup, Tag
 
 from .access_diagnostics import diagnose_access, detect_challenge
-from .api_candidates import build_api_candidates
+from .api_candidates import build_api_candidates, build_direct_json_candidate
 from .fetch_policy import BestFetchResult, FetchAttempt, fetch_best_page
 from .site_zoo import fixture_by_url
 
@@ -181,6 +181,10 @@ def fetch_html(url: str, headers: dict[str, str] | None = None) -> FetchResult:
         return FetchResult(url=url, html=MOCK_CHALLENGE_HTML, status_code=403)
     if url == "mock://structured":
         return FetchResult(url=url, html=MOCK_STRUCTURED_HTML, status_code=200)
+    if url == "mock://json-direct":
+        return FetchResult(url=url, html='[{"title":"JSON Alpha"},{"title":"JSON Beta"}]', status_code=200)
+    if url == "mock://api/graphql-countries":
+        return FetchResult(url=url, html='{"data":{"countries":[]}}', status_code=200)
     site_zoo_fixture = fixture_by_url(url)
     if site_zoo_fixture:
         status_code = 403 if site_zoo_fixture.category == "challenge" else 200
@@ -238,6 +242,8 @@ def _mock_best_fetch(url: str) -> BestFetchResult | None:
         "mock://catalog": MOCK_PRODUCT_HTML,
         "mock://ranking": MOCK_RANKING_HTML,
         "mock://structured": MOCK_STRUCTURED_HTML,
+        "mock://json-direct": '[{"title":"JSON Alpha"},{"title":"JSON Beta"}]',
+        "mock://api/graphql-countries": '{"data":{"countries":[]}}',
     }
     if url in fixture_map:
         attempt = FetchAttempt(mode="mock", url=url, html=fixture_map[url], status_code=200)
@@ -291,6 +297,27 @@ def _mock_best_fetch(url: str) -> BestFetchResult | None:
 
 
 def build_recon_report(url: str, html: str) -> dict[str, Any]:
+    if _looks_like_json_payload(html):
+        access_diagnostics = diagnose_access(html, url=url)
+        return {
+            "target_url": url,
+            "frontend_framework": "api",
+            "rendering": "api",
+            "anti_bot": detect_anti_bot(html),
+            "api_endpoints": [url],
+            "api_candidates": [build_direct_json_candidate(url)],
+            "dom_structure": {
+                "is_product_list": False,
+                "has_pagination": False,
+                "pagination_type": "none",
+                "product_selector": "",
+                "item_count": 0,
+                "field_selectors": {},
+                "candidates": [],
+            },
+            "access_diagnostics": access_diagnostics,
+        }
+
     soup = BeautifulSoup(html or "", "lxml")
     dom_structure = infer_dom_structure(soup, base_url=url)
     access_diagnostics = diagnose_access(
@@ -311,6 +338,11 @@ def build_recon_report(url: str, html: str) -> dict[str, Any]:
         "dom_structure": dom_structure,
         "access_diagnostics": access_diagnostics,
     }
+
+
+def _looks_like_json_payload(text: str) -> bool:
+    stripped = (text or "").lstrip()
+    return stripped.startswith("{") or stripped.startswith("[")
 
 
 def detect_framework(html: str) -> str:

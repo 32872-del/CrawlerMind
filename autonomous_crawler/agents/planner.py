@@ -39,13 +39,19 @@ def planner_node(state: dict[str, Any]) -> dict[str, Any]:
     """
     user_goal = state.get("user_goal", "")
     goal_lower = user_goal.lower()
+    existing_report = state.get("recon_report", {}) or {}
 
-    fields = _extract_fields(goal_lower)
+    configured_fields = list(existing_report.get("target_fields") or [])
+    fields = _merge_fields(configured_fields, _extract_fields(goal_lower))
     task_type = _detect_task_type(goal_lower)
     max_items = _extract_max_items(user_goal)
 
     if not fields:
         fields = ["rank", "title", "hot_score"] if task_type == "ranking_list" else ["title", "price"]
+
+    constraints = dict(existing_report.get("constraints") or {})
+    if max_items:
+        constraints["max_items"] = max_items
 
     task_id = state.get("task_id") or str(uuid.uuid4())[:8]
 
@@ -54,9 +60,10 @@ def planner_node(state: dict[str, Any]) -> dict[str, Any]:
         "status": "planned",
         "messages": state.get("messages", []) + [f"[Planner] Goal: {user_goal}"],
         "recon_report": {
+            **existing_report,
             "target_fields": fields,
-            "task_type": task_type,
-            "constraints": {"max_items": max_items} if max_items else {},
+            "task_type": existing_report.get("task_type", task_type),
+            "constraints": constraints,
         },
         "error_log": [],
     }
@@ -70,6 +77,15 @@ def _extract_fields(goal_lower: str) -> list[str]:
     if "rank" in fields and "title" not in fields:
         fields.append("title")
     return fields
+
+
+def _merge_fields(configured_fields: list[str], inferred_fields: list[str]) -> list[str]:
+    """Keep caller-configured fields and add deterministic inference."""
+    merged: list[str] = []
+    for field in configured_fields + inferred_fields:
+        if field and field not in merged:
+            merged.append(field)
+    return merged
 
 
 def _detect_task_type(goal_lower: str) -> str:

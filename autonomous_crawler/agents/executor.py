@@ -22,7 +22,12 @@ from ..errors import (
 from ..tools.browser_fetch import fetch_rendered_html
 from ..tools.fnspider_adapter import load_goods_rows, run_fnspider_site_spec
 from ..tools.html_recon import MOCK_RANKING_HTML
-from ..tools.api_candidates import fetch_json_api, normalize_api_records, extract_records_from_json
+from ..tools.api_candidates import (
+    fetch_graphql_api,
+    fetch_json_api,
+    normalize_api_records,
+    extract_records_from_json,
+)
 
 
 DEFAULT_HEADERS = {
@@ -88,6 +93,32 @@ def executor_node(state: dict[str, Any]) -> dict[str, Any]:
             "api_responses": [],
             "messages": state.get("messages", []) + [
                 f"[Executor] Mode={mode}, loaded mock ranking fixture"
+            ],
+        }
+
+    if target_url == "mock://json-direct" and mode == "api_intercept":
+        items = [
+            {"title": "JSON Alpha", "index": 0},
+            {"title": "JSON Beta", "index": 1},
+        ]
+        return {
+            "status": "executed",
+            "visited_urls": [target_url],
+            "raw_html": {},
+            "api_responses": [{
+                "ok": True,
+                "url": target_url,
+                "data": [{"title": "JSON Alpha"}, {"title": "JSON Beta"}],
+                "status_code": 200,
+            }],
+            "extracted_data": {
+                "items": items,
+                "fields_found": ["index", "title"],
+                "confidence": 1.0,
+                "item_count": len(items),
+            },
+            "messages": state.get("messages", []) + [
+                f"[Executor] Mode=api_intercept, loaded direct JSON fixture, rows={len(items)}"
             ],
         }
 
@@ -178,7 +209,15 @@ def executor_node(state: dict[str, Any]) -> dict[str, Any]:
         api_endpoint = strategy.get("api_endpoint") or target_url
         headers = {**DEFAULT_HEADERS, **strategy.get("headers", {})}
         try:
-            result = fetch_json_api(api_endpoint, headers=headers)
+            if strategy.get("extraction_method") == "graphql_json":
+                result = fetch_graphql_api(
+                    api_endpoint,
+                    query=str(strategy.get("graphql_query", "")),
+                    variables=strategy.get("graphql_variables") or {},
+                    headers=headers,
+                )
+            else:
+                result = fetch_json_api(api_endpoint, headers=headers)
             records = extract_records_from_json(result.get("data"))
             items = normalize_api_records(records, max_items=int(strategy.get("max_items", 0) or 0))
         except Exception as exc:

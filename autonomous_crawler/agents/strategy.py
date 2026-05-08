@@ -63,8 +63,25 @@ def strategy_node(state: dict[str, Any]) -> dict[str, Any]:
         "image": ".product-image img@src",
         "link": ".product-item a@href",
     }
+    explicit_graphql_query = constraints.get("graphql_query")
+    explicit_graphql_variables = constraints.get("graphql_variables") or {}
+    explicit_api_endpoint = constraints.get("api_endpoint")
 
-    if (
+    if explicit_graphql_query:
+        strategy = {
+            "mode": "api_intercept",
+            "extraction_method": "graphql_json",
+            "api_endpoint": explicit_api_endpoint or target_url,
+            "api_method": "POST",
+            "graphql_query": explicit_graphql_query,
+            "graphql_variables": explicit_graphql_variables,
+            "selectors": {},
+            "pagination": {"type": "none"},
+            "headers": {"Accept": "application/json"},
+            "max_items": constraints.get("max_items", 0),
+            "rationale": "Explicit GraphQL query supplied, using GraphQL API access",
+        }
+    elif (
         preferred_engine == "fnspider"
         and task_type == "product_list"
         and _can_use_fnspider(target_url)
@@ -111,19 +128,22 @@ def strategy_node(state: dict[str, Any]) -> dict[str, Any]:
             strategy["access_warning"] = "challenge_detected"
     elif api_candidates or api_endpoints:
         # Priority 1: API Direct Access
-        api_endpoint = (
-            api_candidates[0].get("url")
-            if api_candidates and isinstance(api_candidates[0], dict)
-            else api_endpoints[0] if api_endpoints else ""
-        )
+        best_candidate = api_candidates[0] if api_candidates and isinstance(api_candidates[0], dict) else {}
+        api_endpoint = best_candidate.get("url") or (api_endpoints[0] if api_endpoints else "")
+        api_method = best_candidate.get("method", "GET")
+        is_graphql = best_candidate.get("kind") == "graphql" or api_method == "POST"
         strategy = {
             "mode": "api_intercept",
-            "extraction_method": "api_json",
+            "extraction_method": "graphql_json" if is_graphql else "api_json",
             "api_endpoint": api_endpoint,
+            "api_method": api_method,
             "api_candidates": api_candidates,
+            "graphql_query": best_candidate.get("query", ""),
+            "graphql_variables": best_candidate.get("variables", {}),
             "selectors": {},
             "pagination": {"type": "api_offset", "param": "offset"},
             "headers": {"Accept": "application/json"},
+            "max_items": constraints.get("max_items", 0),
             "rationale": "API endpoint discovered, using direct API access",
         }
     elif rendering == "static" and not anti_bot.get("detected"):
@@ -199,7 +219,8 @@ _STRATEGY_ALLOWED_ENGINES = frozenset({"", "fnspider"})
 _STRATEGY_ALLOWED_WAIT_UNTIL = frozenset({"domcontentloaded", "load", "networkidle"})
 _STRATEGY_ALLOWED_FIELDS = frozenset({
     "mode", "engine", "selectors", "wait_selector", "wait_until",
-    "max_items", "reasoning_summary",
+    "max_items", "reasoning_summary", "api_endpoint", "api_method",
+    "graphql_query", "graphql_variables",
 })
 _STRATEGY_ALLOWED_SELECTOR_KEYS = frozenset({
     "item_container", "title", "price", "image", "link", "rank",
@@ -262,6 +283,41 @@ def _validate_strategy_advisor_output(
 
         elif key == "max_items":
             if not isinstance(value, int) or value <= 0:
+                rejected.append(key)
+                continue
+            safe[key] = value
+            accepted.append(key)
+
+        elif key == "api_method":
+            method = str(value).strip().upper()
+            if method not in {"GET", "POST"}:
+                rejected.append(key)
+                continue
+            safe[key] = method
+            accepted.append(key)
+
+        elif key == "api_endpoint":
+            if not isinstance(value, str) or not value.strip():
+                rejected.append(key)
+                continue
+            if len(value) > 500 or any(c < "\x20" for c in value):
+                rejected.append(key)
+                continue
+            safe[key] = value.strip()
+            accepted.append(key)
+
+        elif key == "graphql_query":
+            if not isinstance(value, str) or "{" not in value or "}" not in value:
+                rejected.append(key)
+                continue
+            if len(value) > 5000 or any(c < "\x09" for c in value):
+                rejected.append(key)
+                continue
+            safe[key] = value.strip()
+            accepted.append(key)
+
+        elif key == "graphql_variables":
+            if not isinstance(value, dict):
                 rejected.append(key)
                 continue
             safe[key] = value
@@ -363,6 +419,16 @@ def _merge_strategy_advisor_fields(
         elif key == "reasoning_summary":
             merged["advisor_reasoning_summary"] = value
             accepted.append(key)
+
+        elif key in {"api_endpoint", "api_method", "graphql_query", "graphql_variables"}:
+            if not merged.get(key) or merged.get(key) == value:
+                merged[key] = value
+                accepted.append(key)
+                if key == "graphql_query":
+                    merged["extraction_method"] = "graphql_json"
+                    merged["api_method"] = "POST"
+            else:
+                rejected.append(f"{key} (kept deterministic)")
 
     return merged, accepted, rejected
 

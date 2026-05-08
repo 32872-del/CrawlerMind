@@ -115,6 +115,41 @@ Extracted Data: 2 items
 - Provider compatibility needs more real gateway samples.
 - No streaming support or persistent job registry.
 
+## Real-Site Training Round 1
+
+Training source:
+
+```text
+E:\爬虫Agent实战训练网站清单.md
+```
+
+Selected safe/public scenarios:
+
+- JSONPlaceholder posts: direct JSON URL, completed with 10 items.
+- Reddit r/python JSON: `.json` endpoint with `data.children[].data`, completed
+  with 10 items.
+- Countries GraphQL: explicit GraphQL POST query, completed with 10 items.
+
+Added capability:
+
+- Direct JSON target detection.
+- GraphQL POST execution through `fetch_graphql_api()`.
+- Configured API/GraphQL Recon fast path when the caller supplies
+  `constraints.api_endpoint` or `constraints.graphql_query`.
+- Training runner:
+
+```text
+python run_training_round1.py
+```
+
+Verification after this round:
+
+```text
+python -m unittest discover -s autonomous_crawler/tests
+Ran 256 tests
+OK (skipped=3)
+```
+
 ## Next Recommended Tasks
 
 1. Add `run_simple.py --check-llm` for provider config diagnostics.

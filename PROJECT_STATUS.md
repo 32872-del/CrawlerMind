@@ -191,7 +191,9 @@ OK
 - Recon selector inference is heuristic and currently strongest for product
   cards and Baidu-style ranking lists.
 - `site_spec_draft` detail selectors are drafts when only a list page is known.
-- API interception is not fully integrated into the graph.
+- API interception is integrated for direct JSON URLs, API hints, and explicit
+  GraphQL queries. It still needs pagination/cursor handling and richer
+  provider-specific field mapping.
 - Dynamic/JS-heavy and Cloudflare-protected site coverage is not yet proven
   beyond local SPA browser fallback smoke tests.
 - FastAPI background jobs use in-memory registry; jobs are lost on process
@@ -250,4 +252,8 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
     - Fetch mode escalation done 2026-05-08.
     - Site-zoo fixtures, API intercept, SQLite frontier, domain memory, and
       product list/detail/variant helpers done 2026-05-08.
-    - Real-site training next.
+    - Real-site training round 1 done 2026-05-08:
+      JSONPlaceholder direct JSON, Reddit `.json`, and Countries GraphQL all
+      completed with 10 validated items each.
+      `run_training_round1.py` writes
+      `dev_logs/2026-05-08_real_site_training_round1.json`.

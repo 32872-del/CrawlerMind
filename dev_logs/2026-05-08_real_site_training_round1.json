@@ -1,0 +1,154 @@
+{
+  "run_at": "2026-05-08T17:14:07.462069",
+  "source_list": "E:\\爬虫Agent实战训练网站清单.md",
+  "selection_policy": "low-risk public JSON/GraphQL entry targets only",
+  "results": [
+    {
+      "id": "jsonplaceholder_posts",
+      "name": "JSONPlaceholder posts",
+      "url": "https://jsonplaceholder.typicode.com/posts",
+      "risk": "low",
+      "status": "completed",
+      "elapsed_seconds": 3.65,
+      "mode": "api_intercept",
+      "method": "api_json",
+      "expected_mode": "api_intercept",
+      "item_count": 10,
+      "confidence": 1.0,
+      "valid": true,
+      "anomalies": [],
+      "error_code": "",
+      "sample_items": [
+        {
+          "index": 0,
+          "id": 1,
+          "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit"
+        },
+        {
+          "index": 1,
+          "id": 2,
+          "title": "qui est esse"
+        },
+        {
+          "index": 2,
+          "id": 3,
+          "title": "ea molestias quasi exercitationem repellat qui ipsa sit aut"
+        }
+      ],
+      "messages": [
+        "[Planner] Goal: collect post titles",
+        "[Recon] Analyzed https://jsonplaceholder.typicode.com/posts - framework=api, items=0, anti_bot=False, fetch_mode=requests",
+        "[Strategy] Mode=api_intercept, Method=api_json, Rationale=API endpoint discovered, using direct API access",
+        "[Executor] Mode=api_intercept, fetched https://jsonplaceholder.typicode.com/posts, rows=10",
+        "[Extractor] Reused structured executor data, items=10",
+        "[Validator] PASSED - 10 items, completeness=100%"
+      ]
+    },
+    {
+      "id": "reddit_python_json",
+      "name": "Reddit r/python JSON",
+      "url": "https://www.reddit.com/r/python.json",
+      "risk": "low-public-json",
+      "status": "completed",
+      "elapsed_seconds": 7.29,
+      "mode": "api_intercept",
+      "method": "api_json",
+      "expected_mode": "api_intercept",
+      "item_count": 10,
+      "confidence": 1.0,
+      "valid": true,
+      "anomalies": [],
+      "error_code": "",
+      "sample_items": [
+        {
+          "index": 0,
+          "id": "1t3x7ba",
+          "title": "Who's going to PyCon US next week?",
+          "name": "t3_1t3x7ba",
+          "hot_score": 48,
+          "score": 48,
+          "ups": 48,
+          "link": "https://www.reddit.com/r/Python/comments/1t3x7ba/whos_going_to_pycon_us_next_week/",
+          "url": "https://www.reddit.com/r/Python/comments/1t3x7ba/whos_going_to_pycon_us_next_week/"
+        },
+        {
+          "index": 1,
+          "id": "1t6rro9",
+          "title": "Friday Daily Thread: r/Python Meta and Free-Talk Fridays",
+          "name": "t3_1t6rro9",
+          "hot_score": 3,
+          "score": 3,
+          "ups": 3,
+          "link": "https://www.reddit.com/r/Python/comments/1t6rro9/friday_daily_thread_rpython_meta_and_freetalk/",
+          "url": "https://www.reddit.com/r/Python/comments/1t6rro9/friday_daily_thread_rpython_meta_and_freetalk/"
+        },
+        {
+          "index": 2,
+          "id": "1t71t2z",
+          "title": "One of the most influential Python video",
+          "name": "t3_1t71t2z",
+          "hot_score": 6,
+          "score": 6,
+          "ups": 6,
+          "link": "https://www.reddit.com/r/Python/comments/1t71t2z/one_of_the_most_influential_python_video/",
+          "url": "https://www.reddit.com/r/Python/comments/1t71t2z/one_of_the_most_influential_python_video/"
+        }
+      ],
+      "messages": [
+        "[Planner] Goal: collect reddit post titles and scores",
+        "[Recon] Analyzed https://www.reddit.com/r/python.json - framework=api, items=0, anti_bot=False, fetch_mode=requests",
+        "[Strategy] Mode=api_intercept, Method=api_json, Rationale=API endpoint discovered, using direct API access",
+        "[Executor] Mode=api_intercept, fetched https://www.reddit.com/r/python.json, rows=10",
+        "[Extractor] Reused structured executor data, items=10",
+        "[Validator] PASSED - 10 items, completeness=80%"
+      ]
+    },
+    {
+      "id": "countries_graphql",
+      "name": "Countries GraphQL",
+      "url": "https://countries.trevorblades.com",
+      "risk": "low-public-graphql",
+      "status": "completed",
+      "elapsed_seconds": 3.78,
+      "mode": "api_intercept",
+      "method": "graphql_json",
+      "expected_mode": "api_intercept",
+      "item_count": 10,
+      "confidence": 1.0,
+      "valid": true,
+      "anomalies": [],
+      "error_code": "",
+      "sample_items": [
+        {
+          "index": 0,
+          "title": "Andorra",
+          "name": "Andorra",
+          "code": "AD",
+          "capital": "Andorra la Vella"
+        },
+        {
+          "index": 1,
+          "title": "United Arab Emirates",
+          "name": "United Arab Emirates",
+          "code": "AE",
+          "capital": "Abu Dhabi"
+        },
+        {
+          "index": 2,
+          "title": "Afghanistan",
+          "name": "Afghanistan",
+          "code": "AF",
+          "capital": "Kabul"
+        }
+      ],
+      "messages": [
+        "[Planner] Goal: collect country names and capitals",
+        "[Recon] Using configured API target https://countries.trevorblades.com - method=POST, fetch_mode=configured_api",
+        "[Strategy] Mode=api_intercept, Method=graphql_json, Rationale=Explicit GraphQL query supplied, using GraphQL API access",
+        "[Executor] Mode=api_intercept, fetched https://countries.trevorblades.com, rows=10",
+        "[Extractor] Reused structured executor data, items=10",
+        "[Validator] PASSED - 10 items, completeness=95%"
+      ]
+    }
+  ]
+}

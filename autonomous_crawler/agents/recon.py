@@ -20,6 +20,7 @@ from typing import Any
 from .base import preserve_state
 from ..errors import FETCH_HTTP_ERROR, FETCH_UNSUPPORTED_SCHEME, RECON_FAILED, format_error_entry
 from ..tools.html_recon import build_recon_report, fetch_best_html
+from ..tools.api_candidates import build_direct_json_candidate, build_graphql_candidate
 
 
 @preserve_state
@@ -32,6 +33,20 @@ def recon_node(state: dict[str, Any]) -> dict[str, Any]:
     """
     target_url = state.get("target_url", "")
     existing_report = state.get("recon_report", {})
+
+    configured_report = _configured_api_recon_report(target_url, existing_report)
+    if configured_report:
+        return {
+            "status": "recon_done",
+            "recon_report": configured_report,
+            "messages": state.get("messages", []) + [
+                (
+                    f"[Recon] Using configured API target {target_url} - "
+                    f"method={configured_report['api_candidates'][0].get('method', 'GET')}, "
+                    "fetch_mode=configured_api"
+                )
+            ],
+        }
 
     fetch_result = fetch_best_html(target_url)
     if fetch_result.error:
@@ -81,4 +96,72 @@ def recon_node(state: dict[str, Any]) -> dict[str, Any]:
                 f"fetch_mode={fetch_result.mode}"
             )
         ],
+    }
+
+
+def _configured_api_recon_report(
+    target_url: str,
+    existing_report: dict[str, Any],
+) -> dict[str, Any]:
+    """Build recon output for caller-supplied API/GraphQL settings.
+
+    This avoids wasting time rendering an API playground or docs page when the
+    caller already provided the endpoint/query through constraints.
+    """
+    constraints = existing_report.get("constraints") or {}
+    graphql_query = constraints.get("graphql_query")
+    explicit_api_endpoint = constraints.get("api_endpoint")
+
+    if not graphql_query and not explicit_api_endpoint:
+        return {}
+
+    endpoint = str(explicit_api_endpoint or target_url)
+    if graphql_query:
+        candidate = build_graphql_candidate(
+            endpoint,
+            query=str(graphql_query),
+            variables=constraints.get("graphql_variables") or {},
+        )
+        framework = "graphql"
+        finding = "explicit_graphql_query"
+    else:
+        candidate = build_direct_json_candidate(endpoint)
+        framework = "api"
+        finding = "explicit_api_endpoint"
+
+    return {
+        **existing_report,
+        "target_url": target_url,
+        "frontend_framework": framework,
+        "rendering": "api",
+        "anti_bot": {"detected": False, "type": "none", "severity": "low", "indicators": []},
+        "api_endpoints": [endpoint],
+        "api_candidates": [candidate],
+        "dom_structure": {
+            "is_product_list": False,
+            "has_pagination": False,
+            "pagination_type": "none",
+            "product_selector": "",
+            "item_count": 0,
+            "field_selectors": {},
+            "candidates": [],
+        },
+        "access_diagnostics": {
+            "findings": [finding],
+            "signals": {"api_hints": [endpoint], "challenge": ""},
+            "recommendation": "api_direct",
+        },
+        "fetch": {
+            "status_code": None,
+            "html_chars": 0,
+            "selected_mode": "configured_api",
+            "selected_score": 100,
+        },
+        "fetch_trace": {
+            "selected_mode": "configured_api",
+            "selected_url": endpoint,
+            "selected_score": 100,
+            "attempts": [],
+            "error": "",
+        },
     }
