@@ -22,6 +22,7 @@ from ..errors import (
 from ..tools.browser_fetch import fetch_rendered_html
 from ..tools.fnspider_adapter import load_goods_rows, run_fnspider_site_spec
 from ..tools.html_recon import MOCK_RANKING_HTML
+from ..tools.api_candidates import fetch_json_api, normalize_api_records, extract_records_from_json
 
 
 DEFAULT_HEADERS = {
@@ -170,6 +171,44 @@ def executor_node(state: dict[str, Any]) -> dict[str, Any]:
             ],
             "messages": state.get("messages", []) + [
                 f"[Executor] Mode=browser, failed to fetch {target_url}: {browser_result.error}"
+            ],
+        }
+
+    if mode == "api_intercept":
+        api_endpoint = strategy.get("api_endpoint") or target_url
+        headers = {**DEFAULT_HEADERS, **strategy.get("headers", {})}
+        try:
+            result = fetch_json_api(api_endpoint, headers=headers)
+            records = extract_records_from_json(result.get("data"))
+            items = normalize_api_records(records, max_items=int(strategy.get("max_items", 0) or 0))
+        except Exception as exc:
+            return {
+                "status": "failed",
+                "visited_urls": [api_endpoint],
+                "raw_html": {},
+                "api_responses": [],
+                "error_code": FETCH_HTTP_ERROR,
+                "error_log": state.get("error_log", []) + [
+                    format_error_entry(FETCH_HTTP_ERROR, f"API fetch failed: {exc}")
+                ],
+                "messages": state.get("messages", []) + [
+                    f"[Executor] Mode=api_intercept, failed to fetch {api_endpoint}: {exc}"
+                ],
+            }
+        fields_found = sorted({key for item in items for key, value in item.items() if value})
+        return {
+            "status": "executed",
+            "visited_urls": [api_endpoint],
+            "raw_html": {},
+            "api_responses": [result],
+            "extracted_data": {
+                "items": items,
+                "fields_found": fields_found,
+                "confidence": 1.0 if items else 0.0,
+                "item_count": len(items),
+            },
+            "messages": state.get("messages", []) + [
+                f"[Executor] Mode=api_intercept, fetched {api_endpoint}, rows={len(items)}"
             ],
         }
 

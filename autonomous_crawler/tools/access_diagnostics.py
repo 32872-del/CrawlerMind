@@ -31,7 +31,7 @@ CHALLENGE_PATTERNS = [
 ]
 
 API_HINT_RE = re.compile(
-    r"""(?:"|')(?P<url>(?:https?:)?//[^"']+|/[^"']*?(?:api|graphql|ajax|search|product|products|catalog|feed|items)[^"']*?)(?:"|')""",
+    r"""(?:"|')(?P<url>(?:mock://api/[^"']+|https?:\/\/[^"']*(?:/api(?:/|\?|$)|graphql|ajax)[^"']*|/(?:api(?:/|\?|$)[^"']*|[^"']*(?:graphql|ajax)[^"']*)))(?:"|')""",
     re.IGNORECASE,
 )
 

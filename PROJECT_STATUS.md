@@ -162,12 +162,24 @@ search workflow.
   `recon_report.fetch.selected_mode`, `selected_score`, and `fetch_trace`.
   Strategy keeps browser mode when Recon selected browser-rendered HTML. Pure
   transport failures skip browser launch to avoid slow redundant failures.
+- P1 crawl foundation completed for real-site training:
+  - `tools/site_zoo.py` provides static, SPA, structured-data, challenge,
+    API-backed, product-detail, and variant-detail fixtures.
+  - `tools/api_candidates.py` ranks API hints, fetches JSON APIs, extracts
+    common record shapes, and normalizes records.
+  - Executor `api_intercept` now performs real JSON extraction and passes
+    structured data through the graph.
+  - `storage/frontier.py` adds a project-local SQLite URL frontier with
+    dedupe, queued/running/done/failed states, leases, and retry requeue.
+  - `storage/domain_memory.py` adds per-domain preferred mode and challenge
+    memory.
+  - `tools/product_tasks.py` adds generic list/detail/variant helpers.
 
 ## Current Test Status
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 232 tests (skipped=3)
+Ran 249 tests (skipped=3)
 OK
 ```
 
@@ -236,4 +248,6 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
 15. Start P1 crawl capability iteration.
     - Access diagnostics done 2026-05-08.
     - Fetch mode escalation done 2026-05-08.
-    - Site-zoo fixtures next.
+    - Site-zoo fixtures, API intercept, SQLite frontier, domain memory, and
+      product list/detail/variant helpers done 2026-05-08.
+    - Real-site training next.

@@ -15,7 +15,9 @@ import httpx
 from bs4 import BeautifulSoup, Tag
 
 from .access_diagnostics import diagnose_access, detect_challenge
+from .api_candidates import build_api_candidates
 from .fetch_policy import BestFetchResult, FetchAttempt, fetch_best_page
+from .site_zoo import fixture_by_url
 
 
 DEFAULT_RECON_HEADERS = {
@@ -179,6 +181,10 @@ def fetch_html(url: str, headers: dict[str, str] | None = None) -> FetchResult:
         return FetchResult(url=url, html=MOCK_CHALLENGE_HTML, status_code=403)
     if url == "mock://structured":
         return FetchResult(url=url, html=MOCK_STRUCTURED_HTML, status_code=200)
+    site_zoo_fixture = fixture_by_url(url)
+    if site_zoo_fixture:
+        status_code = 403 if site_zoo_fixture.category == "challenge" else 200
+        return FetchResult(url=url, html=site_zoo_fixture.html, status_code=status_code)
 
     parsed = urlparse(url)
     if parsed.scheme not in {"http", "https"}:
@@ -260,6 +266,27 @@ def _mock_best_fetch(url: str) -> BestFetchResult | None:
             score=90,
             attempts=[http_attempt, browser_attempt],
         )
+    site_zoo_fixture = fixture_by_url(url)
+    if site_zoo_fixture:
+        status_code = 403 if site_zoo_fixture.category == "challenge" else 200
+        attempt = FetchAttempt(
+            mode="mock",
+            url=url,
+            html=site_zoo_fixture.html,
+            status_code=status_code,
+        )
+        attempt.score, attempt.reasons = (100, ["site_zoo_fixture"])
+        if site_zoo_fixture.category == "challenge":
+            attempt.score, attempt.reasons = (0, ["site_zoo_challenge"])
+        attempt.diagnostics = diagnose_access(attempt.html, url=url)
+        return BestFetchResult(
+            url=url,
+            html=attempt.html,
+            status_code=status_code,
+            mode="mock",
+            score=attempt.score,
+            attempts=[attempt],
+        )
     return None
 
 
@@ -277,6 +304,10 @@ def build_recon_report(url: str, html: str) -> dict[str, Any]:
         "rendering": detect_rendering(html),
         "anti_bot": detect_anti_bot(html),
         "api_endpoints": discover_api_endpoints(html, base_url=url),
+        "api_candidates": build_api_candidates(
+            access_diagnostics.get("signals", {}).get("api_hints", []),
+            base_url=url,
+        ),
         "dom_structure": dom_structure,
         "access_diagnostics": access_diagnostics,
     }

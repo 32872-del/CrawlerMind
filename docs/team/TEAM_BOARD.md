@@ -73,12 +73,13 @@ Last updated: 2026-05-08
 | v5.2 MVP Release Note | LLM-2026-004 | `docs/team/acceptance/2026-05-08_v5.2_mvp_release_note_ACCEPTED.md` | current MVP abilities, limitations, and startup path summarized |
 | P1 Access Diagnostics | LLM-2026-000 | supervisor direct work | JS shell, challenge, structured data, API hints, and access recommendations added to recon |
 | P1 Fetch Best Page | LLM-2026-000 | supervisor direct work | requests/curl_cffi/browser scoring, escalation trace, and browser-mode carry-forward added to recon |
+| P1 Crawl Foundation | LLM-2026-000 | supervisor direct work | site-zoo, API intercept, SQLite frontier, domain memory, and product task helpers completed |
 
 ## Upcoming Candidate Tasks
 
-1. Real-site and local site-zoo sample suite for strategy and selector reliability.
-2. Browser network observation skeleton for future `api_intercept`.
-3. Durable frontier/job registry design after the in-memory MVP stabilizes.
+1. Real-site training suite: run CLM on selected websites and convert failures into fixtures/tests.
+2. Browser network observation skeleton for richer future API discovery.
+3. Durable job registry design after the in-memory FastAPI MVP stabilizes.
 
 ## Supervisor Notes
 

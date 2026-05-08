@@ -37,6 +37,7 @@ def strategy_node(state: dict[str, Any]) -> dict[str, Any]:
     # --- STUB: Simple strategy selection ---
     # In production, this should be LLM-driven based on recon_report
     api_endpoints = recon_report.get("api_endpoints", [])
+    api_candidates = recon_report.get("api_candidates", [])
     anti_bot = recon_report.get("anti_bot", {})
     rendering = recon_report.get("rendering", "static")
     fetch = recon_report.get("fetch", {})
@@ -108,12 +109,18 @@ def strategy_node(state: dict[str, Any]) -> dict[str, Any]:
         }
         if has_challenge:
             strategy["access_warning"] = "challenge_detected"
-    elif api_endpoints:
+    elif api_candidates or api_endpoints:
         # Priority 1: API Direct Access
+        api_endpoint = (
+            api_candidates[0].get("url")
+            if api_candidates and isinstance(api_candidates[0], dict)
+            else api_endpoints[0] if api_endpoints else ""
+        )
         strategy = {
             "mode": "api_intercept",
             "extraction_method": "api_json",
-            "api_endpoint": api_endpoints[0] if api_endpoints else "",
+            "api_endpoint": api_endpoint,
+            "api_candidates": api_candidates,
             "selectors": {},
             "pagination": {"type": "api_offset", "param": "offset"},
             "headers": {"Accept": "application/json"},

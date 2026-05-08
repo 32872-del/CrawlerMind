@@ -30,6 +30,25 @@ def extractor_node(state: dict[str, Any]) -> dict[str, Any]:
     5. Compute confidence score
     """
     raw_html = state.get("raw_html", {})
+    existing_extracted = state.get("extracted_data") or {}
+    if existing_extracted.get("items") and not raw_html:
+        items = list(existing_extracted.get("items") or [])
+        fields_found = set(existing_extracted.get("fields_found") or [])
+        if not fields_found:
+            fields_found = {key for item in items for key, value in item.items() if value}
+        return {
+            "status": "extracted",
+            "extracted_data": {
+                **existing_extracted,
+                "items": items,
+                "fields_found": sorted(fields_found),
+                "item_count": int(existing_extracted.get("item_count") or len(items)),
+                "confidence": float(existing_extracted.get("confidence") or 1.0),
+            },
+            "messages": state.get("messages", []) + [
+                f"[Extractor] Reused structured executor data, items={len(items)}"
+            ],
+        }
     strategy = state.get("crawl_strategy", {})
     selectors = strategy.get("selectors", {})
     max_items = int(strategy.get("max_items", 0) or 0)
