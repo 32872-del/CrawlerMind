@@ -399,6 +399,7 @@ class TestStrategyAdvisorUnsafe(unittest.TestCase):
         node = make_strategy_node(advisor)
         state = _planned_state()
         state["recon_report"]["task_type"] = "product_list"
+        state["recon_report"]["target_url"] = "https://shop.example/products"
         result = node(state)
 
         strategy = result["crawl_strategy"]
@@ -406,6 +407,20 @@ class TestStrategyAdvisorUnsafe(unittest.TestCase):
 
         decision = result["llm_decisions"][0]
         self.assertIn("engine", decision["accepted_fields"])
+
+    def test_fnspider_rejected_for_mock_url(self) -> None:
+        advisor = _UnsafeStrategyAdvisor()
+        node = make_strategy_node(advisor)
+        state = _planned_state(target_url="mock://catalog")
+        state["recon_report"]["target_url"] = "mock://catalog"
+        state["recon_report"]["task_type"] = "product_list"
+        result = node(state)
+
+        strategy = result["crawl_strategy"]
+        self.assertNotEqual(strategy.get("engine"), "fnspider")
+
+        decision = result["llm_decisions"][0]
+        self.assertIn("engine", decision["rejected_fields"])
 
     def test_invalid_mode_rejected(self) -> None:
         advisor = _FakeStrategyAdvisor({"mode": "invalid_mode"})

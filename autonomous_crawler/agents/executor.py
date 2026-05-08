@@ -62,6 +62,28 @@ def executor_node(state: dict[str, Any]) -> dict[str, Any]:
     mode = strategy.get("mode", "http")
     engine = strategy.get("engine", "")
 
+    if target_url in {"mock://products", "mock://catalog"}:
+        return {
+            "status": "executed",
+            "visited_urls": [target_url],
+            "raw_html": {target_url: MOCK_PRODUCT_HTML},
+            "api_responses": [],
+            "messages": state.get("messages", []) + [
+                f"[Executor] Mode={mode}, loaded mock product fixture"
+            ],
+        }
+
+    if target_url == "mock://ranking":
+        return {
+            "status": "executed",
+            "visited_urls": [target_url],
+            "raw_html": {target_url: MOCK_RANKING_HTML},
+            "api_responses": [],
+            "messages": state.get("messages", []) + [
+                f"[Executor] Mode={mode}, loaded mock ranking fixture"
+            ],
+        }
+
     if engine == "fnspider":
         result = run_fnspider_site_spec(strategy.get("site_spec_draft", {}))
         rows = load_goods_rows(result.db_path) if result.db_path else []
@@ -140,28 +162,6 @@ def executor_node(state: dict[str, Any]) -> dict[str, Any]:
             ],
             "messages": state.get("messages", []) + [
                 f"[Executor] Mode=browser, failed to fetch {target_url}: {browser_result.error}"
-            ],
-        }
-
-    if target_url in {"mock://products", "mock://catalog"}:
-        return {
-            "status": "executed",
-            "visited_urls": [target_url],
-            "raw_html": {target_url: MOCK_PRODUCT_HTML},
-            "api_responses": [],
-            "messages": state.get("messages", []) + [
-                f"[Executor] Mode={mode}, loaded mock product fixture"
-            ],
-        }
-
-    if target_url == "mock://ranking":
-        return {
-            "status": "executed",
-            "visited_urls": [target_url],
-            "raw_html": {target_url: MOCK_RANKING_HTML},
-            "api_responses": [],
-            "messages": state.get("messages", []) + [
-                f"[Executor] Mode={mode}, loaded mock ranking fixture"
             ],
         }
 

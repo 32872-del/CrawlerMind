@@ -31,6 +31,7 @@ def strategy_node(state: dict[str, Any]) -> dict[str, Any]:
     task_type = recon_report.get("task_type", "product_list")
     constraints = recon_report.get("constraints", {})
     preferred_engine = _preferred_engine(state)
+    target_url = recon_report.get("target_url", state.get("target_url", ""))
 
     # --- STUB: Simple strategy selection ---
     # In production, this should be LLM-driven based on recon_report
@@ -51,7 +52,11 @@ def strategy_node(state: dict[str, Any]) -> dict[str, Any]:
         "link": ".product-item a@href",
     }
 
-    if preferred_engine == "fnspider" and task_type == "product_list":
+    if (
+        preferred_engine == "fnspider"
+        and task_type == "product_list"
+        and _can_use_fnspider(target_url)
+    ):
         strategy = {
             "mode": "http",
             "engine": "fnspider",
@@ -153,6 +158,10 @@ def _preferred_engine(state: dict[str, Any]) -> str:
     return ""
 
 
+def _can_use_fnspider(target_url: str) -> bool:
+    return str(target_url).strip().lower().startswith(("http://", "https://"))
+
+
 _STRATEGY_ALLOWED_MODES = frozenset({"http", "browser", "api_intercept"})
 _STRATEGY_ALLOWED_ENGINES = frozenset({"", "fnspider"})
 _STRATEGY_ALLOWED_WAIT_UNTIL = frozenset({"domcontentloaded", "load", "networkidle"})
@@ -176,6 +185,7 @@ _FALLBACK_SELECTORS = {
 def _validate_strategy_advisor_output(
     advisor_output: dict[str, Any],
     task_type: str,
+    target_url: str = "",
 ) -> tuple[dict[str, Any], list[str], list[str]]:
     """Validate and filter strategy advisor output.
 
@@ -203,6 +213,9 @@ def _validate_strategy_advisor_output(
                 rejected.append(key)
                 continue
             if engine == "fnspider" and task_type != "product_list":
+                rejected.append(key)
+                continue
+            if engine == "fnspider" and not _can_use_fnspider(target_url):
                 rejected.append(key)
                 continue
             safe[key] = engine
@@ -378,7 +391,9 @@ def make_strategy_node(
             advisor_output = advisor.choose_strategy(planner_output, recon_report)
             task_type = recon_report.get("task_type", "product_list")
             safe_fields, _validation_accepted, validation_rejected = _validate_strategy_advisor_output(
-                advisor_output, task_type,
+                advisor_output,
+                task_type,
+                recon_report.get("target_url", state.get("target_url", "")),
             )
 
             strategy = result.get("crawl_strategy", {})

@@ -60,6 +60,24 @@ class WorkflowMVPTests(unittest.TestCase):
         self.assertIn("mock://catalog", state["raw_html"])
         self.assertIn("Alpha Jacket", state["raw_html"]["mock://catalog"])
 
+    def test_executor_mock_fixture_takes_precedence_over_fnspider_engine(self) -> None:
+        state = executor_node(
+            {
+                "target_url": "mock://catalog",
+                "crawl_strategy": {
+                    "mode": "http",
+                    "engine": "fnspider",
+                    "site_spec_draft": {"site": "catalog"},
+                },
+                "messages": [],
+                "error_log": [],
+            }
+        )
+
+        self.assertEqual(state["status"], "executed")
+        self.assertNotIn("engine_result", state)
+        self.assertIn("Alpha Jacket", state["raw_html"]["mock://catalog"])
+
     def test_recon_infers_catalog_selectors(self) -> None:
         state = recon_node(
             {
@@ -174,6 +192,38 @@ class WorkflowMVPTests(unittest.TestCase):
             strategy["site_spec_draft"]["list"]["item_container"],
             ".catalog-card",
         )
+
+    def test_strategy_does_not_route_mock_catalog_to_fnspider(self) -> None:
+        state = strategy_node(
+            {
+                "user_goal": "collect products",
+                "target_url": "mock://catalog",
+                "preferred_engine": "fnspider",
+                "recon_report": {
+                    "target_url": "mock://catalog",
+                    "task_type": "product_list",
+                    "rendering": "static",
+                    "anti_bot": {"detected": False},
+                    "api_endpoints": [],
+                    "dom_structure": {
+                        "pagination_type": "none",
+                        "product_selector": ".catalog-card",
+                        "field_selectors": {
+                            "title": ".product-name",
+                            "price": ".product-price",
+                            "image": ".product-photo@src",
+                            "link": ".product-link@href",
+                        },
+                    },
+                },
+                "retries": 0,
+                "messages": [],
+            }
+        )
+
+        strategy = state["crawl_strategy"]
+        self.assertNotEqual(strategy.get("engine"), "fnspider")
+        self.assertEqual(strategy["extraction_method"], "dom_parse")
 
     def test_strategy_does_not_route_ranking_list_to_fnspider(self) -> None:
         state = strategy_node(
