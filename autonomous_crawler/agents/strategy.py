@@ -11,6 +11,7 @@ from __future__ import annotations
 from typing import Any, Callable
 
 from .base import preserve_state
+from ..errors import classify_llm_error, format_error_entry
 from ..tools.site_spec_adapter import build_site_spec
 from ..llm.protocols import StrategyAdvisor
 from ..llm.audit import build_decision_record
@@ -417,7 +418,8 @@ def make_strategy_node(
             ))
 
         except Exception as exc:
-            errors.append(f"strategy advisor: {exc}")
+            llm_error_code = classify_llm_error(exc)
+            errors.append(format_error_entry(llm_error_code, f"strategy advisor: {exc}"))
             decisions.append(build_decision_record(
                 node="strategy",
                 advisor=advisor,

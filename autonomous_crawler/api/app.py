@@ -43,6 +43,7 @@ class CrawlResponse(BaseModel):
     status: str
     item_count: int
     is_valid: bool
+    error_code: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -99,6 +100,7 @@ def _new_job_record(task_id: str, user_goal: str, target_url: str) -> dict[str, 
         "item_count": 0,
         "is_valid": False,
         "error": "",
+        "error_code": None,
         "created_at": now,
         "updated_at": now,
     }
@@ -198,9 +200,12 @@ def _background_crawl(
             status=final_state.get("status", "completed"),
             item_count=int(extracted.get("item_count") or 0),
             is_valid=bool(validation.get("is_valid")),
+            error_code=final_state.get("error_code"),
         )
     except Exception as exc:
-        _update_job(task_id, status="failed", error=str(exc))
+        from ..errors import classify_llm_error
+        _update_job(task_id, status="failed", error=str(exc),
+                    error_code=classify_llm_error(exc))
 
 
 # ---------------------------------------------------------------------------
@@ -224,7 +229,11 @@ def create_app() -> FastAPI:
             try:
                 _build_advisor_from_config(request.llm)
             except LLMConfigurationError as exc:
-                raise HTTPException(status_code=400, detail=str(exc))
+                from ..errors import LLM_CONFIG_INVALID
+                raise HTTPException(
+                    status_code=400,
+                    detail={"error_code": LLM_CONFIG_INVALID, "message": str(exc)},
+                )
             llm_config = request.llm
 
         task_id = str(uuid.uuid4())[:8]
@@ -247,6 +256,7 @@ def create_app() -> FastAPI:
             "status": "running",
             "item_count": 0,
             "is_valid": False,
+            "error_code": None,
         }
 
     @app.get("/crawl/{task_id}")
@@ -264,6 +274,7 @@ def create_app() -> FastAPI:
                 "item_count": job["item_count"],
                 "is_valid": job["is_valid"],
                 "error": job.get("error", ""),
+                "error_code": job.get("error_code"),
             }
 
         # Fall back to persisted result

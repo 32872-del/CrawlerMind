@@ -18,6 +18,7 @@ from __future__ import annotations
 from typing import Any
 
 from .base import preserve_state
+from ..errors import EXTRACTION_EMPTY, VALIDATION_FAILED, format_error_entry
 
 
 @preserve_state
@@ -84,7 +85,11 @@ def validator_node(state: dict[str, Any]) -> dict[str, Any]:
         status = "failed"
         msg = f"[Validator] FAILED - anomalies={anomalies}, max retries exceeded"
 
-    return {
+    error_code = None
+    if status == "failed":
+        error_code = EXTRACTION_EMPTY if not items else VALIDATION_FAILED
+
+    result: dict[str, Any] = {
         "status": status,
         "validation_result": {
             "is_valid": is_valid,
@@ -95,3 +100,6 @@ def validator_node(state: dict[str, Any]) -> dict[str, Any]:
         "retries": retries + (1 if needs_retry else 0),
         "messages": state.get("messages", []) + [msg],
     }
+    if error_code:
+        result["error_code"] = error_code
+    return result

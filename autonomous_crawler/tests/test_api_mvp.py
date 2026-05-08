@@ -542,7 +542,9 @@ class FastAPILLMOptInTests(unittest.TestCase):
             },
         )
         self.assertEqual(resp.status_code, 400)
-        self.assertIn("base_url", resp.json()["detail"])
+        detail = resp.json()["detail"]
+        self.assertEqual(detail["error_code"], "LLM_CONFIG_INVALID")
+        self.assertIn("base_url", detail["message"])
 
     def test_post_crawl_with_missing_model_returns_400(self) -> None:
         """POST /crawl with llm.enabled=true but missing model should return 400."""
@@ -560,7 +562,9 @@ class FastAPILLMOptInTests(unittest.TestCase):
             },
         )
         self.assertEqual(resp.status_code, 400)
-        self.assertIn("model", resp.json()["detail"])
+        detail = resp.json()["detail"]
+        self.assertEqual(detail["error_code"], "LLM_CONFIG_INVALID")
+        self.assertIn("model", detail["message"])
 
     def test_post_crawl_with_valid_llm_config_starts_job(self) -> None:
         """POST /crawl with valid llm config should start a background job."""

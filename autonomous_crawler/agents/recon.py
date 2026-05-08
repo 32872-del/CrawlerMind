@@ -18,6 +18,7 @@ from __future__ import annotations
 from typing import Any
 
 from .base import preserve_state
+from ..errors import FETCH_HTTP_ERROR, FETCH_UNSUPPORTED_SCHEME, RECON_FAILED, format_error_entry
 from ..tools.html_recon import build_recon_report, fetch_html
 
 
@@ -34,18 +35,24 @@ def recon_node(state: dict[str, Any]) -> dict[str, Any]:
 
     fetch_result = fetch_html(target_url)
     if fetch_result.error:
+        error_msg = fetch_result.error
+        if "unsupported scheme" in error_msg.lower():
+            error_code = FETCH_UNSUPPORTED_SCHEME
+        else:
+            error_code = FETCH_HTTP_ERROR
         return {
             "status": "recon_failed",
             "recon_report": {
                 **existing_report,
                 "target_url": target_url,
-                "recon_error": fetch_result.error,
+                "recon_error": error_msg,
             },
+            "error_code": error_code,
             "error_log": state.get("error_log", []) + [
-                f"Recon fetch failed: {fetch_result.error}"
+                format_error_entry(error_code, f"Recon fetch failed: {error_msg}")
             ],
             "messages": state.get("messages", []) + [
-                f"[Recon] Failed to fetch {target_url}: {fetch_result.error}"
+                f"[Recon] Failed to fetch {target_url}: {error_msg}"
             ],
         }
 

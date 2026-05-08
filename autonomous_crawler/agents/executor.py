@@ -13,6 +13,12 @@ from urllib.parse import urlparse
 import httpx
 
 from .base import preserve_state
+from ..errors import (
+    BROWSER_RENDER_FAILED,
+    FETCH_HTTP_ERROR,
+    FETCH_UNSUPPORTED_SCHEME,
+    format_error_entry,
+)
 from ..tools.browser_fetch import fetch_rendered_html
 from ..tools.fnspider_adapter import load_goods_rows, run_fnspider_site_spec
 from ..tools.html_recon import MOCK_RANKING_HTML
@@ -119,8 +125,9 @@ def executor_node(state: dict[str, Any]) -> dict[str, Any]:
                 "error": result.error,
                 "spec_path": result.spec_path,
             },
+            "error_code": FETCH_HTTP_ERROR,
             "error_log": state.get("error_log", []) + [
-                f"fnspider execution failed: {result.error}"
+                format_error_entry(FETCH_HTTP_ERROR, f"fnspider execution failed: {result.error}")
             ],
             "messages": state.get("messages", []) + [
                 f"[Executor] Engine=fnspider failed: {result.error}"
@@ -157,8 +164,9 @@ def executor_node(state: dict[str, Any]) -> dict[str, Any]:
             "visited_urls": [target_url],
             "raw_html": {},
             "api_responses": [],
+            "error_code": BROWSER_RENDER_FAILED,
             "error_log": state.get("error_log", []) + [
-                f"Browser fetch failed: {browser_result.error}"
+                format_error_entry(BROWSER_RENDER_FAILED, f"Browser fetch failed: {browser_result.error}")
             ],
             "messages": state.get("messages", []) + [
                 f"[Executor] Mode=browser, failed to fetch {target_url}: {browser_result.error}"
@@ -172,8 +180,9 @@ def executor_node(state: dict[str, Any]) -> dict[str, Any]:
             "visited_urls": [],
             "raw_html": {},
             "api_responses": [],
+            "error_code": FETCH_UNSUPPORTED_SCHEME,
             "error_log": state.get("error_log", []) + [
-                f"Unsupported URL scheme for executor: {target_url}"
+                format_error_entry(FETCH_UNSUPPORTED_SCHEME, f"Unsupported URL scheme for executor: {target_url}")
             ],
             "messages": state.get("messages", []) + [
                 f"[Executor] Unsupported URL scheme: {target_url}"
@@ -196,7 +205,10 @@ def executor_node(state: dict[str, Any]) -> dict[str, Any]:
             "visited_urls": [target_url],
             "raw_html": {},
             "api_responses": [],
-            "error_log": state.get("error_log", []) + [f"HTTP fetch failed: {exc}"],
+            "error_code": FETCH_HTTP_ERROR,
+            "error_log": state.get("error_log", []) + [
+                format_error_entry(FETCH_HTTP_ERROR, f"HTTP fetch failed: {exc}")
+            ],
             "messages": state.get("messages", []) + [
                 f"[Executor] Mode={mode}, failed to fetch {target_url}: {exc}"
             ],

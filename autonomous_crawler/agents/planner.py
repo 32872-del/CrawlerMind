@@ -6,6 +6,7 @@ import uuid
 from typing import Any, Callable
 
 from .base import preserve_state
+from ..errors import classify_llm_error, format_error_entry
 from ..llm.protocols import PlanningAdvisor
 from ..llm.audit import build_decision_record
 
@@ -191,7 +192,8 @@ def make_planner_node(
 
         except Exception as exc:
             fallback_used = True
-            errors.append(f"planner advisor: {exc}")
+            llm_error_code = classify_llm_error(exc)
+            errors.append(format_error_entry(llm_error_code, f"planner advisor: {exc}"))
             decisions.append(build_decision_record(
                 node="planner",
                 advisor=advisor,

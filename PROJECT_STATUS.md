@@ -134,12 +134,23 @@ search workflow.
   `clm_config.json`, prints the resolved endpoint without exposing the API key,
   and sends a minimal JSON chat request through the same OpenAI-compatible
   adapter path used by Planner/Strategy.
+- Structured error codes added: 11 machine-readable error code constants
+  (`LLM_CONFIG_INVALID`, `LLM_PROVIDER_UNREACHABLE`, `LLM_RESPONSE_INVALID`,
+  `FETCH_UNSUPPORTED_SCHEME`, `FETCH_HTTP_ERROR`, `BROWSER_RENDER_FAILED`,
+  `EXTRACTION_EMPTY`, `SELECTOR_INVALID`, `VALIDATION_FAILED`,
+  `ANTI_BOT_BLOCKED`, `RECON_FAILED`) defined in `autonomous_crawler/errors.py`.
+  Executor, validator, recon, planner, and strategy agents set `error_code` on
+  failure paths. `LLMResponseError` gains optional `error_code` attribute for
+  transport vs. response error classification. API exposes `error_code` in job
+  registry and GET /crawl/{id} responses. LLM config validation errors return
+  structured `{"error_code": "...", "message": "..."}`. 23 focused tests.
+  7 of 10 priority codes are actively used; 3 reserved for future paths.
 
 ## Current Test Status
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 192 tests (skipped=3)
+Ran 215 tests (skipped=3)
 OK
 ```
 
@@ -203,3 +214,5 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
 12. ~~Add FastAPI opt-in LLM advisor support.~~ Done 2026-05-08.
 13. ~~Add simple LLM provider diagnostics.~~ Done 2026-05-08 with
     `python run_simple.py --check-llm`.
+14. ~~Add structured error codes.~~ Done 2026-05-08. 11 codes defined, 7
+    actively used, 23 focused tests, 215 total tests pass.

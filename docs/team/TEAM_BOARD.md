@@ -43,6 +43,8 @@ Last updated: 2026-05-08
 | Real LLM Baidu Hot Smoke | LLM-2026-000 | ROLE-SUPERVISOR | accepted | `docs/team/acceptance/2026-05-08_real_llm_baidu_hot_smoke_ACCEPTED.md` |
 | FastAPI Opt-In LLM Advisors | LLM-2026-001 | ROLE-API / ROLE-LLM-INTERFACE | accepted | `docs/team/acceptance/2026-05-08_fastapi_opt_in_llm_advisors_ACCEPTED.md` |
 | Status Docs Audit After Real LLM Smoke | LLM-2026-004 | ROLE-DOCS | accepted | `docs/team/acceptance/2026-05-08_status_docs_audit_after_real_llm_smoke_ACCEPTED.md` |
+| Structured Error Codes | LLM-2026-001 | ROLE-API / ROLE-LLM-INTERFACE | accepted | `docs/team/acceptance/2026-05-08_structured_error_codes_ACCEPTED.md` |
+| v5.2 MVP Release Note | LLM-2026-004 | ROLE-DOCS | accepted | `docs/team/acceptance/2026-05-08_v5.2_mvp_release_note_ACCEPTED.md` |
 
 ## Accepted Work Today
 
@@ -67,13 +69,16 @@ Last updated: 2026-05-08
 | Real LLM Baidu Hot Smoke | LLM-2026-000 | `docs/team/acceptance/2026-05-08_real_llm_baidu_hot_smoke_ACCEPTED.md` | LLM-enabled Baidu hot-search run extracted 30 validated items |
 | FastAPI Opt-In LLM Advisors | LLM-2026-001 | `docs/team/acceptance/2026-05-08_fastapi_opt_in_llm_advisors_ACCEPTED.md` | request-level LLM config added to FastAPI crawl path |
 | Status Docs Audit After Real LLM Smoke | LLM-2026-004 | `docs/team/acceptance/2026-05-08_status_docs_audit_after_real_llm_smoke_ACCEPTED.md` | status docs refreshed after LLM smoke milestone |
+| Structured Error Codes | LLM-2026-001 | `docs/team/acceptance/2026-05-08_structured_error_codes_ACCEPTED.md` | machine-readable error codes across agents and API |
+| v5.2 MVP Release Note | LLM-2026-004 | `docs/team/acceptance/2026-05-08_v5.2_mvp_release_note_ACCEPTED.md` | current MVP abilities, limitations, and startup path summarized |
 
 ## Upcoming Candidate Tasks
 
-1. `run_simple.py --check-llm` provider diagnostics.
-2. Real-site sample suite for strategy and selector reliability.
-3. Site sample collection for future automatic engine selection.
-4. Durable job registry design after the in-memory MVP stabilizes.
+1. Access diagnostics module: JS shell, challenge, structured data, and API hint signals.
+2. Fetch mode escalation: requests/curl_cffi/browser quality scoring and trace.
+3. Real-site and local site-zoo sample suite for strategy and selector reliability.
+4. Browser network observation skeleton for future `api_intercept`.
+5. Durable frontier/job registry design after the in-memory MVP stabilizes.
 
 ## Supervisor Notes
 
@@ -85,4 +90,7 @@ Last updated: 2026-05-08
   browser artifacts exist.
 - LLM provider adapter exists for CLI. Real provider smoke passed on
   2026-05-08 with Baidu realtime hot-search extraction.
-- FastAPI LLM integration is now the next service-boundary gate.
+- FastAPI LLM integration is accepted.
+- P1 should focus on crawl capability breadth before frontend work: access
+  diagnostics, mode escalation, network observation, and product list/detail/
+  variant task modeling.

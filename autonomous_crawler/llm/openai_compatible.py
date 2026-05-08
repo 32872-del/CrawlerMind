@@ -15,6 +15,7 @@ from typing import Any
 import httpx
 
 from .audit import MAX_PREVIEW_LENGTH, redact_preview
+from ..errors import LLM_PROVIDER_UNREACHABLE
 
 
 class LLMConfigurationError(ValueError):
@@ -23,6 +24,10 @@ class LLMConfigurationError(ValueError):
 
 class LLMResponseError(RuntimeError):
     """Raised when a provider response cannot be used."""
+
+    def __init__(self, *args: object, error_code: str | None = None) -> None:
+        super().__init__(*args)
+        self.error_code = error_code
 
 
 @dataclass(frozen=True)
@@ -167,14 +172,20 @@ class OpenAICompatibleAdvisor:
                         f"LLM request failed: {retry_exc}; response_preview={preview}"
                     ) from retry_exc
                 except httpx.HTTPError as retry_exc:
-                    raise LLMResponseError(f"LLM request failed: {retry_exc}") from retry_exc
+                    raise LLMResponseError(
+                        f"LLM request failed: {retry_exc}",
+                        error_code=LLM_PROVIDER_UNREACHABLE,
+                    ) from retry_exc
             else:
                 preview = _safe_response_preview(exc.response)
                 raise LLMResponseError(
                     f"LLM request failed: {exc}; response_preview={preview}"
                 ) from exc
         except httpx.HTTPError as exc:
-            raise LLMResponseError(f"LLM request failed: {exc}") from exc
+            raise LLMResponseError(
+                f"LLM request failed: {exc}",
+                error_code=LLM_PROVIDER_UNREACHABLE,
+            ) from exc
 
         try:
             raw = response.json()
