@@ -14,6 +14,8 @@ from urllib.parse import urljoin, urlparse
 import httpx
 from bs4 import BeautifulSoup, Tag
 
+from .access_diagnostics import diagnose_access, detect_challenge
+
 
 DEFAULT_RECON_HEADERS = {
     "User-Agent": (
@@ -80,6 +82,43 @@ MOCK_RANKING_HTML = """
 </html>
 """
 
+MOCK_JS_SHELL_HTML = """
+<html>
+  <body>
+    <div id="root"></div>
+    <script src="/static/runtime.js"></script>
+    <script src="/static/vendor.js"></script>
+    <script src="/static/app.js"></script>
+    <script>window.__APP_CONFIG__ = {"api": "/api/products"};</script>
+    <script>fetch('/api/products?page=1')</script>
+    <script>console.log('hydrate')</script>
+  </body>
+</html>
+"""
+
+MOCK_CHALLENGE_HTML = """
+<html>
+  <head><title>Just a moment...</title></head>
+  <body>
+    <div id="cf-challenge">Checking your browser before accessing this site.</div>
+  </body>
+</html>
+"""
+
+MOCK_STRUCTURED_HTML = """
+<html>
+  <head>
+    <script type="application/ld+json">
+      {"@context": "https://schema.org", "@type": "Product", "name": "Structured Jacket"}
+    </script>
+    <script id="__NEXT_DATA__" type="application/json">
+      {"props": {"pageProps": {"products": [{"title": "Structured Jacket"}]}}}
+    </script>
+  </head>
+  <body><main><h1>Structured Jacket</h1></main></body>
+</html>
+"""
+
 PRICE_RE = re.compile(
     r"(?i)(?:[$€£¥]\s*\d[\d\s,.]*|\d[\d\s,.]*(?:pln|usd|eur|gbp|cny|rmb|zł))"
 )
@@ -112,6 +151,12 @@ def fetch_html(url: str, headers: dict[str, str] | None = None) -> FetchResult:
         return FetchResult(url=url, html=MOCK_PRODUCT_HTML, status_code=200)
     if url == "mock://ranking":
         return FetchResult(url=url, html=MOCK_RANKING_HTML, status_code=200)
+    if url == "mock://js-shell":
+        return FetchResult(url=url, html=MOCK_JS_SHELL_HTML, status_code=200)
+    if url == "mock://challenge":
+        return FetchResult(url=url, html=MOCK_CHALLENGE_HTML, status_code=403)
+    if url == "mock://structured":
+        return FetchResult(url=url, html=MOCK_STRUCTURED_HTML, status_code=200)
 
     parsed = urlparse(url)
     if parsed.scheme not in {"http", "https"}:
@@ -138,6 +183,11 @@ def fetch_html(url: str, headers: dict[str, str] | None = None) -> FetchResult:
 def build_recon_report(url: str, html: str) -> dict[str, Any]:
     soup = BeautifulSoup(html or "", "lxml")
     dom_structure = infer_dom_structure(soup, base_url=url)
+    access_diagnostics = diagnose_access(
+        html,
+        url=url,
+        target_selector=dom_structure.get("product_selector", ""),
+    )
     return {
         "target_url": url,
         "frontend_framework": detect_framework(html),
@@ -145,6 +195,7 @@ def build_recon_report(url: str, html: str) -> dict[str, Any]:
         "anti_bot": detect_anti_bot(html),
         "api_endpoints": discover_api_endpoints(html, base_url=url),
         "dom_structure": dom_structure,
+        "access_diagnostics": access_diagnostics,
     }
 
 
@@ -167,16 +218,21 @@ def detect_rendering(html: str) -> str:
     lowered = html.lower()
     if "__next_data__" in lowered or "__nuxt__" in lowered:
         return "ssr"
-    if len(BeautifulSoup(html or "", "lxml").get_text(" ", strip=True)) < 80 and (
-        "id=\"root\"" in lowered or "id=\"app\"" in lowered
-    ):
+    soup = BeautifulSoup(html or "", "lxml")
+    text_len = len(soup.get_text(" ", strip=True))
+    script_count = len(soup.find_all("script"))
+    has_app_root = "id=\"root\"" in lowered or "id=\"app\"" in lowered
+    if (text_len < 80 and has_app_root) or (text_len < 500 and script_count >= 5 and has_app_root):
         return "spa"
     return "static"
 
 
 def detect_anti_bot(html: str) -> dict[str, Any]:
+    challenge = detect_challenge(html)
     lowered = html.lower()
     matches = [pattern for pattern in BOT_PATTERNS if pattern in lowered]
+    if challenge and challenge not in matches:
+        matches.insert(0, challenge)
     return {
         "detected": bool(matches),
         "type": matches[0] if matches else "none",

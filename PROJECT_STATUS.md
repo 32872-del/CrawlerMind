@@ -145,12 +145,22 @@ search workflow.
   registry and GET /crawl/{id} responses. LLM config validation errors return
   structured `{"error_code": "...", "message": "..."}`. 23 focused tests.
   7 of 10 priority codes are actively used; 3 reserved for future paths.
+- P1 access diagnostics started: new project-local
+  `autonomous_crawler/tools/access_diagnostics.py` detects JS shell pages,
+  challenge/CAPTCHA/access-block signals, embedded structured data
+  (`JSON-LD`, `__NEXT_DATA__`, `__NUXT__`), API-like hints, target selector
+  misses, and safe recommendations. Recon stores the diagnostics in
+  `recon_report.access_diagnostics`. Strategy promotes JS-shell and
+  challenge-like pages to browser mode before `api_intercept`. Validator maps
+  empty challenge-page results to `ANTI_BOT_BLOCKED`. Added deterministic
+  `mock://js-shell`, `mock://challenge`, and `mock://structured` fixtures plus
+  focused tests.
 
 ## Current Test Status
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 215 tests (skipped=3)
+Ran 225 tests (skipped=3)
 OK
 ```
 
@@ -216,3 +226,6 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
     `python run_simple.py --check-llm`.
 14. ~~Add structured error codes.~~ Done 2026-05-08. 11 codes defined, 7
     actively used, 23 focused tests, 215 total tests pass.
+15. Start P1 crawl capability iteration.
+    - Access diagnostics done 2026-05-08.
+    - Fetch mode escalation and site-zoo fixtures next.

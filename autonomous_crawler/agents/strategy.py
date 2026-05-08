@@ -39,6 +39,14 @@ def strategy_node(state: dict[str, Any]) -> dict[str, Any]:
     api_endpoints = recon_report.get("api_endpoints", [])
     anti_bot = recon_report.get("anti_bot", {})
     rendering = recon_report.get("rendering", "static")
+    access_diagnostics = recon_report.get("access_diagnostics", {})
+    access_findings = set(access_diagnostics.get("findings", []))
+    has_challenge = bool(access_diagnostics.get("signals", {}).get("challenge")) or bool(anti_bot.get("detected"))
+    needs_browser = (
+        rendering == "spa"
+        or has_challenge
+        or "js_rendering_likely_required" in access_findings
+    )
     dom_structure = recon_report.get("dom_structure", {})
     inferred_selectors = {
         "item_container": dom_structure.get("product_selector", ""),
@@ -84,6 +92,20 @@ def strategy_node(state: dict[str, Any]) -> dict[str, Any]:
             "max_items": constraints.get("max_items", 0),
             "rationale": "Ranking list with inferred DOM selectors",
         }
+    elif needs_browser:
+        # Priority 4: Browser Automation, but promoted ahead of API hints for
+        # JS shells and challenge-like pages until api_intercept is proven safe.
+        strategy = {
+            "mode": "browser",
+            "extraction_method": "browser_render",
+            "selectors": inferred_selectors or fallback_selectors,
+            "pagination": {"type": "scroll", "scroll_count": 5},
+            "headers": {},
+            "max_items": constraints.get("max_items", 0),
+            "rationale": "Access diagnostics recommend browser rendering",
+        }
+        if has_challenge:
+            strategy["access_warning"] = "challenge_detected"
     elif api_endpoints:
         # Priority 1: API Direct Access
         strategy = {

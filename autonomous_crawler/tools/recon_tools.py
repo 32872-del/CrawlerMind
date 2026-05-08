@@ -13,6 +13,7 @@ from .html_recon import (
     discover_api_endpoints as discover_api_endpoints_from_html,
     fetch_html,
 )
+from .access_diagnostics import diagnose_access as diagnose_access_from_html
 
 
 @tool
@@ -75,6 +76,24 @@ def analyze_dom_structure(url: str) -> str:
         )
     report = build_recon_report(fetch.url, fetch.html)
     return _json(report["dom_structure"])
+
+
+@tool
+def diagnose_access(url: str, target_selector: str = "") -> str:
+    """Diagnose challenge, JS shell, structured data, and API-hint signals."""
+    fetch = fetch_html(url)
+    if fetch.error:
+        return _json({
+            "ok": False,
+            "findings": ["fetch_failed"],
+            "signals": {"url": url, "error": fetch.error},
+            "recommendations": [{
+                "type": "fetch_error",
+                "reason": "The page could not be fetched for access diagnostics.",
+                "action": "Check URL, network, or permitted access.",
+            }],
+        })
+    return _json(diagnose_access_from_html(fetch.html, url=fetch.url, target_selector=target_selector))
 
 
 def _json(value: dict[str, Any]) -> str:

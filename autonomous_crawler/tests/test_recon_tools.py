@@ -5,6 +5,7 @@ import unittest
 
 from autonomous_crawler.tools.recon_tools import (
     analyze_dom_structure,
+    diagnose_access,
     detect_anti_bot,
     detect_framework,
     discover_api_endpoints,
@@ -36,6 +37,12 @@ class ReconToolsTests(unittest.TestCase):
 
         self.assertFalse(payload["detected"])
         self.assertEqual(payload["type"], "none")
+
+    def test_diagnose_access_tool_reports_js_shell(self) -> None:
+        payload = json.loads(diagnose_access.invoke({"url": "mock://js-shell"}))
+
+        self.assertIn("js_rendering_likely_required", payload["findings"])
+        self.assertIn("/api/products", payload["signals"]["api_hints"])
 
 
 if __name__ == "__main__":

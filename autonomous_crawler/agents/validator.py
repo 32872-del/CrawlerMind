@@ -18,7 +18,7 @@ from __future__ import annotations
 from typing import Any
 
 from .base import preserve_state
-from ..errors import EXTRACTION_EMPTY, VALIDATION_FAILED, format_error_entry
+from ..errors import ANTI_BOT_BLOCKED, EXTRACTION_EMPTY, VALIDATION_FAILED
 
 
 @preserve_state
@@ -87,7 +87,15 @@ def validator_node(state: dict[str, Any]) -> dict[str, Any]:
 
     error_code = None
     if status == "failed":
-        error_code = EXTRACTION_EMPTY if not items else VALIDATION_FAILED
+        challenge = (
+            recon_report.get("access_diagnostics", {})
+            .get("signals", {})
+            .get("challenge", "")
+        )
+        if challenge and not items:
+            error_code = ANTI_BOT_BLOCKED
+        else:
+            error_code = EXTRACTION_EMPTY if not items else VALIDATION_FAILED
 
     result: dict[str, Any] = {
         "status": status,

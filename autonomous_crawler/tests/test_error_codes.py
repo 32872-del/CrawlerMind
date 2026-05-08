@@ -219,6 +219,22 @@ class TestValidatorErrorCodes(unittest.TestCase):
         self.assertEqual(result["status"], "completed")
         self.assertNotIn("error_code", result)
 
+    def test_challenge_empty_result_sets_anti_bot_blocked(self):
+        from autonomous_crawler.agents.validator import validator_node
+
+        state = self._make_state(
+            recon_report={
+                "target_fields": ["title"],
+                "access_diagnostics": {
+                    "signals": {"challenge": "cf-challenge"},
+                    "findings": ["challenge_detected:cf-challenge"],
+                },
+            }
+        )
+        result = validator_node(state)
+        self.assertEqual(result["status"], "failed")
+        self.assertEqual(result["error_code"], ANTI_BOT_BLOCKED)
+
 
 # ---------------------------------------------------------------------------
 # Recon error codes
