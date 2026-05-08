@@ -95,6 +95,21 @@ class WorkflowMVPTests(unittest.TestCase):
         self.assertEqual(dom["field_selectors"]["image"], ".product-photo@src")
         self.assertEqual(dom["field_selectors"]["link"], ".product-link@href")
 
+    def test_recon_skips_unsafe_tailwind_classes_in_selectors(self) -> None:
+        state = recon_node(
+            {
+                "target_url": "mock://tailwind-links",
+                "recon_report": {"target_fields": ["title", "link"]},
+                "messages": [],
+                "error_log": [],
+            }
+        )
+
+        dom = state["recon_report"]["dom_structure"]
+        selectors = dom["field_selectors"]
+        self.assertNotIn(":", selectors["title"])
+        self.assertNotIn(":", selectors["link"])
+
     def test_recon_infers_ranking_selectors(self) -> None:
         state = recon_node(
             {
@@ -374,7 +389,33 @@ class WorkflowMVPTests(unittest.TestCase):
         self.assertEqual(item["rank"], "1")
         self.assertEqual(item["title"], "Alpha Topic")
         self.assertEqual(item["link"], "/s?q=alpha")
-        self.assertEqual(item["hot_score"], "12345")
+        self.assertEqual(item["hot_score"], 12345)
+        self.assertEqual(state["extracted_data"]["confidence"], 1.0)
+
+    def test_extractor_cleans_rating_score(self) -> None:
+        state = extractor_node(
+            {
+                "raw_html": {
+                    "mock://ratings": """
+                    <div class="item">
+                        <span class="title">Movie A</span>
+                        <span class="rating_num">9.7</span>
+                    </div>
+                    """
+                },
+                "crawl_strategy": {
+                    "selectors": {
+                        "item_container": ".item",
+                        "title": ".title",
+                        "hot_score": ".rating_num",
+                    }
+                },
+                "recon_report": {"target_fields": ["title", "hot_score"]},
+                "messages": [],
+            }
+        )
+
+        self.assertEqual(state["extracted_data"]["items"][0]["hot_score"], 9.7)
         self.assertEqual(state["extracted_data"]["confidence"], 1.0)
 
     def test_validator_does_not_require_price_for_ranking_tasks(self) -> None:

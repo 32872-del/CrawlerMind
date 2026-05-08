@@ -163,17 +163,67 @@ def normalize_api_records(records: list[dict[str, Any]], max_items: int = 0) -> 
     normalized: list[dict[str, Any]] = []
     for index, record in enumerate(records):
         item = dict(record)
-        if "title" not in item:
-            item["title"] = record.get("name") or record.get("label") or record.get("headline")
+        normalized_title = _extract_title(record.get("title"))
+        if normalized_title:
+            item["title"] = normalized_title
+        elif "title" not in item:
+            item["title"] = (
+                record.get("name")
+                or record.get("label")
+                or record.get("headline")
+            )
         if "link" not in item:
-            item["link"] = record.get("url") or record.get("href") or record.get("permalink")
+            item["link"] = record.get("url") or record.get("href") or record.get("permalink") or record.get("siteUrl")
         if "image" not in item:
-            item["image"] = record.get("image") or record.get("image_src") or record.get("thumbnail")
+            item["image"] = (
+                record.get("image")
+                or record.get("image_src")
+                or record.get("thumbnail")
+                or _first_nested(record, ["coverImage", "medium"], ["pic"])
+            )
         if "hot_score" not in item:
-            item["hot_score"] = record.get("score") or record.get("ups") or record.get("heat")
+            item["hot_score"] = (
+                record.get("score")
+                or record.get("ups")
+                or record.get("heat")
+                or record.get("popularity")
+                or record.get("averageScore")
+                or _first_nested(record, ["stat", "view"], ["stat", "like"], ["stat", "coin"])
+            )
+        if "rank" not in item:
+            rank = (
+                record.get("rank")
+                or record.get("position")
+                or _first_nested(record, ["stat", "his_rank"], ["stat", "now_rank"])
+            )
+            item["rank"] = rank if rank not in {None, 0, ""} else index + 1
         item.setdefault("index", index)
         if item.get("title"):
             normalized.append(item)
         if max_items and len(normalized) >= max_items:
             break
     return normalized
+
+
+def _extract_title(value: Any) -> str | None:
+    if isinstance(value, str):
+        return value
+    if isinstance(value, dict):
+        for key in ("english", "romaji", "native", "userPreferred"):
+            candidate = value.get(key)
+            if candidate:
+                return str(candidate)
+    return None
+
+
+def _first_nested(record: dict[str, Any], *paths: list[str]) -> Any:
+    for path in paths:
+        current: Any = record
+        for key in path:
+            if not isinstance(current, dict):
+                current = None
+                break
+            current = current.get(key)
+        if current not in {None, ""}:
+            return current
+    return None

@@ -78,6 +78,8 @@ def extractor_node(state: dict[str, Any]) -> dict[str, Any]:
                     continue
                 if field == "price":
                     value = _clean_price(value)
+                if field == "hot_score":
+                    value = _clean_score(value)
                 item[field] = value
 
             # Only include items with at least a title
@@ -147,3 +149,15 @@ def _clean_price(value: Any) -> float | str:
         return float(cleaned)
     except ValueError:
         return price_text
+
+
+def _clean_score(value: Any) -> float | int | str:
+    score_text = str(value)
+    cleaned = re.sub(r"[^\d.]", "", score_text)
+    if not cleaned:
+        return score_text
+    try:
+        score = float(cleaned)
+    except ValueError:
+        return score_text
+    return int(score) if score.is_integer() else score

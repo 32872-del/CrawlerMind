@@ -1,0 +1,120 @@
+{
+  "run_at": "2026-05-08T18:01:03.121599",
+  "source_list": "E:\\爬虫Agent实战训练网站清单.md",
+  "selection_policy": "public content API and nested GraphQL targets",
+  "results": [
+    {
+      "id": "anilist_popular_anime_graphql",
+      "name": "AniList popular anime GraphQL",
+      "url": "https://graphql.anilist.co",
+      "risk": "low-public-graphql",
+      "capability": "nested_graphql_records",
+      "status": "completed",
+      "elapsed_seconds": 1.89,
+      "mode": "api_intercept",
+      "method": "graphql_json",
+      "expected_mode": "api_intercept",
+      "fetch_mode": "configured_api",
+      "item_count": 10,
+      "confidence": 1.0,
+      "valid": true,
+      "anomalies": [],
+      "error_code": "",
+      "sample_items": [
+        {
+          "index": 0,
+          "id": 16498,
+          "title": "Attack on Titan",
+          "hot_score": 986169,
+          "popularity": 986169,
+          "averageScore": 85,
+          "link": "https://anilist.co/anime/16498",
+          "siteUrl": "https://anilist.co/anime/16498",
+          "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx16498-buvcRTBx4NSm.jpg"
+        },
+        {
+          "index": 1,
+          "id": 101922,
+          "title": "Demon Slayer: Kimetsu no Yaiba",
+          "hot_score": 933621,
+          "popularity": 933621,
+          "averageScore": 83,
+          "link": "https://anilist.co/anime/101922",
+          "siteUrl": "https://anilist.co/anime/101922",
+          "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx101922-WBsBl0ClmgYL.jpg"
+        },
+        {
+          "index": 2,
+          "id": 113415,
+          "title": "JUJUTSU KAISEN",
+          "hot_score": 899834,
+          "popularity": 899834,
+          "averageScore": 84,
+          "link": "https://anilist.co/anime/113415",
+          "siteUrl": "https://anilist.co/anime/113415",
+          "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx113415-LHBAeoZDIsnF.jpg"
+        }
+      ],
+      "messages": [
+        "[Planner] Goal: collect anime titles popularity scores and links",
+        "[Recon] Using configured API target https://graphql.anilist.co - method=POST, fetch_mode=configured_api",
+        "[Strategy] Mode=api_intercept, Method=graphql_json, Rationale=Explicit GraphQL query supplied, using GraphQL API access",
+        "[Executor] Mode=api_intercept, fetched https://graphql.anilist.co, rows=10",
+        "[Extractor] Reused structured executor data, items=10",
+        "[Validator] PASSED - 10 items, completeness=80%"
+      ]
+    },
+    {
+      "id": "bilibili_ranking_public_api",
+      "name": "Bilibili ranking public API",
+      "url": "https://api.bilibili.com/x/web-interface/ranking/v2?rid=0&type=all",
+      "risk": "medium-public-api-rate-sensitive",
+      "capability": "content_api_business_error_detection",
+      "status": "completed",
+      "elapsed_seconds": 0.64,
+      "mode": "api_intercept",
+      "method": "api_json",
+      "expected_mode": "api_intercept",
+      "fetch_mode": "requests",
+      "item_count": 10,
+      "confidence": 1.0,
+      "valid": true,
+      "anomalies": [],
+      "error_code": "",
+      "sample_items": [
+        {
+          "index": 0,
+          "aid": 116530935239061,
+          "title": "《鸣潮》×《赛博朋克：边缘行者》联动预告｜早上好，索拉里斯！",
+          "hot_score": 4081487,
+          "score": 0,
+          "image": "http://i2.hdslb.com/bfs/archive/c512da66a0e1e2a7b044acdf592bd7f3f52f0f15.jpg"
+        },
+        {
+          "index": 1,
+          "aid": 116526271171387,
+          "title": "《好摇不挑曲》",
+          "hot_score": 4837651,
+          "score": 0,
+          "image": "http://i2.hdslb.com/bfs/archive/6635a6e25bae54c39b007e252b2fb836173c1498.jpg"
+        },
+        {
+          "index": 2,
+          "aid": 116526573165896,
+          "title": "全b站最火的视频",
+          "hot_score": 2339339,
+          "score": 0,
+          "image": "http://i2.hdslb.com/bfs/archive/a8101d2c6764100b47aacde2fe8050ca3096b3a7.jpg"
+        }
+      ],
+      "messages": [
+        "[Planner] Goal: collect bilibili ranking titles and scores",
+        "[Recon] Analyzed https://api.bilibili.com/x/web-interface/ranking/v2?rid=0&type=all - framework=api, items=0, anti_bot=False, fetch_mode=requests",
+        "[Strategy] Mode=api_intercept, Method=api_json, Rationale=API endpoint discovered, using direct API access",
+        "[Executor] Mode=api_intercept, fetched https://api.bilibili.com/x/web-interface/ranking/v2?rid=0&type=all, rows=10",
+        "[Extractor] Reused structured executor data, items=10",
+        "[Validator] PASSED - 10 items, completeness=100%"
+      ]
+    }
+  ]
+}

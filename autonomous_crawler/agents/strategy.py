@@ -56,6 +56,7 @@ def strategy_node(state: dict[str, Any]) -> dict[str, Any]:
         **(dom_structure.get("field_selectors") or {}),
     }
     inferred_selectors = {k: v for k, v in inferred_selectors.items() if v}
+    good_dom_candidate = _dom_candidate_is_good(dom_structure, inferred_selectors)
     fallback_selectors = {
         "item_container": ".product-item",
         "title": ".product-title",
@@ -112,7 +113,20 @@ def strategy_node(state: dict[str, Any]) -> dict[str, Any]:
             "max_items": constraints.get("max_items", 0),
             "rationale": "Ranking list with inferred DOM selectors",
         }
-    elif needs_browser:
+    elif good_dom_candidate:
+        strategy = {
+            "mode": "http",
+            "extraction_method": "dom_parse",
+            "selectors": inferred_selectors,
+            "pagination": {
+                "type": dom_structure.get("pagination_type", "none"),
+                "param": "page",
+            },
+            "headers": {},
+            "max_items": constraints.get("max_items", 0),
+            "rationale": "Good repeated DOM candidates found, using DOM parsing",
+        }
+    elif needs_browser and not good_dom_candidate:
         # Priority 4: Browser Automation, but promoted ahead of API hints for
         # JS shells and challenge-like pages until api_intercept is proven safe.
         strategy = {
@@ -126,7 +140,7 @@ def strategy_node(state: dict[str, Any]) -> dict[str, Any]:
         }
         if has_challenge:
             strategy["access_warning"] = "challenge_detected"
-    elif api_candidates or api_endpoints:
+    elif (api_candidates or api_endpoints) and not good_dom_candidate:
         # Priority 1: API Direct Access
         best_candidate = api_candidates[0] if api_candidates and isinstance(api_candidates[0], dict) else {}
         api_endpoint = best_candidate.get("url") or (api_endpoints[0] if api_endpoints else "")
@@ -212,6 +226,15 @@ def _preferred_engine(state: dict[str, Any]) -> str:
 
 def _can_use_fnspider(target_url: str) -> bool:
     return str(target_url).strip().lower().startswith(("http://", "https://"))
+
+
+def _dom_candidate_is_good(
+    dom_structure: dict[str, Any],
+    inferred_selectors: dict[str, str],
+) -> bool:
+    """Prefer DOM parsing when a page has repeated items and useful fields."""
+    item_count = int(dom_structure.get("item_count") or 0)
+    return item_count >= 2 and bool(inferred_selectors.get("title"))
 
 
 _STRATEGY_ALLOWED_MODES = frozenset({"http", "browser", "api_intercept"})

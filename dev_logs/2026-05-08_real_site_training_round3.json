@@ -1,0 +1,139 @@
+{
+  "run_at": "2026-05-08T17:49:12.347967",
+  "source_list": "E:\\爬虫Agent实战训练网站清单.md",
+  "selection_policy": "static/SSR extraction and framework reconnaissance targets",
+  "results": [
+    {
+      "id": "douban_top250_static",
+      "name": "Douban Movie Top250 static page",
+      "url": "https://movie.douban.com/top250",
+      "risk": "medium-static-rate-sensitive",
+      "capability": "static_dom_ranking_with_scores",
+      "status": "completed",
+      "elapsed_seconds": 0.97,
+      "mode": "http",
+      "method": "dom_parse",
+      "expected_mode": "http",
+      "fetch_mode": "requests",
+      "item_count": 25,
+      "confidence": 1.0,
+      "valid": true,
+      "anomalies": [],
+      "error_code": "",
+      "sample_items": [
+        {
+          "index": 0,
+          "title": "肖申克的救赎",
+          "hot_score": 9.7,
+          "link": "https://movie.douban.com/subject/1292052/",
+          "url": "https://movie.douban.com/top250",
+          "image": "https://img3.doubanio.com/view/photo/s_ratio_poster/public/p480747492.jpg"
+        },
+        {
+          "index": 1,
+          "title": "霸王别姬",
+          "hot_score": 9.6,
+          "link": "https://movie.douban.com/subject/1291546/",
+          "url": "https://movie.douban.com/top250",
+          "image": "https://img1.doubanio.com/view/photo/s_ratio_poster/public/p2911205318.jpg"
+        },
+        {
+          "index": 2,
+          "title": "泰坦尼克号",
+          "hot_score": 9.5,
+          "link": "https://movie.douban.com/subject/1292722/",
+          "url": "https://movie.douban.com/top250",
+          "image": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p457760035.jpg"
+        }
+      ],
+      "messages": [
+        "[Planner] Goal: collect movie titles and scores",
+        "[Recon] Analyzed https://movie.douban.com/top250 - framework=unknown, items=25, anti_bot=False, fetch_mode=requests",
+        "[Strategy] Mode=http, Method=dom_parse, Rationale=Ranking list with inferred DOM selectors",
+        "[Executor] Mode=http, fetched https://movie.douban.com/top250 (200, 60718 chars)",
+        "[Extractor] Extracted 25 items, confidence=1.00, fields=['title', 'image', 'link', 'url', 'hot_score', 'index']",
+        "[Validator] PASSED - 25 items, completeness=100%"
+      ]
+    },
+    {
+      "id": "react_docs_ssr_recon",
+      "name": "React docs SSR recon",
+      "url": "https://react.dev/learn",
+      "risk": "low-public-ssr",
+      "capability": "ssr_framework_recon",
+      "status": "completed",
+      "elapsed_seconds": 6.6,
+      "mode": "http",
+      "method": "dom_parse",
+      "expected_mode": "http",
+      "fetch_mode": "requests",
+      "item_count": 1,
+      "confidence": 1.0,
+      "valid": true,
+      "anomalies": [],
+      "error_code": "",
+      "sample_items": [
+        {
+          "index": 0,
+          "title": "Overview",
+          "link": "#",
+          "url": "https://react.dev/learn"
+        }
+      ],
+      "messages": [
+        "[Planner] Goal: collect documentation links",
+        "[Recon] Analyzed https://react.dev/learn - framework=nextjs, items=12, anti_bot=False, fetch_mode=requests",
+        "[Strategy] Mode=http, Method=dom_parse, Rationale=Good repeated DOM candidates found, using DOM parsing",
+        "[Executor] Mode=http, fetched https://react.dev/learn (200, 265032 chars)",
+        "[Extractor] Extracted 1 items, confidence=1.00, fields=['link', 'url', 'title']",
+        "[Validator] PASSED - 1 items, completeness=100%"
+      ]
+    },
+    {
+      "id": "vue_examples_static_recon",
+      "name": "Vue examples static recon",
+      "url": "https://vuejs.org/examples/",
+      "risk": "low-public-static",
+      "capability": "framework_recon_static_site",
+      "status": "completed",
+      "elapsed_seconds": 4.58,
+      "mode": "http",
+      "method": "dom_parse",
+      "expected_mode": "http",
+      "fetch_mode": "requests",
+      "item_count": 10,
+      "confidence": 1.0,
+      "valid": true,
+      "anomalies": [],
+      "error_code": "",
+      "sample_items": [
+        {
+          "index": 0,
+          "title": "简体中文",
+          "link": "https://cn.vuejs.org/examples/",
+          "url": "https://vuejs.org/examples/"
+        },
+        {
+          "index": 1,
+          "title": "日本語",
+          "link": "https://ja.vuejs.org/examples/",
+          "url": "https://vuejs.org/examples/"
+        },
+        {
+          "index": 2,
+          "title": "Українська",
+          "link": "https://ua.vuejs.org/examples/",
+          "url": "https://vuejs.org/examples/"
+        }
+      ],
+      "messages": [
+        "[Planner] Goal: collect example links",
+        "[Recon] Analyzed https://vuejs.org/examples/ - framework=vue, items=13, anti_bot=False, fetch_mode=requests",
+        "[Strategy] Mode=http, Method=dom_parse, Rationale=Good repeated DOM candidates found, using DOM parsing",
+        "[Executor] Mode=http, fetched https://vuejs.org/examples/ (200, 76256 chars)",
+        "[Extractor] Extracted 10 items, confidence=1.00, fields=['index', 'link', 'url', 'title']",
+        "[Validator] PASSED - 10 items, completeness=100%"
+      ]
+    }
+  ]
+}

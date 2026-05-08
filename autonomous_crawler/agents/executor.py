@@ -40,6 +40,12 @@ DEFAULT_HEADERS = {
     "Accept-Language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
 }
 
+API_DEFAULT_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
+    "Accept": "application/json",
+    "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+}
+
 
 MOCK_PRODUCT_HTML = """
 <main class="catalog-grid">
@@ -207,7 +213,7 @@ def executor_node(state: dict[str, Any]) -> dict[str, Any]:
 
     if mode == "api_intercept":
         api_endpoint = strategy.get("api_endpoint") or target_url
-        headers = {**DEFAULT_HEADERS, **strategy.get("headers", {})}
+        headers = {**API_DEFAULT_HEADERS, **strategy.get("headers", {})}
         try:
             if strategy.get("extraction_method") == "graphql_json":
                 result = fetch_graphql_api(

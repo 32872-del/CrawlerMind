@@ -32,6 +32,29 @@ class ApiInterceptTests(unittest.TestCase):
         self.assertEqual(items[0]["title"], "Alpha")
         self.assertEqual(items[0]["link"], "/p/a")
 
+    def test_normalize_api_records_maps_content_platform_metrics(self) -> None:
+        items = normalize_api_records([
+            {
+                "title": {"english": "Attack on Titan", "romaji": "Shingeki no Kyojin"},
+                "siteUrl": "https://anilist.co/anime/16498",
+                "coverImage": {"medium": "https://img.example/a.jpg"},
+                "popularity": 986169,
+            },
+            {
+                "title": "Bilibili Video",
+                "pic": "https://img.example/b.jpg",
+                "stat": {"view": 12345, "like": 100},
+            },
+        ])
+
+        self.assertEqual(items[0]["title"], "Attack on Titan")
+        self.assertEqual(items[0]["link"], "https://anilist.co/anime/16498")
+        self.assertEqual(items[0]["image"], "https://img.example/a.jpg")
+        self.assertEqual(items[0]["hot_score"], 986169)
+        self.assertEqual(items[1]["hot_score"], 12345)
+        self.assertEqual(items[1]["rank"], 2)
+        self.assertEqual(items[1]["image"], "https://img.example/b.jpg")
+
     def test_extract_records_from_reddit_children_shape(self) -> None:
         records = extract_records_from_json({
             "data": {
@@ -100,6 +123,36 @@ class ApiInterceptTests(unittest.TestCase):
         strategy = state["crawl_strategy"]
         self.assertEqual(strategy["mode"], "api_intercept")
         self.assertEqual(strategy["api_endpoint"], "mock://api/products")
+
+    def test_strategy_prefers_good_dom_candidates_over_weak_api_hints(self) -> None:
+        state = strategy_node({
+            "user_goal": "collect documentation links",
+            "target_url": "https://docs.example",
+            "recon_report": {
+                "target_url": "https://docs.example",
+                "task_type": "product_list",
+                "constraints": {"max_items": 10},
+                "rendering": "ssr",
+                "anti_bot": {"detected": False},
+                "api_endpoints": [],
+                "api_candidates": [{"url": "https://docs.example/api/", "score": 20}],
+                "access_diagnostics": {"findings": [], "signals": {}},
+                "dom_structure": {
+                    "pagination_type": "none",
+                    "product_selector": ".doc-link",
+                    "item_count": 5,
+                    "field_selectors": {
+                        "title": "a",
+                        "link": "a@href",
+                    },
+                },
+            },
+            "retries": 0,
+            "messages": [],
+        })
+
+        self.assertEqual(state["crawl_strategy"]["mode"], "http")
+        self.assertEqual(state["crawl_strategy"]["extraction_method"], "dom_parse")
 
     def test_executor_api_intercept_extracts_mock_json(self) -> None:
         state = executor_node({

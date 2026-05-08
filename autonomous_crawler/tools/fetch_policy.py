@@ -8,6 +8,7 @@ low and surfaced as diagnostics.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 from typing import Any, Callable
 
 import httpx
@@ -146,6 +147,7 @@ def score_html_attempt(attempt: FetchAttempt) -> tuple[int, list[str]]:
     structured = signals.get("structured_data", {})
     api_hints = signals.get("api_hints", [])
     soup = BeautifulSoup(html, "lxml")
+    is_json_payload = _looks_like_json_payload(html)
 
     score = 0
     if attempt.status_code and 200 <= attempt.status_code < 300:
@@ -178,6 +180,10 @@ def score_html_attempt(attempt: FetchAttempt) -> tuple[int, list[str]]:
         score -= 8
         reasons.append("low_text")
 
+    if is_json_payload:
+        score += 35
+        reasons.append("json_payload")
+
     if soup.select("article, li, [class*=product], [class*=item], [class*=card], [class*=title]"):
         score += 12
         reasons.append("dom_candidates")
@@ -203,9 +209,22 @@ def score_html_attempt(attempt: FetchAttempt) -> tuple[int, list[str]]:
 
 def _is_good_enough(attempt: FetchAttempt) -> bool:
     reasons = set(attempt.reasons or [])
+    if "json_payload" in reasons and attempt.score >= 45:
+        return True
     if attempt.score >= 60 and "js_shell" not in reasons:
         return True
     return False
+
+
+def _looks_like_json_payload(text: str) -> bool:
+    stripped = (text or "").lstrip()
+    if not stripped.startswith(("{", "[")):
+        return False
+    try:
+        json.loads(stripped)
+    except ValueError:
+        return False
+    return True
 
 
 def _should_skip_browser_after_transport_errors(attempts: list[FetchAttempt]) -> bool:

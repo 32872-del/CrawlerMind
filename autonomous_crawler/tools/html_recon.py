@@ -143,9 +143,25 @@ MOCK_RENDERED_HTML = """
 </html>
 """
 
+MOCK_TAILWIND_LINKS_HTML = """
+<html>
+  <body>
+    <nav>
+      <div class="text-sm px-2">
+        <a class="text-link dark:text-link-dark" href="/learn/a">Learn A</a>
+      </div>
+      <div class="text-sm px-2">
+        <a class="text-link dark:text-link-dark" href="/learn/b">Learn B</a>
+      </div>
+    </nav>
+  </body>
+</html>
+"""
+
 PRICE_RE = re.compile(
     r"(?i)(?:[$€£¥]\s*\d[\d\s,.]*|\d[\d\s,.]*(?:pln|usd|eur|gbp|cny|rmb|zł))"
 )
+SCORE_RE = re.compile(r"(?:\d+(?:\.\d+)?\s*(?:分|/10)?|评分)", re.I)
 API_RE = re.compile(r"""["']([^"']*(?:/api/|graphql|fetch|ajax)[^"']*)["']""", re.I)
 BOT_PATTERNS = [
     "cloudflare",
@@ -185,6 +201,8 @@ def fetch_html(url: str, headers: dict[str, str] | None = None) -> FetchResult:
         return FetchResult(url=url, html='[{"title":"JSON Alpha"},{"title":"JSON Beta"}]', status_code=200)
     if url == "mock://api/graphql-countries":
         return FetchResult(url=url, html='{"data":{"countries":[]}}', status_code=200)
+    if url == "mock://tailwind-links":
+        return FetchResult(url=url, html=MOCK_TAILWIND_LINKS_HTML, status_code=200)
     site_zoo_fixture = fixture_by_url(url)
     if site_zoo_fixture:
         status_code = 403 if site_zoo_fixture.category == "challenge" else 200
@@ -244,6 +262,7 @@ def _mock_best_fetch(url: str) -> BestFetchResult | None:
         "mock://structured": MOCK_STRUCTURED_HTML,
         "mock://json-direct": '[{"title":"JSON Alpha"},{"title":"JSON Beta"}]',
         "mock://api/graphql-countries": '{"data":{"countries":[]}}',
+        "mock://tailwind-links": MOCK_TAILWIND_LINKS_HTML,
     }
     if url in fixture_map:
         attempt = FetchAttempt(mode="mock", url=url, html=fixture_map[url], status_code=200)
@@ -506,7 +525,13 @@ def _infer_field_selectors(container: Tag) -> dict[str, str]:
     if rank:
         fields["rank"] = _relative_selector(rank)
 
-    hot_score = container.select_one("[class*=hot-index], [class*=hot_score], [class*=score], [class*=heat]")
+    hot_score = container.select_one(
+        "[class*=hot-index], [class*=hot_score], [class*=score], "
+        "[class*=heat], [class*=rating_num], [property*=ratingValue], "
+        "[itemprop=ratingValue]"
+    )
+    if not hot_score:
+        hot_score = _find_score_element(container)
     if hot_score:
         fields["hot_score"] = _relative_selector(hot_score)
 
@@ -548,11 +573,19 @@ def _find_price_element(container: Tag) -> Tag | None:
     return None
 
 
+def _find_score_element(container: Tag) -> Tag | None:
+    for element in container.find_all(["span", "div", "strong", "b"]):
+        text = element.get_text(" ", strip=True)
+        if SCORE_RE.fullmatch(text) and not PRICE_RE.search(text):
+            return element
+    return None
+
+
 def _stable_selector(element: Tag) -> str:
     classes = [
         cls
         for cls in element.get("class", [])
-        if not re.search(r"\d{3,}|active|selected|hover|open", str(cls), re.I)
+        if _is_safe_css_class(str(cls))
     ]
     if classes:
         return "." + ".".join(str(cls) for cls in classes[:2])
@@ -567,10 +600,17 @@ def _relative_selector(element: Tag) -> str:
     classes = [
         cls
         for cls in element.get("class", [])
-        if not re.search(r"\d{3,}|active|selected|hover|open", str(cls), re.I)
+        if _is_safe_css_class(str(cls))
     ]
     if classes:
         return "." + ".".join(str(cls) for cls in classes[:2])
     if element.get("itemprop"):
         return f'{element.name}[itemprop="{element["itemprop"]}"]'
     return str(element.name)
+
+
+def _is_safe_css_class(class_name: str) -> bool:
+    """Return whether a class can be emitted as a simple CSS selector."""
+    if re.search(r"\d{3,}|active|selected|hover|open", class_name, re.I):
+        return False
+    return bool(re.fullmatch(r"-?[_a-zA-Z][_a-zA-Z0-9-]*", class_name))

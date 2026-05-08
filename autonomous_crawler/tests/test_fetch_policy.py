@@ -76,6 +76,27 @@ class FetchPolicyTests(unittest.TestCase):
         self.assertEqual([attempt.mode for attempt in result.attempts], ["requests", "browser"])
         self.assertIn("js_shell", result.attempts[0].reasons)
 
+    def test_fetch_best_page_keeps_json_payload_on_requests(self) -> None:
+        def requests_fetch(url: str, headers: dict[str, str] | None) -> FetchAttempt:
+            return FetchAttempt(
+                mode="requests",
+                url=url,
+                html='{"data":{"list":[{"title":"Alpha"}]}}',
+                status_code=200,
+            )
+
+        def browser_fetch(url: str, headers: dict[str, str] | None, options=None) -> FetchAttempt:
+            raise AssertionError("browser should not be launched for JSON payloads")
+
+        result = fetch_best_page(
+            "https://api.example/list",
+            modes=["requests", "browser"],
+            fetchers={"requests": requests_fetch, "browser": browser_fetch},
+        )
+
+        self.assertEqual(result.mode, "requests")
+        self.assertIn("json_payload", result.attempts[0].reasons)
+
     def test_fetch_best_page_skips_browser_after_transport_errors(self) -> None:
         def failed_fetch(url: str, headers: dict[str, str] | None) -> FetchAttempt:
             return FetchAttempt(
