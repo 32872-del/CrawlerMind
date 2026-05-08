@@ -125,19 +125,25 @@ search workflow.
   and mock fixtures load before engine routing even when an advisor suggests an
   engine.
 
+- FastAPI opt-in LLM advisor support added: `CrawlRequest` accepts optional
+  `llm` config object, `POST /crawl` validates config eagerly (400 on missing
+  base_url/model), background workflow passes advisor to graph compiler, and
+  `llm_enabled`/`llm_decisions`/`llm_errors` are stored in persisted state.
+  11 new tests (38 API tests, 186 suite tests).
+
 ## Current Test Status
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 175 tests (skipped=3)
+Ran 186 tests (skipped=3)
 OK
 ```
 
 ## Current Limitations
 
-- Planner and Strategy can use optional LLM advisors through CLI/config, but
-  deterministic fallback remains the default and FastAPI does not yet expose LLM
-  configuration.
+- Planner and Strategy can use optional LLM advisors through CLI/config and now
+  also through FastAPI request-level configuration. Deterministic fallback
+  remains the default.
 - Recon selector inference is heuristic and currently strongest for product
   cards and Baidu-style ranking lists.
 - `site_spec_draft` detail selectors are drafts when only a list page is known.
@@ -188,3 +194,4 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
 10. ~~Add background job registry TTL cleanup.~~ Done 2026-05-07.
 11. ~~Implement LLM Advisor Phase A interfaces with fake-advisor tests.~~
     Done 2026-05-07.
+12. ~~Add FastAPI opt-in LLM advisor support.~~ Done 2026-05-08.

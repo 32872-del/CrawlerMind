@@ -1,4 +1,7 @@
-# Handoff: LLM-2026-000 - Supervisor State
+# Handoff: LLM-2026-000 - Supervisor State (archival snapshot)
+
+This handoff is superseded by
+[`docs/memory/handoffs/2026-05-08_LLM-2026-000_supervisor_handoff.md`](./2026-05-08_LLM-2026-000_supervisor_handoff.md).
 
 ## Current State
 
@@ -47,15 +50,12 @@ Employee memory files now include persistent-memory sections.
 
 ## Verification
 
-Last known checks:
+Historical baseline from this snapshot:
 
 ```text
 python -m unittest discover autonomous_crawler\tests
 Ran 84 tests
 OK (skipped=3)
-
-python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py run_results.py
-OK
 ```
 
 Opt-in browser smoke passed on 2026-05-06:
@@ -77,17 +77,7 @@ OK
 
 ## Next Recommended Action
 
-Start each session with:
-
-```text
-git pull origin main
-```
-
-Then review active assignments from:
-
-```text
-docs/team/TEAM_BOARD.md
-```
+Use the 2026-05-08 handoff for current work.
 
 ## Files To Read First
 

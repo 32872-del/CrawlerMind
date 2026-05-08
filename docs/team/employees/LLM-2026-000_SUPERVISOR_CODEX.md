@@ -42,6 +42,8 @@ Current state:
 - Git repository was initialized on 2026-05-07.
 - On 2026-05-08, CLI-level LLM-assisted Baidu hot-search smoke passed:
   30 items, validation passed, 0 LLM errors.
+- On 2026-05-08, FastAPI opt-in LLM advisors were accepted and the suite
+  reached 186 tests.
 
 Known risks:
 
@@ -51,6 +53,6 @@ Known risks:
 
 Next recommended actions:
 
-- Assign FastAPI opt-in LLM advisor support.
 - Add provider diagnostics for `run_simple.py`.
 - Start a small real-site sample suite.
+- Keep refreshing handoffs and status notes after accepted milestones.

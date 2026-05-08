@@ -26,17 +26,23 @@ Current Project Role: API Job Worker
   `docs/team/acceptance/2026-05-06_real_browser_spa_smoke_ACCEPTED.md`
 - Job Registry Concurrency Limits:
   `docs/team/acceptance/2026-05-07_job_registry_limits_ACCEPTED.md`
+- Job Registry TTL Cleanup:
+  `docs/team/acceptance/2026-05-07_job_registry_ttl_cleanup_ACCEPTED.md`
+- LLM Advisor Phase A Interfaces:
+  `docs/team/acceptance/2026-05-07_llm_phase_a_interfaces_ACCEPTED.md`
+- FastAPI Opt-In LLM Advisors:
+  `docs/team/acceptance/2026-05-08_fastapi_opt_in_llm_advisors_ACCEPTED.md`
 
 ## Current Assignment
 
-- Job Registry TTL Cleanup:
-  `docs/team/assignments/2026-05-07_LLM-2026-001_JOB_REGISTRY_TTL_CLEANUP.md`
+- None.
 
 ## Current Notes
 
-This employee completed Browser Fallback, FastAPI Background Jobs, Real Browser
-SPA Smoke, and Job Registry Concurrency Limits. The employee ID is stable; no
-active assignment is open.
+This employee completed browser fallback, FastAPI background jobs, real browser
+SPA smoke, job registry concurrency limits and TTL cleanup, LLM advisor Phase A,
+and the FastAPI opt-in LLM advisor path. The employee ID is stable; no active
+assignment is open.
 
 ## Persistent Memory
 
@@ -46,14 +52,17 @@ Accepted strengths:
 - Can add opt-in smoke tests without making the normal suite depend on browser
   binaries.
 - Can work on FastAPI boundaries with focused tests.
+- Can wire optional LLM advisors into service boundaries without breaking the
+  deterministic default path.
 
 Known risks:
 
 - Should not be assigned broad executor redesign without a precise file scope.
 - Browser work touches shared boundaries; require clear ownership before edits.
+- FastAPI LLM work should stay request-scoped and avoid hidden provider globals.
 
 Next suitable assignments:
 
-- Job registry persistence or TTL cleanup.
+- FastAPI request diagnostics or provider config validation.
 - Browser artifact cleanup policy.
 - Additional browser smoke fixtures.

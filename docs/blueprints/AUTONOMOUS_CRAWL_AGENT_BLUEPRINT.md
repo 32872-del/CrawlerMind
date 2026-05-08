@@ -21,7 +21,8 @@ Agent with:
 In scope now:
 
 - Single target URL workflow.
-- Natural-language task input through deterministic Planner rules.
+- Natural-language task input through deterministic Planner rules, plus
+  optional CLI/config LLM advisors.
 - Static HTML recon and selector inference.
 - HTTP execution.
 - Playwright browser rendering fallback.

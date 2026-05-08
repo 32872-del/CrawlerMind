@@ -3,8 +3,9 @@
 ## Summary
 
 Today Crawler-Mind crossed from optional LLM interface work into a real
-LLM-assisted smoke run. The system completed a Baidu realtime hot-search crawl
-with LLM Planner/Strategy enabled and extracted 30 validated items.
+LLM-assisted smoke run and a FastAPI LLM opt-in integration. The system
+completed a Baidu realtime hot-search crawl with LLM Planner/Strategy enabled
+and extracted 30 validated items.
 
 ## Completed
 
@@ -61,14 +62,31 @@ Pushed commits:
 ```text
 6a9541b LLM-2026-000: harden OpenAI-compatible adapter
 3e700d4 LLM-2026-000: keep mock fixtures off fnspider
+2fe69ad LLM-2026-000: close out real LLM smoke milestone
 ```
+
+### FastAPI Opt-In LLM Advisors (LLM-2026-001)
+
+- Added `LLMConfig` Pydantic model to `app.py` with fields: `enabled`,
+  `base_url`, `model`, `api_key`, `provider`, `timeout_seconds`, `temperature`,
+  `max_tokens`, `use_response_format`.
+- Added optional `llm` field to `CrawlRequest` (default `None`).
+- `POST /crawl` validates LLM config eagerly: returns 400 on missing
+  `base_url` or `model` when `llm.enabled=true`.
+- `_build_advisor_from_config()` constructs `OpenAICompatibleAdvisor` from
+  request-level config.
+- `run_crawl_workflow()` passes advisor to `compile_crawl_graph()`.
+- Background job stores `llm_enabled`, `llm_decisions`, `llm_errors` in
+  persisted final state.
+- 11 new tests added: 7 endpoint-level (`FastAPILLMOptInTests`), 4 unit-level
+  (`BuildAdvisorFromConfigTests`). Total: 38 API tests, 186 suite tests.
 
 ## Verification
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 175 tests
-OK (skipped=3)
+Ran 186 tests (skipped=3)
+OK
 
 python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py run_results.py run_simple.py
 OK
@@ -85,24 +103,22 @@ Extracted Data: 2 items
 - Level 3 Visual Page Understanding: not started.
 - Level 4 Site Mental Model: not started.
 - Level 5 Autonomous Agent: early CLI-level LLM Planner/Strategy slice is now
-  working against a real public page.
+  working against a real public page, and FastAPI opt-in LLM support is also
+  working.
 - Phase 6 Self-Healing and Memory: memory docs exist for team workflow, but
   crawler runtime memory and self-healing are not implemented.
 
 ## Current Risks
 
-- FastAPI still does not expose LLM advisor configuration.
-- LLM usage is practical through CLI/config, not yet through service endpoints.
 - API interception remains incomplete.
 - Site sample coverage is still thin.
 - Provider compatibility needs more real gateway samples.
+- No streaming support or persistent job registry.
 
 ## Next Recommended Tasks
 
-1. Assign `LLM-2026-001`: FastAPI opt-in LLM advisor support.
-2. Assign `LLM-2026-004`: docs/status consistency audit after today's LLM
-   smoke milestone.
-3. Supervisor or worker: add `run_simple.py --check-llm` for provider config
-   diagnostics.
-4. Start a small real-site sample suite: Baidu hot, static product fixture,
+1. Add `run_simple.py --check-llm` for provider config diagnostics.
+2. Start a small real-site sample suite: Baidu hot, static product fixture,
    local SPA, one simple public product/category page.
+3. Continue docs cleanup for employee memory and handoff refreshes when new
+   assignments land.

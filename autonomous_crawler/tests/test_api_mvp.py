@@ -22,6 +22,8 @@ from autonomous_crawler.api.app import (
     _register_job,
     _try_register_job,
     _update_job,
+    LLMConfig,
+    _build_advisor_from_config,
 )
 
 
@@ -460,6 +462,258 @@ class TTLcleanupTests(unittest.TestCase):
 
             self.assertIsNone(_get_job("stale"))
             self.assertIsNotNone(_get_job("keep"))
+
+
+class FastAPILLMOptInTests(unittest.TestCase):
+    """Tests for opt-in LLM advisor support in the FastAPI crawl path."""
+
+    def setUp(self) -> None:
+        with _jobs_lock:
+            _jobs.clear()
+
+    def test_post_crawl_without_llm_remains_deterministic(self) -> None:
+        """POST /crawl without llm field should not enable LLM."""
+        with patch("autonomous_crawler.api.app.run_crawl_workflow") as mock_wf, patch(
+            "autonomous_crawler.api.app.save_crawl_result"
+        ) as mock_save:
+            mock_wf.return_value = {
+                "status": "completed",
+                "extracted_data": {"items": [{"title": "A"}], "item_count": 1, "confidence": 1.0},
+                "validation_result": {"is_valid": True},
+                "llm_enabled": False,
+                "llm_decisions": [],
+                "llm_errors": [],
+            }
+            mock_save.return_value = "ok"
+
+            client = TestClient(create_app())
+            resp = client.post(
+                "/crawl",
+                json={"user_goal": "test", "target_url": "mock://catalog"},
+            )
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.json()["status"], "running")
+
+            time.sleep(0.5)
+            mock_wf.assert_called_once()
+            call_kwargs = mock_wf.call_args[1]
+            self.assertIsNone(call_kwargs.get("llm_config"))
+
+    def test_post_crawl_with_llm_enabled_false_remains_deterministic(self) -> None:
+        """POST /crawl with llm.enabled=false should not enable LLM."""
+        with patch("autonomous_crawler.api.app.run_crawl_workflow") as mock_wf, patch(
+            "autonomous_crawler.api.app.save_crawl_result"
+        ) as mock_save:
+            mock_wf.return_value = {
+                "status": "completed",
+                "extracted_data": {"items": [], "item_count": 0, "confidence": 0},
+                "validation_result": {"is_valid": False},
+            }
+            mock_save.return_value = "ok"
+
+            client = TestClient(create_app())
+            resp = client.post(
+                "/crawl",
+                json={
+                    "user_goal": "test",
+                    "target_url": "mock://catalog",
+                    "llm": {"enabled": False},
+                },
+            )
+            self.assertEqual(resp.status_code, 200)
+
+            time.sleep(0.5)
+            call_kwargs = mock_wf.call_args[1]
+            self.assertIsNone(call_kwargs.get("llm_config"))
+
+    def test_post_crawl_with_invalid_llm_config_returns_400(self) -> None:
+        """POST /crawl with llm.enabled=true but missing base_url should return 400."""
+        client = TestClient(create_app())
+        resp = client.post(
+            "/crawl",
+            json={
+                "user_goal": "test",
+                "target_url": "https://example.com",
+                "llm": {
+                    "enabled": True,
+                    "model": "test-model",
+                    # base_url missing
+                },
+            },
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn("base_url", resp.json()["detail"])
+
+    def test_post_crawl_with_missing_model_returns_400(self) -> None:
+        """POST /crawl with llm.enabled=true but missing model should return 400."""
+        client = TestClient(create_app())
+        resp = client.post(
+            "/crawl",
+            json={
+                "user_goal": "test",
+                "target_url": "https://example.com",
+                "llm": {
+                    "enabled": True,
+                    "base_url": "https://llm.example/v1",
+                    # model missing
+                },
+            },
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn("model", resp.json()["detail"])
+
+    def test_post_crawl_with_valid_llm_config_starts_job(self) -> None:
+        """POST /crawl with valid llm config should start a background job."""
+        with patch("autonomous_crawler.api.app.run_crawl_workflow") as mock_wf, patch(
+            "autonomous_crawler.api.app.save_crawl_result"
+        ) as mock_save:
+            mock_wf.return_value = {
+                "status": "completed",
+                "extracted_data": {"items": [], "item_count": 0, "confidence": 0},
+                "validation_result": {"is_valid": False},
+                "llm_enabled": True,
+                "llm_decisions": [{"node": "planner"}],
+                "llm_errors": [],
+            }
+            mock_save.return_value = "ok"
+
+            client = TestClient(create_app())
+            resp = client.post(
+                "/crawl",
+                json={
+                    "user_goal": "test",
+                    "target_url": "mock://catalog",
+                    "llm": {
+                        "enabled": True,
+                        "base_url": "https://llm.example/v1",
+                        "model": "test-model",
+                    },
+                },
+            )
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.json()["status"], "running")
+
+            time.sleep(0.5)
+            mock_wf.assert_called_once()
+            call_kwargs = mock_wf.call_args[1]
+            self.assertIsNotNone(call_kwargs.get("llm_config"))
+            self.assertTrue(call_kwargs["llm_config"].enabled)
+
+    def test_background_job_with_llm_completes_and_queryable(self) -> None:
+        """Background job with LLM should complete and be queryable via GET."""
+        with patch("autonomous_crawler.api.app.run_crawl_workflow") as mock_wf, patch(
+            "autonomous_crawler.api.app.save_crawl_result"
+        ) as mock_save:
+            mock_wf.return_value = {
+                "status": "completed",
+                "extracted_data": {"items": [{"title": "A"}], "item_count": 1, "confidence": 1.0},
+                "validation_result": {"is_valid": True},
+                "llm_enabled": True,
+                "llm_decisions": [{"node": "planner"}, {"node": "strategy"}],
+                "llm_errors": [],
+            }
+            mock_save.return_value = "ok"
+
+            client = TestClient(create_app())
+            post_resp = client.post(
+                "/crawl",
+                json={
+                    "user_goal": "test",
+                    "target_url": "mock://catalog",
+                    "llm": {
+                        "enabled": True,
+                        "base_url": "https://llm.example/v1",
+                        "model": "test-model",
+                    },
+                },
+            )
+            task_id = post_resp.json()["task_id"]
+
+            time.sleep(0.5)
+
+            get_resp = client.get(f"/crawl/{task_id}")
+            self.assertEqual(get_resp.status_code, 200)
+            self.assertEqual(get_resp.json()["status"], "completed")
+
+    def test_llm_config_error_in_background_records_failure(self) -> None:
+        """If LLM config validation somehow passes but advisor fails, job should fail gracefully."""
+        with patch("autonomous_crawler.api.app.run_crawl_workflow") as mock_wf, patch(
+            "autonomous_crawler.api.app.save_crawl_result"
+        ):
+            mock_wf.side_effect = RuntimeError("LLM configuration error: bad config")
+
+            client = TestClient(create_app())
+            post_resp = client.post(
+                "/crawl",
+                json={
+                    "user_goal": "test",
+                    "target_url": "mock://catalog",
+                    "llm": {
+                        "enabled": True,
+                        "base_url": "https://llm.example/v1",
+                        "model": "test-model",
+                    },
+                },
+            )
+            task_id = post_resp.json()["task_id"]
+
+            time.sleep(0.5)
+
+            get_resp = client.get(f"/crawl/{task_id}")
+            self.assertEqual(get_resp.status_code, 200)
+            self.assertEqual(get_resp.json()["status"], "failed")
+            self.assertIn("LLM configuration error", get_resp.json()["error"])
+
+
+class BuildAdvisorFromConfigTests(unittest.TestCase):
+    """Unit tests for _build_advisor_from_config."""
+
+    def test_valid_config_returns_advisor(self) -> None:
+        from autonomous_crawler.llm.openai_compatible import OpenAICompatibleAdvisor
+
+        config = LLMConfig(
+            enabled=True,
+            base_url="https://llm.example/v1",
+            model="test-model",
+        )
+        advisor = _build_advisor_from_config(config)
+        self.assertIsInstance(advisor, OpenAICompatibleAdvisor)
+
+    def test_missing_base_url_raises(self) -> None:
+        from autonomous_crawler.llm.openai_compatible import LLMConfigurationError
+
+        config = LLMConfig(enabled=True, model="test-model")
+        with self.assertRaises(LLMConfigurationError):
+            _build_advisor_from_config(config)
+
+    def test_missing_model_raises(self) -> None:
+        from autonomous_crawler.llm.openai_compatible import LLMConfigurationError
+
+        config = LLMConfig(enabled=True, base_url="https://llm.example/v1")
+        with self.assertRaises(LLMConfigurationError):
+            _build_advisor_from_config(config)
+
+    def test_config_fields_passed_through(self) -> None:
+        config = LLMConfig(
+            enabled=True,
+            base_url="https://llm.example/v1",
+            model="my-model",
+            api_key="my-key",
+            provider="my-provider",
+            timeout_seconds=15.0,
+            temperature=0.5,
+            max_tokens=400,
+            use_response_format=False,
+        )
+        advisor = _build_advisor_from_config(config)
+        self.assertEqual(advisor.config.base_url, "https://llm.example/v1")
+        self.assertEqual(advisor.config.model, "my-model")
+        self.assertEqual(advisor.config.api_key, "my-key")
+        self.assertEqual(advisor.config.provider, "my-provider")
+        self.assertEqual(advisor.config.timeout_seconds, 15.0)
+        self.assertEqual(advisor.config.temperature, 0.5)
+        self.assertEqual(advisor.config.max_tokens, 400)
+        self.assertFalse(advisor.config.use_response_format)
 
 
 if __name__ == "__main__":

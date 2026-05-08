@@ -10,14 +10,32 @@ from typing import Any
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
+from ..llm.openai_compatible import (
+    LLMConfigurationError,
+    OpenAICompatibleAdvisor,
+    OpenAICompatibleConfig,
+)
 from ..storage import list_crawl_results, load_crawl_result, save_crawl_result
 from ..workflows.crawl_graph import compile_crawl_graph
+
+
+class LLMConfig(BaseModel):
+    enabled: bool = False
+    base_url: str = ""
+    model: str = ""
+    api_key: str = ""
+    provider: str = "openai-compatible"
+    timeout_seconds: float = Field(default=30.0, gt=0)
+    temperature: float = Field(default=0.0, ge=0)
+    max_tokens: int = Field(default=800, gt=0)
+    use_response_format: bool = True
 
 
 class CrawlRequest(BaseModel):
     user_goal: str = Field(..., min_length=1)
     target_url: str = Field(..., min_length=1)
     max_retries: int = Field(default=3, ge=0, le=10)
+    llm: LLMConfig | None = None
 
 
 class CrawlResponse(BaseModel):
@@ -134,13 +152,42 @@ def _parse_iso(iso_str: str) -> float:
         return 0.0
 
 
-def _background_crawl(task_id: str, user_goal: str, target_url: str, max_retries: int) -> None:
+def _build_advisor_from_config(config: LLMConfig) -> OpenAICompatibleAdvisor:
+    """Build an advisor from request-level LLM config.
+
+    Raises LLMConfigurationError if required fields are missing.
+    """
+    if not config.base_url.strip():
+        raise LLMConfigurationError("llm.base_url is required when llm.enabled is true")
+    if not config.model.strip():
+        raise LLMConfigurationError("llm.model is required when llm.enabled is true")
+    llm_config = OpenAICompatibleConfig(
+        base_url=config.base_url.strip(),
+        model=config.model.strip(),
+        api_key=config.api_key.strip(),
+        provider=config.provider.strip() or "openai-compatible",
+        timeout_seconds=config.timeout_seconds,
+        temperature=config.temperature,
+        max_tokens=config.max_tokens,
+        use_response_format=config.use_response_format,
+    )
+    return OpenAICompatibleAdvisor(llm_config)
+
+
+def _background_crawl(
+    task_id: str,
+    user_goal: str,
+    target_url: str,
+    max_retries: int,
+    llm_config: LLMConfig | None = None,
+) -> None:
     """Run the crawl workflow in a background thread."""
     try:
         final_state = run_crawl_workflow(
             user_goal=user_goal,
             target_url=target_url,
             max_retries=max_retries,
+            llm_config=llm_config,
         )
         save_crawl_result(final_state)
 
@@ -171,6 +218,15 @@ def create_app() -> FastAPI:
     def crawl(request: CrawlRequest) -> dict[str, Any]:
         _cleanup_stale_jobs()
 
+        # Validate LLM config eagerly so bad requests get a clear 400
+        llm_config: LLMConfig | None = None
+        if request.llm is not None and request.llm.enabled:
+            try:
+                _build_advisor_from_config(request.llm)
+            except LLMConfigurationError as exc:
+                raise HTTPException(status_code=400, detail=str(exc))
+            llm_config = request.llm
+
         task_id = str(uuid.uuid4())[:8]
 
         if not _try_register_job(task_id, request.user_goal, request.target_url):
@@ -181,7 +237,7 @@ def create_app() -> FastAPI:
 
         thread = threading.Thread(
             target=_background_crawl,
-            args=(task_id, request.user_goal, request.target_url, request.max_retries),
+            args=(task_id, request.user_goal, request.target_url, request.max_retries, llm_config),
             daemon=True,
         )
         thread.start()
@@ -224,7 +280,16 @@ def create_app() -> FastAPI:
     return app
 
 
-def run_crawl_workflow(user_goal: str, target_url: str, max_retries: int = 3) -> dict[str, Any]:
+def run_crawl_workflow(
+    user_goal: str,
+    target_url: str,
+    max_retries: int = 3,
+    llm_config: LLMConfig | None = None,
+) -> dict[str, Any]:
+    advisor = None
+    if llm_config is not None and llm_config.enabled:
+        advisor = _build_advisor_from_config(llm_config)
+
     initial_state = {
         "user_goal": user_goal,
         "target_url": target_url,
@@ -241,7 +306,10 @@ def run_crawl_workflow(user_goal: str, target_url: str, max_retries: int = 3) ->
         "error_log": [],
         "messages": [],
     }
-    app = compile_crawl_graph()
+    app = compile_crawl_graph(
+        planning_advisor=advisor,
+        strategy_advisor=advisor,
+    )
     return app.invoke(initial_state)
 
 
