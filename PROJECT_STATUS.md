@@ -114,18 +114,30 @@ search workflow.
 - Simplified user entrypoint added: copy `clm_config.example.json` to
   `clm_config.json`, fill API settings, then run `python run_simple.py "<goal>"
   "<url>"`. Missing config falls back to deterministic mode.
+- OpenAI-compatible adapter hardened for practical providers: root base URLs
+  are normalized to `/v1/chat/completions`, response previews are bounded and
+  redacted, content parts and `choices[0].text` are supported, and unsupported
+  `response_format` errors trigger one retry without that parameter.
+- Real LLM-assisted smoke accepted on 2026-05-08: `run_simple.py` completed
+  Baidu realtime hot-search extraction with LLM enabled, 30 items, confidence
+  1.0, validation passed, 0 LLM errors.
+- Mock fixture guardrail added: non-HTTP URLs cannot be routed to `fnspider`,
+  and mock fixtures load before engine routing even when an advisor suggests an
+  engine.
 
 ## Current Test Status
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 164 tests (skipped=3)
+Ran 175 tests (skipped=3)
 OK
 ```
 
 ## Current Limitations
 
-- Planner still uses deterministic keyword matching, not an LLM.
+- Planner and Strategy can use optional LLM advisors through CLI/config, but
+  deterministic fallback remains the default and FastAPI does not yet expose LLM
+  configuration.
 - Recon selector inference is heuristic and currently strongest for product
   cards and Baidu-style ranking lists.
 - `site_spec_draft` detail selectors are drafts when only a list page is known.
@@ -148,11 +160,11 @@ Move from the local MVP toward a more robust crawl service:
 durable jobs + LLM-assisted planning + broader site samples
 ```
 
-The last verified real workflow is:
+The last verified real LLM-assisted workflow is:
 
 ```text
-python run_skeleton.py "采集百度热搜榜前30条" https://top.baidu.com/board?tab=realtime
-Final Status: completed, Extracted Data: 30 items, Validation: passed
+python run_simple.py "collect top 30 hot searches" https://top.baidu.com/board?tab=realtime
+Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM errors: 0
 ```
 
 ## Next Tasks
@@ -163,10 +175,11 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed
    explicit strategy option.~~ Explicit strategy option done 2026-05-06;
    automatic rules deferred until more site samples exist.
 3. ~~Add browser-mode fallback for pages where HTTP HTML is incomplete.~~ Done 2026-05-06.
-4. Add optional LLM Planner/Strategy with deterministic fallback. Design
+4. ~~Add optional LLM Planner/Strategy with deterministic fallback.~~ Design
    drafted, audited, revised, and accepted 2026-05-07; Phase A interfaces
    implemented and accepted 2026-05-07. Phase B/C merge hardening implemented
-   2026-05-07. OpenAI-compatible provider adapter added 2026-05-07.
+   2026-05-07. OpenAI-compatible provider adapter added 2026-05-07. First
+   real-site LLM-assisted CLI smoke accepted 2026-05-08.
 5. ~~Add background job execution for FastAPI crawl requests.~~ Done 2026-05-06.
 6. ~~Add real browser SPA smoke validation.~~ Done 2026-05-06.
 7. ~~Initialize local Git repository and employee memory model.~~ Done 2026-05-07.

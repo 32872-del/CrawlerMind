@@ -2,7 +2,8 @@
 
 ## Current State
 
-Project is an early but runnable autonomous crawler MVP.
+Project is an early but runnable autonomous crawler MVP with a working
+CLI-level LLM-assisted Planner/Strategy path.
 
 Git repository was initialized locally on 2026-05-07 at:
 
@@ -68,7 +69,8 @@ OK
 
 ## Known Risks
 
-- Planner/Strategy are still deterministic and not LLM-assisted.
+- Planner/Strategy have optional LLM advisors for CLI/config usage, but FastAPI
+  does not yet expose LLM configuration.
 - Background job registry is in-memory.
 - No branch/lock automation exists yet.
 - Human still relays messages between LLM workers.
@@ -95,5 +97,6 @@ docs/team/TEAM_BOARD.md
 docs/team/employees/LLM-2026-000_SUPERVISOR_CODEX.md
 docs/memory/EMPLOYEE_MEMORY_MODEL.md
 docs/reports/2026-05-06_DAILY_REPORT.md
+docs/reports/2026-05-08_DAILY_REPORT.md
 docs/reviews/2026-05-06_TEAM_COLLABORATION_SYSTEM_REVIEW.md
 ```

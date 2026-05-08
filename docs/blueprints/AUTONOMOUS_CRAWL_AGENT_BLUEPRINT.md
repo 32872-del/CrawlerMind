@@ -172,9 +172,19 @@ Status: complete for MVP.
 
 ### Phase 3: LLM-Assisted Planning
 
+Status: current CLI MVP.
+
 - Add optional LLM Planner with deterministic fallback.
 - Add optional LLM Strategy that reasons over recon output.
 - Store LLM decisions and prompts for audit.
+
+Current evidence:
+
+- Provider-neutral advisor interfaces and audit records are implemented.
+- OpenAI-compatible adapter is available through `run_simple.py` and
+  `run_skeleton.py --llm`.
+- 2026-05-08 real-site smoke completed Baidu realtime hot-search extraction
+  with LLM enabled: 30 items, validation passed, 0 LLM errors.
 
 ### Phase 4: Visual Recon Prototype
 

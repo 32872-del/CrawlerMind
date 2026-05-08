@@ -40,6 +40,8 @@ Current state:
 - Project uses assignment documents, developer logs, and supervisor acceptance
   records as truth chain.
 - Git repository was initialized on 2026-05-07.
+- On 2026-05-08, CLI-level LLM-assisted Baidu hot-search smoke passed:
+  30 items, validation passed, 0 LLM errors.
 
 Known risks:
 
@@ -49,6 +51,6 @@ Known risks:
 
 Next recommended actions:
 
-- Add `docs/decisions/` ADRs.
-- Add `docs/runbooks/` for git workflow and onboarding.
-- Assign optional LLM Planner/Strategy interface design.
+- Assign FastAPI opt-in LLM advisor support.
+- Add provider diagnostics for `run_simple.py`.
+- Start a small real-site sample suite.

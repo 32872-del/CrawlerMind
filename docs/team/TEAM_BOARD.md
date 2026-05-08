@@ -1,16 +1,16 @@
 # Team Board
 
-Last updated: 2026-05-07
+Last updated: 2026-05-08
 
 ## Active Employees
 
 | Employee ID | Display Name | Current Project Role | Status | Current Assignment |
 |---|---|---|---|---|
 | LLM-2026-000 | Supervisor Codex | Project Supervisor | active | project direction, assignments, acceptance |
-| LLM-2026-001 | Worker Alpha | LLM Interface Worker | accepted | LLM Advisor Phase A Interfaces |
+| LLM-2026-001 | Worker Alpha | LLM / API Worker | assigned | FastAPI Opt-In LLM Advisors |
 | LLM-2026-002 | Worker Beta | Error Path QA Worker | accepted | Error-path hardening |
 | LLM-2026-003 | Worker Gamma | Unassigned | standby | none |
-| LLM-2026-004 | Worker Delta | Documentation Worker | accepted | LLM Phase A Docs / Readiness Audit |
+| LLM-2026-004 | Worker Delta | Documentation Worker | assigned | Status Docs Audit After Real LLM Smoke |
 
 ## Current Project Roles
 
@@ -40,6 +40,9 @@ Last updated: 2026-05-07
 | LLM Interface Design Audit | LLM-2026-004 | ROLE-DOCS | accepted | `docs/team/acceptance/2026-05-07_llm_interface_doc_audit_ACCEPTED.md` |
 | LLM Advisor Phase A Interfaces | LLM-2026-001 | ROLE-LLM-INTERFACE | accepted | `docs/team/acceptance/2026-05-07_llm_phase_a_interfaces_ACCEPTED.md` |
 | LLM Phase A Docs / Readiness Audit | LLM-2026-004 | ROLE-DOCS | accepted | `docs/team/acceptance/2026-05-07_llm_phase_a_docs_audit_ACCEPTED.md` |
+| Real LLM Baidu Hot Smoke | LLM-2026-000 | ROLE-SUPERVISOR | accepted | `docs/team/acceptance/2026-05-08_real_llm_baidu_hot_smoke_ACCEPTED.md` |
+| FastAPI Opt-In LLM Advisors | LLM-2026-001 | ROLE-API / ROLE-LLM-INTERFACE | assigned | pending |
+| Status Docs Audit After Real LLM Smoke | LLM-2026-004 | ROLE-DOCS | assigned | pending |
 
 ## Accepted Work Today
 
@@ -61,13 +64,15 @@ Last updated: 2026-05-07
 | LLM Phase A Docs / Readiness Audit | LLM-2026-004 | `docs/team/acceptance/2026-05-07_llm_phase_a_docs_audit_ACCEPTED.md` | 7 findings, highest medium; acceptance checks applied |
 | LLM Advisor Phase B/C Merge Hardening | LLM-2026-000 | supervisor direct work | Planner validation and Strategy conservative merge rules |
 | OpenAI-Compatible LLM Adapter | LLM-2026-000 | supervisor direct work | opt-in provider adapter and CLI path |
+| Real LLM Baidu Hot Smoke | LLM-2026-000 | `docs/team/acceptance/2026-05-08_real_llm_baidu_hot_smoke_ACCEPTED.md` | LLM-enabled Baidu hot-search run extracted 30 validated items |
 
 ## Upcoming Candidate Tasks
 
-1. Real LLM-assisted smoke test.
-2. FastAPI opt-in support for LLM advisors.
-3. Site sample collection for automatic engine selection.
-4. Durable job registry design after the in-memory MVP stabilizes.
+1. FastAPI opt-in support for LLM advisors.
+2. `run_simple.py --check-llm` provider diagnostics.
+3. Real-site sample suite for strategy and selector reliability.
+4. Site sample collection for future automatic engine selection.
+5. Durable job registry design after the in-memory MVP stabilizes.
 
 ## Supervisor Notes
 
@@ -77,4 +82,6 @@ Last updated: 2026-05-07
 - Automatic fnspider selection is deferred until more real site samples exist.
 - Visual understanding remains blueprint-level and should not be started before
   browser artifacts exist.
-- LLM provider adapter exists for CLI. Real provider smoke is the next gate.
+- LLM provider adapter exists for CLI. Real provider smoke passed on
+  2026-05-08 with Baidu realtime hot-search extraction.
+- FastAPI LLM integration is now the next service-boundary gate.
