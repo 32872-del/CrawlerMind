@@ -2,12 +2,29 @@
 from __future__ import annotations
 
 import json
+from dataclasses import dataclass, field
 from typing import Any
-from urllib.parse import urljoin
+from urllib.parse import urlencode, urljoin, urlparse, parse_qs, urlunparse
 
 import httpx
 
 from .site_zoo import API_LIST_JSON
+
+
+_TRACKING_URL_PATTERNS = (
+    "google-analytics", "googletagmanager", "analytics.google",
+    "telemetry", "/collect", "/pixel", "/beacon", "/metrics",
+    "/tracking", "segment.io", "segment.com", "mixpanel.com",
+    "amplitude.com", "hotjar.com", "fullstory.com", "clarity.ms",
+    "facebook.net/tr", "doubleclick.net", "adservice.google",
+    "stats.", "pixel.", "track.",
+)
+
+
+def is_tracking_url(url: str) -> bool:
+    """Return True if the URL matches known analytics/telemetry patterns."""
+    lowered = url.lower()
+    return any(pattern in lowered for pattern in _TRACKING_URL_PATTERNS)
 
 
 def build_api_candidates(api_hints: list[str], base_url: str = "") -> list[dict[str, Any]]:
@@ -19,6 +36,8 @@ def build_api_candidates(api_hints: list[str], base_url: str = "") -> list[dict[
         if url in seen:
             continue
         seen.add(url)
+        if is_tracking_url(url):
+            continue
         lowered = url.lower()
         score = 0
         if "api" in lowered:
@@ -81,6 +100,10 @@ def fetch_json_api(
             "data": {"hits": [{"title": "POST Alpha"}, {"title": "POST Beta"}]},
             "status_code": 200,
         }
+
+    paged = _mock_paged_response(url)
+    if paged is not None:
+        return paged
 
     method = method.upper()
     if method not in {"GET", "POST"}:
@@ -285,3 +308,491 @@ def _first_nested(record: dict[str, Any], *paths: list[str]) -> Any:
         if current not in {None, ""}:
             return current
     return None
+
+
+# ---------------------------------------------------------------------------
+# Pagination mock data
+# ---------------------------------------------------------------------------
+
+_PAGED_PRODUCTS: dict[int, list[dict[str, Any]]] = {
+    1: [
+        {"title": "Paged Alpha", "price": 10.0, "page": 1},
+        {"title": "Paged Beta", "price": 20.0, "page": 1},
+        {"title": "Paged Gamma", "price": 30.0, "page": 1},
+    ],
+    2: [
+        {"title": "Paged Delta", "price": 40.0, "page": 2},
+        {"title": "Paged Epsilon", "price": 50.0, "page": 2},
+        {"title": "Paged Zeta", "price": 60.0, "page": 2},
+    ],
+    3: [
+        {"title": "Paged Eta", "price": 70.0, "page": 3},
+        {"title": "Paged Theta", "price": 80.0, "page": 3},
+        {"title": "Paged Iota", "price": 90.0, "page": 3},
+    ],
+}
+
+_OFFSET_PRODUCTS: list[dict[str, Any]] = [
+    {"title": "Offset Alpha", "price": 11.0},
+    {"title": "Offset Beta", "price": 22.0},
+    {"title": "Offset Gamma", "price": 33.0},
+    {"title": "Offset Delta", "price": 44.0},
+    {"title": "Offset Epsilon", "price": 55.0},
+    {"title": "Offset Zeta", "price": 66.0},
+    {"title": "Offset Eta", "price": 77.0},
+    {"title": "Offset Theta", "price": 88.0},
+    {"title": "Offset Iota", "price": 99.0},
+]
+
+_CURSOR_PRODUCTS: dict[str, list[dict[str, Any]]] = {
+    "": [
+        {"title": "Cursor Alpha", "price": 15.0},
+        {"title": "Cursor Beta", "price": 25.0},
+        {"title": "Cursor Gamma", "price": 35.0},
+    ],
+    "page2": [
+        {"title": "Cursor Delta", "price": 45.0},
+        {"title": "Cursor Epsilon", "price": 55.0},
+        {"title": "Cursor Zeta", "price": 65.0},
+    ],
+    "page3": [
+        {"title": "Cursor Eta", "price": 75.0},
+        {"title": "Cursor Theta", "price": 85.0},
+        {"title": "Cursor Iota", "price": 95.0},
+    ],
+}
+
+_CURSOR_NEXT: dict[str, str | None] = {
+    "": "page2",
+    "page2": "page3",
+    "page3": None,
+}
+
+# Stuck cursor fixture: next_cursor always equals current cursor
+_CURSOR_STUCK: dict[str, list[dict[str, Any]]] = {
+    "": [{"title": "Stuck Alpha"}],
+    "stuck": [{"title": "Stuck Beta"}],
+}
+_CURSOR_STUCK_NEXT: dict[str, str | None] = {
+    "": "stuck",
+    "stuck": "stuck",
+}
+
+# Duplicate items across pages for dedupe testing
+_DEDUPED_PRODUCTS: dict[int, list[dict[str, Any]]] = {
+    1: [
+        {"id": "a1", "title": "Dedup Alpha"},
+        {"id": "b2", "title": "Dedup Beta"},
+    ],
+    2: [
+        {"id": "b2", "title": "Dedup Beta"},  # duplicate
+        {"id": "c3", "title": "Dedup Gamma"},
+    ],
+}
+
+# Empty pages fixture: pages 2+ are empty
+_EMPTY_AFTER_FIRST: dict[int, list[dict[str, Any]]] = {
+    1: [{"title": "First Only", "id": "f1"}],
+}
+
+
+def _mock_paged_response(url: str) -> dict[str, Any] | None:
+    """Return a deterministic mock paginated response, or None if not a mock URL."""
+    parsed = urlparse(url)
+    params = parse_qs(parsed.query, keep_blank_values=True)
+
+    def _param(name: str, default: str = "") -> str:
+        values = params.get(name, [default])
+        return values[0] if values else default
+
+    host = parsed.hostname or ""
+    path = parsed.path or ""
+
+    # Page-based: mock://api/paged-products?page=N
+    if host == "api" and path == "/paged-products":
+        page = int(_param("page", "1"))
+        items = _PAGED_PRODUCTS.get(page, [])
+        total_pages = len(_PAGED_PRODUCTS)
+        next_page = page + 1 if page < total_pages else None
+        data: dict[str, Any] = {
+            "items": items,
+            "page": page,
+            "total_pages": total_pages,
+            "total": sum(len(v) for v in _PAGED_PRODUCTS.values()),
+        }
+        if next_page is not None:
+            data["next_page"] = next_page
+        return {"ok": True, "url": url, "data": data, "status_code": 200}
+
+    # Offset-based: mock://api/offset-products?offset=N&limit=M
+    if host == "api" and path == "/offset-products":
+        offset = int(_param("offset", "0"))
+        limit = int(_param("limit", "3"))
+        sliced = _OFFSET_PRODUCTS[offset : offset + limit]
+        total = len(_OFFSET_PRODUCTS)
+        next_offset = offset + limit if offset + limit < total else None
+        data = {
+            "items": sliced,
+            "offset": offset,
+            "limit": limit,
+            "total": total,
+        }
+        if next_offset is not None:
+            data["next_offset"] = next_offset
+        return {"ok": True, "url": url, "data": data, "status_code": 200}
+
+    # Cursor-based: mock://api/cursor-products?cursor=X
+    if host == "api" and path == "/cursor-products":
+        cursor = _param("cursor", "")
+        items = _CURSOR_PRODUCTS.get(cursor, [])
+        next_cursor = _CURSOR_NEXT.get(cursor)
+        data = {"items": items}
+        if next_cursor is not None:
+            data["next_cursor"] = next_cursor
+        if cursor:
+            data["cursor"] = cursor
+        return {"ok": True, "url": url, "data": data, "status_code": 200}
+
+    # Stuck cursor: mock://api/cursor-stuck?cursor=X
+    if host == "api" and path == "/cursor-stuck":
+        cursor = _param("cursor", "")
+        items = _CURSOR_STUCK.get(cursor, [])
+        next_cursor = _CURSOR_STUCK_NEXT.get(cursor)
+        data = {"items": items}
+        if next_cursor is not None:
+            data["next_cursor"] = next_cursor
+        if cursor:
+            data["cursor"] = cursor
+        return {"ok": True, "url": url, "data": data, "status_code": 200}
+
+    # Dedupe fixture: mock://api/duped-products?page=N
+    if host == "api" and path == "/duped-products":
+        page = int(_param("page", "1"))
+        items = _DEDUPED_PRODUCTS.get(page, [])
+        total_pages = len(_DEDUPED_PRODUCTS)
+        next_page = page + 1 if page < total_pages else None
+        data = {"items": items, "page": page, "total_pages": total_pages}
+        if next_page is not None:
+            data["next_page"] = next_page
+        return {"ok": True, "url": url, "data": data, "status_code": 200}
+
+    # Empty-after-first: mock://api/empty-after-first?page=N
+    if host == "api" and path == "/empty-after-first":
+        page = int(_param("page", "1"))
+        items = _EMPTY_AFTER_FIRST.get(page, [])
+        total_pages = 3
+        next_page = page + 1 if page < total_pages else None
+        data = {"items": items, "page": page, "total_pages": total_pages}
+        if next_page is not None:
+            data["next_page"] = next_page
+        return {"ok": True, "url": url, "data": data, "status_code": 200}
+
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Pagination spec detection & multi-page fetch
+# ---------------------------------------------------------------------------
+
+_CURSOR_FIELD_CANDIDATES = (
+    "next_cursor", "nextPage", "next_page_token",
+    "after", "page_token",
+)
+_NEXT_PAGE_FIELD_CANDIDATES = ("next_page", "nextPage", "next_page_number")
+_NEXT_OFFSET_FIELD_CANDIDATES = ("next_offset", "nextOffset")
+
+
+def _detect_pagination_fields(data: dict[str, Any]) -> dict[str, Any]:
+    """Inspect a JSON response for pagination hints.
+
+    Returns a dict describing detected pagination fields:
+      - next_cursor: cursor value for cursor-based pagination
+      - next_page: page number for page-based pagination
+      - next_offset: offset for offset-based pagination
+    Only includes keys where a value was found.
+    """
+    result: dict[str, Any] = {}
+    if not isinstance(data, dict):
+        return result
+    for field_name in _CURSOR_FIELD_CANDIDATES:
+        value = data.get(field_name)
+        if value is not None and value != "":
+            result["next_cursor"] = str(value)
+            break
+    for field_name in _NEXT_PAGE_FIELD_CANDIDATES:
+        value = data.get(field_name)
+        if value is not None:
+            try:
+                result["next_page"] = int(value)
+            except (ValueError, TypeError):
+                result["next_page"] = value
+            break
+    for field_name in _NEXT_OFFSET_FIELD_CANDIDATES:
+        value = data.get(field_name)
+        if value is not None:
+            try:
+                result["next_offset"] = int(value)
+            except (ValueError, TypeError):
+                result["next_offset"] = value
+            break
+    return result
+
+
+@dataclass
+class PaginationSpec:
+    """Describes how to paginate a JSON API."""
+    type: str = "none"  # "page", "offset", "cursor", "none"
+    page_param: str = "page"
+    limit_param: str = "limit"
+    offset_param: str = "offset"
+    cursor_param: str = "cursor"
+    limit: int = 10
+    max_pages: int = 10
+    empty_page_threshold: int = 2
+    dedupe_key_fields: tuple[str, ...] = ("url", "link", "objectID", "id", "object_id")
+
+
+@dataclass
+class PaginatedResult:
+    """Aggregated result from multi-page fetching."""
+    all_items: list[dict[str, Any]] = field(default_factory=list)
+    pages_fetched: int = 0
+    pagination_type: str = "none"
+    api_responses: list[dict[str, Any]] = field(default_factory=list)
+    deduplicated_count: int = 0
+    stop_reason: str = ""
+
+
+def _dedupe_items(
+    items: list[dict[str, Any]],
+    key_fields: tuple[str, ...],
+) -> tuple[list[dict[str, Any]], int]:
+    """Remove duplicate items based on stable key fields.
+
+    Returns (deduplicated_list, number_of_duplicates_removed).
+    Falls back to title+hash if no key field matches.
+    """
+    seen: set[str] = set()
+    unique: list[dict[str, Any]] = []
+    dupes = 0
+    for item in items:
+        key = _item_dedupe_key(item, key_fields)
+        if key in seen:
+            dupes += 1
+            continue
+        seen.add(key)
+        unique.append(item)
+    return unique, dupes
+
+
+def _item_dedupe_key(item: dict[str, Any], key_fields: tuple[str, ...]) -> str:
+    for field_name in key_fields:
+        value = item.get(field_name)
+        if value is not None and value != "":
+            return f"{field_name}:{value}"
+    title = item.get("title", "")
+    return f"title:{title}"
+
+
+def fetch_paginated_api(
+    url: str,
+    pagination: PaginationSpec | None = None,
+    headers: dict[str, str] | None = None,
+    method: str = "GET",
+    post_data: str | dict[str, Any] | None = None,
+    max_items: int = 0,
+) -> PaginatedResult:
+    """Fetch a JSON API across multiple pages.
+
+    Args:
+        url: Base API URL (or first page URL).
+        pagination: PaginationSpec describing how to paginate.
+        headers: HTTP headers.
+        method: HTTP method.
+        post_data: POST body for POST-based APIs.
+        max_items: Stop after collecting this many items (0 = unlimited).
+
+    Returns:
+        PaginatedResult with aggregated items and metadata.
+    """
+    if pagination is None:
+        pagination = PaginationSpec()
+
+    result = PaginatedResult(pagination_type=pagination.type)
+
+    if pagination.type == "none":
+        response = fetch_json_api(url, headers=headers, method=method, post_data=post_data)
+        result.api_responses.append(response)
+        records = extract_records_from_json(response.get("data"))
+        items = normalize_api_records(records, max_items=max_items)
+        result.all_items = items
+        result.pages_fetched = 1
+        return result
+
+    if pagination.type == "page":
+        _fetch_page_pagination(url, pagination, headers, method, post_data, max_items, result)
+    elif pagination.type == "offset":
+        _fetch_offset_pagination(url, pagination, headers, method, post_data, max_items, result)
+    elif pagination.type == "cursor":
+        _fetch_cursor_pagination(url, pagination, headers, method, post_data, max_items, result)
+    else:
+        response = fetch_json_api(url, headers=headers, method=method, post_data=post_data)
+        result.api_responses.append(response)
+        records = extract_records_from_json(response.get("data"))
+        result.all_items = normalize_api_records(records, max_items=max_items)
+        result.pages_fetched = 1
+
+    return result
+
+
+def _fetch_page_pagination(
+    url: str,
+    spec: PaginationSpec,
+    headers: dict[str, str] | None,
+    method: str,
+    post_data: str | dict[str, Any] | None,
+    max_items: int,
+    result: PaginatedResult,
+) -> None:
+    current_page = 1
+    visited_urls: set[str] = set()
+    consecutive_empty = 0
+    for _ in range(spec.max_pages):
+        if max_items and len(result.all_items) >= max_items:
+            result.stop_reason = "max_items"
+            break
+        page_url = _set_query_param(url, spec.page_param, str(current_page))
+        if page_url in visited_urls:
+            result.stop_reason = "repeated_url"
+            break
+        visited_urls.add(page_url)
+        response = fetch_json_api(page_url, headers=headers, method=method, post_data=post_data)
+        result.api_responses.append(response)
+        records = extract_records_from_json(response.get("data"))
+        if not records:
+            consecutive_empty += 1
+            if consecutive_empty >= spec.empty_page_threshold:
+                result.stop_reason = "empty_pages"
+                break
+        else:
+            consecutive_empty = 0
+            new_items = normalize_api_records(records, max_items=0)
+            result.all_items.extend(new_items)
+            result.pages_fetched += 1
+            result.all_items, dupes = _dedupe_items(result.all_items, spec.dedupe_key_fields)
+            result.deduplicated_count += dupes
+            if max_items and len(result.all_items) > max_items:
+                result.all_items = result.all_items[:max_items]
+        next_hint = _detect_pagination_fields(response.get("data", {}))
+        next_page = next_hint.get("next_page")
+        if next_page is not None:
+            current_page = int(next_page)
+        else:
+            result.stop_reason = result.stop_reason or "no_next_hint"
+            break
+
+
+def _fetch_offset_pagination(
+    url: str,
+    spec: PaginationSpec,
+    headers: dict[str, str] | None,
+    method: str,
+    post_data: str | dict[str, Any] | None,
+    max_items: int,
+    result: PaginatedResult,
+) -> None:
+    current_offset = 0
+    visited_urls: set[str] = set()
+    consecutive_empty = 0
+    for _ in range(spec.max_pages):
+        if max_items and len(result.all_items) >= max_items:
+            result.stop_reason = "max_items"
+            break
+        offset_url = _set_query_param(url, spec.offset_param, str(current_offset))
+        offset_url = _set_query_param(offset_url, spec.limit_param, str(spec.limit))
+        if offset_url in visited_urls:
+            result.stop_reason = "repeated_url"
+            break
+        visited_urls.add(offset_url)
+        response = fetch_json_api(offset_url, headers=headers, method=method, post_data=post_data)
+        result.api_responses.append(response)
+        records = extract_records_from_json(response.get("data"))
+        if not records:
+            consecutive_empty += 1
+            if consecutive_empty >= spec.empty_page_threshold:
+                result.stop_reason = "empty_pages"
+                break
+        else:
+            consecutive_empty = 0
+            new_items = normalize_api_records(records, max_items=0)
+            result.all_items.extend(new_items)
+            result.pages_fetched += 1
+            result.all_items, dupes = _dedupe_items(result.all_items, spec.dedupe_key_fields)
+            result.deduplicated_count += dupes
+            if max_items and len(result.all_items) > max_items:
+                result.all_items = result.all_items[:max_items]
+        next_hint = _detect_pagination_fields(response.get("data", {}))
+        next_offset = next_hint.get("next_offset")
+        if next_offset is not None:
+            current_offset = int(next_offset)
+        else:
+            result.stop_reason = result.stop_reason or "no_next_hint"
+            break
+
+
+def _fetch_cursor_pagination(
+    url: str,
+    spec: PaginationSpec,
+    headers: dict[str, str] | None,
+    method: str,
+    post_data: str | dict[str, Any] | None,
+    max_items: int,
+    result: PaginatedResult,
+) -> None:
+    cursor_value = ""
+    visited_urls: set[str] = set()
+    consecutive_empty = 0
+    for _ in range(spec.max_pages):
+        if max_items and len(result.all_items) >= max_items:
+            result.stop_reason = "max_items"
+            break
+        cursor_url = _set_query_param(url, spec.cursor_param, cursor_value)
+        if cursor_url in visited_urls:
+            result.stop_reason = "repeated_url"
+            break
+        visited_urls.add(cursor_url)
+        response = fetch_json_api(cursor_url, headers=headers, method=method, post_data=post_data)
+        result.api_responses.append(response)
+        records = extract_records_from_json(response.get("data"))
+        if not records:
+            consecutive_empty += 1
+            if consecutive_empty >= spec.empty_page_threshold:
+                result.stop_reason = "empty_pages"
+                break
+        else:
+            consecutive_empty = 0
+            new_items = normalize_api_records(records, max_items=0)
+            result.all_items.extend(new_items)
+            result.pages_fetched += 1
+            result.all_items, dupes = _dedupe_items(result.all_items, spec.dedupe_key_fields)
+            result.deduplicated_count += dupes
+            if max_items and len(result.all_items) > max_items:
+                result.all_items = result.all_items[:max_items]
+        next_hint = _detect_pagination_fields(response.get("data", {}))
+        next_cursor = next_hint.get("next_cursor")
+        if next_cursor is not None:
+            if str(next_cursor) == cursor_value:
+                result.stop_reason = "cursor_stuck"
+                break
+            cursor_value = str(next_cursor)
+        else:
+            result.stop_reason = result.stop_reason or "no_next_hint"
+            break
+
+
+def _set_query_param(url: str, param: str, value: str) -> str:
+    parsed = urlparse(url)
+    params = parse_qs(parsed.query, keep_blank_values=True)
+    params[param] = [value]
+    new_query = urlencode(params, doseq=True)
+    return urlunparse(parsed._replace(query=new_query))

@@ -11,17 +11,43 @@ The current project is runnable and useful for supported targets, but it is
 still under active development. It is best treated as a local research and
 engineering framework for building a stronger crawling agent.
 
+## Project Vision
+
+CLM is being built as a practical crawl agent rather than a single-purpose
+scraper. The long-term target is:
+
+1. Understand a user's crawl request.
+2. Inspect the target site.
+3. Choose a safe strategy: static HTML, browser rendering, public API replay, or
+   diagnosis-only.
+4. Extract structured data.
+5. Validate quality and retry when useful.
+6. Persist results, logs, and decisions so long runs can be resumed and audited.
+
+The project also includes a file-based team workflow for multi-agent
+development: daily reports, handoffs, employee IDs, assignments, acceptance
+records, and project memory live under `docs/`.
+
 ## What Works Today
 
 - Static HTML crawling and selector inference.
 - Playwright browser fallback for rendered pages.
 - Public JSON API and GraphQL API collection.
+- Browser network observation that can replay a safe observed public JSON POST
+  API. Verified on the HN Algolia SPA.
+- Basic multi-page JSON API pagination for page/limit, offset/limit, and
+  cursor-style responses.
 - Optional OpenAI-compatible LLM advisor for Planner and Strategy.
 - Deterministic fallback when LLM is disabled or fails.
 - FastAPI background-job service.
 - SQLite result persistence.
+- SQLite URL frontier and domain memory.
 - Result inspection/export CLI.
 - Bundled `fnspider` engine for project-local portability.
+- Ecommerce small-sample training: Shopify JSON, Magento list/detail pages,
+  Magento `jsonConfig` variants, Cloudflare diagnosis-only handling, and
+  corporate product pages without fake prices.
+- Local synthetic stress testing for 30,000 ecommerce records.
 - Team workflow docs, daily reports, handoff memory, and training ladder.
 
 Verified examples include:
@@ -33,12 +59,37 @@ Verified examples include:
 - AniList GraphQL.
 - Bilibili public ranking API.
 - Douban Top250.
+- HN Algolia public SPA observed API replay: 10 validated items.
+- Deterministic paged/offset/cursor JSON API fixtures.
+- Donsje public Shopify products JSON.
+- Clausporto and uvex Magento-style product pages.
+- 30,000-row local synthetic ecommerce stress export.
+
+## Capability Matrix
+
+| Area | Current status | Evidence |
+|---|---|---|
+| Static HTML list/detail | Usable MVP | Baidu hot search, Douban, Magento product pages |
+| Browser fallback | Usable MVP | Local SPA smoke and optional browser tests |
+| Public JSON API | Usable MVP | JSONPlaceholder, Reddit JSON, GitHub, DummyJSON |
+| GraphQL API | Usable MVP | Countries and AniList public GraphQL tests |
+| Browser network observation | Early MVP | HN Algolia SPA API replay |
+| API pagination | MVP | page/limit, offset/limit, cursor fixtures |
+| Ecommerce extraction | Training-stage MVP | Donsje, Clausporto, uvex, Bosch, Shoesme diagnosis |
+| Large-volume local handling | Initial pass | 30,000 synthetic records through frontier/store/export |
+| Long-running real-site crawl | Not production-ready | Needs checkpointed product storage and resumability |
+| Frontend UI | Not started | Planned for later P1/P2 |
 
 ## Current Limits
 
 - This is not yet a universal crawler.
 - Dynamic sites, infinite scroll, virtualized lists, and hostile anti-bot pages
   still need more training and tests.
+- API pagination is an MVP; it still needs cross-page dedupe, analytics
+  endpoint denylist, and stronger loop guards before broad real-site use.
+- Large ecommerce runs need checkpointed product storage. The current result
+  store can save large local batches, but it is not yet the right architecture
+  for multi-hour crawls with retries and resumability.
 - Cloudflare/CAPTCHA/login-required targets are diagnosis-only until explicit
   authorized workflows exist.
 - FastAPI job registry is in-memory; running job state is lost on process
@@ -189,7 +240,30 @@ Training rounds:
 python run_training_round1.py
 python run_training_round2.py
 python run_training_round3.py
+python run_training_round4.py
 ```
+
+Ecommerce training sample:
+
+```bash
+python run_ecommerce_training_2026_05_09.py
+```
+
+This writes:
+
+```text
+dev_logs/2026-05-09_ecommerce_training_sample.xlsx
+dev_logs/2026-05-09_ecommerce_training_sample.json
+dev_logs/2026-05-09_ecommerce_training_summary.md
+```
+
+Local stress test:
+
+```bash
+python run_stress_test_2026_05_09.py --items 30000 --batch-size 500 --keep-excel
+```
+
+This test is synthetic and does not send requests to public websites.
 
 ## FastAPI Service
 
@@ -261,12 +335,26 @@ python -m unittest autonomous_crawler.tests.test_real_browser_smoke -v
 ## Important Docs
 
 - Current status: `PROJECT_STATUS.md`
+- Project showcase: `docs/reports/2026-05-09_PROJECT_SHOWCASE.md`
 - Blueprint: `docs/blueprints/AUTONOMOUS_CRAWL_AGENT_BLUEPRINT.md`
+- Ecommerce workflow: `docs/process/ECOMMERCE_CRAWL_WORKFLOW.md`
 - Quick start for Linux/macOS: `docs/runbooks/QUICK_START_LINUX_MAC.md`
 - Quick start for Windows: `docs/runbooks/QUICK_START_WINDOWS.md`
 - Team board: `docs/team/TEAM_BOARD.md`
 - Training ladder: `docs/team/training/2026-05-08_REAL_SITE_TRAINING_LADDER.md`
 - Stage analysis: `docs/reports/2026-05-08_STAGE_AND_BLUEPRINT_ANALYSIS.txt`
+
+## Near-Term Roadmap
+
+The next engineering step is to turn the ecommerce training scripts into
+reusable product infrastructure:
+
+1. `ProductRecord` schema and validation.
+2. Product-specific SQLite storage with checkpointed upserts.
+3. Resumable long-run progress and batch-level metrics.
+4. Real-site pagination and infinite-scroll training.
+5. A lightweight frontend for API configuration, task submission, example
+   upload, and result review.
 
 ## License
 

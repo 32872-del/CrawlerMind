@@ -25,8 +25,10 @@ from ..tools.html_recon import MOCK_RANKING_HTML
 from ..tools.api_candidates import (
     fetch_graphql_api,
     fetch_json_api,
+    fetch_paginated_api,
     normalize_api_records,
     extract_records_from_json,
+    PaginationSpec,
 )
 
 
@@ -214,6 +216,10 @@ def executor_node(state: dict[str, Any]) -> dict[str, Any]:
     if mode == "api_intercept":
         api_endpoint = strategy.get("api_endpoint") or target_url
         headers = {**API_DEFAULT_HEADERS, **strategy.get("headers", {})}
+        max_items = int(strategy.get("max_items", 0) or 0)
+        pagination_cfg = strategy.get("pagination", {})
+        pagination_type = pagination_cfg.get("type", "none") if isinstance(pagination_cfg, dict) else "none"
+
         try:
             if strategy.get("extraction_method") == "graphql_json":
                 result = fetch_graphql_api(
@@ -222,6 +228,29 @@ def executor_node(state: dict[str, Any]) -> dict[str, Any]:
                     variables=strategy.get("graphql_variables") or {},
                     headers=headers,
                 )
+                records = extract_records_from_json(result.get("data"))
+                items = normalize_api_records(records, max_items=max_items)
+                all_api_responses = [result]
+            elif pagination_type in {"page", "offset", "cursor"}:
+                spec = PaginationSpec(
+                    type=pagination_type,
+                    page_param=pagination_cfg.get("param", "page"),
+                    limit_param=pagination_cfg.get("limit_param", "limit"),
+                    offset_param=pagination_cfg.get("param", "offset"),
+                    cursor_param=pagination_cfg.get("param", "cursor"),
+                    limit=int(pagination_cfg.get("limit", 10)),
+                    max_pages=int(pagination_cfg.get("max_pages", 10)),
+                )
+                paginated = fetch_paginated_api(
+                    api_endpoint,
+                    pagination=spec,
+                    headers=headers,
+                    method=strategy.get("api_method", "GET"),
+                    post_data=strategy.get("api_post_data"),
+                    max_items=max_items,
+                )
+                items = paginated.all_items
+                all_api_responses = paginated.api_responses
             else:
                 result = fetch_json_api(
                     api_endpoint,
@@ -229,8 +258,9 @@ def executor_node(state: dict[str, Any]) -> dict[str, Any]:
                     method=strategy.get("api_method", "GET"),
                     post_data=strategy.get("api_post_data"),
                 )
-            records = extract_records_from_json(result.get("data"))
-            items = normalize_api_records(records, max_items=int(strategy.get("max_items", 0) or 0))
+                records = extract_records_from_json(result.get("data"))
+                items = normalize_api_records(records, max_items=max_items)
+                all_api_responses = [result]
         except Exception as exc:
             return {
                 "status": "failed",
@@ -250,7 +280,7 @@ def executor_node(state: dict[str, Any]) -> dict[str, Any]:
             "status": "executed",
             "visited_urls": [api_endpoint],
             "raw_html": {},
-            "api_responses": [result],
+            "api_responses": all_api_responses,
             "extracted_data": {
                 "items": items,
                 "fields_found": fields_found,

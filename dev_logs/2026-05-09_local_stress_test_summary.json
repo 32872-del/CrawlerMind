@@ -1,0 +1,96 @@
+{
+  "config": {
+    "items": 30000,
+    "batch_size": 500,
+    "keep_excel": true,
+    "keep_db": false
+  },
+  "frontier": {
+    "db_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\clm_stress_921y8um5\\frontier.sqlite3",
+    "db_size_bytes": 12267520,
+    "add_summary": {
+      "added": 30000,
+      "skipped": 20,
+      "invalid": 6
+    },
+    "final_stats": {
+      "done": 30000
+    },
+    "processed": 30000,
+    "add_elapsed_seconds": 2.373,
+    "claim_mark_elapsed_seconds": 8.002,
+    "checkpoints": [
+      {
+        "processed": 5000,
+        "stats": {
+          "done": 5000,
+          "queued": 25000
+        }
+      },
+      {
+        "processed": 10000,
+        "stats": {
+          "done": 10000,
+          "queued": 20000
+        }
+      },
+      {
+        "processed": 15000,
+        "stats": {
+          "done": 15000,
+          "queued": 15000
+        }
+      },
+      {
+        "processed": 20000,
+        "stats": {
+          "done": 20000,
+          "queued": 10000
+        }
+      },
+      {
+        "processed": 25000,
+        "stats": {
+          "done": 25000,
+          "queued": 5000
+        }
+      },
+      {
+        "processed": 30000,
+        "stats": {
+          "done": 30000
+        }
+      }
+    ]
+  },
+  "result_store": {
+    "db_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\clm_stress_921y8um5\\results.sqlite3",
+    "db_size_bytes": 38539264,
+    "task_id": "stress-30000",
+    "saved_items": 30000,
+    "loaded_items": 30000,
+    "save_elapsed_seconds": 2.726,
+    "load_elapsed_seconds": 1.372
+  },
+  "excel_export": {
+    "path": "dev_logs\\2026-05-09_stress_export_30000.xlsx",
+    "kept": true,
+    "rows": 30000,
+    "columns": 12,
+    "size_bytes": 2161256,
+    "elapsed_seconds": 21.654
+  },
+  "memory": {
+    "current_mb": 110.43,
+    "peak_mb": 196.07
+  },
+  "total_elapsed_seconds": 39.262,
+  "findings": [
+    "PASS: frontier inserted, claimed, and completed all unique synthetic URLs.",
+    "PASS: duplicate and invalid URL paths were exercised.",
+    "PASS: result store saved and loaded all synthetic records.",
+    "PASS: Excel export completed for the requested row count.",
+    "RISK: current CrawlResultStore duplicates large result payloads in final_state_json and crawl_items, so very large crawls need checkpointed product storage before real long runs.",
+    "RISK: FastAPI job registry remains in-memory; process restart loses running job state."
+  ]
+}

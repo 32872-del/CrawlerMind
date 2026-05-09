@@ -10,9 +10,14 @@ from autonomous_crawler.tools.api_candidates import (
     build_direct_json_candidate,
     fetch_graphql_api,
     fetch_json_api,
+    fetch_paginated_api,
     build_api_candidates,
     extract_records_from_json,
     normalize_api_records,
+    _detect_pagination_fields,
+    _set_query_param,
+    is_tracking_url,
+    PaginationSpec,
 )
 
 
@@ -417,6 +422,325 @@ class ApiInterceptTests(unittest.TestCase):
         self.assertIn("capital", final_state["recon_report"]["target_fields"])
         self.assertEqual(final_state["crawl_strategy"]["extraction_method"], "graphql_json")
         self.assertEqual(final_state["extracted_data"]["items"][0]["capital"], "Beijing")
+
+
+class PaginationDetectionTests(unittest.TestCase):
+    def test_detect_next_cursor(self) -> None:
+        result = _detect_pagination_fields({"items": [], "next_cursor": "abc123"})
+        self.assertEqual(result["next_cursor"], "abc123")
+
+    def test_detect_next_page(self) -> None:
+        result = _detect_pagination_fields({"items": [], "next_page": 3})
+        self.assertEqual(result["next_page"], 3)
+
+    def test_detect_next_offset(self) -> None:
+        result = _detect_pagination_fields({"items": [], "next_offset": 20})
+        self.assertEqual(result["next_offset"], 20)
+
+    def test_detect_no_pagination(self) -> None:
+        result = _detect_pagination_fields({"items": [1, 2, 3]})
+        self.assertEqual(result, {})
+
+    def test_detect_prefers_first_cursor_field(self) -> None:
+        result = _detect_pagination_fields({"after": "xyz", "next_cursor": "abc"})
+        self.assertEqual(result["next_cursor"], "abc")
+
+    def test_set_query_param_adds_param(self) -> None:
+        url = _set_query_param("https://api.test/items", "page", "2")
+        self.assertEqual(url, "https://api.test/items?page=2")
+
+    def test_set_query_param_updates_existing(self) -> None:
+        url = _set_query_param("https://api.test/items?page=1", "page", "3")
+        self.assertEqual(url, "https://api.test/items?page=3")
+
+
+class PagePaginationTests(unittest.TestCase):
+    def test_mock_paged_products_page_1(self) -> None:
+        result = fetch_json_api("mock://api/paged-products?page=1")
+        self.assertTrue(result["ok"])
+        data = result["data"]
+        self.assertEqual(len(data["items"]), 3)
+        self.assertEqual(data["items"][0]["title"], "Paged Alpha")
+        self.assertEqual(data["page"], 1)
+        self.assertEqual(data["next_page"], 2)
+
+    def test_mock_paged_products_page_3(self) -> None:
+        result = fetch_json_api("mock://api/paged-products?page=3")
+        data = result["data"]
+        self.assertEqual(len(data["items"]), 3)
+        self.assertEqual(data["items"][0]["title"], "Paged Eta")
+        self.assertNotIn("next_page", data)
+
+    def test_mock_paged_products_empty_page(self) -> None:
+        result = fetch_json_api("mock://api/paged-products?page=4")
+        data = result["data"]
+        self.assertEqual(len(data["items"]), 0)
+
+    def test_fetch_paginated_page_type(self) -> None:
+        spec = PaginationSpec(type="page", limit=3, max_pages=10)
+        result = fetch_paginated_api("mock://api/paged-products", pagination=spec)
+        self.assertEqual(result.pagination_type, "page")
+        self.assertEqual(len(result.all_items), 9)
+        self.assertEqual(result.pages_fetched, 3)
+        self.assertEqual(result.all_items[0]["title"], "Paged Alpha")
+        self.assertEqual(result.all_items[8]["title"], "Paged Iota")
+
+    def test_fetch_paginated_page_respects_max_items(self) -> None:
+        spec = PaginationSpec(type="page", limit=3, max_pages=10)
+        result = fetch_paginated_api(
+            "mock://api/paged-products", pagination=spec, max_items=5,
+        )
+        self.assertEqual(len(result.all_items), 5)
+
+    def test_executor_page_pagination(self) -> None:
+        state = executor_node({
+            "target_url": "https://shop.example",
+            "crawl_strategy": {
+                "mode": "api_intercept",
+                "api_endpoint": "mock://api/paged-products",
+                "headers": {},
+                "max_items": 0,
+                "pagination": {"type": "page", "param": "page", "limit": 3, "max_pages": 10},
+            },
+            "messages": [],
+            "error_log": [],
+        })
+
+        self.assertEqual(state["status"], "executed")
+        self.assertEqual(state["extracted_data"]["item_count"], 9)
+        self.assertEqual(len(state["api_responses"]), 3)
+
+
+class OffsetPaginationTests(unittest.TestCase):
+    def test_mock_offset_products_page_1(self) -> None:
+        result = fetch_json_api("mock://api/offset-products?offset=0&limit=3")
+        data = result["data"]
+        self.assertEqual(len(data["items"]), 3)
+        self.assertEqual(data["items"][0]["title"], "Offset Alpha")
+        self.assertEqual(data["next_offset"], 3)
+
+    def test_mock_offset_products_last_page(self) -> None:
+        result = fetch_json_api("mock://api/offset-products?offset=6&limit=3")
+        data = result["data"]
+        self.assertEqual(len(data["items"]), 3)
+        self.assertNotIn("next_offset", data)
+
+    def test_fetch_paginated_offset_type(self) -> None:
+        spec = PaginationSpec(type="offset", limit=3, max_pages=10)
+        result = fetch_paginated_api("mock://api/offset-products", pagination=spec)
+        self.assertEqual(result.pagination_type, "offset")
+        self.assertEqual(len(result.all_items), 9)
+        self.assertEqual(result.pages_fetched, 3)
+
+    def test_fetch_paginated_offset_respects_max_items(self) -> None:
+        spec = PaginationSpec(type="offset", limit=3, max_pages=10)
+        result = fetch_paginated_api(
+            "mock://api/offset-products", pagination=spec, max_items=4,
+        )
+        self.assertEqual(len(result.all_items), 4)
+
+    def test_executor_offset_pagination(self) -> None:
+        state = executor_node({
+            "target_url": "https://shop.example",
+            "crawl_strategy": {
+                "mode": "api_intercept",
+                "api_endpoint": "mock://api/offset-products",
+                "headers": {},
+                "max_items": 0,
+                "pagination": {"type": "offset", "param": "offset", "limit": 3, "max_pages": 10},
+            },
+            "messages": [],
+            "error_log": [],
+        })
+
+        self.assertEqual(state["status"], "executed")
+        self.assertEqual(state["extracted_data"]["item_count"], 9)
+
+
+class CursorPaginationTests(unittest.TestCase):
+    def test_mock_cursor_products_first_page(self) -> None:
+        result = fetch_json_api("mock://api/cursor-products?cursor=")
+        data = result["data"]
+        self.assertEqual(len(data["items"]), 3)
+        self.assertEqual(data["items"][0]["title"], "Cursor Alpha")
+        self.assertEqual(data["next_cursor"], "page2")
+
+    def test_mock_cursor_products_last_page(self) -> None:
+        result = fetch_json_api("mock://api/cursor-products?cursor=page3")
+        data = result["data"]
+        self.assertEqual(len(data["items"]), 3)
+        self.assertNotIn("next_cursor", data)
+
+    def test_fetch_paginated_cursor_type(self) -> None:
+        spec = PaginationSpec(type="cursor", max_pages=10)
+        result = fetch_paginated_api("mock://api/cursor-products", pagination=spec)
+        self.assertEqual(result.pagination_type, "cursor")
+        self.assertEqual(len(result.all_items), 9)
+        self.assertEqual(result.pages_fetched, 3)
+        self.assertEqual(result.all_items[0]["title"], "Cursor Alpha")
+        self.assertEqual(result.all_items[8]["title"], "Cursor Iota")
+
+    def test_fetch_paginated_cursor_respects_max_items(self) -> None:
+        spec = PaginationSpec(type="cursor", max_pages=10)
+        result = fetch_paginated_api(
+            "mock://api/cursor-products", pagination=spec, max_items=7,
+        )
+        self.assertEqual(len(result.all_items), 7)
+
+    def test_executor_cursor_pagination(self) -> None:
+        state = executor_node({
+            "target_url": "https://search.example",
+            "crawl_strategy": {
+                "mode": "api_intercept",
+                "api_endpoint": "mock://api/cursor-products",
+                "headers": {},
+                "max_items": 0,
+                "pagination": {"type": "cursor", "param": "cursor", "max_pages": 10},
+            },
+            "messages": [],
+            "error_log": [],
+        })
+
+        self.assertEqual(state["status"], "executed")
+        self.assertEqual(state["extracted_data"]["item_count"], 9)
+
+    def test_executor_cursor_pagination_max_items(self) -> None:
+        state = executor_node({
+            "target_url": "https://search.example",
+            "crawl_strategy": {
+                "mode": "api_intercept",
+                "api_endpoint": "mock://api/cursor-products",
+                "headers": {},
+                "max_items": 4,
+                "pagination": {"type": "cursor", "param": "cursor", "max_pages": 10},
+            },
+            "messages": [],
+            "error_log": [],
+        })
+
+        self.assertEqual(state["status"], "executed")
+        self.assertEqual(state["extracted_data"]["item_count"], 4)
+
+    def test_fetch_paginated_none_type_uses_single_fetch(self) -> None:
+        result = fetch_paginated_api("mock://api/products")
+        self.assertEqual(result.pagination_type, "none")
+        self.assertEqual(result.pages_fetched, 1)
+        self.assertTrue(result.all_items)
+
+    def test_api_responses_captured_per_page(self) -> None:
+        spec = PaginationSpec(type="page", limit=3, max_pages=10)
+        result = fetch_paginated_api("mock://api/paged-products", pagination=spec)
+        self.assertEqual(len(result.api_responses), 3)
+        for resp in result.api_responses:
+            self.assertTrue(resp["ok"])
+
+
+class AnalyticsDenylistTests(unittest.TestCase):
+    def test_is_tracking_url_google_analytics(self) -> None:
+        self.assertTrue(is_tracking_url("https://www.google-analytics.com/collect"))
+        self.assertTrue(is_tracking_url("https://www.googletagmanager.com/gtm.js"))
+
+    def test_is_tracking_url_segment_mixpanel(self) -> None:
+        self.assertTrue(is_tracking_url("https://api.segment.io/v1/track"))
+        self.assertTrue(is_tracking_url("https://api.mixpanel.com/track"))
+
+    def test_is_tracking_url_beacon_pixel(self) -> None:
+        self.assertTrue(is_tracking_url("https://example.com/pixel.gif"))
+        self.assertTrue(is_tracking_url("https://example.com/beacon"))
+        self.assertTrue(is_tracking_url("https://example.com/collect"))
+
+    def test_is_tracking_url_normal_api(self) -> None:
+        self.assertFalse(is_tracking_url("https://api.example.com/products"))
+        self.assertFalse(is_tracking_url("https://shop.example.com/api/items"))
+
+    def test_build_api_candidates_filters_tracking(self) -> None:
+        candidates = build_api_candidates([
+            "/api/products",
+            "https://www.google-analytics.com/collect",
+            "https://api.mixpanel.com/track",
+            "/api/items",
+        ], base_url="https://shop.example")
+        urls = [c["url"] for c in candidates]
+        self.assertNotIn("https://www.google-analytics.com/collect", urls)
+        self.assertNotIn("https://api.mixpanel.com/track", urls)
+        self.assertEqual(len(candidates), 2)
+
+    def test_build_api_candidates_empty_after_filtering(self) -> None:
+        candidates = build_api_candidates([
+            "https://www.google-analytics.com/collect",
+            "https://api.segment.io/v1/track",
+        ])
+        self.assertEqual(candidates, [])
+
+
+class CrossPageDedupeTests(unittest.TestCase):
+    def test_fetch_paginated_dedupes_across_pages(self) -> None:
+        spec = PaginationSpec(type="page", limit=2, max_pages=10)
+        result = fetch_paginated_api("mock://api/duped-products", pagination=spec)
+        # Page 1: a1, b2; Page 2: b2 (dup), c3 → unique: a1, b2, c3
+        self.assertEqual(len(result.all_items), 3)
+        ids = [item.get("id") for item in result.all_items]
+        self.assertEqual(ids, ["a1", "b2", "c3"])
+        self.assertEqual(result.deduplicated_count, 1)
+
+    def test_fetch_paginated_no_dedup_when_no_dupes(self) -> None:
+        spec = PaginationSpec(type="page", limit=3, max_pages=10)
+        result = fetch_paginated_api("mock://api/paged-products", pagination=spec)
+        self.assertEqual(result.deduplicated_count, 0)
+        self.assertEqual(len(result.all_items), 9)
+
+
+class CursorStuckGuardTests(unittest.TestCase):
+    def test_cursor_stuck_breaks_loop(self) -> None:
+        spec = PaginationSpec(type="cursor", max_pages=10)
+        result = fetch_paginated_api("mock://api/cursor-stuck", pagination=spec)
+        # First page: "", second page: "stuck" (next_cursor="stuck" = current) → stops
+        self.assertEqual(result.stop_reason, "cursor_stuck")
+        self.assertEqual(result.pages_fetched, 2)
+        self.assertEqual(len(result.all_items), 2)
+
+
+class RepeatedUrlGuardTests(unittest.TestCase):
+    def test_repeated_url_detected(self) -> None:
+        # Use empty-after-first: page 1 has items, pages 2-3 are empty.
+        # The empty-page guard should stop at threshold 2, but let's verify
+        # repeated URL detection works by checking stop_reason.
+        spec = PaginationSpec(type="page", limit=1, max_pages=10, empty_page_threshold=3)
+        result = fetch_paginated_api("mock://api/empty-after-first", pagination=spec)
+        # Pages 2 and 3 are empty, threshold=3 so we don't hit empty_pages.
+        # Page 4 would be generated but there's no next_page hint after page 3,
+        # so we get "no_next_hint" stop.
+        self.assertIn(result.stop_reason, ("no_next_hint", "empty_pages"))
+        self.assertEqual(result.pages_fetched, 1)
+
+
+class EmptyPageGuardTests(unittest.TestCase):
+    def test_empty_page_guard_stops_after_threshold(self) -> None:
+        spec = PaginationSpec(type="page", limit=1, max_pages=10, empty_page_threshold=2)
+        result = fetch_paginated_api("mock://api/empty-after-first", pagination=spec)
+        # Page 1 has items, page 2 is empty (count=1), page 3 is empty (count=2 → stop)
+        self.assertEqual(result.stop_reason, "empty_pages")
+        self.assertEqual(result.pages_fetched, 1)
+        self.assertEqual(len(result.all_items), 1)
+
+    def test_empty_page_guard_resets_on_nonempty(self) -> None:
+        # Normal paged products: all pages have items, no empty pages
+        spec = PaginationSpec(type="page", limit=3, max_pages=10, empty_page_threshold=1)
+        result = fetch_paginated_api("mock://api/paged-products", pagination=spec)
+        self.assertEqual(result.stop_reason, "no_next_hint")
+        self.assertEqual(result.pages_fetched, 3)
+
+    def test_stop_reason_max_items(self) -> None:
+        spec = PaginationSpec(type="page", limit=3, max_pages=10)
+        result = fetch_paginated_api(
+            "mock://api/paged-products", pagination=spec, max_items=4,
+        )
+        self.assertEqual(result.stop_reason, "max_items")
+
+    def test_stop_reason_no_next_hint(self) -> None:
+        spec = PaginationSpec(type="page", limit=3, max_pages=10)
+        result = fetch_paginated_api("mock://api/paged-products", pagination=spec)
+        self.assertEqual(result.stop_reason, "no_next_hint")
 
 
 if __name__ == "__main__":

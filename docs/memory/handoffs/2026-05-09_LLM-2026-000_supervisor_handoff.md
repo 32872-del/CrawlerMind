@@ -4,6 +4,9 @@
 
 Crawler-Mind is a runnable MVP with open-source basics in place and browser
 network observation now usable for at least one public SPA API-replay scenario.
+Observed API pagination/cursor has an MVP implementation for deterministic
+page/limit, offset/limit, and cursor fixtures, accepted with hardening
+follow-ups.
 
 Accepted worker outputs from 2026-05-09 include:
 
@@ -12,6 +15,9 @@ Accepted worker outputs from 2026-05-09 include:
 - `LLM-2026-004`: Open Source Docs And Onboarding Audit
 - `LLM-2026-001`: Rendered DOM Selector Training
 - `LLM-2026-002`: Browser Network Observation Timing QA
+- `LLM-2026-001`: Observed API Pagination/Cursor MVP
+- `LLM-2026-002`: API Pagination QA
+- `LLM-2026-004`: Docs State Audit After API Replay
 
 ## Completed Work
 
@@ -45,6 +51,17 @@ Accepted worker outputs from 2026-05-09 include:
 - Retried HN Algolia browser-network observation successfully:
   `status=completed`, `mode=api_intercept`, `method=api_json`, `items=10`,
   `confidence=1.0`.
+- Accepted `LLM-2026-001` observed API pagination/cursor MVP conditionally:
+  Executor can route `api_intercept` to page, offset, and cursor pagination
+  loops. 49 focused API tests and 371 total tests pass.
+- Accepted `LLM-2026-002` API pagination QA. Its findings define the next
+  hardening checklist: analytics denylist, cross-page dedupe, cursor/repeated
+  page guards, and empty-page guard.
+- Accepted `LLM-2026-004` docs-state audit and refreshed README/status docs.
+- Reviewed `C:\Users\Administrator\Downloads\spider_text` as an external
+  ecommerce crawl experience library. Do not copy the whole project. Absorb
+  schema, product quality rules, three-stage list/detail/variant scheduling,
+  body cleaning, image dedupe, and category-aware product dedupe.
 - Updated `PROJECT_STATUS.md`.
 - Updated `docs/team/TEAM_BOARD.md`.
 - Updated supervisor persistent memory.
@@ -57,15 +74,15 @@ python -m unittest autonomous_crawler.tests.test_browser_network_observer -v
 Ran 60 tests
 OK
 
-python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py run_results.py run_simple.py run_training_round1.py run_training_round2.py run_training_round3.py
+python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py run_results.py run_simple.py run_training_round1.py run_training_round2.py run_training_round3.py run_training_round4.py
 OK
 
 python -m unittest discover -s autonomous_crawler/tests
-Ran 345 tests
+Ran 371 tests
 OK (skipped=4)
 
 python -m unittest autonomous_crawler.tests.test_api_intercept -v
-Ran 23 tests
+Ran 49 tests
 OK
 
 python -m unittest autonomous_crawler.tests.test_access_diagnostics -v
@@ -87,9 +104,13 @@ OK
 ## Known Risks
 
 - Browser network observation has mock coverage, a controlled local
-  XHR-backed smoke target, and one public HN Algolia SPA success. Remaining
-  gaps are pagination/cursor replay, infinite scroll, and sites requiring extra
-  non-sensitive headers.
+  XHR-backed smoke target, and one public HN Algolia SPA success.
+- Observed API pagination exists as an MVP but still needs hardening before
+  broad real-site use: analytics denylist, cross-page dedupe, cursor/repeated
+  request guard, and empty-page guard.
+- Ecommerce product quality is still shallow compared with the `spider_text`
+  experience library: CLM needs product schema validation, category-aware
+  dedupe, body cleaning, image dedupe, and color/size variant normalization.
 - Rendered DOM selector inference is stronger for HN Algolia-style fixtures,
   but still needs a public-site retry.
 - FastAPI job registry remains in-memory.
@@ -99,8 +120,9 @@ OK
 
 ## Next Recommended Action
 
-Add pagination/cursor support for observed JSON APIs, then continue real-site
-training on dynamic pages and virtualized/infinite-scroll lists.
+Harden observed API pagination, then add ecommerce product quality foundation
+from the `spider_text` lessons before the next ecommerce real-site training
+batch.
 
 ## Files To Read First
 
@@ -117,6 +139,9 @@ docs/reports/2026-05-09_REAL_SITE_TRAINING_ROUND4.md
 dev_logs/2026-05-09_real_site_training_round4.json
 autonomous_crawler/tools/browser_network_observer.py
 autonomous_crawler/tests/test_browser_network_observer.py
+autonomous_crawler/tools/api_candidates.py
+autonomous_crawler/tests/test_api_intercept.py
 autonomous_crawler/tools/html_recon.py
 autonomous_crawler/tests/test_hn_algolia_dom.py
+docs/plans/2026-05-09_SPIDER_TEXT_ABSORPTION_PLAN.md
 ```

@@ -195,10 +195,14 @@ def score_network_entry(entry: NetworkEntry) -> tuple[int, list[str], str]:
 
 def build_api_candidates_from_entries(entries: list[NetworkEntry]) -> list[dict[str, Any]]:
     """Convert observed entries into Strategy-friendly API candidates."""
+    from .api_candidates import is_tracking_url
+
     candidates: list[dict[str, Any]] = []
     seen: set[tuple[str, str]] = set()
     for entry in sorted(entries, key=lambda item: item.score, reverse=True):
         if entry.score < 20:
+            continue
+        if is_tracking_url(entry.url):
             continue
         key = (entry.method.upper(), entry.url)
         if key in seen:

@@ -227,7 +227,7 @@ OK
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 345 tests
+Ran 385 tests
 OK (skipped=4)
 ```
 
@@ -264,6 +264,15 @@ OK
 - Browser network observation: tested with mocks, proven through a controlled
   local XHR-backed SPA smoke, and now successful on the public HN Algolia SPA
   by observing and replaying its public JSON POST API.
+- Observed API pagination/cursor MVP: page/limit, offset/limit, and cursor
+  pagination work against deterministic JSON API fixtures and route through
+  Executor `api_intercept`.
+- Ecommerce crawl workflow: accepted as a safe small-sample process with
+  category/list/detail/variant decomposition and no challenge/login bypass.
+- Ecommerce real-site training: completed one five-site batch and exported
+  Excel/JSON evidence.
+- Local stress testing: 30,000 synthetic ecommerce records passed through
+  frontier claim/mark, result storage save/load, and Excel export.
 - Public JSON/API normalization: broader after round 4, including `hits`,
   `quotes`, GitHub issue links/comments, HN points, product ratings, and text
   summaries.
@@ -274,7 +283,16 @@ OK
 - Network observation currently handles one public dynamic SPA API replay case.
   It still needs broader training on infinite scroll, cursor pagination, and
   sites where XHR requires extra non-sensitive headers.
-- API pagination/cursor handling is still shallow.
+- API pagination/cursor handling is implemented as an MVP but still needs
+  cross-page dedupe, analytics endpoint denylist, stronger repeated-page/cursor
+  guards, and real-site pagination training.
+- Ecommerce product quality is proven through a supervisor script and sample
+  workbook, but the reusable `ProductRecord`, validator, and fixture tests are
+  not implemented yet.
+- Large-run durability is not production-ready yet. The local stress test passed
+  at 30,000 synthetic records, but it also confirmed that `CrawlResultStore`
+  stores a full `final_state_json` plus per-item rows, which is not the right
+  checkpoint model for long-running ecommerce crawls.
 - Virtualized lists and infinite scroll still need training targets.
 - Cloudflare/CAPTCHA/login-required targets remain diagnosis-only.
 - FastAPI job registry is still in-memory.
@@ -283,10 +301,69 @@ OK
 
 ## Next Recommended Work
 
-1. Continue real-site training from the ladder: dynamic pages, virtualized
+1. Add ecommerce product quality foundation based on the `spider_text`
+   experience library: product schema, price/body/image/variant normalization,
+   and product-specific validation.
+2. Convert `dev_logs/2026-05-09_ecommerce_training_sample.json` into fixtures
+   covering Shopify JSON, Magento DOM/detail, Magento `jsonConfig` variants,
+   Cloudflare diagnosis-only, and corporate product pages without prices.
+3. Harden observed API pagination: analytics denylist, cross-page dedupe,
+   cursor/repeated-page guards, and empty-page guard.
+4. Add checkpointed ecommerce product storage and resumable long-run progress
+   before attempting real multi-hour or tens-of-thousands-item site crawls.
+5. Continue real-site training from the ladder: dynamic pages, virtualized
    lists, then tougher anti-bot diagnosis cases.
-2. Add API pagination/cursor support for observed JSON APIs.
-3. Add `SECURITY.md`, PR template, and an open-source release checklist pass
+6. Add `SECURITY.md`, PR template, and an open-source release checklist pass
    before public announcement.
-4. Later P1/P2: design durable job registry and a simple frontend for API
+7. Later P1/P2: design durable job registry and a simple frontend for API
    configuration, task submission, result viewing, and example upload.
+
+## Ecommerce Training Batch
+
+2026-05-09 supervisor-run ecommerce batch:
+
+```text
+Output Excel: dev_logs/2026-05-09_ecommerce_training_sample.xlsx
+Output JSON:  dev_logs/2026-05-09_ecommerce_training_sample.json
+Summary:      dev_logs/2026-05-09_ecommerce_training_summary.md
+```
+
+Site outcomes:
+
+- Shoesme: Cloudflare challenge detected; recorded as diagnosis-only.
+- Donsje: public Shopify `products.json`; 5 products with prices, colors,
+  sizes, descriptions, and images.
+- Clausporto: Magento-style static list/detail pages; 5 candle products with
+  prices, descriptions, and images.
+- uvex.com.pl: Magento-style list/detail pages; 5 helmet products with prices,
+  descriptions, images, and sizes extracted from Magento `jsonConfig`.
+- Bosch.de: corporate product/service page; 3 partial product-category records
+  with images and descriptions, no fake prices/colors/sizes.
+
+## Local Stress Test
+
+2026-05-09 supervisor-run local stress test:
+
+```text
+Script:  run_stress_test_2026_05_09.py
+Summary: dev_logs/2026-05-09_local_stress_test_summary.json
+Report:  dev_logs/2026-05-09_local_stress_test_report.md
+Excel:   dev_logs/2026-05-09_stress_export_30000.xlsx
+```
+
+Result:
+
+- 30,000 synthetic ecommerce URLs inserted into SQLite frontier.
+- Duplicate URL and invalid URL paths exercised.
+- 30,000 URLs claimed and marked done in batches of 500.
+- 30,000 synthetic product records saved and loaded through `CrawlResultStore`.
+- 30,000-row Excel export completed.
+- Peak memory: about 196 MB.
+
+Interpretation:
+
+- Local core components can handle a 30,000-row synthetic batch.
+- This does not prove real-site long-run stability yet, because network errors,
+  retries, rate limiting, dynamic rendering, and resumability were not included.
+- Before real tens-of-thousands-item crawls, CLM needs checkpointed product
+  storage, resumable progress, per-domain rate limits, and run-level metrics.

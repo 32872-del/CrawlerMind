@@ -3,8 +3,9 @@
 ## Current Stage
 
 The project is an early but runnable MVP. The LangGraph workflow exists and can
-complete deterministic fixture crawls and a real automatic Baidu realtime hot
-search workflow.
+complete deterministic fixture crawls, real Baidu realtime hot-search
+extraction, public JSON/GraphQL/API workflows, and one public SPA observed API
+replay workflow on HN Algolia.
 
 ## Completed
 
@@ -217,12 +218,23 @@ search workflow.
   `/api/products?page=1`; `observe_browser_network()` captures the real XHR
   response and promotes it to a JSON API candidate. This proves the browser
   network observation path end-to-end without relying on external sites.
+- Observed API pagination/cursor MVP added on 2026-05-09:
+  `api_intercept` now supports multi-page JSON API crawling with three
+  pagination strategies: page/limit (`next_page` hint), offset/limit
+  (`next_offset` hint), and cursor-based (`next_cursor`/`after`/`page_token`
+  hints). `fetch_paginated_api()` loops across pages, respects `max_items` as
+  a universal termination guard, and caps at `max_pages`. Three deterministic
+  mock fixtures (`mock://api/paged-products`, `mock://api/offset-products`,
+  `mock://api/cursor-products`) provide fixture-only testing. Executor routes
+  to the pagination loop when `strategy.pagination.type` is `page`, `offset`,
+  or `cursor`. 26 new pagination tests. 385 total tests pass after the
+  ecommerce and stress-test documentation updates.
 
 ## Current Test Status
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 345 tests (skipped=4)
+Ran 385 tests (skipped=4)
 OK
 ```
 
@@ -234,7 +246,7 @@ Ran 60 tests
 OK
 
 python -m unittest autonomous_crawler.tests.test_api_intercept -v
-Ran 23 tests
+Ran 63 tests
 OK
 
 python -m unittest autonomous_crawler.tests.test_access_diagnostics -v
@@ -262,8 +274,10 @@ OK
   cards and Baidu-style ranking lists.
 - `site_spec_draft` detail selectors are drafts when only a list page is known.
 - API interception is integrated for direct JSON URLs, API hints, explicit
-  GraphQL queries, and observed JSON POST APIs. It still needs
-  pagination/cursor handling and richer provider-specific field mapping.
+  GraphQL queries, observed JSON POST APIs, and multi-page pagination
+  (page/limit, offset/limit, cursor). It still needs POST-based pagination
+  loop support, cross-page deduplication, and richer provider-specific field
+  mapping.
 - Dynamic/JS-heavy site coverage is proven for local SPA rendering, local
   XHR-backed network observation smoke tests, and one public HN Algolia SPA
   API-replay scenario. Cloudflare/CAPTCHA/login-required targets remain
@@ -283,7 +297,7 @@ OK
 Move from the local MVP toward a more robust crawl service:
 
 ```text
-provider diagnostics + broader site samples + dynamic-page capability tests
+pagination hardening + ecommerce product quality foundation + broader dynamic-page training
 ```
 
 The last verified real LLM-assisted workflow is:
@@ -343,3 +357,22 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
 18. ~~Improve rendered DOM selector inference for public SPA list layouts and
     retry the HN Algolia browser-network observation probe.~~ Done 2026-05-09;
     HN Algolia now completes via observed API replay.
+19. ~~Add observed API pagination/cursor MVP.~~ Done 2026-05-09.
+    `api_intercept` supports page/limit, offset/limit, and cursor-based
+    pagination with `max_items` guard and `max_pages` cap. Three deterministic
+    mock fixtures, 26 new pagination tests, 385 total tests pass after today's
+    full verification.
+20. ~~Accept ecommerce workflow and QA planning from `spider_text` lessons.~~
+    Done 2026-05-09. Workflow and QA docs accepted; scope stays public or
+    authorized pages only, with challenge/login handling as diagnosis-only.
+21. ~~Run first ecommerce real-site training batch.~~ Done 2026-05-09.
+    Five sites exported to `dev_logs/2026-05-09_ecommerce_training_sample.xlsx`
+    with separate sheets: Shoesme diagnosis-only, Donsje Shopify JSON,
+    Clausporto Magento DOM/detail, uvex Magento DOM/detail plus `jsonConfig`
+    sizes, and Bosch corporate product category partial records.
+22. ~~Run first local large-volume stress test.~~ Done 2026-05-09.
+    `run_stress_test_2026_05_09.py` generated 30,000 synthetic ecommerce
+    records without public network access. SQLite frontier inserted, claimed,
+    and marked all 30,000 URLs done; result storage saved/loaded 30,000 items;
+    Excel export completed. Peak memory was about 196 MB. Finding: CLM needs
+    checkpointed product storage before real long-running multi-hour crawls.

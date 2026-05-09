@@ -18,4 +18,5 @@ agent_packages/
 *.zip
 *.tmp
 *.log
+~$*.xlsx
 clm_config.json

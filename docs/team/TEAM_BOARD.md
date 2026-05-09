@@ -56,6 +56,9 @@ Last updated: 2026-05-09
 | Open Source Docs And Onboarding Audit | LLM-2026-004 | ROLE-DOCS | accepted | `docs/team/acceptance/2026-05-09_open_source_docs_audit_ACCEPTED.md` |
 | Rendered DOM Selector Training | LLM-2026-001 | Browser / DOM Recon Worker | accepted | `docs/team/acceptance/2026-05-09_rendered_dom_selector_training_ACCEPTED.md` |
 | Browser Network Observation Timing QA | LLM-2026-002 | QA / Browser Network Auditor | accepted | `docs/team/acceptance/2026-05-09_network_timing_qa_ACCEPTED.md` |
+| Observed API Pagination/Cursor MVP | LLM-2026-001 | API / Crawl Capability Worker | conditionally accepted | `docs/team/acceptance/2026-05-09_observed_api_pagination_ACCEPTED.md` |
+| API Pagination QA | LLM-2026-002 | QA / Browser Network Auditor | accepted | `docs/team/acceptance/2026-05-09_api_pagination_qa_ACCEPTED.md` |
+| Docs State Audit After API Replay | LLM-2026-004 | Documentation Worker | accepted | `docs/team/acceptance/2026-05-09_docs_state_audit_after_api_replay_ACCEPTED.md` |
 
 ## Recent Accepted Work Log
 
@@ -94,14 +97,23 @@ Last updated: 2026-05-09
 | Controlled XHR SPA Network Smoke | LLM-2026-000 | supervisor direct work | optional real-browser test proves `observe_browser_network()` captures a real local XHR API candidate |
 | Rendered DOM Selector Training | LLM-2026-001 | `docs/team/acceptance/2026-05-09_rendered_dom_selector_training_ACCEPTED.md` | HN Algolia-style DOM fixtures and selector inference tests |
 | Browser Network Timing QA | LLM-2026-002 | `docs/team/acceptance/2026-05-09_network_timing_qa_ACCEPTED.md` | diagnosed observer timing gap and recommended `networkidle` plus optional render delay |
+| Observed API Pagination/Cursor MVP | LLM-2026-001 | `docs/team/acceptance/2026-05-09_observed_api_pagination_ACCEPTED.md` | page/limit, offset/limit, and cursor JSON pagination MVP; accepted with hardening follow-up |
+| API Pagination QA | LLM-2026-002 | `docs/team/acceptance/2026-05-09_api_pagination_qa_ACCEPTED.md` | identified pagination loop, dedupe, cursor-stuck, and analytics replay risks |
+| Docs State Audit After API Replay | LLM-2026-004 | `docs/team/acceptance/2026-05-09_docs_state_audit_after_api_replay_ACCEPTED.md` | README/status docs stale after HN Algolia API replay; supervisor cleanup applied |
+| Ecommerce Product Quality QA | LLM-2026-002 | `docs/team/acceptance/2026-05-09_ecommerce_product_quality_qa_ACCEPTED.md` | product schema, price/body/image/variant, category-aware dedupe, and anti-starvation QA design accepted |
+| Ecommerce Crawl Workflow Docs | LLM-2026-004 | `docs/team/acceptance/2026-05-09_ecommerce_workflow_docs_ACCEPTED.md` | safe ecommerce workflow, category/list/detail/variant decomposition, and challenge diagnosis boundary accepted |
+| Ecommerce Real-Site Training Batch | LLM-2026-000 | supervisor direct work | Shoesme diagnosis-only, Donsje Shopify JSON, Clausporto/uvex Magento list/detail, Bosch corporate product page; Excel/JSON exported |
+| Local Ecommerce Stress Test | LLM-2026-000 | supervisor direct work | 30,000 synthetic products passed frontier, result storage, and Excel export; long-run checkpoint storage still required |
 
 ## Upcoming Candidate Tasks
 
-1. Add API pagination/cursor handling for observed JSON APIs.
-2. Run the next real-site training batch against dynamic pages and virtualized lists.
-3. Durable job registry design after the in-memory FastAPI MVP stabilizes.
-4. One controlled infinite-scroll target for scroll strategy validation.
-5. Open-source polish: `SECURITY.md`, PR template, release checklist pass.
+1. Add ecommerce product quality foundation from `spider_text`: product schema, price/body/image/variant normalization, category-aware dedupe.
+2. Convert 2026-05-09 ecommerce real-site samples into fixtures/tests.
+3. Add checkpointed ecommerce product storage and resumable run progress before real tens-of-thousands-item crawls.
+4. Harden observed API pagination on real public pagination targets after the deterministic guards are stable.
+5. Run the next real-site training batch against dynamic pages, paginated APIs, and virtualized lists.
+6. Durable job registry design after the in-memory FastAPI MVP stabilizes.
+7. Open-source polish: `SECURITY.md`, PR template, release checklist pass.
 
 ## Supervisor Notes
 
