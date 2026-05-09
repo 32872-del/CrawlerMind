@@ -4,7 +4,7 @@ Use this before tagging a public release.
 
 ## Required
 
-- [ ] Choose and add a `LICENSE` file.
+- [x] Choose and add a `LICENSE` file.
 - [ ] Confirm `clm_config.json` is not tracked.
 - [ ] Confirm runtime databases and caches are not tracked.
 - [ ] Run the standard test suite.
@@ -22,7 +22,7 @@ Use this before tagging a public release.
 
 ## Current Notes
 
-- License is still pending project-owner choice.
+- License is MIT.
 - `clm_config.json` is ignored by Git.
 - Runtime folders are ignored by Git.
 - The repository is suitable for source synchronization, but not yet a polished

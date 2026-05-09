@@ -268,11 +268,9 @@ python -m unittest autonomous_crawler.tests.test_real_browser_smoke -v
 - Training ladder: `docs/team/training/2026-05-08_REAL_SITE_TRAINING_LADDER.md`
 - Stage analysis: `docs/reports/2026-05-08_STAGE_AND_BLUEPRINT_ANALYSIS.txt`
 
-## Open Source Status
+## License
 
-This repository is being prepared for public release. A license has not been
-selected yet. Before using it as a formal open-source project, choose and add a
-license file, such as MIT or Apache-2.0.
+This project is released under the MIT License. See `LICENSE`.
 
 ## Safety Note
 
