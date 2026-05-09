@@ -6,7 +6,7 @@ Display Name: Worker Alpha
 
 Permanent Employee ID: `LLM-2026-001`
 
-Current Project Role: API Job Worker
+Current Project Role: Browser / DOM Recon Worker
 
 ## Current Strength Profile
 
@@ -32,17 +32,24 @@ Current Project Role: API Job Worker
   `docs/team/acceptance/2026-05-07_llm_phase_a_interfaces_ACCEPTED.md`
 - FastAPI Opt-In LLM Advisors:
   `docs/team/acceptance/2026-05-08_fastapi_opt_in_llm_advisors_ACCEPTED.md`
+- Open Source CI And Contributor Basics:
+  `docs/team/acceptance/2026-05-09_open_source_ci_ACCEPTED.md`
+- Rendered DOM Selector Training:
+  `docs/team/acceptance/2026-05-09_rendered_dom_selector_training_ACCEPTED.md`
 
 ## Current Assignment
 
-- None.
+- Rendered DOM Selector Training:
+  `docs/team/acceptance/2026-05-09_rendered_dom_selector_training_ACCEPTED.md`
+  accepted.
 
 ## Current Notes
 
 This employee completed browser fallback, FastAPI background jobs, real browser
 SPA smoke, job registry concurrency limits and TTL cleanup, LLM advisor Phase A,
-and the FastAPI opt-in LLM advisor path. The employee ID is stable; no active
-assignment is open.
+and the FastAPI opt-in LLM advisor path. On 2026-05-09, this employee added
+open-source CI basics and HN Algolia-style rendered DOM selector training.
+The employee ID is stable; no active assignment is open.
 
 ## Persistent Memory
 
@@ -66,3 +73,4 @@ Next suitable assignments:
 - FastAPI request diagnostics or provider config validation.
 - Browser artifact cleanup policy.
 - Additional browser smoke fixtures.
+- Rendered DOM selector fixtures for modern SPA/SSR layouts.

@@ -185,6 +185,14 @@ search workflow.
   skipped (no Playwright in CI). `CONTRIBUTING.md` with setup, test command,
   no-secrets rule, branch/PR guidance, and crawling safety note. Three GitHub
   issue templates: bug report, feature request, crawl target/training report.
+- Rendered DOM selector training added on 2026-05-09: improved
+  `infer_dom_structure` for modern SPA/SSR list pages. Added HN Algolia-style
+  fixtures (`mock://hn-algolia`, `mock://hn-algolia-variant`) with CSS module
+  class names, `data-testid` attributes, nested link/title structures, bare-text
+  score nodes, and `<time>` elements. Field selectors now support
+  `[data-testid*=title]` fallback, `<time[datetime]>` date detection, and
+  `POINTS_RE` score matching ("123 points", "45 votes"). `_find_score_element`
+  checks `data-testid`, class names, and text patterns. 15 new tests.
 - Browser network observation skeleton added on 2026-05-09:
   `tools/browser_network_observer.py` observes Playwright response events,
   redacts sensitive headers, captures bounded JSON/post-data previews, scores
@@ -207,7 +215,7 @@ search workflow.
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 321 tests (skipped=4)
+Ran 336 tests (skipped=4)
 OK
 ```
 

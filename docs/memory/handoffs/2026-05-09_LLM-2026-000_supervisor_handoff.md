@@ -6,11 +6,13 @@ Crawler-Mind is a runnable MVP with open-source basics in place and the first
 browser network observation skeleton integrated into Recon behind explicit
 opt-in.
 
-Three worker outputs from 2026-05-09 were accepted:
+Accepted worker outputs from 2026-05-09 include:
 
 - `LLM-2026-001`: Open Source CI And Contributor Basics
 - `LLM-2026-002`: Browser Network Observation QA
 - `LLM-2026-004`: Open Source Docs And Onboarding Audit
+- `LLM-2026-001`: Rendered DOM Selector Training
+- `LLM-2026-002`: Browser Network Observation Timing QA
 
 ## Completed Work
 
@@ -26,6 +28,12 @@ Three worker outputs from 2026-05-09 were accepted:
 - Added controlled XHR-backed SPA browser-network smoke. The optional browser
   test serves a local SPA, triggers `fetch("/api/products?page=1")`, and proves
   `observe_browser_network()` captures/promotes the XHR as a JSON API candidate.
+- Accepted rendered DOM selector training from `LLM-2026-001`: HN Algolia-style
+  fixtures and 15 focused tests now cover data-testid title/link signals,
+  bare-text points, and time/date selectors.
+- Accepted network timing QA from `LLM-2026-002`: public SPA observation likely
+  returns too early with `domcontentloaded`; next fix is observation
+  `networkidle` plus optional post-load delay.
 - Updated `PROJECT_STATUS.md`.
 - Updated `docs/team/TEAM_BOARD.md`.
 - Updated supervisor persistent memory.
@@ -42,8 +50,8 @@ python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py ru
 OK
 
 python -m unittest discover -s autonomous_crawler/tests
-Ran 316 tests
-OK (skipped=3)
+Ran 336 tests
+OK (skipped=4)
 
 python -m unittest autonomous_crawler.tests.test_access_diagnostics autonomous_crawler.tests.test_api_intercept -v
 Ran 28 tests
@@ -55,13 +63,18 @@ python run_training_round4.py
 AUTONOMOUS_CRAWLER_RUN_BROWSER_SMOKE=1 python -m unittest autonomous_crawler.tests.test_real_browser_smoke -v
 Ran 4 tests
 OK
+
+python -m unittest autonomous_crawler.tests.test_hn_algolia_dom -v
+Ran 15 tests
+OK
 ```
 
 ## Known Risks
 
 - Browser network observation has mock coverage and a controlled local
-  XHR-backed smoke target. The remaining gap is public SPA observation and
-  rendered-DOM selector training.
+  XHR-backed smoke target. The remaining gap is public SPA observation timing.
+- Rendered DOM selector inference is stronger for HN Algolia-style fixtures,
+  but still needs a public-site retry.
 - FastAPI job registry remains in-memory.
 - Employee memory is still file-based and manually loaded by each AI session.
 - No automated branch/lock workflow for multiple workers yet.
@@ -69,8 +82,8 @@ OK
 
 ## Next Recommended Action
 
-Assign rendered DOM selector training for public SPA list layouts, then retry
-the HN Algolia browser-network observation probe.
+Implement observer timing fix, then retry the HN Algolia browser-network
+observation probe.
 
 ## Files To Read First
 
@@ -81,8 +94,12 @@ docs/reports/2026-05-09_DAILY_REPORT.md
 docs/team/acceptance/2026-05-09_open_source_ci_ACCEPTED.md
 docs/team/acceptance/2026-05-09_browser_network_observation_qa_ACCEPTED.md
 docs/team/acceptance/2026-05-09_open_source_docs_audit_ACCEPTED.md
+docs/team/acceptance/2026-05-09_rendered_dom_selector_training_ACCEPTED.md
+docs/team/acceptance/2026-05-09_network_timing_qa_ACCEPTED.md
 docs/reports/2026-05-09_REAL_SITE_TRAINING_ROUND4.md
 dev_logs/2026-05-09_real_site_training_round4.json
 autonomous_crawler/tools/browser_network_observer.py
 autonomous_crawler/tests/test_browser_network_observer.py
+autonomous_crawler/tools/html_recon.py
+autonomous_crawler/tests/test_hn_algolia_dom.py
 ```

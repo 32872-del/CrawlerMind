@@ -142,6 +142,51 @@ This closes the gap between mocked network-observer tests and a real browser
 network path. It does not depend on external sites and remains skipped in the
 normal suite unless `AUTONOMOUS_CRAWLER_RUN_BROWSER_SMOKE=1` is set.
 
+### Rendered DOM Selector Training
+
+Accepted from `LLM-2026-001`.
+
+- Added HN Algolia-style rendered DOM fixtures:
+  - `mock://hn-algolia`
+  - `mock://hn-algolia-variant`
+- Improved `infer_dom_structure()` support for:
+  - CSS module class names
+  - `data-testid` title/link signals
+  - bare-text score patterns such as `123 points`
+  - `<time datetime>` date extraction
+- Added 15 focused tests in
+  `autonomous_crawler/tests/test_hn_algolia_dom.py`.
+
+Acceptance record:
+
+```text
+docs/team/acceptance/2026-05-09_rendered_dom_selector_training_ACCEPTED.md
+```
+
+### Browser Network Observation Timing QA
+
+Accepted from `LLM-2026-002`.
+
+The audit identified why the public HN Algolia browser-network observation
+probe captured only the document response:
+
+- `observe_browser_network()` defaults to `wait_until="domcontentloaded"`
+- many SPAs fire XHR after DOMContentLoaded during hydration
+- when no `wait_selector` is supplied, the observer can return before XHR
+  events occur
+
+Recommended next implementation:
+
+- change observation default to `networkidle`
+- add optional `render_time_ms` post-load delay
+- leave `fetch_rendered_html()` default unchanged
+
+Acceptance record:
+
+```text
+docs/team/acceptance/2026-05-09_network_timing_qa_ACCEPTED.md
+```
+
 ## Verification
 
 ```text
@@ -157,7 +202,7 @@ OK
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 321 tests
+Ran 336 tests
 OK (skipped=4)
 ```
 
@@ -173,6 +218,10 @@ python run_training_round4.py
 
 AUTONOMOUS_CRAWLER_RUN_BROWSER_SMOKE=1 python -m unittest autonomous_crawler.tests.test_real_browser_smoke -v
 Ran 4 tests
+OK
+
+python -m unittest autonomous_crawler.tests.test_hn_algolia_dom -v
+Ran 15 tests
 OK
 ```
 
@@ -193,7 +242,8 @@ OK
 ## Current Gaps
 
 - Network observation has not yet produced API candidates on a public dynamic
-  site, although it now works end-to-end on a controlled XHR-backed SPA.
+  site, although it now works end-to-end on a controlled XHR-backed SPA. Timing
+  QA points to `domcontentloaded` returning too early.
 - API pagination/cursor handling is still shallow.
 - Virtualized lists and infinite scroll still need training targets.
 - Cloudflare/CAPTCHA/login-required targets remain diagnosis-only.
@@ -203,9 +253,10 @@ OK
 
 ## Next Recommended Work
 
-1. Improve rendered DOM selector inference for public SPA list layouts.
-2. Retry the HN Algolia browser-network observation probe with better timing or
-   request observation.
+1. Implement the observer timing fix: `networkidle` default for observation and
+   optional post-load delay.
+2. Retry the HN Algolia browser-network observation probe with improved timing
+   and rendered DOM selector inference.
 3. Continue real-site training from the ladder: dynamic pages, virtualized
    lists, then tougher anti-bot diagnosis cases.
 4. Add `SECURITY.md`, PR template, and an open-source release checklist pass

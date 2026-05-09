@@ -158,10 +158,120 @@ MOCK_TAILWIND_LINKS_HTML = """
 </html>
 """
 
+# HN Algolia-style rendered DOM: modern SPA with CSS module class names,
+# nested link/title structures, and bare-text score/metadata nodes.
+MOCK_HN_ALGOLIA_HTML = """
+<html>
+  <body>
+    <main class="content">
+      <ol class="stories_list">
+        <li class="stories_story">
+          <article class="Story_storyContainer Story_story" data-testid="story-item">
+            <div class="Story_titleRow">
+              <a class="Story_titleLink" href="https://example.com/article-1" data-testid="story-link">
+                <span class="Story_title" data-testid="story-title">Show HN: A New Search Engine</span>
+              </a>
+              <span class="Story_source">(example.com)</span>
+            </div>
+            <div class="Story_meta" data-testid="story-meta">
+              123 points by user1 3 hours ago | 45 comments
+            </div>
+          </article>
+        </li>
+        <li class="stories_story">
+          <article class="Story_storyContainer Story_story" data-testid="story-item">
+            <div class="Story_titleRow">
+              <a class="Story_titleLink" href="https://blog.example.org/post-2" data-testid="story-link">
+                <span class="Story_title" data-testid="story-title">Ask HN: Best Practices for Crawling</span>
+              </a>
+              <span class="Story_source">(blog.example.org)</span>
+            </div>
+            <div class="Story_meta" data-testid="story-meta">
+              89 points by user2 5 hours ago | 12 comments
+            </div>
+          </article>
+        </li>
+        <li class="stories_story">
+          <article class="Story_storyContainer Story_story" data-testid="story-item">
+            <div class="Story_titleRow">
+              <a class="Story_titleLink" href="https://news.example.com/breaking" data-testid="story-link">
+                <span class="Story_title" data-testid="story-title">Breaking: Major Tech Acquisition Announced</span>
+              </a>
+              <span class="Story_source">(news.example.com)</span>
+            </div>
+            <div class="Story_meta" data-testid="story-meta">
+              456 points by user3 1 hour ago | 200 comments
+            </div>
+          </article>
+        </li>
+      </ol>
+    </main>
+  </body>
+</html>
+"""
+
+# Variant: articles with <time> elements and explicit points spans.
+MOCK_HN_ALGOLIA_VARIANT_HTML = """
+<html>
+  <body>
+    <main class="content">
+      <ol class="stories_list">
+        <li class="stories_story">
+          <article class="Story_storyContainer Story_story" data-testid="story-item">
+            <div class="Story_titleRow">
+              <a class="Story_titleLink" href="https://example.com/a" data-testid="story-link">
+                <span class="Story_title" data-testid="story-title">First Article</span>
+              </a>
+            </div>
+            <div class="Story_meta">
+              <span class="Story_score" data-testid="story-score">72 points</span>
+              by <a class="Story_user" href="/user/alpha">alpha</a>
+              <time datetime="2026-05-09T10:00:00Z">2 hours ago</time>
+              | <a href="/item/111">34 comments</a>
+            </div>
+          </article>
+        </li>
+        <li class="stories_story">
+          <article class="Story_storyContainer Story_story" data-testid="story-item">
+            <div class="Story_titleRow">
+              <a class="Story_titleLink" href="https://example.com/b" data-testid="story-link">
+                <span class="Story_title" data-testid="story-title">Second Article</span>
+              </a>
+            </div>
+            <div class="Story_meta">
+              <span class="Story_score" data-testid="story-score">210 points</span>
+              by <a class="Story_user" href="/user/beta">beta</a>
+              <time datetime="2026-05-09T08:00:00Z">4 hours ago</time>
+              | <a href="/item/222">88 comments</a>
+            </div>
+          </article>
+        </li>
+        <li class="stories_story">
+          <article class="Story_storyContainer Story_story" data-testid="story-item">
+            <div class="Story_titleRow">
+              <a class="Story_titleLink" href="https://example.com/c" data-testid="story-link">
+                <span class="Story_title" data-testid="story-title">Third Article</span>
+              </a>
+            </div>
+            <div class="Story_meta">
+              <span class="Story_score" data-testid="story-score">15 points</span>
+              by <a class="Story_user" href="/user/gamma">gamma</a>
+              <time datetime="2026-05-09T12:00:00Z">30 minutes ago</time>
+              | <a href="/item/332">2 comments</a>
+            </div>
+          </article>
+        </li>
+      </ol>
+    </main>
+  </body>
+</html>
+"""
+
 PRICE_RE = re.compile(
     r"(?i)(?:[$€£¥]\s*\d[\d\s,.]*|\d[\d\s,.]*(?:pln|usd|eur|gbp|cny|rmb|zł))"
 )
 SCORE_RE = re.compile(r"(?:\d+(?:\.\d+)?\s*(?:分|/10)?|评分)", re.I)
+POINTS_RE = re.compile(r"\b\d+\s*(?:points?|votes?|likes?|upvotes?)\b", re.I)
 API_RE = re.compile(r"""["']([^"']*(?:/api/|graphql|fetch|ajax)[^"']*)["']""", re.I)
 BOT_PATTERNS = [
     "cloudflare",
@@ -203,6 +313,10 @@ def fetch_html(url: str, headers: dict[str, str] | None = None) -> FetchResult:
         return FetchResult(url=url, html='{"data":{"countries":[]}}', status_code=200)
     if url == "mock://tailwind-links":
         return FetchResult(url=url, html=MOCK_TAILWIND_LINKS_HTML, status_code=200)
+    if url == "mock://hn-algolia":
+        return FetchResult(url=url, html=MOCK_HN_ALGOLIA_HTML, status_code=200)
+    if url == "mock://hn-algolia-variant":
+        return FetchResult(url=url, html=MOCK_HN_ALGOLIA_VARIANT_HTML, status_code=200)
     site_zoo_fixture = fixture_by_url(url)
     if site_zoo_fixture:
         status_code = 403 if site_zoo_fixture.category == "challenge" else 200
@@ -263,6 +377,8 @@ def _mock_best_fetch(url: str) -> BestFetchResult | None:
         "mock://json-direct": '[{"title":"JSON Alpha"},{"title":"JSON Beta"}]',
         "mock://api/graphql-countries": '{"data":{"countries":[]}}',
         "mock://tailwind-links": MOCK_TAILWIND_LINKS_HTML,
+        "mock://hn-algolia": MOCK_HN_ALGOLIA_HTML,
+        "mock://hn-algolia-variant": MOCK_HN_ALGOLIA_VARIANT_HTML,
     }
     if url in fixture_map:
         attempt = FetchAttempt(mode="mock", url=url, html=fixture_map[url], status_code=200)
@@ -493,6 +609,7 @@ def _score_container(elements: list[Tag], fields: dict[str, str]) -> int:
     score += 3 if fields.get("rank") else 0
     score += 3 if fields.get("hot_score") else 0
     score += 1 if fields.get("summary") else 0
+    score += 1 if fields.get("date") else 0
     text_lengths = [len(element.get_text(" ", strip=True)) for element in elements[:5]]
     if text_lengths and max(text_lengths) > 1000:
         score -= 4
@@ -503,6 +620,8 @@ def _infer_field_selectors(container: Tag) -> dict[str, str]:
     fields: dict[str, str] = {}
 
     title = container.select_one("[class*=title], [class*=name], h1, h2, h3, h4")
+    if not title:
+        title = container.select_one("[data-testid*=title]")
     if not title:
         title = container.select_one("a[title], a")
     if title:
@@ -543,8 +662,16 @@ def _infer_field_selectors(container: Tag) -> dict[str, str]:
         fields["hot_score"] = _relative_selector(hot_score)
 
     summary = container.select_one("[class*=desc], [class*=summary], [class*=intro]")
+    if not summary:
+        summary = container.select_one("[data-testid*=summary], [data-testid*=desc]")
     if summary:
         fields["summary"] = _relative_selector(summary)
+
+    time_el = container.select_one("time[datetime]")
+    if time_el:
+        fields["date"] = _relative_selector(time_el) + "@datetime"
+    elif container.select_one("[class*=time], [class*=date]"):
+        fields["date"] = _relative_selector(container.select_one("[class*=time], [class*=date]"))
 
     return fields
 
@@ -555,6 +682,8 @@ def _find_primary_link(container: Tag, title: Tag | None = None) -> Tag | None:
         "a.title_dIF3B[href]",
         "a[class*=title][href]",
         "a[class*=name][href]",
+        "a[data-testid*=link][href]",
+        "a[data-testid*=title][href]",
     ]
     for selector in selectors:
         link = container.select_one(selector)
@@ -581,9 +710,22 @@ def _find_price_element(container: Tag) -> Tag | None:
 
 
 def _find_score_element(container: Tag) -> Tag | None:
+    # Check data-testid attributes first (most specific).
+    testid_score = container.select_one("[data-testid*=score], [data-testid*=points]")
+    if testid_score:
+        return testid_score
+
+    # Check explicit score/points class names.
+    class_score = container.select_one("[class*=score], [class*=points], [class*=hot-index]")
+    if class_score and POINTS_RE.search(class_score.get_text(" ", strip=True)):
+        return class_score
+
+    # Check text content for score patterns.
     for element in container.find_all(["span", "div", "strong", "b"]):
         text = element.get_text(" ", strip=True)
         if SCORE_RE.fullmatch(text) and not PRICE_RE.search(text):
+            return element
+        if POINTS_RE.search(text) and not PRICE_RE.search(text):
             return element
     return None
 

@@ -7,10 +7,10 @@ Last updated: 2026-05-09
 | Employee ID | Display Name | Current Project Role | Status | Current Assignment |
 |---|---|---|---|---|
 | LLM-2026-000 | Supervisor Codex | Project Supervisor | active | project direction, assignments, acceptance |
-| LLM-2026-001 | Worker Alpha | Open Source CI Worker | accepted | Open Source CI And Contributor Basics |
-| LLM-2026-002 | Worker Beta | Browser Network Observation QA | accepted | Browser Network Observation QA |
+| LLM-2026-001 | Worker Alpha | Browser / DOM Recon Worker | accepted | Rendered DOM Selector Training |
+| LLM-2026-002 | Worker Beta | QA / Browser Network Auditor | accepted | Browser Network Observation Timing QA |
 | LLM-2026-003 | Worker Gamma | Unassigned | standby | none |
-| LLM-2026-004 | Worker Delta | Open Source Docs Auditor | accepted | Open Source Docs And Onboarding Audit |
+| LLM-2026-004 | Worker Delta | Documentation Worker | standby | none |
 
 ## Current Project Roles
 
@@ -54,6 +54,8 @@ Last updated: 2026-05-09
 | Open Source CI And Contributor Basics | LLM-2026-001 | Open Source CI Worker | accepted | `docs/team/acceptance/2026-05-09_open_source_ci_ACCEPTED.md` |
 | Browser Network Observation QA | LLM-2026-002 | ROLE-QA | accepted | `docs/team/acceptance/2026-05-09_browser_network_observation_qa_ACCEPTED.md` |
 | Open Source Docs And Onboarding Audit | LLM-2026-004 | ROLE-DOCS | accepted | `docs/team/acceptance/2026-05-09_open_source_docs_audit_ACCEPTED.md` |
+| Rendered DOM Selector Training | LLM-2026-001 | Browser / DOM Recon Worker | accepted | `docs/team/acceptance/2026-05-09_rendered_dom_selector_training_ACCEPTED.md` |
+| Browser Network Observation Timing QA | LLM-2026-002 | QA / Browser Network Auditor | accepted | `docs/team/acceptance/2026-05-09_network_timing_qa_ACCEPTED.md` |
 
 ## Recent Accepted Work Log
 
@@ -89,11 +91,13 @@ Last updated: 2026-05-09
 | Open Source Docs Audit | LLM-2026-004 | `docs/team/acceptance/2026-05-09_open_source_docs_audit_ACCEPTED.md` | onboarding audit and doc consistency findings |
 | Real-Site Training Round 4 | LLM-2026-000 | supervisor direct work | 4/5 public API scenarios completed; JSON anti-bot false positive and common API shape normalization fixed |
 | Controlled XHR SPA Network Smoke | LLM-2026-000 | supervisor direct work | optional real-browser test proves `observe_browser_network()` captures a real local XHR API candidate |
+| Rendered DOM Selector Training | LLM-2026-001 | `docs/team/acceptance/2026-05-09_rendered_dom_selector_training_ACCEPTED.md` | HN Algolia-style DOM fixtures and selector inference tests |
+| Browser Network Timing QA | LLM-2026-002 | `docs/team/acceptance/2026-05-09_network_timing_qa_ACCEPTED.md` | diagnosed observer timing gap and recommended `networkidle` plus optional render delay |
 
 ## Upcoming Candidate Tasks
 
-1. Rendered DOM selector training for modern SPA list layouts.
-2. Retry HN Algolia browser-network observation with improved timing/request capture.
+1. Implement observer timing fix: default network observation to `networkidle` and add optional post-load delay.
+2. Retry HN Algolia browser-network observation with improved timing and rendered DOM selectors.
 3. Durable job registry design after the in-memory FastAPI MVP stabilizes.
 4. One controlled SPA target for browser fallback validation.
 5. One virtualized-list target for scroll strategy validation.
