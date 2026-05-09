@@ -1,43 +1,137 @@
-# Crawler-Mind
+# Crawler-Mind (CLM)
 
-一个可接入 LLM API 的采集 Agent MVP。
+Crawler-Mind is an early autonomous crawl-agent MVP. It turns a natural-language
+crawl goal into a structured crawl workflow:
 
-## 最简单用法
-
-1. 安装依赖：
-
-```powershell
-python -m pip install -r requirements.txt
+```text
+Planner -> Recon -> Strategy -> Executor -> Extractor -> Validator
 ```
 
-2. 复制配置并填 API：
+The current project is runnable and useful for supported targets, but it is
+still under active development. It is best treated as a local research and
+engineering framework for building a stronger crawling agent.
+
+## What Works Today
+
+- Static HTML crawling and selector inference.
+- Playwright browser fallback for rendered pages.
+- Public JSON API and GraphQL API collection.
+- Optional OpenAI-compatible LLM advisor for Planner and Strategy.
+- Deterministic fallback when LLM is disabled or fails.
+- FastAPI background-job service.
+- SQLite result persistence.
+- Result inspection/export CLI.
+- Bundled `fnspider` engine for project-local portability.
+- Team workflow docs, daily reports, handoff memory, and training ladder.
+
+Verified examples include:
+
+- Baidu realtime hot search: 30 validated items.
+- JSONPlaceholder direct JSON.
+- Reddit `.json`.
+- Countries GraphQL.
+- AniList GraphQL.
+- Bilibili public ranking API.
+- Douban Top250.
+
+## Current Limits
+
+- This is not yet a universal crawler.
+- Dynamic sites, infinite scroll, virtualized lists, and hostile anti-bot pages
+  still need more training and tests.
+- Cloudflare/CAPTCHA/login-required targets are diagnosis-only until explicit
+  authorized workflows exist.
+- FastAPI job registry is in-memory; running job state is lost on process
+  restart.
+- No frontend UI yet.
+
+## Repository Map
+
+```text
+autonomous_crawler/
+  agents/        LangGraph workflow nodes
+  api/           FastAPI service
+  engines/       Bundled crawler engines
+  llm/           Optional OpenAI-compatible advisor adapter
+  models/        State schemas
+  storage/       SQLite result store, frontier, domain memory
+  tests/         Unit and integration tests
+  tools/         Recon, browser, API, fetch policy, product helpers
+  training/      Real-site training runner
+  workflows/     LangGraph graph
+
+docs/
+  blueprints/    Long-term architecture
+  decisions/     ADRs
+  memory/        Handoffs and persistent employee memory model
+  plans/         Short-term and feature plans
+  process/       Collaboration guide
+  reports/       Daily/project reports
+  runbooks/      Setup and operation guides
+  team/          Team board, employees, assignments, acceptance records
+
+dev_logs/        Developer logs and selected training summaries
+scripts/         Cross-platform helper scripts
+```
+
+## Quick Start
+
+Python 3.11+ is recommended.
+
+### Windows PowerShell
 
 ```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+playwright install
+
 Copy-Item clm_config.example.json clm_config.json
 notepad clm_config.json
-```
-
-3. 运行：
-
-```powershell
-python run_simple.py "collect product titles and prices" https://example.com
-```
-
-测试 LLM API 配置：
-
-```powershell
 python run_simple.py --check-llm
-```
-
-如果还没有 API，可以先跑本地 mock：
-
-```powershell
 python run_simple.py "collect product titles and prices" mock://catalog
 ```
 
-## 配置文件
+### Linux / macOS
 
-`clm_config.json` 示例：
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+playwright install
+
+cp clm_config.example.json clm_config.json
+${EDITOR:-nano} clm_config.json
+python run_simple.py --check-llm
+python run_simple.py "collect product titles and prices" mock://catalog
+```
+
+You can also use the helper scripts:
+
+```bash
+bash scripts/setup_unix.sh
+bash scripts/check_llm_unix.sh
+bash scripts/run_mock_unix.sh
+bash scripts/run_api_unix.sh
+```
+
+## LLM Configuration
+
+Copy the example config:
+
+```bash
+cp clm_config.example.json clm_config.json
+```
+
+On Windows:
+
+```powershell
+Copy-Item clm_config.example.json clm_config.json
+```
+
+Then edit:
 
 ```json
 {
@@ -46,110 +140,62 @@ python run_simple.py "collect product titles and prices" mock://catalog
     "base_url": "https://api.openai.com/v1",
     "model": "gpt-4o-mini",
     "api_key": "replace-with-your-api-key",
+    "provider": "openai-compatible",
+    "timeout_seconds": 30,
+    "temperature": 0,
+    "max_tokens": 800,
     "use_response_format": true
   }
 }
 ```
 
-兼容 OpenAI-compatible API。换供应商时通常只改：
+Most OpenAI-compatible providers only require changing:
 
 - `base_url`
 - `model`
 - `api_key`
 
-`base_url` 可以填根地址或 `/v1` 地址；CLM 会自动拼到 `/v1/chat/completions`。如果供应商报 `response_format` 不支持，把 `use_response_format` 改成 `false`。
+If your provider does not support `response_format`, set:
 
-## 当前真实状态
-
-已经能做到：
-
-- 安装依赖
-- 填一个 API 配置
-- 用 `run_simple.py` 运行一次 LLM-assisted 采集流程
-
-还没做到：
-
-- 对任意网站都稳定成功
-- 自动处理所有复杂分页/API 拦截
-
-Current capabilities:
-
-- LangGraph workflow:
-  `Planner -> Recon -> Strategy -> Executor -> Extractor -> Validator`
-- Static HTML recon and selector inference.
-- HTTP execution.
-- Playwright browser fallback for rendered SPA/anti-bot pages.
-- Structured extraction and validation.
-- SQLite result persistence.
-- FastAPI background-job service MVP with in-memory job registry and opt-in LLM
-  request config.
-- Bundled `fnspider` engine for project-local portability.
-- Verified Baidu realtime hot-search smoke test.
-- Opt-in real browser SPA smoke test using a local JS fixture.
-- Result inspection/export CLI.
-- Git-backed team workflow with employee memory, ADRs, runbooks, and supervisor
-  acceptance records.
-- Optional OpenAI-compatible LLM advisor adapter for Planner/Strategy.
-
-## Quick Start
-
-Run tests:
-
-```text
-python -m unittest discover autonomous_crawler\tests
+```json
+"use_response_format": false
 ```
 
-Run opt-in real browser SPA smoke test:
+`clm_config.json` is ignored by Git. Do not commit real API keys.
 
-```text
-$env:AUTONOMOUS_CRAWLER_RUN_BROWSER_SMOKE='1'
-python -m unittest autonomous_crawler.tests.test_real_browser_smoke -v
+## Run A Crawl
+
+Deterministic mock:
+
+```bash
+python run_simple.py "collect product titles and prices" mock://catalog
 ```
 
-Run Baidu smoke test:
+Real smoke:
 
-```text
+```bash
+python run_simple.py "collect top 30 hot searches" "https://top.baidu.com/board?tab=realtime"
+```
+
+Baidu smoke script:
+
+```bash
 python run_baidu_hot_test.py
 ```
 
-Run a workflow directly:
+Training rounds:
 
-```text
-python run_skeleton.py "采集百度热搜榜前30条" https://top.baidu.com/board?tab=realtime
+```bash
+python run_training_round1.py
+python run_training_round2.py
+python run_training_round3.py
 ```
 
-Inspect persisted results:
+## FastAPI Service
 
-```text
-python run_results.py list
-python run_results.py show <task_id>
-python run_results.py items <task_id>
-python run_results.py export-json <task_id> output.json
-python run_results.py export-csv <task_id> output.csv
-```
+Start the local API:
 
-Run with an OpenAI-compatible LLM advisor:
-
-```text
-$env:CLM_LLM_BASE_URL='https://api.openai.com/v1'
-$env:CLM_LLM_MODEL='gpt-4o-mini'
-$env:CLM_LLM_API_KEY='...'
-python run_skeleton.py --llm "collect product titles and prices" https://example.com
-```
-
-Compatible providers usually only require changing `CLM_LLM_BASE_URL`,
-`CLM_LLM_MODEL`, and `CLM_LLM_API_KEY`. Local OpenAI-compatible servers can omit
-`CLM_LLM_API_KEY`.
-
-Check `clm_config.json` before running a crawl:
-
-```text
-python run_simple.py --check-llm
-```
-
-Start API service:
-
-```text
+```bash
 uvicorn autonomous_crawler.api.app:app --reload
 ```
 
@@ -159,7 +205,7 @@ Open:
 http://127.0.0.1:8000/docs
 ```
 
-## Current API
+Endpoints:
 
 ```text
 GET  /health
@@ -168,66 +214,68 @@ GET  /crawl/{task_id}
 GET  /history
 ```
 
-`POST /crawl` returns a task ID immediately with `running` status. The workflow
-runs in a background thread and can be queried through `GET /crawl/{task_id}`.
-The current job registry is in-memory, so in-flight jobs do not survive process
-restart.
-
 Example request:
 
 ```json
 {
-  "user_goal": "采集百度热搜榜前30条",
-  "target_url": "https://top.baidu.com/board?tab=realtime"
+  "user_goal": "collect top 30 hot searches",
+  "target_url": "https://top.baidu.com/board?tab=realtime",
+  "max_retries": 3,
+  "llm": {
+    "enabled": false
+  }
 }
 ```
 
-## Project Map
+## Result CLI
 
-```text
-autonomous_crawler/
-  agents/       Workflow nodes
-  api/          FastAPI service
-  engines/      Bundled crawler engines
-  models/       State schemas
-  storage/      SQLite result store
-  tests/        Unit and integration tests
-  tools/        Recon and adapter tools
-  workflows/    LangGraph graph
-  llm/          Optional provider-neutral LLM advisors
+```bash
+python run_results.py list
+python run_results.py show <task_id>
+python run_results.py items <task_id>
+python run_results.py export-json <task_id> output.json
+python run_results.py export-csv <task_id> output.csv
+```
 
-docs/
-  blueprints/   Long-term architecture and capability blueprints
-  plans/        Short-term implementation plans
-  process/      Development and collaboration rules
-  reports/      Daily reports
-  reviews/      Engineering reviews
-  team/         Supervisor/worker LLM workspace
+## Tests
 
-dev_logs/       Developer logs only
+Run the standard suite:
+
+```bash
+python -m unittest discover -s autonomous_crawler/tests
+```
+
+Run optional browser smoke:
+
+```bash
+# Linux / macOS
+AUTONOMOUS_CRAWLER_RUN_BROWSER_SMOKE=1 python -m unittest autonomous_crawler.tests.test_real_browser_smoke -v
+```
+
+```powershell
+# Windows PowerShell
+$env:AUTONOMOUS_CRAWLER_RUN_BROWSER_SMOKE='1'
+python -m unittest autonomous_crawler.tests.test_real_browser_smoke -v
 ```
 
 ## Important Docs
 
-- Current status: [PROJECT_STATUS.md](PROJECT_STATUS.md)
-- Main blueprint: [docs/blueprints/AUTONOMOUS_CRAWL_AGENT_BLUEPRINT.md](docs/blueprints/AUTONOMOUS_CRAWL_AGENT_BLUEPRINT.md)
-- MCP blueprint: [docs/blueprints/MCP_BLUEPRINT.md](docs/blueprints/MCP_BLUEPRINT.md)
-- Collaboration rules: [docs/process/COLLABORATION_GUIDE.md](docs/process/COLLABORATION_GUIDE.md)
-- Decisions: [docs/decisions/](docs/decisions/)
-- Runbooks: [docs/runbooks/](docs/runbooks/)
-- Quick start guide: [docs/runbooks/QUICK_START_CN.md](docs/runbooks/QUICK_START_CN.md)
-- Employee memory model: [docs/memory/EMPLOYEE_MEMORY_MODEL.md](docs/memory/EMPLOYEE_MEMORY_MODEL.md)
-- LLM team workspace: [docs/team/TEAM_WORKSPACE.md](docs/team/TEAM_WORKSPACE.md)
-- New LLM onboarding: [docs/team/training/NEW_LLM_ONBOARDING.md](docs/team/training/NEW_LLM_ONBOARDING.md)
-- Short-term plan: [docs/plans/2026-05-05_SHORT_TERM_PLAN.md](docs/plans/2026-05-05_SHORT_TERM_PLAN.md)
+- Current status: `PROJECT_STATUS.md`
+- Blueprint: `docs/blueprints/AUTONOMOUS_CRAWL_AGENT_BLUEPRINT.md`
+- Quick start for Linux/macOS: `docs/runbooks/QUICK_START_LINUX_MAC.md`
+- Quick start for Windows: `docs/runbooks/QUICK_START_WINDOWS.md`
+- Team board: `docs/team/TEAM_BOARD.md`
+- Training ladder: `docs/team/training/2026-05-08_REAL_SITE_TRAINING_LADDER.md`
+- Stage analysis: `docs/reports/2026-05-08_STAGE_AND_BLUEPRINT_ANALYSIS.txt`
 
-## Runtime Data
+## Open Source Status
 
-Runtime files are intentionally not packaged:
+This repository is being prepared for public release. A license has not been
+selected yet. Before using it as a formal open-source project, choose and add a
+license file, such as MIT or Apache-2.0.
 
-```text
-autonomous_crawler/storage/runtime/
-autonomous_crawler/engines/runtime/
-```
+## Safety Note
 
-The project should remain portable without external folders.
+Use this project only on targets you are allowed to access. Do not use it to
+bypass login systems, CAPTCHA, Cloudflare challenges, or other access controls
+without explicit authorization.

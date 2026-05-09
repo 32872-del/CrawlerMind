@@ -7,6 +7,9 @@ LLM-assisted smoke run and a FastAPI LLM opt-in integration. The system
 completed a Baidu realtime hot-search crawl with LLM Planner/Strategy enabled
 and extracted 30 validated items.
 
+Today also added a persistent real-site training ladder and completed three
+training rounds that broadened API, GraphQL, SSR, and ranking-page coverage.
+
 ## Completed
 
 ### OpenAI-Compatible Adapter Hardening
@@ -55,16 +58,6 @@ LLM decisions: 2
 LLM errors: 0
 ```
 
-### Git
-
-Pushed commits:
-
-```text
-6a9541b LLM-2026-000: harden OpenAI-compatible adapter
-3e700d4 LLM-2026-000: keep mock fixtures off fnspider
-2fe69ad LLM-2026-000: close out real LLM smoke milestone
-```
-
 ### FastAPI Opt-In LLM Advisors (LLM-2026-001)
 
 - Added `LLMConfig` Pydantic model to `app.py` with fields: `enabled`,
@@ -81,11 +74,44 @@ Pushed commits:
 - 11 new tests added: 7 endpoint-level (`FastAPILLMOptInTests`), 4 unit-level
   (`BuildAdvisorFromConfigTests`). Total: 38 API tests, 186 suite tests.
 
+### Real-Site Training Rounds
+
+The external training list is now preserved as a long-term ladder under:
+
+```text
+docs/team/training/2026-05-08_REAL_SITE_TRAINING_LADDER.md
+```
+
+Round 1:
+
+- JSONPlaceholder posts: direct JSON target detection, 10 items
+- Reddit r/python JSON: nested JSON record extraction, 10 items
+- Countries GraphQL: explicit GraphQL POST execution, 10 items
+
+Round 2:
+
+- AniList GraphQL: nested GraphQL records, 10 items
+- Bilibili public ranking API: public API normalization, 10 items
+
+Round 3:
+
+- Douban Top250: static ranking page, 25 items
+- React docs SSR recon: framework recon plus minimal extraction, 1 item
+- Vue examples recon: static/framework recon, 10 items
+
+Training takeaway:
+
+- public JSON and GraphQL routes are now part of the main graph
+- ranking pages work on both static DOM and public API paths
+- SSR/framework recon works, but some targets are navigation-heavy and return
+  sparse items by nature
+- the next useful rung is a controlled SPA, then a virtualized-list target
+
 ## Verification
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 186 tests (skipped=3)
+Ran 261 tests (skipped=3)
 OK
 
 python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py run_results.py run_simple.py
@@ -115,45 +141,9 @@ Extracted Data: 2 items
 - Provider compatibility needs more real gateway samples.
 - No streaming support or persistent job registry.
 
-## Real-Site Training Round 1
-
-Training source:
-
-```text
-E:\爬虫Agent实战训练网站清单.md
-```
-
-Selected safe/public scenarios:
-
-- JSONPlaceholder posts: direct JSON URL, completed with 10 items.
-- Reddit r/python JSON: `.json` endpoint with `data.children[].data`, completed
-  with 10 items.
-- Countries GraphQL: explicit GraphQL POST query, completed with 10 items.
-
-Added capability:
-
-- Direct JSON target detection.
-- GraphQL POST execution through `fetch_graphql_api()`.
-- Configured API/GraphQL Recon fast path when the caller supplies
-  `constraints.api_endpoint` or `constraints.graphql_query`.
-- Training runner:
-
-```text
-python run_training_round1.py
-```
-
-Verification after this round:
-
-```text
-python -m unittest discover -s autonomous_crawler/tests
-Ran 256 tests
-OK (skipped=3)
-```
-
 ## Next Recommended Tasks
 
-1. Add `run_simple.py --check-llm` for provider config diagnostics.
-2. Start a small real-site sample suite: Baidu hot, static product fixture,
-   local SPA, one simple public product/category page.
+1. Continue the real-site training ladder with one controlled SPA target.
+2. Add one virtualized-list target for scroll strategy validation.
 3. Continue docs cleanup for employee memory and handoff refreshes when new
    assignments land.

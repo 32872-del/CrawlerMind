@@ -2,6 +2,10 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .claude/
+.venv/
+venv/
+.env
+.env.*
 
 autonomous_crawler/engines/runtime/
 autonomous_crawler/storage/runtime/

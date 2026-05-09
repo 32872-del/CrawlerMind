@@ -35,6 +35,11 @@ search workflow.
   switching to incomplete API extraction.
 - Project-local SQLite result storage for workflow final states, extracted
   items, validation status, and history listing.
+- Real-site training ladder preserved under `docs/team/training/` and linked
+  from the team board.
+- Open-source preparation docs added for GitHub users, including a rewritten
+  root README, Windows quick start, Linux/macOS quick start, release checklist,
+  and Unix helper scripts.
 - `run_skeleton.py` and `run_baidu_hot_test.py` now persist completed or failed
   runs to `autonomous_crawler/storage/runtime/crawl_results.sqlite3`.
 - `recon_tools.py` now wraps the real deterministic HTML recon helpers instead
@@ -174,12 +179,13 @@ search workflow.
   - `storage/domain_memory.py` adds per-domain preferred mode and challenge
     memory.
   - `tools/product_tasks.py` adds generic list/detail/variant helpers.
+  - Real-site training ladder normalized and linked into the team workflow.
 
 ## Current Test Status
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 249 tests (skipped=3)
+Ran 261 tests (skipped=3)
 OK
 ```
 

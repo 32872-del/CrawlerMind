@@ -44,15 +44,22 @@ Current state:
   30 items, validation passed, 0 LLM errors.
 - On 2026-05-08, FastAPI opt-in LLM advisors were accepted and the suite
   reached 186 tests.
+- On 2026-05-08, the real-site training ladder was normalized into
+  `docs/team/training/2026-05-08_REAL_SITE_TRAINING_LADDER.md` and linked into
+  `docs/team/TEAM_BOARD.md`.
+- On 2026-05-08, the project status and daily report were refreshed with the
+  real-site training rounds and current capability summary.
 
 Known risks:
 
 - Human is still the cross-LLM communication bridge.
 - No automated locking or Git branch workflow yet.
 - Employee memory exists as files but does not yet have retrieval automation.
+- Runtime job state is still in-memory.
 
 Next recommended actions:
 
 - Add provider diagnostics for `run_simple.py`.
-- Start a small real-site sample suite.
+- Keep expanding the real-site ladder with controlled SPA and virtualized-list
+  targets.
 - Keep refreshing handoffs and status notes after accepted milestones.

@@ -25,6 +25,12 @@ Last updated: 2026-05-08
 | ROLE-DOCS | Documentation Worker | LLM-2026-004 | accepted work completed |
 | ROLE-LLM-INTERFACE | LLM Interface Worker | LLM-2026-001 | accepted work completed |
 
+## Persistent Training Backlog
+
+| Backlog Item | Source | Status | Notes |
+|---|---|---|---|
+| Real-Site Training Ladder | `docs/team/training/2026-05-08_REAL_SITE_TRAINING_LADDER.md` | active | Long-term training map for future assignments and acceptance records |
+
 ## Assignment Records
 
 | Assignment | Employee ID | Project Role | Status | Acceptance |
@@ -77,9 +83,11 @@ Last updated: 2026-05-08
 
 ## Upcoming Candidate Tasks
 
-1. Real-site training suite: run CLM on selected websites and convert failures into fixtures/tests.
+1. Real-site training suite: continue from the training ladder and convert failures into fixtures/tests.
 2. Browser network observation skeleton for richer future API discovery.
 3. Durable job registry design after the in-memory FastAPI MVP stabilizes.
+4. One controlled SPA target for browser fallback validation.
+5. One virtualized-list target for scroll strategy validation.
 
 ## Supervisor Notes
 
