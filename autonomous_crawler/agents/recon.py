@@ -21,6 +21,7 @@ from .base import preserve_state
 from ..errors import FETCH_HTTP_ERROR, FETCH_UNSUPPORTED_SCHEME, RECON_FAILED, format_error_entry
 from ..tools.html_recon import build_recon_report, fetch_best_html
 from ..tools.api_candidates import build_direct_json_candidate, build_graphql_candidate
+from ..tools.browser_network_observer import observe_browser_network
 
 
 @preserve_state
@@ -83,6 +84,24 @@ def recon_node(state: dict[str, Any]) -> dict[str, Any]:
         },
         "fetch_trace": fetch_result.to_trace(),
     }
+    network_messages: list[str] = []
+    if _should_observe_network(existing_report, target_url):
+        observation = observe_browser_network(target_url)
+        observation_dict = observation.to_dict()
+        recon_report["network_observation"] = observation_dict
+        if observation.api_candidates:
+            recon_report["api_candidates"] = _merge_api_candidates(
+                recon_report.get("api_candidates", []),
+                observation.api_candidates,
+            )
+        network_messages.append(
+            (
+                "[Recon] Network observation "
+                f"status={observation.status}, "
+                f"entries={len(observation.entries)}, "
+                f"api_candidates={len(observation.api_candidates)}"
+            )
+        )
 
     return {
         "status": "recon_done",
@@ -95,8 +114,32 @@ def recon_node(state: dict[str, Any]) -> dict[str, Any]:
                 f"anti_bot={recon_report['anti_bot']['detected']}, "
                 f"fetch_mode={fetch_result.mode}"
             )
-        ],
+        ] + network_messages,
     }
+
+
+def _should_observe_network(existing_report: dict[str, Any], target_url: str) -> bool:
+    constraints = existing_report.get("constraints") or {}
+    if not constraints.get("observe_network"):
+        return False
+    return target_url.startswith(("http://", "https://"))
+
+
+def _merge_api_candidates(
+    existing: list[dict[str, Any]],
+    observed: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    by_key: dict[tuple[str, str], dict[str, Any]] = {}
+    for candidate in list(existing or []) + list(observed or []):
+        url = str(candidate.get("url", ""))
+        method = str(candidate.get("method", "GET")).upper()
+        if not url:
+            continue
+        key = (method, url)
+        current = by_key.get(key)
+        if current is None or int(candidate.get("score") or 0) > int(current.get("score") or 0):
+            by_key[key] = candidate
+    return sorted(by_key.values(), key=lambda item: int(item.get("score") or 0), reverse=True)
 
 
 def _configured_api_recon_report(

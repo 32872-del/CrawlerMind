@@ -180,12 +180,34 @@ search workflow.
     memory.
   - `tools/product_tasks.py` adds generic list/detail/variant helpers.
   - Real-site training ladder normalized and linked into the team workflow.
+- Open source CI and contributor basics added on 2026-05-09: GitHub Actions
+  workflow runs unit tests on Python 3.11/3.12 with compile check. Browser smoke
+  skipped (no Playwright in CI). `CONTRIBUTING.md` with setup, test command,
+  no-secrets rule, branch/PR guidance, and crawling safety note. Three GitHub
+  issue templates: bug report, feature request, crawl target/training report.
+- Browser network observation skeleton added on 2026-05-09:
+  `tools/browser_network_observer.py` observes Playwright response events,
+  redacts sensitive headers, captures bounded JSON/post-data previews, scores
+  JSON/API/GraphQL candidates, and can be enabled in Recon through
+  `constraints.observe_network=true`. QA expanded coverage to 55 focused tests;
+  duplicate API candidates now keep the higher-score observation.
 
 ## Current Test Status
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 261 tests (skipped=3)
+Ran 316 tests (skipped=3)
+OK
+```
+
+Additional verification on 2026-05-09:
+
+```text
+python -m unittest autonomous_crawler.tests.test_browser_network_observer -v
+Ran 55 tests
+OK
+
+python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py run_results.py run_simple.py run_training_round1.py run_training_round2.py run_training_round3.py
 OK
 ```
 
@@ -254,6 +276,8 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
 14. ~~Add structured error codes.~~ Done 2026-05-08. 11 codes defined, 7
     actively used, 23 focused tests, 215 total tests pass.
 15. Start P1 crawl capability iteration.
+16. ~~Add open source CI and contributor basics.~~ Done 2026-05-09. GitHub
+    Actions workflow, CONTRIBUTING.md, and three issue templates.
     - Access diagnostics done 2026-05-08.
     - Fetch mode escalation done 2026-05-08.
     - Site-zoo fixtures, API intercept, SQLite frontier, domain memory, and
@@ -263,3 +287,7 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
       completed with 10 validated items each.
       `run_training_round1.py` writes
       `dev_logs/2026-05-08_real_site_training_round1.json`.
+    - Browser network observation skeleton done 2026-05-09 with mocked
+      Playwright tests and explicit Recon opt-in.
+17. Run a real browser-network observation smoke against a controlled
+    SPA/API-backed target and convert useful findings into fixtures/tests.

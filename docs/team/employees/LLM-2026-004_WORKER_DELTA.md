@@ -6,7 +6,7 @@ Display Name: Worker Delta
 
 Permanent Employee ID: `LLM-2026-004`
 
-Current Project Role: Documentation Worker
+Current Project Role: Open Source Docs Auditor
 
 ## Current Strength Profile
 
@@ -34,13 +34,17 @@ Current Project Role: Documentation Worker
 
 ## Current Assignment
 
-- None.
+- Open Source Docs And Onboarding Audit:
+  `docs/team/assignments/2026-05-09_LLM-2026-004_OPEN_SOURCE_DOCS_AUDIT.md`
+  submitted and pending supervisor acceptance.
 
 ## Current Notes
 
 This employee completed onboarding, project-state audit work, ADR/runbook
 audit, LLM interface and readiness audits, and the status-docs audit after the
-real LLM smoke milestone. No active assignment is open.
+real LLM smoke milestone. On 2026-05-09, Worker Delta completed the open-source
+docs and onboarding audit and identified stale employee memory plus historical
+analysis framing as the main cleanup items.
 
 ## Persistent Memory
 

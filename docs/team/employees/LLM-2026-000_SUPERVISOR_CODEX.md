@@ -49,6 +49,12 @@ Current state:
   `docs/team/TEAM_BOARD.md`.
 - On 2026-05-08, the project status and daily report were refreshed with the
   real-site training rounds and current capability summary.
+- On 2026-05-09, open-source basics were accepted: GitHub Actions, contributor
+  guide, and issue templates.
+- On 2026-05-09, browser network observation was accepted as an opt-in Recon
+  capability with 55 focused tests and 316 total tests passing.
+- On 2026-05-09, docs/onboarding audit was accepted and stale historical
+  status framing was cleaned up.
 
 Known risks:
 
@@ -59,7 +65,8 @@ Known risks:
 
 Next recommended actions:
 
-- Add provider diagnostics for `run_simple.py`.
-- Keep expanding the real-site ladder with controlled SPA and virtualized-list
-  targets.
+- Run a real browser-network observation smoke against one controlled
+  SPA/API-backed target.
+- Keep expanding the real-site ladder with dynamic, virtualized-list, and
+  API-backed targets.
 - Keep refreshing handoffs and status notes after accepted milestones.

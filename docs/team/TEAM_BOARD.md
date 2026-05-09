@@ -1,16 +1,16 @@
 # Team Board
 
-Last updated: 2026-05-08
+Last updated: 2026-05-09
 
 ## Active Employees
 
 | Employee ID | Display Name | Current Project Role | Status | Current Assignment |
 |---|---|---|---|---|
 | LLM-2026-000 | Supervisor Codex | Project Supervisor | active | project direction, assignments, acceptance |
-| LLM-2026-001 | Worker Alpha | LLM / API Worker | standby | none |
-| LLM-2026-002 | Worker Beta | Error Path QA Worker | accepted | Error-path hardening |
+| LLM-2026-001 | Worker Alpha | Open Source CI Worker | accepted | Open Source CI And Contributor Basics |
+| LLM-2026-002 | Worker Beta | Browser Network Observation QA | accepted | Browser Network Observation QA |
 | LLM-2026-003 | Worker Gamma | Unassigned | standby | none |
-| LLM-2026-004 | Worker Delta | Documentation Worker | standby | none |
+| LLM-2026-004 | Worker Delta | Open Source Docs Auditor | accepted | Open Source Docs And Onboarding Audit |
 
 ## Current Project Roles
 
@@ -51,8 +51,11 @@ Last updated: 2026-05-08
 | Status Docs Audit After Real LLM Smoke | LLM-2026-004 | ROLE-DOCS | accepted | `docs/team/acceptance/2026-05-08_status_docs_audit_after_real_llm_smoke_ACCEPTED.md` |
 | Structured Error Codes | LLM-2026-001 | ROLE-API / ROLE-LLM-INTERFACE | accepted | `docs/team/acceptance/2026-05-08_structured_error_codes_ACCEPTED.md` |
 | v5.2 MVP Release Note | LLM-2026-004 | ROLE-DOCS | accepted | `docs/team/acceptance/2026-05-08_v5.2_mvp_release_note_ACCEPTED.md` |
+| Open Source CI And Contributor Basics | LLM-2026-001 | Open Source CI Worker | accepted | `docs/team/acceptance/2026-05-09_open_source_ci_ACCEPTED.md` |
+| Browser Network Observation QA | LLM-2026-002 | ROLE-QA | accepted | `docs/team/acceptance/2026-05-09_browser_network_observation_qa_ACCEPTED.md` |
+| Open Source Docs And Onboarding Audit | LLM-2026-004 | ROLE-DOCS | accepted | `docs/team/acceptance/2026-05-09_open_source_docs_audit_ACCEPTED.md` |
 
-## Accepted Work Today
+## Recent Accepted Work Log
 
 | Module | Employee ID | Acceptance Record | Summary |
 |---|---|---|---|
@@ -80,11 +83,15 @@ Last updated: 2026-05-08
 | P1 Access Diagnostics | LLM-2026-000 | supervisor direct work | JS shell, challenge, structured data, API hints, and access recommendations added to recon |
 | P1 Fetch Best Page | LLM-2026-000 | supervisor direct work | requests/curl_cffi/browser scoring, escalation trace, and browser-mode carry-forward added to recon |
 | P1 Crawl Foundation | LLM-2026-000 | supervisor direct work | site-zoo, API intercept, SQLite frontier, domain memory, and product task helpers completed |
+| Browser Network Observation Skeleton | LLM-2026-000 | supervisor direct work | opt-in Playwright network observation, API candidate scoring, header redaction; duplicate candidate merge now keeps higher-score version |
+| Open Source CI | LLM-2026-001 | `docs/team/acceptance/2026-05-09_open_source_ci_ACCEPTED.md` | GitHub Actions, CONTRIBUTING, issue templates |
+| Browser Network Observation QA | LLM-2026-002 | `docs/team/acceptance/2026-05-09_browser_network_observation_qa_ACCEPTED.md` | 55 focused tests and QA audit |
+| Open Source Docs Audit | LLM-2026-004 | `docs/team/acceptance/2026-05-09_open_source_docs_audit_ACCEPTED.md` | onboarding audit and doc consistency findings |
 
 ## Upcoming Candidate Tasks
 
 1. Real-site training suite: continue from the training ladder and convert failures into fixtures/tests.
-2. Browser network observation skeleton for richer future API discovery.
+2. Real browser network observation smoke on one controlled SPA/API-backed target.
 3. Durable job registry design after the in-memory FastAPI MVP stabilizes.
 4. One controlled SPA target for browser fallback validation.
 5. One virtualized-list target for scroll strategy validation.
