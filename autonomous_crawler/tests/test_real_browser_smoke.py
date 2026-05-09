@@ -14,6 +14,7 @@ import socket
 import threading
 import unittest
 from http.server import HTTPServer, SimpleHTTPRequestHandler
+import json
 from typing import Any
 
 # Minimal SPA HTML: renders nothing server-side, generates all content via JS.
@@ -60,6 +61,60 @@ class _SPAHandler(SimpleHTTPRequestHandler):
 
     def log_message(self, format: str, *args: Any) -> None:
         pass  # Suppress noisy server logs during tests
+
+
+XHR_SPA_HTML = """\
+<!DOCTYPE html>
+<html>
+<head><title>XHR SPA Smoke Test</title></head>
+<body>
+  <main id="app"></main>
+  <script>
+    fetch("/api/products?page=1")
+      .then(function(response) { return response.json(); })
+      .then(function(payload) {
+        var app = document.getElementById("app");
+        app.innerHTML = payload.items.map(function(item) {
+          return '<article class="product-card">'
+            + '<h2 class="product-title">' + item.title + '</h2>'
+            + '<span class="product-price">' + item.price + '</span>'
+            + '</article>';
+        }).join("");
+      });
+  </script>
+</body>
+</html>
+"""
+
+
+class _XHRSPAHandler(SimpleHTTPRequestHandler):
+    """Serve an XHR-backed SPA fixture and its JSON API."""
+
+    def do_GET(self) -> None:
+        if self.path.startswith("/api/products"):
+            payload = {
+                "items": [
+                    {"title": "XHR Alpha", "price": 10.5},
+                    {"title": "XHR Beta", "price": 20.0},
+                ]
+            }
+            body = json.dumps(payload).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+
+        body = XHR_SPA_HTML.encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, format: str, *args: Any) -> None:
+        pass
 
 
 def _should_skip() -> str:
@@ -120,6 +175,41 @@ class TestRealBrowserSPA(unittest.TestCase):
             self.assertIn("Item Gamma", result.html)
         finally:
             server.shutdown()
+            server.server_close()
+
+    def test_browser_network_observer_captures_xhr_api_candidate(self) -> None:
+        """Network observer should capture a real browser XHR from a local SPA."""
+        skip_reason = _should_skip()
+        if skip_reason:
+            self.skipTest(skip_reason)
+
+        from autonomous_crawler.tools.browser_network_observer import observe_browser_network
+
+        port = _find_free_port()
+        server = HTTPServer(("127.0.0.1", port), _XHRSPAHandler)
+        server_thread = threading.Thread(target=server.serve_forever, daemon=True)
+        server_thread.start()
+
+        try:
+            url = f"http://127.0.0.1:{port}/"
+            result = observe_browser_network(
+                url=url,
+                wait_selector=".product-card",
+                wait_until="domcontentloaded",
+                timeout_ms=10000,
+                max_entries=10,
+            )
+
+            self.assertEqual(result.status, "ok", result.error)
+            self.assertTrue(result.api_candidates)
+            candidate = result.api_candidates[0]
+            self.assertIn("/api/products", candidate["url"])
+            self.assertEqual(candidate["method"], "GET")
+            self.assertEqual(candidate["kind"], "json")
+            self.assertGreaterEqual(candidate["score"], 50)
+        finally:
+            server.shutdown()
+            server.server_close()
 
     def test_browser_wait_for_selector(self) -> None:
         """wait_selector should block until the JS element appears."""
@@ -147,6 +237,7 @@ class TestRealBrowserSPA(unittest.TestCase):
             self.assertIn("Item Gamma", result.html)
         finally:
             server.shutdown()
+            server.server_close()
 
     def test_screenshot_capture(self) -> None:
         """Screenshot should be saved when requested."""
@@ -174,6 +265,7 @@ class TestRealBrowserSPA(unittest.TestCase):
             self.assertIn("screenshots", result.screenshot_path)
         finally:
             server.shutdown()
+            server.server_close()
 
 
 if __name__ == "__main__":

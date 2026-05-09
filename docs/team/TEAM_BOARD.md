@@ -88,11 +88,12 @@ Last updated: 2026-05-09
 | Browser Network Observation QA | LLM-2026-002 | `docs/team/acceptance/2026-05-09_browser_network_observation_qa_ACCEPTED.md` | 55 focused tests and QA audit |
 | Open Source Docs Audit | LLM-2026-004 | `docs/team/acceptance/2026-05-09_open_source_docs_audit_ACCEPTED.md` | onboarding audit and doc consistency findings |
 | Real-Site Training Round 4 | LLM-2026-000 | supervisor direct work | 4/5 public API scenarios completed; JSON anti-bot false positive and common API shape normalization fixed |
+| Controlled XHR SPA Network Smoke | LLM-2026-000 | supervisor direct work | optional real-browser test proves `observe_browser_network()` captures a real local XHR API candidate |
 
 ## Upcoming Candidate Tasks
 
-1. Real browser network observation smoke on one controlled SPA/API-backed target.
-2. Rendered DOM selector training for modern SPA list layouts.
+1. Rendered DOM selector training for modern SPA list layouts.
+2. Retry HN Algolia browser-network observation with improved timing/request capture.
 3. Durable job registry design after the in-memory FastAPI MVP stabilizes.
 4. One controlled SPA target for browser fallback validation.
 5. One virtualized-list target for scroll strategy validation.

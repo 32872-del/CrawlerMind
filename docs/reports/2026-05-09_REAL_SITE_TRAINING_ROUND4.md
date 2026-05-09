@@ -51,6 +51,8 @@ Likely next work:
 
 1. Add a real browser-network smoke fixture with controlled XHR so the
    observer proves full end-to-end candidate discovery outside mocks.
+   Completed later on 2026-05-09 in
+   `autonomous_crawler/tests/test_real_browser_smoke.py`.
 2. Enhance browser observation timing to wait for network idle and/or capture
    request URLs triggered after hydration.
 3. Add rendered DOM selector training for modern SPA list layouts.

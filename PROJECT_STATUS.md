@@ -197,12 +197,17 @@ search workflow.
   anti-bot false positives and added support for `hits`/`quotes` response
   shapes plus common score/summary/link normalization. One browser-network
   observation probe remains failed and is now the next dynamic-page target.
+- Controlled XHR-backed SPA browser-network smoke added on 2026-05-09:
+  optional real-browser smoke now serves a local SPA that calls
+  `/api/products?page=1`; `observe_browser_network()` captures the real XHR
+  response and promotes it to a JSON API candidate. This proves the browser
+  network observation path end-to-end without relying on external sites.
 
 ## Current Test Status
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 316 tests (skipped=3)
+Ran 321 tests (skipped=4)
 OK
 ```
 
@@ -219,6 +224,10 @@ OK
 
 python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py run_results.py run_simple.py run_training_round1.py run_training_round2.py run_training_round3.py run_training_round4.py
 OK
+
+AUTONOMOUS_CRAWLER_RUN_BROWSER_SMOKE=1 python -m unittest autonomous_crawler.tests.test_real_browser_smoke -v
+Ran 4 tests
+OK
 ```
 
 ## Current Limitations
@@ -232,8 +241,10 @@ OK
 - API interception is integrated for direct JSON URLs, API hints, and explicit
   GraphQL queries. It still needs pagination/cursor handling and richer
   provider-specific field mapping.
-- Dynamic/JS-heavy and Cloudflare-protected site coverage is not yet proven
-  beyond local SPA browser fallback smoke tests.
+- Dynamic/JS-heavy site coverage is proven for local SPA rendering and local
+  XHR-backed network observation smoke tests, but public dynamic-site extraction
+  is still weak. Cloudflare/CAPTCHA/login-required targets remain
+  diagnosis-only.
 - FastAPI background jobs use in-memory registry; jobs are lost on process
   restart. TTL cleanup limits stale completed/failed entries, but does not add
   durability.
@@ -303,5 +314,8 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
       4/5 scenarios completed after absorbing JSON/API failures into generic
       tests and normalizers. Remaining failed case is browser-network
       observation on a public SPA.
-17. Run a real browser-network observation smoke against a controlled
-    SPA/API-backed target and convert useful findings into fixtures/tests.
+17. ~~Run a real browser-network observation smoke against a controlled
+    SPA/API-backed target and convert useful findings into fixtures/tests.~~
+    Done 2026-05-09 with local XHR-backed SPA smoke.
+18. Improve rendered DOM selector inference for public SPA list layouts and
+    retry the HN Algolia browser-network observation probe.

@@ -125,6 +125,23 @@ Report:
 docs/reports/2026-05-09_REAL_SITE_TRAINING_ROUND4.md
 ```
 
+### Controlled XHR-Backed SPA Network Smoke
+
+Supervisor direct work.
+
+Added an optional browser smoke test that serves a local SPA and a local JSON
+API:
+
+- page route: `/`
+- API route: `/api/products?page=1`
+- browser action: page JavaScript calls `fetch()`
+- observer action: `observe_browser_network()` captures the real XHR response
+  and promotes it to a JSON API candidate
+
+This closes the gap between mocked network-observer tests and a real browser
+network path. It does not depend on external sites and remains skipped in the
+normal suite unless `AUTONOMOUS_CRAWLER_RUN_BROWSER_SMOKE=1` is set.
+
 ## Verification
 
 ```text
@@ -140,8 +157,8 @@ OK
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 316 tests
-OK (skipped=3)
+Ran 321 tests
+OK (skipped=4)
 ```
 
 Additional training verification:
@@ -153,6 +170,10 @@ OK
 
 python run_training_round4.py
 4 completed, 1 failed
+
+AUTONOMOUS_CRAWLER_RUN_BROWSER_SMOKE=1 python -m unittest autonomous_crawler.tests.test_real_browser_smoke -v
+Ran 4 tests
+OK
 ```
 
 ## Current Capability Snapshot
@@ -162,8 +183,8 @@ python run_training_round4.py
 - Public JSON and GraphQL API collection: MVP usable.
 - Optional LLM Planner/Strategy: usable from CLI and FastAPI with
   deterministic fallback.
-- Browser network observation: skeleton complete, tested with mocks, now needs
-  real-site smoke.
+- Browser network observation: skeleton complete, tested with mocks, and proven
+  through a controlled local XHR-backed SPA smoke.
 - Public JSON/API normalization: broader after round 4, including `hits`,
   `quotes`, GitHub issue links/comments, HN points, product ratings, and text
   summaries.
@@ -171,8 +192,8 @@ python run_training_round4.py
 
 ## Current Gaps
 
-- Network observation has not yet produced API candidates on a real dynamic
-  site.
+- Network observation has not yet produced API candidates on a public dynamic
+  site, although it now works end-to-end on a controlled XHR-backed SPA.
 - API pagination/cursor handling is still shallow.
 - Virtualized lists and infinite scroll still need training targets.
 - Cloudflare/CAPTCHA/login-required targets remain diagnosis-only.
@@ -182,9 +203,9 @@ python run_training_round4.py
 
 ## Next Recommended Work
 
-1. Run a controlled real browser-network observation smoke on an SPA/API-backed
-   target.
-2. Convert useful observed network patterns into stable fixtures and tests.
+1. Improve rendered DOM selector inference for public SPA list layouts.
+2. Retry the HN Algolia browser-network observation probe with better timing or
+   request observation.
 3. Continue real-site training from the ladder: dynamic pages, virtualized
    lists, then tougher anti-bot diagnosis cases.
 4. Add `SECURITY.md`, PR template, and an open-source release checklist pass

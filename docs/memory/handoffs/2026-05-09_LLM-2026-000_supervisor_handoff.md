@@ -23,6 +23,9 @@ Three worker outputs from 2026-05-09 were accepted:
   after fixing JSON challenge false positives and common `hits`/`quotes`
   response extraction. The remaining failed case is browser-network observation
   on a public SPA.
+- Added controlled XHR-backed SPA browser-network smoke. The optional browser
+  test serves a local SPA, triggers `fetch("/api/products?page=1")`, and proves
+  `observe_browser_network()` captures/promotes the XHR as a JSON API candidate.
 - Updated `PROJECT_STATUS.md`.
 - Updated `docs/team/TEAM_BOARD.md`.
 - Updated supervisor persistent memory.
@@ -48,13 +51,17 @@ OK
 
 python run_training_round4.py
 4 completed, 1 failed
+
+AUTONOMOUS_CRAWLER_RUN_BROWSER_SMOKE=1 python -m unittest autonomous_crawler.tests.test_real_browser_smoke -v
+Ran 4 tests
+OK
 ```
 
 ## Known Risks
 
-- Browser network observation has mock coverage and a failed public SPA probe;
-  it needs a controlled XHR-backed smoke target and rendered-DOM selector
-  training.
+- Browser network observation has mock coverage and a controlled local
+  XHR-backed smoke target. The remaining gap is public SPA observation and
+  rendered-DOM selector training.
 - FastAPI job registry remains in-memory.
 - Employee memory is still file-based and manually loaded by each AI session.
 - No automated branch/lock workflow for multiple workers yet.
@@ -62,8 +69,8 @@ python run_training_round4.py
 
 ## Next Recommended Action
 
-Assign or run a controlled browser-network observation smoke against an
-XHR-backed SPA target, then convert the result into fixtures/tests.
+Assign rendered DOM selector training for public SPA list layouts, then retry
+the HN Algolia browser-network observation probe.
 
 ## Files To Read First
 
