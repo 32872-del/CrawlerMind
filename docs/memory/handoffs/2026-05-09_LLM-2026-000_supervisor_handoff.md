@@ -2,9 +2,8 @@
 
 ## Current State
 
-Crawler-Mind is a runnable MVP with open-source basics in place and the first
-browser network observation skeleton integrated into Recon behind explicit
-opt-in.
+Crawler-Mind is a runnable MVP with open-source basics in place and browser
+network observation now usable for at least one public SPA API-replay scenario.
 
 Accepted worker outputs from 2026-05-09 include:
 
@@ -34,6 +33,18 @@ Accepted worker outputs from 2026-05-09 include:
 - Accepted network timing QA from `LLM-2026-002`: public SPA observation likely
   returns too early with `domcontentloaded`; next fix is observation
   `networkidle` plus optional post-load delay.
+- Implemented the timing/API replay fix directly:
+  - `observe_browser_network()` defaults to `networkidle`.
+  - optional `render_time_ms` is available.
+  - Algolia-style JSON POST search bodies are classified as `json`, not
+    GraphQL.
+  - POST JSON candidates preserve `post_data_preview`.
+  - Strategy can prefer high-confidence observed public APIs over browser
+    rendering when no challenge is detected.
+  - Executor can replay observed JSON POST APIs through `api_intercept`.
+- Retried HN Algolia browser-network observation successfully:
+  `status=completed`, `mode=api_intercept`, `method=api_json`, `items=10`,
+  `confidence=1.0`.
 - Updated `PROJECT_STATUS.md`.
 - Updated `docs/team/TEAM_BOARD.md`.
 - Updated supervisor persistent memory.
@@ -43,22 +54,26 @@ Accepted worker outputs from 2026-05-09 include:
 
 ```text
 python -m unittest autonomous_crawler.tests.test_browser_network_observer -v
-Ran 55 tests
+Ran 60 tests
 OK
 
 python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py run_results.py run_simple.py run_training_round1.py run_training_round2.py run_training_round3.py
 OK
 
 python -m unittest discover -s autonomous_crawler/tests
-Ran 336 tests
+Ran 345 tests
 OK (skipped=4)
 
-python -m unittest autonomous_crawler.tests.test_access_diagnostics autonomous_crawler.tests.test_api_intercept -v
-Ran 28 tests
+python -m unittest autonomous_crawler.tests.test_api_intercept -v
+Ran 23 tests
+OK
+
+python -m unittest autonomous_crawler.tests.test_access_diagnostics -v
+Ran 9 tests
 OK
 
 python run_training_round4.py
-4 completed, 1 failed
+5 completed, 0 failed
 
 AUTONOMOUS_CRAWLER_RUN_BROWSER_SMOKE=1 python -m unittest autonomous_crawler.tests.test_real_browser_smoke -v
 Ran 4 tests
@@ -71,8 +86,10 @@ OK
 
 ## Known Risks
 
-- Browser network observation has mock coverage and a controlled local
-  XHR-backed smoke target. The remaining gap is public SPA observation timing.
+- Browser network observation has mock coverage, a controlled local
+  XHR-backed smoke target, and one public HN Algolia SPA success. Remaining
+  gaps are pagination/cursor replay, infinite scroll, and sites requiring extra
+  non-sensitive headers.
 - Rendered DOM selector inference is stronger for HN Algolia-style fixtures,
   but still needs a public-site retry.
 - FastAPI job registry remains in-memory.
@@ -82,8 +99,8 @@ OK
 
 ## Next Recommended Action
 
-Implement observer timing fix, then retry the HN Algolia browser-network
-observation probe.
+Add pagination/cursor support for observed JSON APIs, then continue real-site
+training on dynamic pages and virtualized/infinite-scroll lists.
 
 ## Files To Read First
 

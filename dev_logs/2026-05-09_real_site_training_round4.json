@@ -1,5 +1,5 @@
 {
-  "run_at": "2026-05-09T14:10:31.791772",
+  "run_at": "2026-05-09T16:45:35.380430",
   "source_list": "E:\\爬虫Agent实战训练网站清单.md",
   "selection_policy": "public JSON APIs and one browser-network observation probe",
   "results": [
@@ -10,7 +10,7 @@
       "risk": "low-public-json",
       "capability": "product_api_rating_summary_normalization",
       "status": "completed",
-      "elapsed_seconds": 9.77,
+      "elapsed_seconds": 4.72,
       "mode": "api_intercept",
       "method": "api_json",
       "expected_mode": "api_intercept",
@@ -59,7 +59,7 @@
       "risk": "low-public-json",
       "capability": "search_api_points_normalization",
       "status": "completed",
-      "elapsed_seconds": 5.02,
+      "elapsed_seconds": 5.35,
       "mode": "api_intercept",
       "method": "api_json",
       "expected_mode": "api_intercept",
@@ -72,24 +72,24 @@
       "sample_items": [
         {
           "index": 0,
-          "title": "Using Claude Code: The unreasonable effectiveness of HTML",
-          "hot_score": 34,
-          "link": "https://twitter.com/trq212/status/2052809885763747935",
-          "url": "https://twitter.com/trq212/status/2052809885763747935"
+          "title": "All my clients wanted a carousel, now it's an AI chatbot",
+          "hot_score": 61,
+          "link": "https://adele.pages.casa/md/blog/all-my-clients-wanted-a-carousel-now-it-s-an-ai-chatbot.md",
+          "url": "https://adele.pages.casa/md/blog/all-my-clients-wanted-a-carousel-now-it-s-an-ai-chatbot.md"
         },
         {
           "index": 1,
-          "title": "Over 97% of the 'Linux' Foundation's Budget Goes Not to Linux",
-          "hot_score": 56,
-          "link": "https://techrights.org/n/2026/05/08/Over_97_of_the_Linux_Foundation_s_Budget_Goes_Not_to_Linux.shtml",
-          "url": "https://techrights.org/n/2026/05/08/Over_97_of_the_Linux_Foundation_s_Budget_Goes_Not_to_Linux.shtml"
+          "title": "EU calls VPNs \"a loophole that needs closing\" in age verification push",
+          "hot_score": 159,
+          "link": "https://cyberinsider.com/eu-calls-vpns-a-loophole-that-needs-closing-in-age-verification-push/",
+          "url": "https://cyberinsider.com/eu-calls-vpns-a-loophole-that-needs-closing-in-age-verification-push/"
         },
         {
           "index": 2,
-          "title": "A recent experience with ChatGPT 5.5 Pro",
-          "hot_score": 119,
-          "link": "https://gowers.wordpress.com/2026/05/08/a-recent-experience-with-chatgpt-5-5-pro/",
-          "url": "https://gowers.wordpress.com/2026/05/08/a-recent-experience-with-chatgpt-5-5-pro/"
+          "title": "Using Claude Code: The unreasonable effectiveness of HTML",
+          "hot_score": 112,
+          "link": "https://twitter.com/trq212/status/2052809885763747935",
+          "url": "https://twitter.com/trq212/status/2052809885763747935"
         }
       ],
       "messages": [
@@ -108,7 +108,7 @@
       "risk": "low-public-json-rate-limited",
       "capability": "list_json_comment_count_normalization",
       "status": "completed",
-      "elapsed_seconds": 5.18,
+      "elapsed_seconds": 5.24,
       "mode": "api_intercept",
       "method": "api_json",
       "expected_mode": "api_intercept",
@@ -130,7 +130,7 @@
           "index": 1,
           "id": 4410818006,
           "title": "Creating multiple instances of faulthandler module causes unbalanced refcount on fatal_error.file",
-          "hot_score": 1,
+          "hot_score": 2,
           "link": "https://github.com/python/cpython/issues/149590",
           "url": "https://api.github.com/repos/python/cpython/issues/149590"
         },
@@ -158,7 +158,7 @@
       "risk": "low-public-training-api",
       "capability": "training_api_text_summary_normalization",
       "status": "completed",
-      "elapsed_seconds": 5.69,
+      "elapsed_seconds": 4.97,
       "mode": "api_intercept",
       "method": "api_json",
       "expected_mode": "api_intercept",
@@ -197,32 +197,48 @@
       "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=&sort=byPopularity&type=story",
       "risk": "low-public-spa-observation",
       "capability": "browser_network_observation_real_site_probe",
-      "status": "failed",
-      "elapsed_seconds": 29.44,
-      "mode": "browser",
-      "method": "browser_render",
-      "expected_mode": "http",
+      "status": "completed",
+      "elapsed_seconds": 25.56,
+      "mode": "api_intercept",
+      "method": "api_json",
+      "expected_mode": "api_intercept",
       "fetch_mode": "browser",
-      "item_count": 0,
-      "confidence": 0.0,
-      "valid": false,
-      "anomalies": [
-        "No items extracted"
+      "item_count": 10,
+      "confidence": 1.0,
+      "valid": true,
+      "anomalies": [],
+      "error_code": "",
+      "sample_items": [
+        {
+          "index": 0,
+          "title": "Stephen Hawking has died",
+          "hot_score": 6015,
+          "link": "http://www.bbc.com/news/uk-43396008",
+          "url": "http://www.bbc.com/news/uk-43396008"
+        },
+        {
+          "index": 1,
+          "title": "A Message to Our Customers",
+          "hot_score": 5771,
+          "link": "http://www.apple.com/customer-letter/",
+          "url": "http://www.apple.com/customer-letter/"
+        },
+        {
+          "index": 2,
+          "title": "OpenAI's board has fired Sam Altman",
+          "hot_score": 5710,
+          "link": "https://openai.com/blog/openai-announces-leadership-transition",
+          "url": "https://openai.com/blog/openai-announces-leadership-transition"
+        }
       ],
-      "error_code": "EXTRACTION_EMPTY",
-      "sample_items": [],
       "messages": [
         "[Planner] Goal: observe browser network candidates while collecting story titles",
         "[Recon] Analyzed https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=&sort=byPopularity&type=story - framework=unknown, items=4, anti_bot=False, fetch_mode=browser",
-        "[Recon] Network observation status=ok, entries=1, api_candidates=0",
-        "[Strategy] Mode=browser, Method=browser_render, Rationale=Access diagnostics recommend browser rendering",
-        "[Executor] Mode=browser, fetched https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=&sort=byPopularity&type=story (8984 chars)",
-        "[Extractor] Extracted 0 items, confidence=0.00, fields=[]",
-        "[Validator] RETRY - anomalies=['No items extracted'], attempt 1/1",
-        "[Strategy] Mode=browser, Method=browser_render, Rationale=Access diagnostics recommend browser rendering (retry #1)",
-        "[Executor] Mode=browser, fetched https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=&sort=byPopularity&type=story (8984 chars)",
-        "[Extractor] Extracted 0 items, confidence=0.00, fields=[]",
-        "[Validator] FAILED - anomalies=['No items extracted'], max retries exceeded"
+        "[Recon] Network observation status=ok, entries=8, api_candidates=7",
+        "[Strategy] Mode=api_intercept, Method=api_json, Rationale=Browser network observation found a high-confidence public API, using direct API access",
+        "[Executor] Mode=api_intercept, fetched https://uj5wyc0l7x-3.algolianet.com/1/indexes/Item_dev/query?x-algolia-agent=Algolia%20for%20JavaScript%20(4.13.1)%3B%20Browser%20(lite)&x-algolia-api-key=28f0e1ec37a5e792e6845e67da5f20dd&x-algolia-application-id=UJ5WYC0L7X, rows=10",
+        "[Extractor] Reused structured executor data, items=10",
+        "[Validator] PASSED - 10 items, completeness=100%"
       ]
     }
   ]

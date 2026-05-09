@@ -199,12 +199,19 @@ search workflow.
   JSON/API/GraphQL candidates, and can be enabled in Recon through
   `constraints.observe_network=true`. QA expanded coverage to 55 focused tests;
   duplicate API candidates now keep the higher-score observation.
+- Browser network observation timing and API replay improved on 2026-05-09:
+  observation now defaults to `networkidle`, supports optional
+  `render_time_ms`, distinguishes Algolia-style JSON POST search bodies from
+  GraphQL, carries POST JSON bodies into Strategy, and lets Executor replay
+  safe observed JSON POST APIs through `api_intercept`.
 - Real-site training round 4 completed on 2026-05-09:
   DummyJSON products API, HN Algolia API, GitHub CPython issues API, and
   Quotes to Scrape API completed with 10 items each. Training fixed JSON
   anti-bot false positives and added support for `hits`/`quotes` response
-  shapes plus common score/summary/link normalization. One browser-network
-  observation probe remains failed and is now the next dynamic-page target.
+  shapes plus common score/summary/link normalization. After the timing/API
+  replay fix, the HN Algolia public SPA observation scenario also completes:
+  Recon observes Algolia XHR, Strategy chooses `api_intercept`, Executor POSTs
+  the observed JSON body, and 10 story items validate successfully.
 - Controlled XHR-backed SPA browser-network smoke added on 2026-05-09:
   optional real-browser smoke now serves a local SPA that calls
   `/api/products?page=1`; `observe_browser_network()` captures the real XHR
@@ -215,7 +222,7 @@ search workflow.
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 336 tests (skipped=4)
+Ran 345 tests (skipped=4)
 OK
 ```
 
@@ -223,15 +230,23 @@ Additional verification on 2026-05-09:
 
 ```text
 python -m unittest autonomous_crawler.tests.test_browser_network_observer -v
-Ran 55 tests
+Ran 60 tests
 OK
 
-python -m unittest autonomous_crawler.tests.test_access_diagnostics autonomous_crawler.tests.test_api_intercept -v
-Ran 28 tests
+python -m unittest autonomous_crawler.tests.test_api_intercept -v
+Ran 23 tests
+OK
+
+python -m unittest autonomous_crawler.tests.test_access_diagnostics -v
+Ran 9 tests
 OK
 
 python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py run_results.py run_simple.py run_training_round1.py run_training_round2.py run_training_round3.py run_training_round4.py
 OK
+
+python run_training_round4.py
+5 completed, 0 failed
+HN Algolia browser-network observation: completed, mode=api_intercept, items=10
 
 AUTONOMOUS_CRAWLER_RUN_BROWSER_SMOKE=1 python -m unittest autonomous_crawler.tests.test_real_browser_smoke -v
 Ran 4 tests
@@ -246,12 +261,12 @@ OK
 - Recon selector inference is heuristic and currently strongest for product
   cards and Baidu-style ranking lists.
 - `site_spec_draft` detail selectors are drafts when only a list page is known.
-- API interception is integrated for direct JSON URLs, API hints, and explicit
-  GraphQL queries. It still needs pagination/cursor handling and richer
-  provider-specific field mapping.
-- Dynamic/JS-heavy site coverage is proven for local SPA rendering and local
-  XHR-backed network observation smoke tests, but public dynamic-site extraction
-  is still weak. Cloudflare/CAPTCHA/login-required targets remain
+- API interception is integrated for direct JSON URLs, API hints, explicit
+  GraphQL queries, and observed JSON POST APIs. It still needs
+  pagination/cursor handling and richer provider-specific field mapping.
+- Dynamic/JS-heavy site coverage is proven for local SPA rendering, local
+  XHR-backed network observation smoke tests, and one public HN Algolia SPA
+  API-replay scenario. Cloudflare/CAPTCHA/login-required targets remain
   diagnosis-only.
 - FastAPI background jobs use in-memory registry; jobs are lost on process
   restart. TTL cleanup limits stale completed/failed entries, but does not add
@@ -319,11 +334,12 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
     - Browser network observation skeleton done 2026-05-09 with mocked
       Playwright tests and explicit Recon opt-in.
     - Real-site training round 4 done 2026-05-09:
-      4/5 scenarios completed after absorbing JSON/API failures into generic
-      tests and normalizers. Remaining failed case is browser-network
-      observation on a public SPA.
+      5/5 scenarios completed after absorbing JSON/API failures into generic
+      tests and normalizers, then fixing browser-network timing and observed
+      JSON POST replay for the HN Algolia public SPA.
 17. ~~Run a real browser-network observation smoke against a controlled
     SPA/API-backed target and convert useful findings into fixtures/tests.~~
     Done 2026-05-09 with local XHR-backed SPA smoke.
-18. Improve rendered DOM selector inference for public SPA list layouts and
-    retry the HN Algolia browser-network observation probe.
+18. ~~Improve rendered DOM selector inference for public SPA list layouts and
+    retry the HN Algolia browser-network observation probe.~~ Done 2026-05-09;
+    HN Algolia now completes via observed API replay.

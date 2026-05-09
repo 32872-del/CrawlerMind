@@ -126,6 +126,16 @@ def strategy_node(state: dict[str, Any]) -> dict[str, Any]:
             "max_items": constraints.get("max_items", 0),
             "rationale": "Good repeated DOM candidates found, using DOM parsing",
         }
+    elif _has_safe_observed_api_candidate(api_candidates) and not good_dom_candidate and not has_challenge:
+        strategy = _build_api_strategy(
+            api_candidates=api_candidates,
+            api_endpoints=api_endpoints,
+            constraints=constraints,
+            rationale=(
+                "Browser network observation found a high-confidence public API, "
+                "using direct API access"
+            ),
+        )
     elif needs_browser and not good_dom_candidate:
         # Priority 4: Browser Automation, but promoted ahead of API hints for
         # JS shells and challenge-like pages until api_intercept is proven safe.
@@ -142,24 +152,12 @@ def strategy_node(state: dict[str, Any]) -> dict[str, Any]:
             strategy["access_warning"] = "challenge_detected"
     elif (api_candidates or api_endpoints) and not good_dom_candidate:
         # Priority 1: API Direct Access
-        best_candidate = api_candidates[0] if api_candidates and isinstance(api_candidates[0], dict) else {}
-        api_endpoint = best_candidate.get("url") or (api_endpoints[0] if api_endpoints else "")
-        api_method = best_candidate.get("method", "GET")
-        is_graphql = best_candidate.get("kind") == "graphql" or api_method == "POST"
-        strategy = {
-            "mode": "api_intercept",
-            "extraction_method": "graphql_json" if is_graphql else "api_json",
-            "api_endpoint": api_endpoint,
-            "api_method": api_method,
-            "api_candidates": api_candidates,
-            "graphql_query": best_candidate.get("query", ""),
-            "graphql_variables": best_candidate.get("variables", {}),
-            "selectors": {},
-            "pagination": {"type": "api_offset", "param": "offset"},
-            "headers": {"Accept": "application/json"},
-            "max_items": constraints.get("max_items", 0),
-            "rationale": "API endpoint discovered, using direct API access",
-        }
+        strategy = _build_api_strategy(
+            api_candidates=api_candidates,
+            api_endpoints=api_endpoints,
+            constraints=constraints,
+            rationale="API endpoint discovered, using direct API access",
+        )
     elif rendering == "static" and not anti_bot.get("detected"):
         # Priority 3: Static DOM Parsing
         strategy = {
@@ -235,6 +233,52 @@ def _dom_candidate_is_good(
     """Prefer DOM parsing when a page has repeated items and useful fields."""
     item_count = int(dom_structure.get("item_count") or 0)
     return item_count >= 2 and bool(inferred_selectors.get("title"))
+
+
+def _has_safe_observed_api_candidate(api_candidates: list[dict[str, Any]]) -> bool:
+    for candidate in api_candidates or []:
+        if not isinstance(candidate, dict):
+            continue
+        if candidate.get("reason") != "browser_network_observation":
+            continue
+        if int(candidate.get("score") or 0) < 50:
+            continue
+        status_code = candidate.get("status_code")
+        if status_code and int(status_code) in {401, 403, 429, 503}:
+            continue
+        if str(candidate.get("kind", "")).lower() not in {"json", "graphql"}:
+            continue
+        return True
+    return False
+
+
+def _build_api_strategy(
+    api_candidates: list[dict[str, Any]],
+    api_endpoints: list[str],
+    constraints: dict[str, Any],
+    rationale: str,
+) -> dict[str, Any]:
+    best_candidate = api_candidates[0] if api_candidates and isinstance(api_candidates[0], dict) else {}
+    api_endpoint = best_candidate.get("url") or (api_endpoints[0] if api_endpoints else "")
+    api_method = str(best_candidate.get("method", "GET")).upper()
+    is_graphql = best_candidate.get("kind") == "graphql"
+    strategy = {
+        "mode": "api_intercept",
+        "extraction_method": "graphql_json" if is_graphql else "api_json",
+        "api_endpoint": api_endpoint,
+        "api_method": api_method,
+        "api_candidates": api_candidates,
+        "graphql_query": best_candidate.get("query", ""),
+        "graphql_variables": best_candidate.get("variables", {}),
+        "selectors": {},
+        "pagination": {"type": "api_offset", "param": "offset"},
+        "headers": {"Accept": "application/json"},
+        "max_items": constraints.get("max_items", 0),
+        "rationale": rationale,
+    }
+    if not is_graphql and api_method == "POST" and best_candidate.get("post_data_preview"):
+        strategy["api_post_data"] = best_candidate["post_data_preview"]
+    return strategy
 
 
 _STRATEGY_ALLOWED_MODES = frozenset({"http", "browser", "api_intercept"})

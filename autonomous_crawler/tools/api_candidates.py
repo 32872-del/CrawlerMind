@@ -65,17 +65,40 @@ def build_graphql_candidate(
     }
 
 
-def fetch_json_api(url: str, headers: dict[str, str] | None = None) -> dict[str, Any]:
+def fetch_json_api(
+    url: str,
+    headers: dict[str, str] | None = None,
+    method: str = "GET",
+    post_data: str | dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Fetch a JSON API response, with deterministic mock support."""
     if url in {"mock://api/products", "mock://site-zoo/api-products"}:
         return {"ok": True, "url": url, "data": API_LIST_JSON, "status_code": 200}
+    if url == "mock://api/search-post" and method.upper() == "POST":
+        return {
+            "ok": True,
+            "url": url,
+            "data": {"hits": [{"title": "POST Alpha"}, {"title": "POST Beta"}]},
+            "status_code": 200,
+        }
+
+    method = method.upper()
+    if method not in {"GET", "POST"}:
+        raise ValueError(f"Unsupported JSON API method: {method}")
+
+    merged_headers = {"Accept": "application/json", **(headers or {})}
+    if method == "POST":
+        merged_headers.setdefault("Content-Type", "application/json")
 
     with httpx.Client(
         follow_redirects=True,
         timeout=httpx.Timeout(20.0, connect=10.0),
-        headers=headers,
+        headers=merged_headers,
     ) as client:
-        response = client.get(url)
+        if method == "POST":
+            response = client.post(url, content=_coerce_json_post_content(post_data))
+        else:
+            response = client.get(url)
         response.raise_for_status()
         return {
             "ok": True,
@@ -156,6 +179,21 @@ def extract_records_from_json(data: Any) -> list[dict[str, Any]]:
         if nested:
             return nested
     return []
+
+
+def _coerce_json_post_content(post_data: str | dict[str, Any] | None) -> str:
+    if post_data is None:
+        return "{}"
+    if isinstance(post_data, dict):
+        return json.dumps(post_data)
+    text = str(post_data).strip()
+    if not text:
+        return "{}"
+    try:
+        json.loads(text)
+    except json.JSONDecodeError:
+        return json.dumps({"query": text})
+    return text
 
 
 def normalize_api_records(records: list[dict[str, Any]], max_items: int = 0) -> list[dict[str, Any]]:

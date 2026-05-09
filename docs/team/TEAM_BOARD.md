@@ -86,21 +86,22 @@ Last updated: 2026-05-09
 | P1 Fetch Best Page | LLM-2026-000 | supervisor direct work | requests/curl_cffi/browser scoring, escalation trace, and browser-mode carry-forward added to recon |
 | P1 Crawl Foundation | LLM-2026-000 | supervisor direct work | site-zoo, API intercept, SQLite frontier, domain memory, and product task helpers completed |
 | Browser Network Observation Skeleton | LLM-2026-000 | supervisor direct work | opt-in Playwright network observation, API candidate scoring, header redaction; duplicate candidate merge now keeps higher-score version |
+| Browser Network Timing And API Replay | LLM-2026-000 | supervisor direct work | `networkidle` observation, JSON POST replay, Algolia-style POST classification, HN SPA completed with 10 items |
 | Open Source CI | LLM-2026-001 | `docs/team/acceptance/2026-05-09_open_source_ci_ACCEPTED.md` | GitHub Actions, CONTRIBUTING, issue templates |
 | Browser Network Observation QA | LLM-2026-002 | `docs/team/acceptance/2026-05-09_browser_network_observation_qa_ACCEPTED.md` | 55 focused tests and QA audit |
 | Open Source Docs Audit | LLM-2026-004 | `docs/team/acceptance/2026-05-09_open_source_docs_audit_ACCEPTED.md` | onboarding audit and doc consistency findings |
-| Real-Site Training Round 4 | LLM-2026-000 | supervisor direct work | 4/5 public API scenarios completed; JSON anti-bot false positive and common API shape normalization fixed |
+| Real-Site Training Round 4 | LLM-2026-000 | supervisor direct work | 5/5 scenarios completed; public JSON/API plus HN Algolia SPA observed API replay |
 | Controlled XHR SPA Network Smoke | LLM-2026-000 | supervisor direct work | optional real-browser test proves `observe_browser_network()` captures a real local XHR API candidate |
 | Rendered DOM Selector Training | LLM-2026-001 | `docs/team/acceptance/2026-05-09_rendered_dom_selector_training_ACCEPTED.md` | HN Algolia-style DOM fixtures and selector inference tests |
 | Browser Network Timing QA | LLM-2026-002 | `docs/team/acceptance/2026-05-09_network_timing_qa_ACCEPTED.md` | diagnosed observer timing gap and recommended `networkidle` plus optional render delay |
 
 ## Upcoming Candidate Tasks
 
-1. Implement observer timing fix: default network observation to `networkidle` and add optional post-load delay.
-2. Retry HN Algolia browser-network observation with improved timing and rendered DOM selectors.
+1. Add API pagination/cursor handling for observed JSON APIs.
+2. Run the next real-site training batch against dynamic pages and virtualized lists.
 3. Durable job registry design after the in-memory FastAPI MVP stabilizes.
-4. One controlled SPA target for browser fallback validation.
-5. One virtualized-list target for scroll strategy validation.
+4. One controlled infinite-scroll target for scroll strategy validation.
+5. Open-source polish: `SECURITY.md`, PR template, release checklist pass.
 
 ## Supervisor Notes
 

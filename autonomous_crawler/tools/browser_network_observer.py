@@ -80,10 +80,11 @@ class NetworkObservationResult:
 def observe_browser_network(
     url: str,
     wait_selector: str = "",
-    wait_until: str = "domcontentloaded",
+    wait_until: str = "networkidle",
     timeout_ms: int = 30000,
     max_entries: int = 50,
     capture_json_preview: bool = True,
+    render_time_ms: int = 0,
 ) -> NetworkObservationResult:
     """Observe browser network traffic and return API candidates.
 
@@ -99,7 +100,7 @@ def observe_browser_network(
 
     valid_wait_until = {"domcontentloaded", "load", "networkidle"}
     if wait_until not in valid_wait_until:
-        wait_until = "domcontentloaded"
+        wait_until = "networkidle"
 
     entries: list[NetworkEntry] = []
 
@@ -124,6 +125,8 @@ def observe_browser_network(
                 page.goto(url, wait_until=wait_until, timeout=timeout_ms)
                 if wait_selector:
                     page.wait_for_selector(wait_selector, timeout=timeout_ms)
+                if render_time_ms > 0:
+                    page.wait_for_timeout(render_time_ms)
 
                 final_url = getattr(page, "url", url)
                 candidates = build_api_candidates_from_entries(entries)
@@ -170,7 +173,7 @@ def score_network_entry(entry: NetworkEntry) -> tuple[int, list[str], str]:
         reasons.append("json")
         kind = "json"
 
-    if "graphql" in lowered_url or "graphql" in post_data or "query" in post_data:
+    if _looks_like_graphql(lowered_url, post_data):
         score += 24
         reasons.append("graphql_signal")
         kind = "graphql"
@@ -210,7 +213,9 @@ def build_api_candidates_from_entries(entries: list[NetworkEntry]) -> list[dict[
             "resource_type": entry.resource_type,
             "status_code": entry.status_code,
         }
-        if entry.kind == "graphql":
+        if entry.kind == "graphql" or (
+            entry.method.upper() == "POST" and entry.post_data_preview
+        ):
             candidate["post_data_preview"] = entry.post_data_preview
         candidates.append(candidate)
     return candidates
@@ -281,6 +286,31 @@ def _truncate_json(value: Any, limit: int = 2000) -> Any:
     if len(text) <= limit:
         return value
     return {"preview": text[:limit] + "...[truncated]"}
+
+
+def _looks_like_graphql(lowered_url: str, lowered_post_data: str) -> bool:
+    if "graphql" in lowered_url or "graphql" in lowered_post_data:
+        return True
+    if not lowered_post_data:
+        return False
+
+    try:
+        payload = json.loads(lowered_post_data)
+    except json.JSONDecodeError:
+        payload = None
+
+    if isinstance(payload, dict):
+        query = payload.get("query")
+        if isinstance(query, str):
+            stripped = query.strip()
+            if stripped.startswith(("query ", "mutation ", "subscription ")):
+                return True
+            if stripped.startswith("{") and "}" in stripped:
+                return True
+        return False
+
+    stripped = lowered_post_data.strip()
+    return stripped.startswith(("query ", "mutation ", "subscription "))
 
 
 def _looks_like_static_asset(lowered_url: str, content_type: str) -> bool:

@@ -355,6 +355,22 @@ class ScoreEdgeCaseTests(unittest.TestCase):
         self.assertIn("graphql_signal", reasons)
         self.assertEqual(kind, "graphql")
 
+    def test_score_algolia_query_json_is_not_graphql(self) -> None:
+        entry = NetworkEntry(
+            url="https://example.algolia.net/1/indexes/Item_dev/query",
+            method="POST",
+            resource_type="xhr",
+            status_code=200,
+            response_headers={"content-type": "application/json"},
+            post_data_preview='{"query":"","hitsPerPage":30,"tagFilters":[["story"],[]]}',
+            json_preview={"hits": [{"title": "Story"}]},
+        )
+
+        score, reasons, kind = score_network_entry(entry)
+        self.assertGreaterEqual(score, 50)
+        self.assertNotIn("graphql_signal", reasons)
+        self.assertEqual(kind, "json")
+
 
 class ShouldKeepEntryTests(unittest.TestCase):
     def test_keep_high_score_entry(self) -> None:
@@ -472,7 +488,7 @@ class BuildCandidatesEdgeCaseTests(unittest.TestCase):
         self.assertIn("post_data_preview", candidates[0])
         self.assertEqual(candidates[0]["post_data_preview"], '{"query":"{ products { title } }"}')
 
-    def test_non_graphql_candidate_no_post_data(self) -> None:
+    def test_non_post_json_candidate_no_post_data(self) -> None:
         entry = NetworkEntry(
             url="https://example.com/api/list",
             method="GET",
@@ -484,6 +500,21 @@ class BuildCandidatesEdgeCaseTests(unittest.TestCase):
         candidates = build_api_candidates_from_entries([entry])
         self.assertEqual(len(candidates), 1)
         self.assertNotIn("post_data_preview", candidates[0])
+
+    def test_post_json_candidate_includes_post_data(self) -> None:
+        entry = NetworkEntry(
+            url="https://example.com/api/search",
+            method="POST",
+            resource_type="xhr",
+            status_code=200,
+            kind="json",
+            score=60,
+            post_data_preview='{"query":"","page":0}',
+        )
+        candidates = build_api_candidates_from_entries([entry])
+        self.assertEqual(len(candidates), 1)
+        self.assertEqual(candidates[0]["kind"], "json")
+        self.assertEqual(candidates[0]["post_data_preview"], '{"query":"","page":0}')
 
 
 class ObserveNetworkEdgeCaseTests(unittest.TestCase):
@@ -506,7 +537,61 @@ class ObserveNetworkEdgeCaseTests(unittest.TestCase):
 
         observe_browser_network("https://example.com", wait_until="invalid_value")
 
-        self.assertEqual(captured_kwargs.get("wait_until"), "domcontentloaded")
+        self.assertEqual(captured_kwargs.get("wait_until"), "networkidle")
+
+    @patch("autonomous_crawler.tools.browser_network_observer.sync_playwright")
+    def test_default_wait_until_is_networkidle(self, mock_pw_cls: MagicMock) -> None:
+        mock_page = MagicMock()
+        mock_page.url = "https://example.com"
+        captured_kwargs = {}
+        mock_page.goto.side_effect = lambda *args, **kwargs: captured_kwargs.update(kwargs)
+        mock_browser = MagicMock()
+        mock_browser.new_page.return_value = mock_page
+        mock_pw = MagicMock()
+        mock_pw.chromium.launch.return_value = mock_browser
+        mock_pw_cls.return_value.__enter__ = MagicMock(return_value=mock_pw)
+        mock_pw_cls.return_value.__exit__ = MagicMock(return_value=False)
+
+        observe_browser_network("https://example.com")
+
+        self.assertEqual(captured_kwargs.get("wait_until"), "networkidle")
+
+    @patch("autonomous_crawler.tools.browser_network_observer.sync_playwright")
+    def test_render_time_ms_waits_after_selector(self, mock_pw_cls: MagicMock) -> None:
+        mock_page = MagicMock()
+        mock_page.url = "https://example.com"
+        mock_page.goto.return_value = None
+        mock_browser = MagicMock()
+        mock_browser.new_page.return_value = mock_page
+        mock_pw = MagicMock()
+        mock_pw.chromium.launch.return_value = mock_browser
+        mock_pw_cls.return_value.__enter__ = MagicMock(return_value=mock_pw)
+        mock_pw_cls.return_value.__exit__ = MagicMock(return_value=False)
+
+        observe_browser_network(
+            "https://example.com",
+            wait_selector="#ready",
+            render_time_ms=750,
+        )
+
+        mock_page.wait_for_selector.assert_called_once_with("#ready", timeout=30000)
+        mock_page.wait_for_timeout.assert_called_once_with(750)
+
+    @patch("autonomous_crawler.tools.browser_network_observer.sync_playwright")
+    def test_render_time_ms_zero_does_not_wait(self, mock_pw_cls: MagicMock) -> None:
+        mock_page = MagicMock()
+        mock_page.url = "https://example.com"
+        mock_page.goto.return_value = None
+        mock_browser = MagicMock()
+        mock_browser.new_page.return_value = mock_page
+        mock_pw = MagicMock()
+        mock_pw.chromium.launch.return_value = mock_browser
+        mock_pw_cls.return_value.__enter__ = MagicMock(return_value=mock_pw)
+        mock_pw_cls.return_value.__exit__ = MagicMock(return_value=False)
+
+        observe_browser_network("https://example.com", render_time_ms=0)
+
+        mock_page.wait_for_timeout.assert_not_called()
 
     @patch("autonomous_crawler.tools.browser_network_observer.sync_playwright")
     def test_browser_closed_on_success(self, mock_pw_cls: MagicMock) -> None:

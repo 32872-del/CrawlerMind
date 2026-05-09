@@ -223,7 +223,12 @@ def executor_node(state: dict[str, Any]) -> dict[str, Any]:
                     headers=headers,
                 )
             else:
-                result = fetch_json_api(api_endpoint, headers=headers)
+                result = fetch_json_api(
+                    api_endpoint,
+                    headers=headers,
+                    method=strategy.get("api_method", "GET"),
+                    post_data=strategy.get("api_post_data"),
+                )
             records = extract_records_from_json(result.get("data"))
             items = normalize_api_records(records, max_items=int(strategy.get("max_items", 0) or 0))
         except Exception as exc:

@@ -67,7 +67,7 @@ TRAINING_SCENARIOS: list[dict[str, Any]] = [
             "observe_network": True,
             "max_items": 10,
         },
-        "expected_mode": "http",
+        "expected_mode": "api_intercept",
         "risk": "low-public-spa-observation",
         "capability": "browser_network_observation_real_site_probe",
         "max_retries": 1,

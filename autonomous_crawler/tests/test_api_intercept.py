@@ -9,6 +9,7 @@ from autonomous_crawler.workflows.crawl_graph import compile_crawl_graph
 from autonomous_crawler.tools.api_candidates import (
     build_direct_json_candidate,
     fetch_graphql_api,
+    fetch_json_api,
     build_api_candidates,
     extract_records_from_json,
     normalize_api_records,
@@ -172,6 +173,67 @@ class ApiInterceptTests(unittest.TestCase):
         self.assertEqual(strategy["mode"], "api_intercept")
         self.assertEqual(strategy["api_endpoint"], "mock://api/products")
 
+    def test_strategy_prefers_observed_api_candidate_over_browser_for_spa(self) -> None:
+        state = strategy_node({
+            "user_goal": "collect stories",
+            "target_url": "https://hn.algolia.com/",
+            "recon_report": {
+                "target_url": "https://hn.algolia.com/",
+                "task_type": "ranking_list",
+                "constraints": {"max_items": 10},
+                "rendering": "spa",
+                "anti_bot": {"detected": False},
+                "api_endpoints": [],
+                "api_candidates": [{
+                    "url": "mock://api/search-post",
+                    "method": "POST",
+                    "kind": "json",
+                    "score": 88,
+                    "reason": "browser_network_observation",
+                    "status_code": 200,
+                    "post_data_preview": '{"query":"","hitsPerPage":10}',
+                }],
+                "access_diagnostics": {"findings": ["js_rendering_likely_required"], "signals": {}},
+                "dom_structure": {"pagination_type": "none", "field_selectors": {}, "item_count": 0},
+            },
+            "retries": 0,
+            "messages": [],
+        })
+
+        strategy = state["crawl_strategy"]
+        self.assertEqual(strategy["mode"], "api_intercept")
+        self.assertEqual(strategy["extraction_method"], "api_json")
+        self.assertEqual(strategy["api_method"], "POST")
+        self.assertEqual(strategy["api_post_data"], '{"query":"","hitsPerPage":10}')
+
+    def test_strategy_keeps_browser_for_challenge_even_with_observed_api(self) -> None:
+        state = strategy_node({
+            "user_goal": "collect products",
+            "target_url": "https://blocked.example",
+            "recon_report": {
+                "target_url": "https://blocked.example",
+                "task_type": "product_list",
+                "constraints": {},
+                "rendering": "spa",
+                "anti_bot": {"detected": True},
+                "api_endpoints": [],
+                "api_candidates": [{
+                    "url": "https://blocked.example/api/products",
+                    "method": "GET",
+                    "kind": "json",
+                    "score": 88,
+                    "reason": "browser_network_observation",
+                    "status_code": 200,
+                }],
+                "access_diagnostics": {"findings": [], "signals": {"challenge": "cf-challenge"}},
+                "dom_structure": {"pagination_type": "none", "field_selectors": {}, "item_count": 0},
+            },
+            "retries": 0,
+            "messages": [],
+        })
+
+        self.assertEqual(state["crawl_strategy"]["mode"], "browser")
+
     def test_strategy_prefers_good_dom_candidates_over_weak_api_hints(self) -> None:
         state = strategy_node({
             "user_goal": "collect documentation links",
@@ -218,6 +280,36 @@ class ApiInterceptTests(unittest.TestCase):
         self.assertEqual(state["status"], "executed")
         self.assertEqual(state["extracted_data"]["item_count"], 2)
         self.assertEqual(state["extracted_data"]["items"][0]["title"], "API Alpha")
+
+    def test_executor_api_intercept_extracts_post_json(self) -> None:
+        state = executor_node({
+            "target_url": "https://search.example",
+            "crawl_strategy": {
+                "mode": "api_intercept",
+                "extraction_method": "api_json",
+                "api_endpoint": "mock://api/search-post",
+                "api_method": "POST",
+                "api_post_data": '{"query":"","hitsPerPage":2}',
+                "headers": {},
+                "max_items": 2,
+            },
+            "messages": [],
+            "error_log": [],
+        })
+
+        self.assertEqual(state["status"], "executed")
+        self.assertEqual(state["extracted_data"]["item_count"], 2)
+        self.assertEqual(state["extracted_data"]["items"][0]["title"], "POST Alpha")
+
+    def test_fetch_json_api_supports_mock_post(self) -> None:
+        result = fetch_json_api(
+            "mock://api/search-post",
+            method="POST",
+            post_data='{"query":""}',
+        )
+
+        records = extract_records_from_json(result["data"])
+        self.assertEqual(records[0]["title"], "POST Alpha")
 
     def test_executor_graphql_intercept_extracts_mock_json(self) -> None:
         state = executor_node({

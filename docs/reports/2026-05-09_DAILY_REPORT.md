@@ -187,34 +187,63 @@ Acceptance record:
 docs/team/acceptance/2026-05-09_network_timing_qa_ACCEPTED.md
 ```
 
+### Browser Network Timing And Observed API Replay
+
+Supervisor direct work after accepting the timing QA.
+
+Implemented:
+
+- `observe_browser_network()` now defaults to `wait_until="networkidle"`.
+- Invalid `wait_until` values fall back to `networkidle`.
+- Optional `render_time_ms` allows a bounded post-load observation delay.
+- Algolia-style JSON POST search bodies with a `query` field are no longer
+  mislabeled as GraphQL unless the query value looks like a GraphQL operation.
+- JSON POST candidates now preserve bounded `post_data_preview`.
+- Strategy prefers a high-confidence observed public API over browser rendering
+  for SPA pages when no challenge is detected.
+- Executor can replay `api_json` POST requests using the observed JSON body.
+
+The HN Algolia public SPA probe now completes end-to-end:
+
+```text
+Recon: observed 8 network entries and 7 API candidates
+Strategy: mode=api_intercept, method=api_json
+Executor: replayed Algolia POST JSON search API
+Result: completed, 10 items, confidence=1.0
+```
+
 ## Verification
 
 ```text
 python -m unittest autonomous_crawler.tests.test_browser_network_observer -v
-Ran 55 tests
+Ran 60 tests
 OK
 ```
 
 ```text
-python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py run_results.py run_simple.py run_training_round1.py run_training_round2.py run_training_round3.py
+python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py run_results.py run_simple.py run_training_round1.py run_training_round2.py run_training_round3.py run_training_round4.py
 OK
 ```
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 336 tests
+Ran 345 tests
 OK (skipped=4)
 ```
 
 Additional training verification:
 
 ```text
-python -m unittest autonomous_crawler.tests.test_access_diagnostics autonomous_crawler.tests.test_api_intercept -v
-Ran 28 tests
+python -m unittest autonomous_crawler.tests.test_api_intercept -v
+Ran 23 tests
+OK
+
+python -m unittest autonomous_crawler.tests.test_access_diagnostics -v
+Ran 9 tests
 OK
 
 python run_training_round4.py
-4 completed, 1 failed
+5 completed, 0 failed
 
 AUTONOMOUS_CRAWLER_RUN_BROWSER_SMOKE=1 python -m unittest autonomous_crawler.tests.test_real_browser_smoke -v
 Ran 4 tests
@@ -232,8 +261,9 @@ OK
 - Public JSON and GraphQL API collection: MVP usable.
 - Optional LLM Planner/Strategy: usable from CLI and FastAPI with
   deterministic fallback.
-- Browser network observation: skeleton complete, tested with mocks, and proven
-  through a controlled local XHR-backed SPA smoke.
+- Browser network observation: tested with mocks, proven through a controlled
+  local XHR-backed SPA smoke, and now successful on the public HN Algolia SPA
+  by observing and replaying its public JSON POST API.
 - Public JSON/API normalization: broader after round 4, including `hits`,
   `quotes`, GitHub issue links/comments, HN points, product ratings, and text
   summaries.
@@ -241,9 +271,9 @@ OK
 
 ## Current Gaps
 
-- Network observation has not yet produced API candidates on a public dynamic
-  site, although it now works end-to-end on a controlled XHR-backed SPA. Timing
-  QA points to `domcontentloaded` returning too early.
+- Network observation currently handles one public dynamic SPA API replay case.
+  It still needs broader training on infinite scroll, cursor pagination, and
+  sites where XHR requires extra non-sensitive headers.
 - API pagination/cursor handling is still shallow.
 - Virtualized lists and infinite scroll still need training targets.
 - Cloudflare/CAPTCHA/login-required targets remain diagnosis-only.
@@ -253,13 +283,10 @@ OK
 
 ## Next Recommended Work
 
-1. Implement the observer timing fix: `networkidle` default for observation and
-   optional post-load delay.
-2. Retry the HN Algolia browser-network observation probe with improved timing
-   and rendered DOM selector inference.
-3. Continue real-site training from the ladder: dynamic pages, virtualized
+1. Continue real-site training from the ladder: dynamic pages, virtualized
    lists, then tougher anti-bot diagnosis cases.
-4. Add `SECURITY.md`, PR template, and an open-source release checklist pass
+2. Add API pagination/cursor support for observed JSON APIs.
+3. Add `SECURITY.md`, PR template, and an open-source release checklist pass
    before public announcement.
-5. Later P1/P2: design durable job registry and a simple frontend for API
+4. Later P1/P2: design durable job registry and a simple frontend for API
    configuration, task submission, result viewing, and example upload.

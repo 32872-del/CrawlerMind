@@ -10,8 +10,9 @@ and fixed during the session:
   anti-bot pages.
 - Common API response shapes such as `hits` and `quotes` were not extracted.
 
-After fixes, 4/5 scenarios passed. The remaining failure is a real dynamic-page
-browser/network-observation gap, not a direct JSON API gap.
+After the first fixes, 4/5 scenarios passed. A follow-up timing and API replay
+fix closed the remaining dynamic-page gap: the HN Algolia SPA now completes by
+observing its public Algolia XHR and replaying the JSON POST request.
 
 ## Scenarios
 
@@ -21,7 +22,7 @@ browser/network-observation gap, not a direct JSON API gap.
 | Hacker News Algolia front page API | `https://hn.algolia.com/api/v1/search_by_date?tags=front_page` | completed | 10 | Fixed JSON anti-bot false positive and `hits` extraction |
 | GitHub CPython issues API | `https://api.github.com/repos/python/cpython/issues?per_page=10` | completed | 10 | GitHub `html_url` and `comments` normalization |
 | Quotes to Scrape API | `https://quotes.toscrape.com/api/quotes?page=1` | completed | 10 | Fixed `quotes` extraction and quote text normalization |
-| HN Algolia browser-network observation | `https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=&sort=byPopularity&type=story` | failed | 0 | Browser rendered page observed only document response; no API candidate surfaced |
+| HN Algolia browser-network observation | `https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=&sort=byPopularity&type=story` | completed | 10 | Observed Algolia XHR, selected `api_intercept`, replayed JSON POST body |
 
 Raw training output:
 
@@ -42,20 +43,31 @@ dev_logs/2026-05-09_real_site_training_round4.json
 
 ## Remaining Failure Analysis
 
-The HN Algolia browser-network observation scenario failed because the current
-observer captured only the document response and produced zero API candidates.
-The page rendered some DOM, but current DOM selector inference did not produce
-extractable story items.
+The HN Algolia browser-network observation scenario initially failed because
+the observer returned too early and because Algolia's JSON POST body contains a
+plain `query` field that was incorrectly treated as GraphQL. Both issues were
+fixed later on 2026-05-09.
 
-Likely next work:
+Resolved follow-up:
 
-1. Add a real browser-network smoke fixture with controlled XHR so the
+1. Added a real browser-network smoke fixture with controlled XHR so the
    observer proves full end-to-end candidate discovery outside mocks.
    Completed later on 2026-05-09 in
    `autonomous_crawler/tests/test_real_browser_smoke.py`.
-2. Enhance browser observation timing to wait for network idle and/or capture
-   request URLs triggered after hydration.
-3. Add rendered DOM selector training for modern SPA list layouts.
+2. Changed network observation timing to default to `networkidle` and added
+   optional `render_time_ms`.
+3. Tightened GraphQL detection so Algolia-style JSON POST search requests stay
+   classified as `json`.
+4. Preserved JSON POST bodies on API candidates and replayed them in Executor.
+5. Retried the public HN Algolia scenario successfully:
+
+```text
+status=completed
+mode=api_intercept
+method=api_json
+items=10
+confidence=1.0
+```
 
 ## Verification
 
@@ -65,5 +77,5 @@ Ran 28 tests
 OK
 
 python run_training_round4.py
-4 completed, 1 failed
+5 completed, 0 failed
 ```
