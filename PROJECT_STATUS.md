@@ -376,3 +376,8 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
     and marked all 30,000 URLs done; result storage saved/loaded 30,000 items;
     Excel export completed. Peak memory was about 196 MB. Finding: CLM needs
     checkpointed product storage before real long-running multi-hour crawls.
+23. ~~Sync 2026-05-09 worker deliveries and supervisor outputs to GitHub.~~
+    Done 2026-05-09. `main` and `origin/main` are at commit `4af3f81`
+    (`Advance API pagination and ecommerce training docs`), which includes
+    001/002/004 deliveries, acceptance records, ecommerce training outputs,
+    stress-test outputs, and updated project documentation.

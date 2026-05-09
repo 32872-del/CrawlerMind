@@ -367,3 +367,24 @@ Interpretation:
   retries, rate limiting, dynamic rendering, and resumability were not included.
 - Before real tens-of-thousands-item crawls, CLM needs checkpointed product
   storage, resumable progress, per-domain rate limits, and run-level metrics.
+
+## GitHub Sync
+
+The 2026-05-09 worker deliveries and supervisor follow-up were committed and
+pushed to GitHub on `main`.
+
+```text
+Commit: 4af3f81 Advance API pagination and ecommerce training docs
+Remote: origin/main
+Repository: https://github.com/32872-del/CrawlerMind.git
+```
+
+Included in the pushed commit:
+
+- LLM-2026-001 observed API pagination/cursor work.
+- LLM-2026-002 API pagination QA and ecommerce product quality QA.
+- LLM-2026-004 docs state audit and ecommerce workflow documentation.
+- Supervisor acceptance records.
+- Ecommerce real-site training script and sample outputs.
+- Local 30,000-record stress test script and outputs.
+- Updated README, project status, team board, and project showcase report.

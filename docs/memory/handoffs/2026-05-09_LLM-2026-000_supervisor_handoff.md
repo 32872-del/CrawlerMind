@@ -109,8 +109,12 @@ OK
   broad real-site use: analytics denylist, cross-page dedupe, cursor/repeated
   request guard, and empty-page guard.
 - Ecommerce product quality is still shallow compared with the `spider_text`
-  experience library: CLM needs product schema validation, category-aware
-  dedupe, body cleaning, image dedupe, and color/size variant normalization.
+  experience library, although the 2026-05-09 real-site batch proved Shopify
+  JSON, Magento list/detail, Magento `jsonConfig` sizes, Cloudflare
+  diagnosis-only, and corporate-product partial rows.
+- Local synthetic stress testing passed at 30,000 records, but real long-running
+  ecommerce crawls still need checkpointed product storage, resumable progress,
+  rate limits, and metrics.
 - Rendered DOM selector inference is stronger for HN Algolia-style fixtures,
   but still needs a public-site retry.
 - FastAPI job registry remains in-memory.
@@ -120,9 +124,20 @@ OK
 
 ## Next Recommended Action
 
-Harden observed API pagination, then add ecommerce product quality foundation
-from the `spider_text` lessons before the next ecommerce real-site training
-batch.
+Add ecommerce product quality foundation and checkpointed product storage before
+attempting real tens-of-thousands-item crawls. The next concrete module should
+be `ProductRecord` + `ProductStore` + validation/fixture tests based on the
+2026-05-09 ecommerce sample.
+
+## Latest GitHub Sync
+
+```text
+main / origin/main: 4af3f81 Advance API pagination and ecommerce training docs
+```
+
+This commit includes 001/002/004 worker deliveries, acceptance records,
+ecommerce training outputs, local stress-test outputs, README/project-showcase
+updates, and supervisor documentation.
 
 ## Files To Read First
 
