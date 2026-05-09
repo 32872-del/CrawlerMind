@@ -26,6 +26,16 @@ class ApiInterceptTests(unittest.TestCase):
 
         self.assertEqual(records, [{"name": "Alpha"}])
 
+    def test_extract_records_from_training_json_shapes(self) -> None:
+        self.assertEqual(
+            extract_records_from_json({"hits": [{"title": "HN Story"}]}),
+            [{"title": "HN Story"}],
+        )
+        self.assertEqual(
+            extract_records_from_json({"quotes": [{"text": "Quote text"}]}),
+            [{"text": "Quote text"}],
+        )
+
     def test_normalize_api_records_maps_name_to_title(self) -> None:
         items = normalize_api_records([{"name": "Alpha", "url": "/p/a"}])
 
@@ -54,6 +64,44 @@ class ApiInterceptTests(unittest.TestCase):
         self.assertEqual(items[1]["hot_score"], 12345)
         self.assertEqual(items[1]["rank"], 2)
         self.assertEqual(items[1]["image"], "https://img.example/b.jpg")
+
+    def test_normalize_api_records_maps_training_api_fields(self) -> None:
+        items = normalize_api_records([
+            {
+                "title": "HN Story",
+                "points": 123,
+                "story_text": "A useful story summary",
+            },
+            {
+                "title": "Rated Product",
+                "rating": 4.7,
+                "description": "A product description",
+            },
+        ])
+
+        self.assertEqual(items[0]["hot_score"], 123)
+        self.assertEqual(items[0]["summary"], "A useful story summary")
+        self.assertEqual(items[1]["hot_score"], 4.7)
+        self.assertEqual(items[1]["summary"], "A product description")
+
+    def test_normalize_api_records_maps_quote_and_github_fields(self) -> None:
+        items = normalize_api_records([
+            {
+                "text": "Quote text",
+                "author": {"name": "Ada"},
+            },
+            {
+                "title": "Issue title",
+                "html_url": "https://github.example/issues/1",
+                "comments": 3,
+            },
+        ])
+
+        self.assertEqual(items[0]["title"], "Quote text")
+        self.assertEqual(items[0]["summary"], "Quote text")
+        self.assertEqual(items[1]["link"], "https://github.example/issues/1")
+        self.assertEqual(items[1]["hot_score"], 3)
+
 
     def test_extract_records_from_reddit_children_shape(self) -> None:
         records = extract_records_from_json({

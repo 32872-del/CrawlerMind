@@ -87,11 +87,12 @@ Last updated: 2026-05-09
 | Open Source CI | LLM-2026-001 | `docs/team/acceptance/2026-05-09_open_source_ci_ACCEPTED.md` | GitHub Actions, CONTRIBUTING, issue templates |
 | Browser Network Observation QA | LLM-2026-002 | `docs/team/acceptance/2026-05-09_browser_network_observation_qa_ACCEPTED.md` | 55 focused tests and QA audit |
 | Open Source Docs Audit | LLM-2026-004 | `docs/team/acceptance/2026-05-09_open_source_docs_audit_ACCEPTED.md` | onboarding audit and doc consistency findings |
+| Real-Site Training Round 4 | LLM-2026-000 | supervisor direct work | 4/5 public API scenarios completed; JSON anti-bot false positive and common API shape normalization fixed |
 
 ## Upcoming Candidate Tasks
 
-1. Real-site training suite: continue from the training ladder and convert failures into fixtures/tests.
-2. Real browser network observation smoke on one controlled SPA/API-backed target.
+1. Real browser network observation smoke on one controlled SPA/API-backed target.
+2. Rendered DOM selector training for modern SPA list layouts.
 3. Durable job registry design after the in-memory FastAPI MVP stabilizes.
 4. One controlled SPA target for browser fallback validation.
 5. One virtualized-list target for scroll strategy validation.

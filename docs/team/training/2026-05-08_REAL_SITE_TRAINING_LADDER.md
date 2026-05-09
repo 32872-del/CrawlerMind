@@ -42,6 +42,10 @@ Completed examples:
 - Douban Top250
 - React docs SSR recon
 - Vue examples recon
+- DummyJSON products API
+- Hacker News Algolia front page API
+- GitHub CPython issues API
+- Quotes to Scrape quotes API
 
 ### Tier 2: Browser-Rendered Targets
 
@@ -77,6 +81,6 @@ When assigning training work:
 ## Next Suggested Training
 
 - one controlled SPA target
-- one virtualized-list target
 - one browser-network-observation sample
+- one virtualized-list target
 - one failure case that becomes a reusable fixture

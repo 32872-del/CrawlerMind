@@ -12,6 +12,7 @@ from autonomous_crawler.tools.html_recon import (
     MOCK_CHALLENGE_HTML,
     MOCK_JS_SHELL_HTML,
     MOCK_STRUCTURED_HTML,
+    detect_anti_bot,
 )
 from autonomous_crawler.tools.recon_tools import diagnose_access as diagnose_access_tool
 
@@ -34,6 +35,17 @@ class AccessDiagnosticsTests(unittest.TestCase):
         self.assertEqual(result["signals"]["challenge"], "cf-challenge")
         self.assertIn("challenge_detected:cf-challenge", result["findings"])
         self.assertEqual(result["recommendations"][0]["type"], "manual_review")
+
+    def test_json_payload_text_does_not_trigger_challenge(self) -> None:
+        result = diagnose_access(
+            '{"title": "Cloudflare explains CAPTCHA and access denied errors"}',
+            url="https://api.example/items",
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["signals"]["challenge"], "")
+        self.assertFalse(any(finding.startswith("challenge_detected") for finding in result["findings"]))
+        self.assertFalse(detect_anti_bot('{"title": "captcha in article text"}')["detected"])
 
     def test_structured_data_is_detected(self) -> None:
         result = diagnose_access(MOCK_STRUCTURED_HTML, url="https://shop.example")

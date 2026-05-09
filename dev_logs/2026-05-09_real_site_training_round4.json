@@ -1,0 +1,229 @@
+{
+  "run_at": "2026-05-09T14:10:31.791772",
+  "source_list": "E:\\爬虫Agent实战训练网站清单.md",
+  "selection_policy": "public JSON APIs and one browser-network observation probe",
+  "results": [
+    {
+      "id": "dummyjson_products_public_api",
+      "name": "DummyJSON products public API",
+      "url": "https://dummyjson.com/products?limit=10",
+      "risk": "low-public-json",
+      "capability": "product_api_rating_summary_normalization",
+      "status": "completed",
+      "elapsed_seconds": 9.77,
+      "mode": "api_intercept",
+      "method": "api_json",
+      "expected_mode": "api_intercept",
+      "fetch_mode": "requests",
+      "item_count": 10,
+      "confidence": 1.0,
+      "valid": true,
+      "anomalies": [],
+      "error_code": "",
+      "sample_items": [
+        {
+          "index": 0,
+          "id": 1,
+          "title": "Essence Mascara Lash Princess",
+          "hot_score": 2.56,
+          "image": "https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/thumbnail.webp"
+        },
+        {
+          "index": 1,
+          "id": 2,
+          "title": "Eyeshadow Palette with Mirror",
+          "hot_score": 2.86,
+          "image": "https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/thumbnail.webp"
+        },
+        {
+          "index": 2,
+          "id": 3,
+          "title": "Powder Canister",
+          "hot_score": 4.64,
+          "image": "https://cdn.dummyjson.com/product-images/beauty/powder-canister/thumbnail.webp"
+        }
+      ],
+      "messages": [
+        "[Planner] Goal: collect product titles prices ratings and summaries",
+        "[Recon] Analyzed https://dummyjson.com/products?limit=10 - framework=api, items=0, anti_bot=False, fetch_mode=requests",
+        "[Strategy] Mode=api_intercept, Method=api_json, Rationale=API endpoint discovered, using direct API access",
+        "[Executor] Mode=api_intercept, fetched https://dummyjson.com/products?limit=10, rows=10",
+        "[Extractor] Reused structured executor data, items=10",
+        "[Validator] PASSED - 10 items, completeness=100%"
+      ]
+    },
+    {
+      "id": "hn_algolia_front_page_api",
+      "name": "Hacker News Algolia front page API",
+      "url": "https://hn.algolia.com/api/v1/search_by_date?tags=front_page",
+      "risk": "low-public-json",
+      "capability": "search_api_points_normalization",
+      "status": "completed",
+      "elapsed_seconds": 5.02,
+      "mode": "api_intercept",
+      "method": "api_json",
+      "expected_mode": "api_intercept",
+      "fetch_mode": "requests",
+      "item_count": 10,
+      "confidence": 1.0,
+      "valid": true,
+      "anomalies": [],
+      "error_code": "",
+      "sample_items": [
+        {
+          "index": 0,
+          "title": "Using Claude Code: The unreasonable effectiveness of HTML",
+          "hot_score": 34,
+          "link": "https://twitter.com/trq212/status/2052809885763747935",
+          "url": "https://twitter.com/trq212/status/2052809885763747935"
+        },
+        {
+          "index": 1,
+          "title": "Over 97% of the 'Linux' Foundation's Budget Goes Not to Linux",
+          "hot_score": 56,
+          "link": "https://techrights.org/n/2026/05/08/Over_97_of_the_Linux_Foundation_s_Budget_Goes_Not_to_Linux.shtml",
+          "url": "https://techrights.org/n/2026/05/08/Over_97_of_the_Linux_Foundation_s_Budget_Goes_Not_to_Linux.shtml"
+        },
+        {
+          "index": 2,
+          "title": "A recent experience with ChatGPT 5.5 Pro",
+          "hot_score": 119,
+          "link": "https://gowers.wordpress.com/2026/05/08/a-recent-experience-with-chatgpt-5-5-pro/",
+          "url": "https://gowers.wordpress.com/2026/05/08/a-recent-experience-with-chatgpt-5-5-pro/"
+        }
+      ],
+      "messages": [
+        "[Planner] Goal: collect hacker news story titles scores and links",
+        "[Recon] Analyzed https://hn.algolia.com/api/v1/search_by_date?tags=front_page - framework=api, items=0, anti_bot=False, fetch_mode=requests",
+        "[Strategy] Mode=api_intercept, Method=api_json, Rationale=API endpoint discovered, using direct API access",
+        "[Executor] Mode=api_intercept, fetched https://hn.algolia.com/api/v1/search_by_date?tags=front_page, rows=10",
+        "[Extractor] Reused structured executor data, items=10",
+        "[Validator] PASSED - 10 items, completeness=98%"
+      ]
+    },
+    {
+      "id": "github_cpython_issues_api",
+      "name": "GitHub CPython issues API",
+      "url": "https://api.github.com/repos/python/cpython/issues?per_page=10",
+      "risk": "low-public-json-rate-limited",
+      "capability": "list_json_comment_count_normalization",
+      "status": "completed",
+      "elapsed_seconds": 5.18,
+      "mode": "api_intercept",
+      "method": "api_json",
+      "expected_mode": "api_intercept",
+      "fetch_mode": "requests",
+      "item_count": 10,
+      "confidence": 1.0,
+      "valid": true,
+      "anomalies": [],
+      "error_code": "",
+      "sample_items": [
+        {
+          "index": 0,
+          "id": 4410933111,
+          "title": "gh-149083: use sentinel to fix _functools.reduce() signature",
+          "link": "https://github.com/python/cpython/pull/149591",
+          "url": "https://api.github.com/repos/python/cpython/issues/149591"
+        },
+        {
+          "index": 1,
+          "id": 4410818006,
+          "title": "Creating multiple instances of faulthandler module causes unbalanced refcount on fatal_error.file",
+          "hot_score": 1,
+          "link": "https://github.com/python/cpython/issues/149590",
+          "url": "https://api.github.com/repos/python/cpython/issues/149590"
+        },
+        {
+          "index": 2,
+          "id": 4410802979,
+          "title": "Adding in a new `PyList_Pop` C-API",
+          "link": "https://github.com/python/cpython/issues/149589",
+          "url": "https://api.github.com/repos/python/cpython/issues/149589"
+        }
+      ],
+      "messages": [
+        "[Planner] Goal: collect github issue titles comment counts and links",
+        "[Recon] Analyzed https://api.github.com/repos/python/cpython/issues?per_page=10 - framework=api, items=0, anti_bot=False, fetch_mode=requests",
+        "[Strategy] Mode=api_intercept, Method=api_json, Rationale=API endpoint discovered, using direct API access",
+        "[Executor] Mode=api_intercept, fetched https://api.github.com/repos/python/cpython/issues?per_page=10, rows=10",
+        "[Extractor] Reused structured executor data, items=10",
+        "[Validator] PASSED - 10 items, completeness=88%"
+      ]
+    },
+    {
+      "id": "quotes_to_scrape_quotes_api",
+      "name": "Quotes to Scrape quotes API",
+      "url": "https://quotes.toscrape.com/api/quotes?page=1",
+      "risk": "low-public-training-api",
+      "capability": "training_api_text_summary_normalization",
+      "status": "completed",
+      "elapsed_seconds": 5.69,
+      "mode": "api_intercept",
+      "method": "api_json",
+      "expected_mode": "api_intercept",
+      "fetch_mode": "requests",
+      "item_count": 10,
+      "confidence": 1.0,
+      "valid": true,
+      "anomalies": [],
+      "error_code": "",
+      "sample_items": [
+        {
+          "index": 0,
+          "title": "“The world as we have created it is a process of our thinking. It cannot be changed without changing our thinking.”"
+        },
+        {
+          "index": 1,
+          "title": "“It is our choices, Harry, that show what we truly are, far more than our abilities.”"
+        },
+        {
+          "index": 2,
+          "title": "“There are only two ways to live your life. One is as though nothing is a miracle. The other is as though everything is a miracle.”"
+        }
+      ],
+      "messages": [
+        "[Planner] Goal: collect quote text and author names",
+        "[Recon] Analyzed https://quotes.toscrape.com/api/quotes?page=1 - framework=api, items=0, anti_bot=False, fetch_mode=requests",
+        "[Strategy] Mode=api_intercept, Method=api_json, Rationale=API endpoint discovered, using direct API access",
+        "[Executor] Mode=api_intercept, fetched https://quotes.toscrape.com/api/quotes?page=1, rows=10",
+        "[Extractor] Reused structured executor data, items=10",
+        "[Validator] PASSED - 10 items, completeness=100%"
+      ]
+    },
+    {
+      "id": "hn_algolia_browser_network_observation",
+      "name": "Hacker News Algolia browser network observation",
+      "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=&sort=byPopularity&type=story",
+      "risk": "low-public-spa-observation",
+      "capability": "browser_network_observation_real_site_probe",
+      "status": "failed",
+      "elapsed_seconds": 29.44,
+      "mode": "browser",
+      "method": "browser_render",
+      "expected_mode": "http",
+      "fetch_mode": "browser",
+      "item_count": 0,
+      "confidence": 0.0,
+      "valid": false,
+      "anomalies": [
+        "No items extracted"
+      ],
+      "error_code": "EXTRACTION_EMPTY",
+      "sample_items": [],
+      "messages": [
+        "[Planner] Goal: observe browser network candidates while collecting story titles",
+        "[Recon] Analyzed https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=&sort=byPopularity&type=story - framework=unknown, items=4, anti_bot=False, fetch_mode=browser",
+        "[Recon] Network observation status=ok, entries=1, api_candidates=0",
+        "[Strategy] Mode=browser, Method=browser_render, Rationale=Access diagnostics recommend browser rendering",
+        "[Executor] Mode=browser, fetched https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=&sort=byPopularity&type=story (8984 chars)",
+        "[Extractor] Extracted 0 items, confidence=0.00, fields=[]",
+        "[Validator] RETRY - anomalies=['No items extracted'], attempt 1/1",
+        "[Strategy] Mode=browser, Method=browser_render, Rationale=Access diagnostics recommend browser rendering (retry #1)",
+        "[Executor] Mode=browser, fetched https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=&sort=byPopularity&type=story (8984 chars)",
+        "[Extractor] Extracted 0 items, confidence=0.00, fields=[]",
+        "[Validator] FAILED - anomalies=['No items extracted'], max retries exceeded"
+      ]
+    }
+  ]
+}

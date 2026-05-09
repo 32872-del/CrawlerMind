@@ -85,6 +85,46 @@ Acceptance record:
 docs/team/acceptance/2026-05-09_open_source_docs_audit_ACCEPTED.md
 ```
 
+### Real-Site Training Round 4
+
+Supervisor direct work.
+
+Training targets:
+
+- DummyJSON products public API
+- Hacker News Algolia front page API
+- GitHub CPython issues API
+- Quotes to Scrape API
+- Hacker News Algolia browser-network observation probe
+
+Initial run:
+
+- 2/5 completed
+- failures exposed JSON anti-bot false positives and missing common API shapes
+
+Fixes applied:
+
+- JSON payloads no longer trigger HTML challenge detection just because their
+  content mentions words such as `captcha`.
+- `hits` and `quotes` JSON response shapes are now extracted.
+- API normalization now maps common fields:
+  - `points`, `num_comments`, `comments`, `rating` -> `hot_score`
+  - `description`, `text`, `body`, `story_text` -> `summary`
+  - `html_url` -> `link`
+
+Final run:
+
+- 4/5 completed
+- all direct public JSON/API scenarios passed with 10 items each
+- the remaining failure is the browser-network observation probe, which now
+  becomes the next dynamic-page training target
+
+Report:
+
+```text
+docs/reports/2026-05-09_REAL_SITE_TRAINING_ROUND4.md
+```
+
 ## Verification
 
 ```text
@@ -104,6 +144,17 @@ Ran 316 tests
 OK (skipped=3)
 ```
 
+Additional training verification:
+
+```text
+python -m unittest autonomous_crawler.tests.test_access_diagnostics autonomous_crawler.tests.test_api_intercept -v
+Ran 28 tests
+OK
+
+python run_training_round4.py
+4 completed, 1 failed
+```
+
 ## Current Capability Snapshot
 
 - Level 1 HTML pipeline: MVP complete.
@@ -113,11 +164,15 @@ OK (skipped=3)
   deterministic fallback.
 - Browser network observation: skeleton complete, tested with mocks, now needs
   real-site smoke.
+- Public JSON/API normalization: broader after round 4, including `hits`,
+  `quotes`, GitHub issue links/comments, HN points, product ratings, and text
+  summaries.
 - Open-source onboarding: basic structure complete.
 
 ## Current Gaps
 
-- Network observation has not yet been proven on a real dynamic site.
+- Network observation has not yet produced API candidates on a real dynamic
+  site.
 - API pagination/cursor handling is still shallow.
 - Virtualized lists and infinite scroll still need training targets.
 - Cloudflare/CAPTCHA/login-required targets remain diagnosis-only.

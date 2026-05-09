@@ -143,7 +143,7 @@ def extract_records_from_json(data: Any) -> list[dict[str, Any]]:
                 records.append(child)
         if records:
             return records
-    for key in ("items", "products", "data", "results", "records"):
+    for key in ("items", "products", "data", "results", "records", "hits", "quotes"):
         value = data.get(key)
         if isinstance(value, list):
             return [item for item in value if isinstance(item, dict)]
@@ -171,9 +171,16 @@ def normalize_api_records(records: list[dict[str, Any]], max_items: int = 0) -> 
                 record.get("name")
                 or record.get("label")
                 or record.get("headline")
+                or record.get("text")
             )
         if "link" not in item:
-            item["link"] = record.get("url") or record.get("href") or record.get("permalink") or record.get("siteUrl")
+            item["link"] = (
+                record.get("html_url")
+                or record.get("url")
+                or record.get("href")
+                or record.get("permalink")
+                or record.get("siteUrl")
+            )
         if "image" not in item:
             item["image"] = (
                 record.get("image")
@@ -184,11 +191,24 @@ def normalize_api_records(records: list[dict[str, Any]], max_items: int = 0) -> 
         if "hot_score" not in item:
             item["hot_score"] = (
                 record.get("score")
+                or record.get("points")
+                or record.get("num_comments")
+                or record.get("comments")
+                or record.get("rating")
                 or record.get("ups")
                 or record.get("heat")
                 or record.get("popularity")
                 or record.get("averageScore")
                 or _first_nested(record, ["stat", "view"], ["stat", "like"], ["stat", "coin"])
+            )
+        if "summary" not in item:
+            item["summary"] = (
+                record.get("summary")
+                or record.get("description")
+                or record.get("text")
+                or record.get("body")
+                or record.get("story_text")
+                or _first_nested(record, ["author", "name"])
             )
         if "rank" not in item:
             rank = (

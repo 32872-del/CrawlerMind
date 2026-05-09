@@ -141,6 +141,8 @@ def diagnose_access(html: str, url: str = "", target_selector: str = "") -> dict
 
 def detect_challenge(html: str) -> str:
     """Return the first challenge marker found in HTML, or an empty string."""
+    if _looks_like_json_payload(html):
+        return ""
     sample = (html or "")[:200_000].lower()
     for pattern in CHALLENGE_PATTERNS:
         if pattern.lower() in sample:
@@ -187,6 +189,11 @@ def looks_like_js_shell(signals: dict[str, Any]) -> bool:
     if app_root_count and text_chars < 1200:
         return True
     return False
+
+
+def _looks_like_json_payload(text: str) -> bool:
+    stripped = (text or "").lstrip()
+    return stripped.startswith("{") or stripped.startswith("[")
 
 
 def _json_ld_types(nodes: list[Any]) -> list[str]:

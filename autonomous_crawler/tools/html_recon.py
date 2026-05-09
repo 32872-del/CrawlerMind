@@ -393,6 +393,13 @@ def detect_rendering(html: str) -> str:
 
 
 def detect_anti_bot(html: str) -> dict[str, Any]:
+    if _looks_like_json_payload(html):
+        return {
+            "detected": False,
+            "type": "none",
+            "severity": "low",
+            "indicators": [],
+        }
     challenge = detect_challenge(html)
     lowered = html.lower()
     matches = [pattern for pattern in BOT_PATTERNS if pattern in lowered]
