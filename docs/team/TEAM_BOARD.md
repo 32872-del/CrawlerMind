@@ -62,6 +62,10 @@ Last updated: 2026-05-11
 | Ecommerce Product Store Foundation | LLM-2026-001 | Storage / Ecommerce Worker | accepted | `docs/team/acceptance/2026-05-11_product_store_ACCEPTED.md` |
 | Ecommerce Product Quality Foundation | LLM-2026-002 | QA / Ecommerce Worker | accepted | `docs/team/acceptance/2026-05-11_product_quality_ACCEPTED.md` |
 | Long-Running Ecommerce Runbook | LLM-2026-000 | Supervisor | accepted | `docs/team/acceptance/2026-05-11_long_running_ecommerce_runbook_ACCEPTED.md` |
+| Generic Resumable Batch Runner MVP | LLM-2026-000 | Supervisor | accepted | `docs/team/acceptance/2026-05-11_resumable_batch_runner_ACCEPTED.md` |
+| Resumable Runner QA Audit | LLM-2026-001 | QA / Runner Auditor | accepted | `docs/team/acceptance/2026-05-11_resumable_runner_qa_ACCEPTED.md` |
+| Training Fixture Plan | LLM-2026-002 | Training / Fixture Planner | accepted | `docs/team/acceptance/2026-05-11_training_fixture_plan_ACCEPTED.md` |
+| Runner Docs Consistency Audit | LLM-2026-004 | Documentation Worker | accepted | `docs/team/acceptance/2026-05-11_runner_docs_audit_ACCEPTED.md` |
 
 ## Recent Accepted Work Log
 
@@ -110,14 +114,19 @@ Last updated: 2026-05-11
 | Ecommerce Product Store Foundation | LLM-2026-001 | `docs/team/acceptance/2026-05-11_product_store_ACCEPTED.md` | generic `ProductRecord`, category-aware dedupe, SQLite `ProductStore`, 30,000-row batch tests |
 | Ecommerce Product Quality Foundation | LLM-2026-002 | `docs/team/acceptance/2026-05-11_product_quality_ACCEPTED.md` | generic quality validator for price/image/body/status/dedupe checks; supervisor cleaned encoding-sensitive tests |
 | Long-Running Ecommerce Runbook | LLM-2026-000 | `docs/team/acceptance/2026-05-11_long_running_ecommerce_runbook_ACCEPTED.md` | operational policy for checkpointed large ecommerce runs |
+| Generic Resumable Batch Runner MVP | LLM-2026-000 | `docs/team/acceptance/2026-05-11_resumable_batch_runner_ACCEPTED.md` | frontier-backed claim/process/checkpoint loop with pause/resume smoke |
+| Resumable Runner QA Audit | LLM-2026-001 | `docs/team/acceptance/2026-05-11_resumable_runner_qa_ACCEPTED.md` | retry-limit, progress-event, lease, atomicity, and politeness risks accepted as follow-ups |
+| Training Fixture Plan | LLM-2026-002 | `docs/team/acceptance/2026-05-11_training_fixture_plan_ACCEPTED.md` | six generic training scenarios accepted for fixture/test implementation |
+| Runner Docs Consistency Audit | LLM-2026-004 | `docs/team/acceptance/2026-05-11_runner_docs_audit_ACCEPTED.md` | generic runner framing risk accepted and supervisor docs updated |
+| Two-Round Real-Site Training | LLM-2026-000 | supervisor direct work | 850 rows exported; round 1: 5 public targets x 50; round 2: 3 ecommerce sites x 200 |
 
 ## Upcoming Candidate Tasks
 
-1. Build a resumable ecommerce runner: frontier -> fetch -> extract -> validate -> `ProductStore` -> progress report.
-2. Convert 2026-05-09 ecommerce real-site samples into fixtures/tests.
-3. Add runtime site/crawl profile files for selectors, API hints, pagination, and quality overrides.
-4. Harden observed API pagination on real public pagination targets after the deterministic guards are stable.
-5. Run the next real-site training batch against dynamic pages, paginated APIs, and virtualized lists.
+1. Add runner retry limits and progress events.
+2. Wrap the LangGraph crawl workflow as a `BatchRunner` processor.
+3. Convert 2026-05-11 real-site findings into fixtures/tests, including Tatuum color extraction.
+4. Add runtime site/crawl profile files for selectors, API hints, pagination, field extraction, and quality overrides.
+5. Harden observed API pagination on real public pagination targets after the deterministic guards are stable.
 6. Durable job registry design after the in-memory FastAPI MVP stabilizes.
 7. Open-source polish: `SECURITY.md`, PR template, release checklist pass.
 

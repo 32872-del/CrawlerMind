@@ -11,6 +11,7 @@ Current runbooks:
 - `QUICK_START_CN.md`
 - `OPEN_SOURCE_RELEASE_CHECKLIST.md`
 - `LONG_RUNNING_ECOMMERCE_RUNS.md`
+- `RESUMABLE_BATCH_RUNNER.md`
 
 Recommended first read:
 

@@ -237,12 +237,23 @@ replay workflow on HN Algolia.
 - Long-running ecommerce runbook added on 2026-05-11. Large ecommerce crawls
   must checkpoint frontier progress and product records batch-by-batch instead
   of relying on a final in-memory workflow state.
+- Generic resumable `BatchRunner` added on 2026-05-11:
+  frontier-backed claim/process/checkpoint loop, bounded `max_batches` resume
+  support, failure/retry handling, discovered URL insertion, checkpoint error
+  handling, and a `ProductRecordCheckpoint` adapter. Local smoke proves a
+  two-pass run can process 25 records across an intentional pause/resume.
+- Two-round real-site training completed on 2026-05-11:
+  round 1 collected 50 records each from five public targets
+  (JSONPlaceholder, DummyJSON, GitHub CPython issues, HN Algolia, and Quotes
+  to Scrape). Round 2 collected 200 product detail records each from Tatuum,
+  The Sting, and BalticBHP through public sitemap/detail pages. Total: 850
+  rows exported to JSON and Excel under `dev_logs/`.
 
 ## Current Test Status
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 437 tests (skipped=4)
+Ran 447 tests (skipped=4)
 OK
 ```
 
@@ -305,7 +316,7 @@ OK
 Move from the local MVP toward a more robust crawl service:
 
 ```text
-pagination hardening + ecommerce product quality foundation + broader dynamic-page training
+resumable runner + profile-driven crawl execution + broader dynamic-page training
 ```
 
 The last verified real LLM-assisted workflow is:
@@ -393,3 +404,15 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
     2026-05-11. `ProductRecord`, `ProductStore`, product quality validation,
     30,000-row storage tests, long-running ecommerce runbook, and supervisor
     acceptance records added.
+25. ~~Add generic resumable batch runner MVP.~~ Done 2026-05-11.
+    `BatchRunner` supports bounded frontier claims, pause/resume via
+    `max_batches`, success/failure/retry marking, discovered URL insertion,
+    checkpoint sinks, and product checkpoint integration. Local smoke:
+    25 synthetic records processed as 10 + 15 across two passes.
+26. ~~Run two-round real-site training batch.~~ Done 2026-05-11.
+    Round 1: 5 sources x 50 records. Round 2: 3 ecommerce sites x 200
+    products. Exported `dev_logs/2026-05-11_two_round_real_training.json` and
+    `.xlsx`. Findings: public sitemap/detail flow can scale to 200 records per
+  site, but real runs need incremental checkpointing, fetch fallback for empty
+  HTTP 200 responses, and profile-based field extraction. Known gap: Tatuum
+  color extraction remains incomplete even though the site exposes color data.

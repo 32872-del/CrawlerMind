@@ -1,0 +1,62 @@
+{
+  "run_id": "batch-runner-smoke",
+  "config": {
+    "items": 25,
+    "batch_size": 5,
+    "first_pass_batches": 2,
+    "keep_db": false
+  },
+  "frontier_add": {
+    "added": 25,
+    "skipped": 0,
+    "invalid": 0
+  },
+  "first_pass": {
+    "run_id": "batch-runner-smoke",
+    "batches": 2,
+    "claimed": 10,
+    "succeeded": 10,
+    "failed": 0,
+    "retried": 0,
+    "records_saved": 10,
+    "discovered_urls": 0,
+    "checkpoint_errors": 0,
+    "item_errors": [],
+    "frontier_stats": {
+      "done": 10,
+      "queued": 15
+    }
+  },
+  "resume_pass": {
+    "run_id": "batch-runner-smoke",
+    "batches": 3,
+    "claimed": 15,
+    "succeeded": 15,
+    "failed": 0,
+    "retried": 0,
+    "records_saved": 15,
+    "discovered_urls": 0,
+    "checkpoint_errors": 0,
+    "item_errors": [],
+    "frontier_stats": {
+      "done": 25
+    }
+  },
+  "final_frontier_stats": {
+    "done": 25
+  },
+  "product_stats": {
+    "run_id": "batch-runner-smoke",
+    "total": 25,
+    "by_status": {
+      "ok": 25
+    },
+    "by_site": {
+      "runner-smoke.local": 25
+    },
+    "price_min": 10.0,
+    "price_max": 34.0,
+    "price_avg": 22.0
+  },
+  "accepted": true
+}

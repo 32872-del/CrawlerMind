@@ -8,6 +8,7 @@ for hours or collect tens of thousands of products.
 CLM has a local foundation for larger ecommerce runs:
 
 - SQLite URL frontier with queued/running/done/failed states.
+- Generic `BatchRunner` for bounded claim/process/checkpoint loops.
 - Generic `ProductRecord` model.
 - SQLite `ProductStore` with batch upsert and run-level stats.
 - Product quality validator for URL/title/price/image/body/dedupe checks.
@@ -30,6 +31,12 @@ Large runs should use this loop:
 8. Repeat until the frontier is empty or limits are reached.
 
 Do not hold the entire run in memory and save only at the end.
+
+The generic runner contract is documented in:
+
+```text
+docs/runbooks/RESUMABLE_BATCH_RUNNER.md
+```
 
 ## Suggested Limits For Training
 
@@ -72,6 +79,8 @@ On interruption:
 - There is no durable FastAPI job registry yet.
 - There is no dashboard for run progress.
 - There is no automatic per-domain throttling controller.
+- The current runner has a product checkpoint adapter, but no generic JSON
+  checkpoint adapter yet.
 - Real long-run ecommerce behavior still needs supervised site-by-site training.
 
 ## Supervisor Policy
