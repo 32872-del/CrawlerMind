@@ -151,7 +151,7 @@ docs/team/acceptance/2026-05-09_open_source_docs_audit_ACCEPTED.md
 docs/team/acceptance/2026-05-09_rendered_dom_selector_training_ACCEPTED.md
 docs/team/acceptance/2026-05-09_network_timing_qa_ACCEPTED.md
 docs/reports/2026-05-09_REAL_SITE_TRAINING_ROUND4.md
-dev_logs/2026-05-09_real_site_training_round4.json
+dev_logs/training/2026-05-09_real_site_training_round4.json
 autonomous_crawler/tools/browser_network_observer.py
 autonomous_crawler/tests/test_browser_network_observer.py
 autonomous_crawler/tools/api_candidates.py

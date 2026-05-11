@@ -62,7 +62,7 @@ anomalies: []
 Result file:
 
 ```text
-dev_logs/baidu_hot_smoke_result.json
+dev_logs/smoke/baidu_hot_smoke_result.json
 ```
 
 ## First 30 titles captured

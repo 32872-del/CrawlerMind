@@ -178,7 +178,7 @@ python run_baidu_hot_test.py
 Write a developer log:
 
 ```text
-dev_logs/2026-05-06_HH-MM_browser_fallback_mvp.md
+dev_logs/development/2026-05-06_HH-MM_browser_fallback_mvp.md
 ```
 
 Required sections:

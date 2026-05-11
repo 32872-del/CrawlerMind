@@ -142,7 +142,7 @@ Issue:
 The daily report and acceptance record cite:
 
 ```text
-dev_logs/skeleton_run_result.json
+dev_logs/runtime/skeleton_run_result.json
 ```
 
 as the latest persisted result/evidence. That file exists locally but is
@@ -270,7 +270,7 @@ workers read first:
    stale assignment.
 2. Create a 2026-05-08 supervisor handoff that records the 175-test baseline,
    accepted real LLM smoke, and next FastAPI LLM task.
-3. Clarify in the next portable status note that `dev_logs/skeleton_run_result.json`
+3. Clarify in the next portable status note that `dev_logs/runtime/skeleton_run_result.json`
    is a local gitignored runtime artifact, while acceptance docs are the
    committed evidence.
 
@@ -306,7 +306,7 @@ Get-Content docs/reports/2026-05-08_DAILY_REPORT.md
 Get-Content docs/team/TEAM_BOARD.md
 Get-Content docs/team/acceptance/2026-05-08_real_llm_baidu_hot_smoke_ACCEPTED.md
 Get-Content docs/memory/handoffs/2026-05-07_LLM-2026-000_supervisor_handoff.md
-git ls-files dev_logs/skeleton_run_result.json
+git ls-files dev_logs/runtime/skeleton_run_result.json
 Select-String docs dev_logs for secret-like terms
 ```
 

@@ -36,7 +36,7 @@ python run_skeleton.py "采集百度热搜榜前30条" https://top.baidu.com/boa
 - `run_skeleton.py` now prints ranking-list summaries using rank, title,
   hot score, and link instead of product price formatting.
 - `run_baidu_hot_test.py` is now a self-contained Agent smoke test that writes
-  `dev_logs/baidu_hot_smoke_result.json`.
+  `dev_logs/smoke/baidu_hot_smoke_result.json`.
 - `PROJECT_STATUS.md` was updated to reflect the current completed workflow.
 
 ## Verification
@@ -74,13 +74,13 @@ python run_baidu_hot_test.py
 Status: completed
 Items: 30
 Valid: True
-Output: dev_logs\baidu_hot_smoke_result.json
+Output: dev_logs/smoke/baidu_hot_smoke_result.json
 ```
 
 The latest full real-run state is saved at:
 
 ```text
-dev_logs/skeleton_run_result.json
+dev_logs/runtime/skeleton_run_result.json
 ```
 
 ## Result

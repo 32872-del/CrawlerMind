@@ -1,8 +1,8 @@
 # 2026-05-11 Two-Round Real Training Report
 
 Generated at: 2026-05-11T07:32:30.583811+00:00
-JSON: `dev_logs\2026-05-11_two_round_real_training.json`
-Excel: `dev_logs\2026-05-11_two_round_real_training.xlsx`
+JSON: `dev_logs/training/2026-05-11_two_round_real_training.json`
+Excel: `dev_logs/training/2026-05-11_two_round_real_training.xlsx`
 
 ## Summary
 

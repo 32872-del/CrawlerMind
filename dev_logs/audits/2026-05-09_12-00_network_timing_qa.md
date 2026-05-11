@@ -39,5 +39,5 @@ correct for HTML rendering.
 ## Deliverables
 
 - `docs/team/audits/2026-05-09_LLM-2026-002_NETWORK_TIMING_QA.md` — audit report
-- `dev_logs/2026-05-09_12-00_network_timing_qa.md` — this log
+- `dev_logs/audits/2026-05-09_12-00_network_timing_qa.md` — this log
 - `docs/memory/handoffs/2026-05-09_LLM-2026-002_network_timing_qa.md` — handoff

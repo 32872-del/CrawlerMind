@@ -1,8 +1,8 @@
 # 2026-05-09 Ecommerce Training Summary
 
 Generated at: 2026-05-09T18:11:28
-Excel: `dev_logs/2026-05-09_ecommerce_training_sample.xlsx`
-JSON: `dev_logs/2026-05-09_ecommerce_training_sample.json`
+Excel: `dev_logs/training/2026-05-09_ecommerce_training_sample.xlsx`
+JSON: `dev_logs/training/2026-05-09_ecommerce_training_sample.json`
 
 ## Site Results
 

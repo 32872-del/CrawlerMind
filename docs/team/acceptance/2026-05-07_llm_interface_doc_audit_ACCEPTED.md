@@ -16,7 +16,7 @@ Reviewed:
 
 ```text
 docs/team/audits/2026-05-07_LLM-2026-004_LLM_INTERFACE_DOC_AUDIT.md
-dev_logs/2026-05-07_14-36_llm_interface_doc_audit.md
+dev_logs/audits/2026-05-07_14-36_llm_interface_doc_audit.md
 docs/memory/handoffs/2026-05-07_LLM-2026-004_llm_interface_doc_audit.md
 ```
 

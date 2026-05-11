@@ -42,7 +42,7 @@ User then ran the real LLM-assisted Baidu hot-search smoke. Latest persisted
 artifact:
 
 ```text
-dev_logs/skeleton_run_result.json
+dev_logs/runtime/skeleton_run_result.json
 ```
 
 Observed:

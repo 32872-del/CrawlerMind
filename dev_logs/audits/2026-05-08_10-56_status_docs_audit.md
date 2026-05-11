@@ -40,7 +40,7 @@ docs/team/acceptance/2026-05-08_real_llm_baidu_hot_smoke_ACCEPTED.md
 docs/memory/handoffs/2026-05-07_LLM-2026-000_supervisor_handoff.md
 ```
 
-Also checked that `dev_logs/skeleton_run_result.json` is not tracked and
+Also checked that `dev_logs/runtime/skeleton_run_result.json` is not tracked and
 searched docs/dev_logs for obvious secret-like terms.
 
 No tests were run because this was a docs-only audit.

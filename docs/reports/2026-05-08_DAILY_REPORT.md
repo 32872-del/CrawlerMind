@@ -40,7 +40,7 @@ training rounds that broadened API, GraphQL, SSR, and ranking-page coverage.
 Latest persisted result:
 
 ```text
-dev_logs/skeleton_run_result.json
+dev_logs/runtime/skeleton_run_result.json
 ```
 
 Result:

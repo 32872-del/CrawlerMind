@@ -16,7 +16,7 @@ Reviewed:
 
 ```text
 docs/team/audits/2026-05-06_LLM-2026-004_PROJECT_STATE_AUDIT.md
-dev_logs/2026-05-06_18-25_project_state_audit.md
+dev_logs/audits/2026-05-06_18-25_project_state_audit.md
 ```
 
 The worker stayed within the assigned docs-only scope.

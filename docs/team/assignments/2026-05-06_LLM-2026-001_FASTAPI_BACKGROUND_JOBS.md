@@ -138,7 +138,7 @@ all tests pass.
 3. Developer log:
 
 ```text
-dev_logs/2026-05-06_HH-MM_fastapi_background_jobs.md
+dev_logs/development/2026-05-06_HH-MM_fastapi_background_jobs.md
 ```
 
 4. Updates to:

@@ -58,7 +58,7 @@ If the `docs/team/audits/` directory does not exist, create it.
 You may also write one developer log:
 
 ```text
-dev_logs/2026-05-06_HH-MM_project_state_audit.md
+dev_logs/audits/2026-05-06_HH-MM_project_state_audit.md
 ```
 
 ## Avoid Files

@@ -1,4 +1,4 @@
-﻿# Acceptance: Docs State Audit After API Replay
+# Acceptance: Docs State Audit After API Replay
 
 Employee ID: `LLM-2026-004`
 
@@ -13,7 +13,7 @@ Date: 2026-05-09
 - Added read-only docs/workflow audit:
   `docs/team/audits/2026-05-09_LLM-2026-004_DOCS_STATE_AUDIT_AFTER_API_REPLAY.md`
 - Added dev log:
-  `dev_logs/2026-05-09_docs_state_audit_after_api_replay.md`
+  `dev_logs/audits/2026-05-09_docs_state_audit_after_api_replay.md`
 
 ## Supervisor Review
 

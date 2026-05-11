@@ -14,8 +14,8 @@ future employees can use for training and regression testing.
 
 - `docs/team/training/2026-05-08_REAL_SITE_TRAINING_LADDER.md` — 4-tier ladder
 - `docs/process/ECOMMERCE_CRAWL_WORKFLOW.md` — 4 task types, quality checklist
-- `dev_logs/2026-05-09_ecommerce_training_sample.json` — 5 real sites, 19 records
-- `dev_logs/2026-05-09_ecommerce_training_summary.md` — site result summary
+- `dev_logs/training/2026-05-09_ecommerce_training_sample.json` — 5 real sites, 19 records
+- `dev_logs/training/2026-05-09_ecommerce_training_summary.md` — site result summary
 
 ## Scenario Inventory
 

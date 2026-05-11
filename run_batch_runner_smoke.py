@@ -24,7 +24,7 @@ from autonomous_crawler.storage.frontier import URLFrontier
 from autonomous_crawler.storage.product_store import ProductStore
 
 
-OUTPUT_DIR = Path("dev_logs")
+OUTPUT_DIR = Path("dev_logs") / "smoke"
 SUMMARY_PATH = OUTPUT_DIR / "2026-05-11_batch_runner_smoke.json"
 
 

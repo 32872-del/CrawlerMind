@@ -5,7 +5,7 @@
 Supervisor reviewed the latest persisted run artifact:
 
 ```text
-dev_logs/skeleton_run_result.json
+dev_logs/runtime/skeleton_run_result.json
 ```
 
 The run used:

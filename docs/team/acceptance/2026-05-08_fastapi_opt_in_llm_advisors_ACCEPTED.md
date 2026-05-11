@@ -17,7 +17,7 @@ Reviewed:
 ```text
 autonomous_crawler/api/app.py
 autonomous_crawler/tests/test_api_mvp.py
-dev_logs/2026-05-08_14-00_fastapi_llm_advisors.md
+dev_logs/development/2026-05-08_14-00_fastapi_llm_advisors.md
 docs/memory/handoffs/2026-05-08_LLM-2026-001_fastapi_llm_advisors.md
 ```
 

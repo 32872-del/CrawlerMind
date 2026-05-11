@@ -13,7 +13,7 @@ Date: 2026-05-09
 - Added timing audit:
   `docs/team/audits/2026-05-09_LLM-2026-002_NETWORK_TIMING_QA.md`
 - Added dev log:
-  `dev_logs/2026-05-09_12-00_network_timing_qa.md`
+  `dev_logs/audits/2026-05-09_12-00_network_timing_qa.md`
 - Added handoff:
   `docs/memory/handoffs/2026-05-09_LLM-2026-002_network_timing_qa.md`
 

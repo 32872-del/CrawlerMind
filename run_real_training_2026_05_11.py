@@ -28,7 +28,7 @@ from bs4 import BeautifulSoup, MarkupResemblesLocatorWarning, XMLParsedAsHTMLWar
 from autonomous_crawler.tools.product_quality import parse_price, validate_product_record
 
 
-OUTPUT_DIR = Path("dev_logs")
+OUTPUT_DIR = Path("dev_logs") / "training"
 JSON_PATH = OUTPUT_DIR / "2026-05-11_two_round_real_training.json"
 XLSX_PATH = OUTPUT_DIR / "2026-05-11_two_round_real_training.xlsx"
 REPORT_PATH = OUTPUT_DIR / "2026-05-11_two_round_real_training_report.md"

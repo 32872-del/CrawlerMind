@@ -18,7 +18,8 @@ docs/memory/EMPLOYEE_MEMORY_MODEL.md
 latest docs/reports/*_DAILY_REPORT.md
 current assignment, if any
 relevant docs/team/acceptance/*
-relevant dev_logs/*
+relevant dev_logs/development/*, dev_logs/audits/*, dev_logs/training/*,
+dev_logs/smoke/*, or dev_logs/stress/*
 relevant docs/decisions/*
 latest docs/memory/handoffs/*
 ```
@@ -63,7 +64,7 @@ I understand I am taking over persisted state, not role-playing: yes/no
 Create or update:
 
 ```text
-dev_logs/YYYY-MM-DD_HH-MM_topic.md
+dev_logs/development/YYYY-MM-DD_HH-MM_topic.md
 docs/memory/handoffs/YYYY-MM-DD_<employee>_<topic>.md
 ```
 

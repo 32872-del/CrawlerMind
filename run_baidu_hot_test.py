@@ -14,7 +14,7 @@ from autonomous_crawler.workflows.crawl_graph import compile_crawl_graph
 
 TARGET_URL = "https://top.baidu.com/board?tab=realtime"
 USER_GOAL = "采集百度热搜榜前30条"
-OUTPUT_PATH = Path("dev_logs") / "baidu_hot_smoke_result.json"
+OUTPUT_PATH = Path("dev_logs") / "smoke" / "baidu_hot_smoke_result.json"
 
 
 def build_initial_state() -> dict:

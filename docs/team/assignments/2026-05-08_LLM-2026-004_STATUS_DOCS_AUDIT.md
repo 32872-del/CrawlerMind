@@ -40,7 +40,7 @@ You may create:
 
 ```text
 docs/team/audits/2026-05-08_LLM-2026-004_STATUS_DOCS_AUDIT.md
-dev_logs/2026-05-08_HH-MM_status_docs_audit.md
+dev_logs/audits/2026-05-08_HH-MM_status_docs_audit.md
 docs/memory/handoffs/2026-05-08_LLM-2026-004_status_docs_audit.md
 ```
 

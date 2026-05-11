@@ -140,9 +140,9 @@ Executor replayed public JSON POST search API.
 Output:
 
 ```text
-dev_logs/2026-05-09_ecommerce_training_sample.xlsx
-dev_logs/2026-05-09_ecommerce_training_sample.json
-dev_logs/2026-05-09_ecommerce_training_summary.md
+dev_logs/training/2026-05-09_ecommerce_training_sample.xlsx
+dev_logs/training/2026-05-09_ecommerce_training_sample.json
+dev_logs/training/2026-05-09_ecommerce_training_summary.md
 ```
 
 Sites:
@@ -164,9 +164,9 @@ Output:
 
 ```text
 run_stress_test_2026_05_09.py
-dev_logs/2026-05-09_local_stress_test_summary.json
-dev_logs/2026-05-09_local_stress_test_report.md
-dev_logs/2026-05-09_stress_export_30000.xlsx
+dev_logs/stress/2026-05-09_local_stress_test_summary.json
+dev_logs/stress/2026-05-09_local_stress_test_report.md
+dev_logs/stress/2026-05-09_stress_export_30000.xlsx
 ```
 
 Result:

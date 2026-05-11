@@ -92,7 +92,7 @@ Expected behavior:
 The smoke writes a compact JSON summary to:
 
 ```text
-dev_logs/2026-05-11_batch_runner_smoke.json
+dev_logs/smoke/2026-05-11_batch_runner_smoke.json
 ```
 
 Do not commit large runtime databases or large exports.

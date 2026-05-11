@@ -14,7 +14,7 @@ Created:
 
 ```text
 docs/team/audits/2026-05-08_LLM-2026-004_STATUS_DOCS_AUDIT.md
-dev_logs/2026-05-08_10-56_status_docs_audit.md
+dev_logs/audits/2026-05-08_10-56_status_docs_audit.md
 ```
 
 This handoff is the third deliverable requested by the assignment.
@@ -37,7 +37,7 @@ The highest-value stale areas are:
 - `docs/memory/handoffs/2026-05-07_LLM-2026-000_supervisor_handoff.md` still
   lists an 84-test verification baseline instead of the current 175-test
   baseline.
-- `dev_logs/skeleton_run_result.json` is correctly gitignored, so acceptance
+- `dev_logs/runtime/skeleton_run_result.json` is correctly gitignored, so acceptance
   docs should be treated as portable smoke evidence rather than expecting that
   local runtime artifact to exist on fresh clones.
 
@@ -84,7 +84,7 @@ status conflict severe enough to block that task.
 
 ```text
 docs/team/audits/2026-05-08_LLM-2026-004_STATUS_DOCS_AUDIT.md
-dev_logs/2026-05-08_10-56_status_docs_audit.md
+dev_logs/audits/2026-05-08_10-56_status_docs_audit.md
 docs/team/assignments/2026-05-08_LLM-2026-004_STATUS_DOCS_AUDIT.md
 PROJECT_STATUS.md
 docs/team/TEAM_BOARD.md

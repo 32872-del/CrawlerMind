@@ -121,7 +121,7 @@ docs/
   runbooks/      Setup and operation guides
   team/          Team board, employees, assignments, acceptance records
 
-dev_logs/        Developer logs and selected training summaries
+dev_logs/        Developer evidence, split into development/audits/training/smoke/stress
 scripts/         Cross-platform helper scripts
 ```
 
@@ -252,9 +252,9 @@ python run_ecommerce_training_2026_05_09.py
 This writes:
 
 ```text
-dev_logs/2026-05-09_ecommerce_training_sample.xlsx
-dev_logs/2026-05-09_ecommerce_training_sample.json
-dev_logs/2026-05-09_ecommerce_training_summary.md
+dev_logs/training/2026-05-09_ecommerce_training_sample.xlsx
+dev_logs/training/2026-05-09_ecommerce_training_sample.json
+dev_logs/training/2026-05-09_ecommerce_training_summary.md
 ```
 
 Local stress test:

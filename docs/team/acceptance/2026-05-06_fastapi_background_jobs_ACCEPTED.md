@@ -17,7 +17,7 @@ Reviewed:
 ```text
 autonomous_crawler/api/app.py
 autonomous_crawler/tests/test_api_mvp.py
-dev_logs/2026-05-06_19-00_fastapi_background_jobs.md
+dev_logs/development/2026-05-06_19-00_fastapi_background_jobs.md
 PROJECT_STATUS.md
 docs/reports/2026-05-06_DAILY_REPORT.md
 ```

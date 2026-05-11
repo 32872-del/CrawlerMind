@@ -247,7 +247,7 @@ replay workflow on HN Algolia.
   (JSONPlaceholder, DummyJSON, GitHub CPython issues, HN Algolia, and Quotes
   to Scrape). Round 2 collected 200 product detail records each from Tatuum,
   The Sting, and BalticBHP through public sitemap/detail pages. Total: 850
-  rows exported to JSON and Excel under `dev_logs/`.
+  rows exported to JSON and Excel under `dev_logs/training/`.
 
 ## Current Test Status
 
@@ -363,7 +363,7 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
       JSONPlaceholder direct JSON, Reddit `.json`, and Countries GraphQL all
       completed with 10 validated items each.
       `run_training_round1.py` writes
-      `dev_logs/2026-05-08_real_site_training_round1.json`.
+      `dev_logs/training/2026-05-08_real_site_training_round1.json`.
     - Browser network observation skeleton done 2026-05-09 with mocked
       Playwright tests and explicit Recon opt-in.
     - Real-site training round 4 done 2026-05-09:
@@ -385,7 +385,7 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
     Done 2026-05-09. Workflow and QA docs accepted; scope stays public or
     authorized pages only, with challenge/login handling as diagnosis-only.
 21. ~~Run first ecommerce real-site training batch.~~ Done 2026-05-09.
-    Five sites exported to `dev_logs/2026-05-09_ecommerce_training_sample.xlsx`
+    Five sites exported to `dev_logs/training/2026-05-09_ecommerce_training_sample.xlsx`
     with separate sheets: Shoesme diagnosis-only, Donsje Shopify JSON,
     Clausporto Magento DOM/detail, uvex Magento DOM/detail plus `jsonConfig`
     sizes, and Bosch corporate product category partial records.
@@ -411,7 +411,7 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
     25 synthetic records processed as 10 + 15 across two passes.
 26. ~~Run two-round real-site training batch.~~ Done 2026-05-11.
     Round 1: 5 sources x 50 records. Round 2: 3 ecommerce sites x 200
-    products. Exported `dev_logs/2026-05-11_two_round_real_training.json` and
+    products. Exported `dev_logs/training/2026-05-11_two_round_real_training.json` and
     `.xlsx`. Findings: public sitemap/detail flow can scale to 200 records per
   site, but real runs need incremental checkpointing, fetch fallback for empty
   HTTP 200 responses, and profile-based field extraction. Known gap: Tatuum

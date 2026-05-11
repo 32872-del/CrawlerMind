@@ -101,7 +101,7 @@ python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py ru
 Write:
 
 ```text
-dev_logs/YYYY-MM-DD_HH-MM_topic.md
+dev_logs/development/YYYY-MM-DD_HH-MM_topic.md
 ```
 
 Use:

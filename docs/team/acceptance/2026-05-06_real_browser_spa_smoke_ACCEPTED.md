@@ -16,7 +16,7 @@ Reviewed:
 
 ```text
 autonomous_crawler/tests/test_real_browser_smoke.py
-dev_logs/2026-05-06_20-30_real_browser_spa_smoke.md
+dev_logs/smoke/2026-05-06_20-30_real_browser_spa_smoke.md
 PROJECT_STATUS.md
 docs/reports/2026-05-06_DAILY_REPORT.md
 ```

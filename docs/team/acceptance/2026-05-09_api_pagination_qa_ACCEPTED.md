@@ -1,4 +1,4 @@
-﻿# Acceptance: API Pagination QA
+# Acceptance: API Pagination QA
 
 Employee ID: `LLM-2026-002`
 
@@ -13,7 +13,7 @@ Date: 2026-05-09
 - Added read-only QA audit:
   `docs/team/audits/2026-05-09_LLM-2026-002_API_PAGINATION_QA.md`
 - Added dev log:
-  `dev_logs/2026-05-09_api_pagination_qa.md`
+  `dev_logs/audits/2026-05-09_api_pagination_qa.md`
 
 ## Supervisor Review
 

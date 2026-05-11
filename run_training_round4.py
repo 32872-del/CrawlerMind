@@ -79,7 +79,7 @@ def run_training_round() -> dict[str, Any]:
     return run_training_scenarios(
         title="Crawler-Mind Real-Site Training Round 4",
         scenarios=TRAINING_SCENARIOS,
-        output_path=Path("dev_logs") / "2026-05-09_real_site_training_round4.json",
+        output_path=Path("dev_logs") / "training" / "2026-05-09_real_site_training_round4.json",
         selection_policy="public JSON APIs and one browser-network observation probe",
     )
 

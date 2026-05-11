@@ -49,4 +49,4 @@ aware sole_id dedup, goods SQLite schema).
 ## Deliverables
 
 - `docs/team/audits/2026-05-09_LLM-2026-002_ECOMMERCE_PRODUCT_QUALITY_QA.md`
-- `dev_logs/2026-05-09_ecommerce_product_quality_qa.md`
+- `dev_logs/audits/2026-05-09_ecommerce_product_quality_qa.md`

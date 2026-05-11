@@ -19,7 +19,7 @@ README.md
 PROJECT_STATUS.md
 docs/plans/2026-05-05_SHORT_TERM_PLAN.md
 docs/reports/2026-05-06_DAILY_REPORT.md
-dev_logs/2026-05-06_10-20_result_cli.md
+dev_logs/development/2026-05-06_10-20_result_cli.md
 ```
 
 ## Verification

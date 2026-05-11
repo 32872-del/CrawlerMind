@@ -14,7 +14,7 @@ Created:
 
 ```text
 docs/team/audits/2026-05-07_LLM-2026-004_ADR_RUNBOOK_AUDIT.md
-dev_logs/2026-05-07_12-02_adr_runbook_audit.md
+dev_logs/audits/2026-05-07_12-02_adr_runbook_audit.md
 ```
 
 This handoff is the third deliverable requested by the assignment.
@@ -60,7 +60,7 @@ handoff that says no remote Git repository exists.
 
 ```text
 docs/team/audits/2026-05-07_LLM-2026-004_ADR_RUNBOOK_AUDIT.md
-dev_logs/2026-05-07_12-02_adr_runbook_audit.md
+dev_logs/audits/2026-05-07_12-02_adr_runbook_audit.md
 docs/team/assignments/2026-05-07_LLM-2026-004_ADR_RUNBOOK_AUDIT.md
 docs/team/employees/LLM-2026-004_WORKER_DELTA.md
 ```

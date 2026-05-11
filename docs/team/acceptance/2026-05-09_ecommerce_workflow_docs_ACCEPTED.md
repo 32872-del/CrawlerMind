@@ -11,7 +11,7 @@ Date: 2026-05-09
 ## Accepted Work
 
 - Created `docs/process/ECOMMERCE_CRAWL_WORKFLOW.md`.
-- Created `dev_logs/2026-05-09_ecommerce_workflow_docs.md`.
+- Created `dev_logs/development/2026-05-09_ecommerce_workflow_docs.md`.
 - Documented the safe ecommerce crawl boundary:
   - public/authorized pages only
   - no login bypass

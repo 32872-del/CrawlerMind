@@ -126,7 +126,8 @@ def run_crawl(
                 f"fallback={decision.get('fallback_used', False)}"
             )
 
-    output_path = "dev_logs/skeleton_run_result.json"
+    output_path = "dev_logs/runtime/skeleton_run_result.json"
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         serializable = json.loads(json.dumps(final_state, default=str))
         json.dump(serializable, f, indent=2, ensure_ascii=False)

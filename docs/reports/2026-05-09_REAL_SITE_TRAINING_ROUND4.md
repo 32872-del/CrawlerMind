@@ -27,7 +27,7 @@ observing its public Algolia XHR and replaying the JSON POST request.
 Raw training output:
 
 ```text
-dev_logs/2026-05-09_real_site_training_round4.json
+dev_logs/training/2026-05-09_real_site_training_round4.json
 ```
 
 ## Code Improvements From Training

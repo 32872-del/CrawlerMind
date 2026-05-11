@@ -19,7 +19,7 @@ autonomous_crawler/tests/test_browser_fallback.py
 PROJECT_STATUS.md
 docs/reports/2026-05-06_DAILY_REPORT.md
 docs/plans/2026-05-05_SHORT_TERM_PLAN.md
-dev_logs/2026-05-06_17-30_browser_fallback_mvp.md
+dev_logs/development/2026-05-06_17-30_browser_fallback_mvp.md
 ```
 
 Supervisor also added:

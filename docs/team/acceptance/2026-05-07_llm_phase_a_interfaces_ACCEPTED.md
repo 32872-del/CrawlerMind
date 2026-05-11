@@ -23,7 +23,7 @@ autonomous_crawler/agents/strategy.py
 autonomous_crawler/workflows/crawl_graph.py
 autonomous_crawler/agents/__init__.py
 autonomous_crawler/tests/test_llm_advisors.py
-dev_logs/2026-05-07_14-00_llm_phase_a_interfaces.md
+dev_logs/development/2026-05-07_14-00_llm_phase_a_interfaces.md
 docs/memory/handoffs/2026-05-07_LLM-2026-001_llm_phase_a_interfaces.md
 ```
 

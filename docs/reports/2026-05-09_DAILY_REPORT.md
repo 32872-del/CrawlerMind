@@ -304,7 +304,7 @@ OK
 1. Add ecommerce product quality foundation based on the `spider_text`
    experience library: product schema, price/body/image/variant normalization,
    and product-specific validation.
-2. Convert `dev_logs/2026-05-09_ecommerce_training_sample.json` into fixtures
+2. Convert `dev_logs/training/2026-05-09_ecommerce_training_sample.json` into fixtures
    covering Shopify JSON, Magento DOM/detail, Magento `jsonConfig` variants,
    Cloudflare diagnosis-only, and corporate product pages without prices.
 3. Harden observed API pagination: analytics denylist, cross-page dedupe,
@@ -323,9 +323,9 @@ OK
 2026-05-09 supervisor-run ecommerce batch:
 
 ```text
-Output Excel: dev_logs/2026-05-09_ecommerce_training_sample.xlsx
-Output JSON:  dev_logs/2026-05-09_ecommerce_training_sample.json
-Summary:      dev_logs/2026-05-09_ecommerce_training_summary.md
+Output Excel: dev_logs/training/2026-05-09_ecommerce_training_sample.xlsx
+Output JSON:  dev_logs/training/2026-05-09_ecommerce_training_sample.json
+Summary:      dev_logs/training/2026-05-09_ecommerce_training_summary.md
 ```
 
 Site outcomes:
@@ -346,9 +346,9 @@ Site outcomes:
 
 ```text
 Script:  run_stress_test_2026_05_09.py
-Summary: dev_logs/2026-05-09_local_stress_test_summary.json
-Report:  dev_logs/2026-05-09_local_stress_test_report.md
-Excel:   dev_logs/2026-05-09_stress_export_30000.xlsx
+Summary: dev_logs/stress/2026-05-09_local_stress_test_summary.json
+Report:  dev_logs/stress/2026-05-09_local_stress_test_report.md
+Excel:   dev_logs/stress/2026-05-09_stress_export_30000.xlsx
 ```
 
 Result:

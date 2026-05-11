@@ -52,7 +52,7 @@ You may edit:
 autonomous_crawler/api/app.py
 autonomous_crawler/tests/test_api_mvp.py
 autonomous_crawler/tests/test_openai_compatible_llm.py
-dev_logs/2026-05-08_HH-MM_fastapi_llm_advisors.md
+dev_logs/development/2026-05-08_HH-MM_fastapi_llm_advisors.md
 docs/memory/handoffs/2026-05-08_LLM-2026-001_fastapi_llm_advisors.md
 ```
 

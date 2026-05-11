@@ -14,7 +14,7 @@ Created:
 
 ```text
 docs/team/audits/2026-05-07_LLM-2026-004_LLM_PHASE_A_DOCS_AUDIT.md
-dev_logs/2026-05-07_15-25_llm_phase_a_docs_audit.md
+dev_logs/audits/2026-05-07_15-25_llm_phase_a_docs_audit.md
 ```
 
 This handoff is the third deliverable requested by the assignment.
@@ -62,7 +62,7 @@ acceptance guardrails to Worker Alpha's Phase A review:
 
 ```text
 docs/team/audits/2026-05-07_LLM-2026-004_LLM_PHASE_A_DOCS_AUDIT.md
-dev_logs/2026-05-07_15-25_llm_phase_a_docs_audit.md
+dev_logs/audits/2026-05-07_15-25_llm_phase_a_docs_audit.md
 docs/team/assignments/2026-05-07_LLM-2026-004_LLM_PHASE_A_DOCS_AUDIT.md
 docs/team/assignments/2026-05-07_LLM-2026-001_LLM_PHASE_A_INTERFACES.md
 docs/plans/2026-05-07_LLM_PLANNER_STRATEGY_INTERFACE_DESIGN.md

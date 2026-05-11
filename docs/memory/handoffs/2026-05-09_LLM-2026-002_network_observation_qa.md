@@ -25,7 +25,7 @@ QA review and test expansion for `browser_network_observer.py`:
 
 - `autonomous_crawler/tests/test_browser_network_observer.py` — 44 new tests added
 - `docs/team/audits/2026-05-09_LLM-2026-002_NETWORK_OBSERVATION_QA.md` — new audit report
-- `dev_logs/2026-05-09_11-00_browser_network_observation_qa.md` — new dev log
+- `dev_logs/audits/2026-05-09_11-00_browser_network_observation_qa.md` — new dev log
 
 ## Test Status
 

@@ -75,7 +75,7 @@ python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py ru
 3. Developer log:
 
 ```text
-dev_logs/2026-05-06_HH-MM_browser_fallback_mvp.md
+dev_logs/development/2026-05-06_HH-MM_browser_fallback_mvp.md
 ```
 
 4. Updates to:

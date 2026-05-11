@@ -63,9 +63,12 @@ Root directory:
 
 `dev_logs/`:
 
-- Developer logs only.
-- One file per development event.
-- Use timestamped filenames.
+- Developer evidence only.
+- Put implementation notes in `development/`.
+- Put QA/audit notes in `audits/`.
+- Put training exports in `training/`, smoke outputs in `smoke/`, and stress
+  outputs in `stress/`.
+- Put scratch command state in `runtime/`; it is not tracked.
 - Do not put broad blueprint documents or engineering reviews here.
 
 ## Naming Rules
@@ -73,7 +76,7 @@ Root directory:
 Developer logs:
 
 ```text
-dev_logs/YYYY-MM-DD_HH-MM_short_topic.md
+dev_logs/development/YYYY-MM-DD_HH-MM_short_topic.md
 ```
 
 Daily reports:

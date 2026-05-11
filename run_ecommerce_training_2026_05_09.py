@@ -19,7 +19,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 
 
-OUTPUT_DIR = Path("dev_logs")
+OUTPUT_DIR = Path("dev_logs") / "training"
 EXCEL_PATH = OUTPUT_DIR / "2026-05-09_ecommerce_training_sample.xlsx"
 JSON_PATH = OUTPUT_DIR / "2026-05-09_ecommerce_training_sample.json"
 REPORT_PATH = OUTPUT_DIR / "2026-05-09_ecommerce_training_summary.md"

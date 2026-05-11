@@ -119,4 +119,4 @@ Output:
 - `autonomous_crawler/prompts/__init__.py` (new)
 - `autonomous_crawler/tests/__init__.py` (new)
 - `run_skeleton.py` (new)
-- `dev_logs/skeleton_run_result.json` (generated)
+- `dev_logs/runtime/skeleton_run_result.json` (generated)

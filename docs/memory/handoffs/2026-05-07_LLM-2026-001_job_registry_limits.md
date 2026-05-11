@@ -15,7 +15,7 @@ now rejects with HTTP 429 when active jobs reach the configured limit
 - `autonomous_crawler/api/app.py` - added `_max_active_jobs()`,
   `_count_active_jobs()`, and 429 check in POST /crawl
 - `autonomous_crawler/tests/test_api_mvp.py` - added 9 concurrency limit tests
-- `dev_logs/2026-05-07_10-30_job_registry_limits.md`
+- `dev_logs/development/2026-05-07_10-30_job_registry_limits.md`
 - `docs/memory/handoffs/2026-05-07_LLM-2026-001_job_registry_limits.md`
 
 ## Test Status

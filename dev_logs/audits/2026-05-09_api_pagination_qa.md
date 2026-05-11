@@ -38,4 +38,4 @@ pagination metadata (`type`, `param`) that the executor never reads.
 ## Deliverables
 
 - `docs/team/audits/2026-05-09_LLM-2026-002_API_PAGINATION_QA.md`
-- `dev_logs/2026-05-09_api_pagination_qa.md`
+- `dev_logs/audits/2026-05-09_api_pagination_qa.md`

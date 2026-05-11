@@ -16,7 +16,7 @@ Reviewed:
 
 ```text
 docs/team/audits/2026-05-07_LLM-2026-004_ADR_RUNBOOK_AUDIT.md
-dev_logs/2026-05-07_12-02_adr_runbook_audit.md
+dev_logs/audits/2026-05-07_12-02_adr_runbook_audit.md
 docs/memory/handoffs/2026-05-07_LLM-2026-004_adr_runbook_audit.md
 ```
 

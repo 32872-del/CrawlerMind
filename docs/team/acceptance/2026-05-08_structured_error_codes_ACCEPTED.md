@@ -25,7 +25,7 @@ autonomous_crawler/agents/strategy.py
 autonomous_crawler/api/app.py
 autonomous_crawler/tests/test_error_codes.py
 autonomous_crawler/tests/test_api_mvp.py
-dev_logs/2026-05-08_16-00_structured_error_codes.md
+dev_logs/development/2026-05-08_16-00_structured_error_codes.md
 docs/memory/handoffs/2026-05-08_LLM-2026-001_structured_error_codes.md
 ```
 

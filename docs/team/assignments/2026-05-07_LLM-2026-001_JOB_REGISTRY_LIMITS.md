@@ -51,7 +51,7 @@ Use existing in-memory registry and lock. Avoid broader API redesign.
 ```text
 autonomous_crawler/api/app.py
 autonomous_crawler/tests/test_api_mvp.py
-dev_logs/2026-05-07_HH-MM_job_registry_limits.md
+dev_logs/development/2026-05-07_HH-MM_job_registry_limits.md
 docs/memory/handoffs/2026-05-07_LLM-2026-001_job_registry_limits.md
 ```
 

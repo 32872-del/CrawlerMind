@@ -14,7 +14,7 @@ Created:
 
 ```text
 docs/team/audits/2026-05-09_LLM-2026-004_OPEN_SOURCE_DOCS_AUDIT.md
-dev_logs/2026-05-09_11-45_open_source_docs_audit.md
+dev_logs/audits/2026-05-09_11-45_open_source_docs_audit.md
 ```
 
 ## Key Findings

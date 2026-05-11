@@ -34,7 +34,7 @@ manual authorization workflows.
 Full machine-readable summary:
 
 ```text
-dev_logs/2026-05-08_real_site_training_round1.json
+dev_logs/training/2026-05-08_real_site_training_round1.json
 ```
 
 ## Code Changes From Training

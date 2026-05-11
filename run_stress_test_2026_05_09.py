@@ -22,7 +22,7 @@ from autonomous_crawler.storage.frontier import URLFrontier
 from autonomous_crawler.storage.result_store import CrawlResultStore
 
 
-OUTPUT_DIR = Path("dev_logs")
+OUTPUT_DIR = Path("dev_logs") / "stress"
 SUMMARY_PATH = OUTPUT_DIR / "2026-05-09_local_stress_test_summary.json"
 REPORT_PATH = OUTPUT_DIR / "2026-05-09_local_stress_test_report.md"
 
@@ -278,7 +278,11 @@ def main() -> None:
     parser.add_argument("--items", type=int, default=30000, help="Synthetic product count.")
     parser.add_argument("--batch-size", type=int, default=500, help="Frontier claim batch size.")
     parser.add_argument("--keep-excel", action="store_true", help="Keep generated Excel file.")
-    parser.add_argument("--keep-db", action="store_true", help="Keep temporary SQLite DBs under dev_logs.")
+    parser.add_argument(
+        "--keep-db",
+        action="store_true",
+        help="Keep temporary SQLite DBs under dev_logs/stress.",
+    )
     args = parser.parse_args()
     summary = run(
         items=max(1, args.items),

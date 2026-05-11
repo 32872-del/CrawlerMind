@@ -167,7 +167,7 @@ I understand I am taking over persisted state, not role-playing: yes/no
 At the end of a task, the worker should update or produce:
 
 ```text
-dev_logs/YYYY-MM-DD_HH-MM_topic.md
+dev_logs/development/YYYY-MM-DD_HH-MM_topic.md
 docs/team/acceptance/YYYY-MM-DD_topic_ACCEPTED.md  # supervisor only
 docs/team/employees/<employee>.md                  # supervisor or approved worker
 docs/memory/handoffs/YYYY-MM-DD_<employee>_<topic>.md
