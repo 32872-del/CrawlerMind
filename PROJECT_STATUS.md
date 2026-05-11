@@ -229,12 +229,20 @@ replay workflow on HN Algolia.
   to the pagination loop when `strategy.pagination.type` is `page`, `offset`,
   or `cursor`. 26 new pagination tests. 385 total tests pass after the
   ecommerce and stress-test documentation updates.
+- Ecommerce product storage and quality foundation added on 2026-05-11:
+  `ProductRecord`, category-aware dedupe, SQLite `ProductStore`, batch upsert,
+  product quality validation, and 30,000-row store tests. Site-specific
+  collection rules remain outside the core and should live in profiles,
+  fixtures, or training artifacts.
+- Long-running ecommerce runbook added on 2026-05-11. Large ecommerce crawls
+  must checkpoint frontier progress and product records batch-by-batch instead
+  of relying on a final in-memory workflow state.
 
 ## Current Test Status
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 385 tests (skipped=4)
+Ran 437 tests (skipped=4)
 OK
 ```
 
@@ -381,3 +389,7 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
     (`Advance API pagination and ecommerce training docs`), which includes
     001/002/004 deliveries, acceptance records, ecommerce training outputs,
     stress-test outputs, and updated project documentation.
+24. ~~Add generic ecommerce product storage and quality foundation.~~ Done
+    2026-05-11. `ProductRecord`, `ProductStore`, product quality validation,
+    30,000-row storage tests, long-running ecommerce runbook, and supervisor
+    acceptance records added.

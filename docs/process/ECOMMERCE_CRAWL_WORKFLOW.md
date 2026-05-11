@@ -1,488 +1,163 @@
-# 电商采集工作流
+# Ecommerce Crawl Workflow
 
-## 目的
+This document defines the generic ecommerce crawl workflow for Crawler-Mind.
+It is a process guide, not a place for site-specific rules.
 
-这份文档把旧电商采集工作台里的经验整理成 Crawler-Mind 可执行的工作流。
+## Goal
 
-目标不是复制旧项目，也不是把站点脚本、代理、二进制或登录逻辑搬进 CLM。
-目标是沉淀一套安全、可测试、可复用的电商采集方法，让后续员工和开源用户
-知道接到一个电商站点任务时应该怎么拆解、怎么验收、哪些边界不能越过。
+Crawler-Mind should extract structured product data from public or authorized
+pages while keeping site-specific knowledge outside the core engine.
 
-## 1. 电商采集目标和边界
+Core code may provide:
 
-电商采集的目标是从授权或公开可访问页面中提取结构化商品数据，包括：
+- generic product records
+- price, image, body, and variant quality checks
+- category-aware deduplication
+- frontier/checkpoint storage
+- runtime profiles and strategy hints
 
-- 分类信息
-- 商品列表
-- 商品详情
-- 价格
-- 图片
-- 描述正文
-- 颜色、尺码、规格等变体信息
-- 商品在不同分类下的归属关系
+Core code must not hard-code:
 
-当前 CLM 的电商工作流应优先服务这些场景：
+- selectors for one named site
+- one-off API endpoints
+- Cloudflare or CAPTCHA bypass logic
+- real cookies, tokens, API keys, proxy accounts, or sessions
 
-- 静态商品列表页
-- 可公开访问的商品详情页
-- 公开 JSON / GraphQL 商品 API
-- 需要浏览器渲染但不需要绕过访问控制的页面
-- 小样本验证：1 个分类、1 页列表、1 到 5 个商品
+Site-specific selectors, pagination hints, API templates, and fallback notes
+belong in a runtime site profile, crawl profile, fixture, or training record.
 
-明确不把下面内容作为默认目标：
+## Standard Product Fields
 
-- 登录后可见的私有商品数据
-- 需要破解验证码、挑战页或设备指纹的站点
-- 需要提交 cookie、token、代理账号、浏览器指纹配置的采集流程
-- 大规模全站采集
-- 未经授权的价格监控或竞争情报抓取
+Minimum useful ecommerce output:
 
-## 2. 标准字段说明
-
-电商数据不应该只压缩成通用的 `title / price / image / link`。
-CLM 后续应保留一个电商专用的规范化记录层。
-
-建议标准字段：
-
-| 字段 | 说明 | 要求 |
+| Field | Meaning | Requirement |
 |---|---|---|
-| `url` | 商品详情页 URL | 必填 |
-| `handle` | 商品稳定标识，可由 URL、slug、标题生成 | 必填 |
-| `title` | 商品标题 | 必填 |
-| `subtitle` | 副标题或短卖点 | 可选 |
-| `price` | 标准价格，尽量规范成数值 | 必填，无法解析时保留原始值并标记 |
-| `body` | 商品详情正文，可渲染 HTML | 建议保留 |
-| `more_info` | 额外详情，如参数、材质、配送说明 | 可选 |
-| `categories_1` | 一级分类 | 分类任务中必填 |
-| `categories_2` | 二级分类 | 可选 |
-| `categories_3` | 三级分类 | 可选 |
-| `option1_name` | 规格名，例如 Color | 有变体时建议 |
-| `option1_value` | 规格值，例如 Red | 有变体时建议 |
-| `option2_name` | 规格名，例如 Size | 有变体时建议 |
-| `option2_value` | 规格值列表或当前值 | 有尺码时建议 |
-| `option3_name` | 第三规格名 | 可选 |
-| `option3_value` | 第三规格值 | 可选 |
-| `image_src` | 商品图片 URL 列表 | 必填，至少 1 张 |
-| `size_price` | 尺码到价格/库存/可用状态的映射 | 有尺码时建议 |
-| `sole_id` | 去重和导出的稳定主键 | 建议生成 |
+| `url` / `canonical_url` | product detail URL | required |
+| `title` | product title | required |
+| `highest_price` | normalized numeric highest visible price | recommended |
+| `currency` | visible or inferred currency | recommended |
+| `colors` | product colors when available | optional |
+| `sizes` | product sizes when available | optional |
+| `description` | product body or cleaned detail text | recommended |
+| `image_urls` | product image URL list | recommended |
+| `category` | category/list context | recommended |
+| `status` | `ok`, `partial`, `blocked`, or `failed` | required |
+| `mode` | crawl mode used, such as `http`, `browser`, `api_intercept` | recommended |
+| `notes` | diagnosis notes, especially for blocked/partial records | recommended |
+| `raw_json` | bounded raw evidence for replay/debugging | optional |
+| `dedupe_key` | stable category-aware key | required by storage |
 
-字段原则：
+The normalized schema can be extended later, but product storage and quality
+checks should remain site-agnostic.
 
-- 必填字段缺失时，不应默默通过验收。
-- 原始值和规范化值可以同时保留，避免过早丢信息。
-- 价格、图片、正文和变体是电商质量检查的重点。
-- 分类字段要随着任务一起传递，不能在 detail 阶段丢失。
+## Task Types
 
-## 3. 四类任务解释
+### Category
 
-电商采集应拆成四类任务，而不是一个脚本从头跑到尾。
+Discover category entry points from a homepage, sitemap, navigation tree, or
+known category URL.
 
-### category 任务
+Output category name, level, URL, and context payload. Do not run a large detail
+crawl from this step.
 
-目标：发现分类树或分类入口。
+### List
 
-输入：
+Extract product links or card-level records from one category/search/list page.
 
-- 首页
-- sitemap
-- 导航菜单
-- 已知分类 URL
+Output detail URLs, card title/price/image when available, pagination metadata,
+and category context. Prefer sending discovered detail URLs into the frontier
+quickly instead of crawling every category first.
 
-输出：
+### Detail
 
-- 分类名称
-- 分类层级
-- 分类 URL
-- 分类上下文 payload
+Extract one product page into a `ProductRecord`.
 
-注意：
+Check title, price, image, description, colors, sizes, variant hints, and
+category context. Detail pages are the main quality gate.
 
-- 分类任务只负责发现和确认分类，不负责大量详情采集。
-- 分类上下文必须传给后续 list/detail/variant 任务。
+### Variant
 
-### list 任务
+Extract color/size/stock/price combinations from page JSON, visible controls,
+or public variant APIs.
 
-目标：从分类页或搜索结果页发现商品详情链接。
+Keep missing/out-of-stock variants when they are visible; do not silently drop
+them.
 
-输入：
+## Category-Aware Dedupe
 
-- 分类 URL
-- 搜索结果 URL
-- 翻页 URL
-- API 列表接口
+Ecommerce dedupe must preserve category context. The same product URL may appear
+in several categories, and that relationship can be valuable.
 
-输出：
-
-- 商品详情 URL
-- 商品卡片字段，例如标题、价格、图片
-- 下一页或 cursor 信息
-- 分类上下文
-
-注意：
-
-- list 任务发现 detail 后，应优先插入 detail 任务。
-- 不建议先把所有 category/list 页跑完再处理 detail，否则数据库长期为空，
-  也更难早期发现字段质量问题。
-
-### detail 任务
-
-目标：提取单个商品的完整详情。
-
-输入：
-
-- 商品 URL
-- 分类上下文
-- 列表页已知字段
-
-输出：
-
-- 商品标准字段
-- 图片列表
-- 正文 HTML
-- 价格
-- 颜色、尺码、规格入口
-- variant 任务候选
-
-注意：
-
-- detail 是电商质量验收的主战场。
-- 如果 detail 页面只有默认规格，应仍然生成稳定商品记录。
-
-### variant 任务
-
-目标：提取颜色、尺码、规格组合和对应价格/库存/图片。
-
-输入：
-
-- 商品详情 URL
-- 页面内变体 JSON
-- 规格 API
-- 用户可见的颜色/尺码控件
-
-输出：
-
-- 变体组合
-- 每个组合的价格、库存、图片、可用状态
-- `size_price` 或更细的 variant records
-
-注意：
-
-- `option2_value` 应表达所有尺码，而不只是有库存尺码。
-- 缺货状态可以作为字段保存，不应直接丢弃。
-- 颜色、尺码、价格之间的关系要能复查。
-
-## 4. Category-Aware Dedupe 规则
-
-电商采集不能只按 URL 全局去重。
-
-同一个商品 URL 可能同时出现在多个分类下。例如：
-
-- New Arrivals
-- Sale
-- Shoes > Running
-- Women > Sneakers
-
-这些分类归属本身就是有价值的数据。
-
-推荐去重键：
+Default key:
 
 ```text
-categories_1 + categories_2 + categories_3 + url
+source_site + category + canonical_url
 ```
 
-如果没有分类上下文，可以退化为：
+Fallback key:
 
 ```text
-url
+source_site + category + source_url_or_title
 ```
 
-如果存在变体记录，可以扩展为：
+Future variant-aware key:
 
 ```text
-categories_1 + categories_2 + categories_3 + url + option1_value + option2_value + option3_value
+source_site + category + canonical_url + color + size
 ```
 
-规则：
-
-- URL 相同但分类不同：默认保留。
-- URL 相同、分类相同、变体相同：去重。
-- URL 相同、分类相同、变体不同：保留为变体或规格记录。
-- 生成 `sole_id` 时应包含足够上下文，避免跨分类误合并。
-
-后续 CLM 需要在 frontier 或 product task 层支持 `dedupe_key` / `scope_key`。
-
-## 5. 商品质量验收 checklist
-
-每个电商任务完成后，至少检查：
-
-- `title` 是否存在、非空、已清洗。
-- `price` 是否存在，能否解析为数值；无法解析时是否保留原始值。
-- `image_src` 是否至少有一张有效 URL。
-- `handle` 或 `sole_id` 是否稳定。
-- `url` 是否为商品详情页，而不是分类页或跳转页。
-- `body` 是否去除了脚本、样式和明显噪声，但仍可渲染。
-- 分类字段是否从 category/list 传到了 detail。
-- 同一 URL 在不同分类下是否按 category-aware dedupe 保留。
-- 颜色、尺码、规格是否规范化。
-- `option2_value` 是否包含全部尺码，而不是只包含有库存尺码。
-- 缺货、停售、价格缺失等异常是否被标记，而不是静默丢弃。
-- 样本结果能否导出为 JSON/CSV 并被人类复核。
-
-验收失败时，优先把失败样本转为 fixture 和测试，再扩大采集范围。
-
-## 6. 图片、body、价格、颜色、尺码要求
-
-### 图片
-
-要求：
-
-- `image_src` 应是列表。
-- 至少保留 1 张商品主图。
-- 图片 URL 去重。
-- 过滤空值、占位图、明显无关图标。
-- 尽量保留高质量图片 URL，而不是缩略图。
-
-建议：
-
-- 保留原始顺序，第一张通常作为主图。
-- 对导出视图可以另选 `primary_image`。
-
-### body
-
-要求：
-
-- 移除 `script`、`style`、`link`。
-- 移除明显跟踪属性和噪声属性，例如大批量 `data-*`。
-- 保留可渲染 HTML，而不是只保留纯文本。
-- 长正文可设置上限，避免下游表格或数据库异常。
-
-建议：
-
-- 列表、段落、表格应尽量保留结构。
-- 清洗后仍要能复查商品卖点、材质、参数和说明。
-
-### 价格
-
-要求：
-
-- 尽量规范成数值。
-- 兼容货币符号、千分位、小数点。
-- 保留无法解析的原始价格文本。
-- 区分正常价、促销价、区间价和缺失价。
-
-建议：
-
-- 如果页面有多个价格，记录来源或优先级。
-- variant 价格应与规格组合关联。
-
-### 颜色
-
-要求：
-
-- 颜色值清洗为稳定文本。
-- 色卡图片和颜色名尽量都保留。
-- 不要把颜色当作普通描述文本丢掉。
-
-建议：
-
-- `option1_name = Color`
-- `option1_value` 使用页面显示的颜色名或规范化名称。
-
-### 尺码
-
-要求：
-
-- 所有可见尺码都要保留。
-- 有库存和无库存状态要区分。
-- 不要只采集有库存尺码。
-
-建议：
-
-- `option2_name = Size`
-- `option2_value` 可以是尺码列表或当前变体尺码。
-- `size_price` 保存尺码到价格/库存/可用状态的映射。
-
-## 7. 反爬、Cloudflare、login 的安全边界
-
-CLM 的默认边界是安全诊断和授权采集，不做绕过。
-
-可以做：
-
-- 检测 Cloudflare、CAPTCHA、登录页、访问拒绝。
-- 返回结构化错误，例如 `ANTI_BOT_BLOCKED`。
-- 建议使用公开 API、官方导出、授权 cookie 或人工确认流程。
-- 在本地 fixture 中模拟挑战页，验证诊断逻辑。
-- 对公开、无需登录、无需绕过的页面做小样本测试。
-
-不能做：
-
-- 不破解登录。
-- 不绕验证码。
-- 不绕 Cloudflare challenge 或访问控制。
-- 不提交、记录或分享真实 cookie、token、session、API key。
-- 不把外部 proxy 配置、代理账号、Clash 配置或二进制塞进仓库。
-- 不把站点专用规避脚本合入 CLM core。
-- 不把未经授权的私有或付费内容作为训练目标。
-
-如果站点需要授权访问，应单独写授权测试计划，并由主管明确批准。
-
-## 8. 小样本实战流程
-
-电商站点任务必须先小样本验证。
-
-推荐流程：
-
-1. 明确授权边界。
-   - 是否公开可访问？
-   - 是否需要登录？
-   - 是否有 robots 或服务条款限制？
-   - 是否涉及个人信息或敏感数据？
-
-2. 选一个最小目标。
-   - 1 个分类。
-   - 1 页列表。
-   - 1 到 5 个商品。
-
-3. 先做 recon。
-   - 静态 HTML 是否有商品卡片？
-   - 是否是 JS shell？
-   - 是否有 JSON-LD / `__NEXT_DATA__` / `__NUXT__`？
-   - 是否有公开 API hint？
-   - 是否触发挑战页或登录页？
-
-4. 决定策略。
-   - 静态列表：DOM selector。
-   - API-backed：`api_intercept` 或直接 JSON API。
-   - JS 渲染：browser fallback。
-   - 有公开 XHR：observe network 后 replay。
-   - challenge/login：停止在诊断层。
-
-5. 采 list，不急着全站展开。
-   - 发现 1 到 5 个 detail 链接。
-   - 保留分类上下文。
-   - 生成 category-aware dedupe key。
-
-6. 采 detail。
-   - 检查 title/price/image/body/handle。
-   - 检查颜色、尺码、变体。
-   - 记录缺失字段。
-
-7. 采 variant。
-   - 提取所有颜色/尺码组合。
-   - 保存缺货状态。
-   - 关联 variant 价格和图片。
-
-8. 做质量验收。
-   - 用 checklist 检查样本。
-   - 导出 JSON/CSV 人工复核。
-   - 将失败样本沉淀成 fixture/test。
-
-9. 再决定是否扩大。
-   - 只有小样本通过，才进入下一页、更多分类或分页/cursor。
-
-## 9. 员工接到电商站点任务时应该怎么做
-
-### 第一步：读任务和安全边界
-
-先回答：
-
-- 目标站点是什么？
-- 目标字段是什么？
-- 是否公开可访问？
-- 是否允许采集？
-- 是否需要登录、验证码、Cloudflare 或代理？
-- 任务要求是研究、fixture、测试，还是真实采集？
-
-如果授权边界不清楚，先问主管，不要写采集代码。
-
-### 第二步：做最小 recon
-
-先收集证据：
-
-- HTML 是否包含数据？
-- 浏览器渲染后是否出现商品？
-- 是否有公开 API / JSON-LD / hydration data？
-- 商品卡片和详情页选择器是否稳定？
-- 是否有 challenge/login 信号？
-
-输出应该是一个简短结论：
-
-```text
-recommended_mode = http | browser | api_intercept | diagnosis_only
-reason = ...
-sample_fields = ...
-risks = ...
-```
-
-### 第三步：写或选择 fixture
-
-优先用可控 fixture 复现结构：
-
-- 商品列表
-- 商品详情
-- 变体
-- 缺失价格
-- 重复图片
-- 同 URL 多分类
-- challenge/login 诊断页
-
-不要一开始就对真实站点扩大范围。
-
-### 第四步：小样本采集
-
-限制：
-
-- 1 个分类。
-- 1 页列表。
-- 1 到 5 个商品。
-- 低频请求。
-- 保存结果和失败证据。
-
-### 第五步：验收和记录
-
-必须产出：
-
-- dev log。
-- 如果能力变化，写 report。
-- 如果是员工任务，等待 supervisor acceptance。
-- 如果发现通用缺陷，转为 fixture/test。
-
-### 第六步：扩大前复核
-
-扩大前必须确认：
-
-- 字段质量达标。
-- 去重规则正确。
-- 分类上下文没有丢。
-- 不触碰登录/验证码/Cloudflare 绕过。
-- 运行产物不会进入仓库。
-
-## 10. 不能做的事情
-
-任何电商采集任务都不能做：
-
-- 不破解登录。
-- 不绕验证码。
-- 不绕 Cloudflare challenge。
-- 不伪造授权。
-- 不提交真实 API key、cookie、token、session。
-- 不把 `.env`、`clm_config.json`、代理账号、cookie jar 提交进仓库。
-- 不把外部 proxy、Clash 配置、代理池或二进制文件塞进仓库。
-- 不把站点专用规避脚本复制进 CLM core。
-- 不对未授权私有页面做采集。
-- 不在没有小样本验收的情况下做大规模采集。
-
-如果任务必须涉及登录、授权 cookie 或企业内部数据，应新建单独的授权采集设计文档，
-并由主管明确批准后再执行。
-
-## 后续建议
-
-这份文档是流程层，不是实现层。
-
-建议后续补齐：
-
-- `ProductRecord` 标准模型。
-- `validate_product_record()` 质量检查。
-- `build_product_dedupe_key()` category-aware 去重。
-- detail/variant fixtures。
-- 小样本电商训练报告模板。
+## Quality Checklist
+
+Each ecommerce sample should answer:
+
+- Does the record have a usable URL and title?
+- Can the price be parsed, or is the raw value preserved for review?
+- Are product images present and not only logos/icons/placeholders?
+- Is the description/body present when the site exposes it?
+- Are colors and sizes captured when visible?
+- Is the category context still attached at detail time?
+- Is the dedupe key stable and category-aware?
+- Are blocked/challenge/login cases marked as diagnosis-only with notes?
+- Can a human review the sample in JSON/CSV/Excel?
+
+Failed samples should become fixtures or tests before expanding crawl volume.
+
+## Safety Boundary
+
+Allowed:
+
+- public or authorized pages
+- low-rate small samples
+- static HTML extraction
+- browser rendering without bypassing access controls
+- public JSON/GraphQL/XHR API observation and replay
+- challenge/login/CAPTCHA diagnosis
+
+Not allowed in core:
+
+- login cracking
+- CAPTCHA solving
+- Cloudflare challenge bypass
+- forged authorization
+- committed real cookies, tokens, sessions, or API keys
+- proxy-account configuration
+- site-specific bypass scripts
+- full-scale scraping before sample quality is accepted
+
+## Small-Sample Workflow
+
+1. Confirm the site is public or authorized.
+2. Pick one category/list page and one to five product details.
+3. Run recon: static HTML, JS shell, structured data, API hints, challenge signs.
+4. Choose mode: `http`, `browser`, `api_intercept`, or `diagnosis_only`.
+5. Save sample evidence and extracted records.
+6. Run product quality validation.
+7. Convert generic failures into fixtures/tests.
+8. Only then expand pagination, categories, and run duration.
+
+## Long-Running Rule
+
+Large ecommerce jobs must use checkpointed product storage and frontier progress.
+Do not rely only on an in-memory final state for tens of thousands of products.
+
+See `docs/runbooks/LONG_RUNNING_ECOMMERCE_RUNS.md`.

@@ -10,6 +10,7 @@ Current runbooks:
 - `EMPLOYEE_TAKEOVER.md`
 - `QUICK_START_CN.md`
 - `OPEN_SOURCE_RELEASE_CHECKLIST.md`
+- `LONG_RUNNING_ECOMMERCE_RUNS.md`
 
 Recommended first read:
 
@@ -22,4 +23,3 @@ Planned:
 - packaging
 - code review
 - incident response
-- release checklist

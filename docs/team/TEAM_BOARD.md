@@ -1,6 +1,6 @@
 # Team Board
 
-Last updated: 2026-05-09
+Last updated: 2026-05-11
 
 ## Active Employees
 
@@ -59,6 +59,9 @@ Last updated: 2026-05-09
 | Observed API Pagination/Cursor MVP | LLM-2026-001 | API / Crawl Capability Worker | conditionally accepted | `docs/team/acceptance/2026-05-09_observed_api_pagination_ACCEPTED.md` |
 | API Pagination QA | LLM-2026-002 | QA / Browser Network Auditor | accepted | `docs/team/acceptance/2026-05-09_api_pagination_qa_ACCEPTED.md` |
 | Docs State Audit After API Replay | LLM-2026-004 | Documentation Worker | accepted | `docs/team/acceptance/2026-05-09_docs_state_audit_after_api_replay_ACCEPTED.md` |
+| Ecommerce Product Store Foundation | LLM-2026-001 | Storage / Ecommerce Worker | accepted | `docs/team/acceptance/2026-05-11_product_store_ACCEPTED.md` |
+| Ecommerce Product Quality Foundation | LLM-2026-002 | QA / Ecommerce Worker | accepted | `docs/team/acceptance/2026-05-11_product_quality_ACCEPTED.md` |
+| Long-Running Ecommerce Runbook | LLM-2026-000 | Supervisor | accepted | `docs/team/acceptance/2026-05-11_long_running_ecommerce_runbook_ACCEPTED.md` |
 
 ## Recent Accepted Work Log
 
@@ -104,12 +107,15 @@ Last updated: 2026-05-09
 | Ecommerce Crawl Workflow Docs | LLM-2026-004 | `docs/team/acceptance/2026-05-09_ecommerce_workflow_docs_ACCEPTED.md` | safe ecommerce workflow, category/list/detail/variant decomposition, and challenge diagnosis boundary accepted |
 | Ecommerce Real-Site Training Batch | LLM-2026-000 | supervisor direct work | Shoesme diagnosis-only, Donsje Shopify JSON, Clausporto/uvex Magento list/detail, Bosch corporate product page; Excel/JSON exported |
 | Local Ecommerce Stress Test | LLM-2026-000 | supervisor direct work | 30,000 synthetic products passed frontier, result storage, and Excel export; long-run checkpoint storage still required |
+| Ecommerce Product Store Foundation | LLM-2026-001 | `docs/team/acceptance/2026-05-11_product_store_ACCEPTED.md` | generic `ProductRecord`, category-aware dedupe, SQLite `ProductStore`, 30,000-row batch tests |
+| Ecommerce Product Quality Foundation | LLM-2026-002 | `docs/team/acceptance/2026-05-11_product_quality_ACCEPTED.md` | generic quality validator for price/image/body/status/dedupe checks; supervisor cleaned encoding-sensitive tests |
+| Long-Running Ecommerce Runbook | LLM-2026-000 | `docs/team/acceptance/2026-05-11_long_running_ecommerce_runbook_ACCEPTED.md` | operational policy for checkpointed large ecommerce runs |
 
 ## Upcoming Candidate Tasks
 
-1. Add ecommerce product quality foundation from `spider_text`: product schema, price/body/image/variant normalization, category-aware dedupe.
+1. Build a resumable ecommerce runner: frontier -> fetch -> extract -> validate -> `ProductStore` -> progress report.
 2. Convert 2026-05-09 ecommerce real-site samples into fixtures/tests.
-3. Add checkpointed ecommerce product storage and resumable run progress before real tens-of-thousands-item crawls.
+3. Add runtime site/crawl profile files for selectors, API hints, pagination, and quality overrides.
 4. Harden observed API pagination on real public pagination targets after the deterministic guards are stable.
 5. Run the next real-site training batch against dynamic pages, paginated APIs, and virtualized lists.
 6. Durable job registry design after the in-memory FastAPI MVP stabilizes.
