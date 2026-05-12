@@ -7,10 +7,10 @@ Last updated: 2026-05-12
 | Employee ID | Display Name | Current Project Role | Status | Current Assignment |
 |---|---|---|---|---|
 | LLM-2026-000 | Supervisor Codex | Project Supervisor | active | project direction, assignments, acceptance |
-| LLM-2026-001 | Worker Alpha | Browser Fingerprint Worker | assigned | CAP-4.2 Browser Fingerprint Profile Report |
-| LLM-2026-002 | Worker Beta | JS Static Analysis Worker | assigned | CAP-2.1 JS AST/String Table MVP |
+| LLM-2026-001 | Worker Alpha | Strategy QA Worker | accepted | CAP-5.1 Strategy JS Evidence QA completed |
+| LLM-2026-002 | Worker Beta | WebSocket Capability Worker | accepted | CAP-1.4 WebSocket Observation MVP completed |
 | LLM-2026-003 | Worker Gamma | Unassigned | standby | none |
-| LLM-2026-004 | Worker Delta | Capability Alignment Auditor | assigned | Capability Round 2 Audit |
+| LLM-2026-004 | Worker Delta | Capability Documentation Auditor | accepted | Capability Matrix Refresh Audit completed |
 
 ## Current Project Roles
 
@@ -77,9 +77,13 @@ Last updated: 2026-05-12
 | CAP-4.4 Browser Interception And JS Capture | LLM-2026-001 | ROLE-BROWSER-CAPABILITY | accepted | `docs/team/acceptance/2026-05-12_cap_4_4_browser_interception_ACCEPTED.md` |
 | CAP-2.1 JS Asset Inventory | LLM-2026-002 | ROLE-JS-RECON | accepted | `docs/team/acceptance/2026-05-12_cap_2_1_js_asset_inventory_ACCEPTED.md` |
 | CAP-4.4 / CAP-2.1 Capability Alignment Audit | LLM-2026-004 | ROLE-CAPABILITY-AUDIT | accepted | `docs/team/acceptance/2026-05-12_capability_alignment_audit_ACCEPTED.md` |
-| CAP-4.2 Browser Fingerprint Profile Report | LLM-2026-001 | ROLE-BROWSER-FINGERPRINT | assigned | pending |
-| CAP-2.1 JS AST/String Table MVP | LLM-2026-002 | ROLE-JS-AST | assigned | pending |
-| Capability Round 2 Audit | LLM-2026-004 | ROLE-CAPABILITY-AUDIT | assigned | pending |
+| CAP-4.2 Browser Fingerprint Profile Report | LLM-2026-001 | ROLE-BROWSER-FINGERPRINT | accepted | `docs/team/acceptance/2026-05-12_cap_4_2_browser_fingerprint_ACCEPTED.md` |
+| CAP-2.1 JS Static Analysis Foundation | LLM-2026-002 | ROLE-JS-AST | accepted | `docs/team/acceptance/2026-05-12_cap_2_1_js_static_analysis_ACCEPTED.md` |
+| Capability Round 2 Audit | LLM-2026-004 | ROLE-CAPABILITY-AUDIT | accepted | `docs/team/acceptance/2026-05-12_capability_round2_audit_ACCEPTED.md` |
+| CAP-5.1 Strategy JS Evidence QA | LLM-2026-001 | ROLE-STRATEGY-QA | accepted | `docs/team/acceptance/2026-05-12_cap_5_1_strategy_js_evidence_qa_ACCEPTED.md` |
+| CAP-1.4 WebSocket Observation MVP | LLM-2026-002 | ROLE-WEBSOCKET | accepted | `docs/team/acceptance/2026-05-12_cap_1_4_websocket_observation_ACCEPTED.md` |
+| Capability Matrix Refresh Audit | LLM-2026-004 | ROLE-CAPABILITY-DOC-AUDIT | accepted | `docs/team/acceptance/2026-05-12_capability_matrix_refresh_audit_ACCEPTED.md` |
+| CAP-4.2 Runtime Fingerprint Probe | LLM-2026-000 | ROLE-SUPERVISOR / ROLE-BROWSER-FINGERPRINT | accepted | `docs/team/acceptance/2026-05-12_cap_4_2_runtime_fingerprint_probe_ACCEPTED.md` |
 
 ## Recent Accepted Work Log
 
@@ -142,16 +146,28 @@ Last updated: 2026-05-12
 | CAP-4.4 Browser Interception And JS Capture | LLM-2026-001 | `docs/team/acceptance/2026-05-12_cap_4_4_browser_interception_ACCEPTED.md` | Playwright route interception, resource blocking, JS/API metadata capture, init-script injection |
 | CAP-2.1 JS Asset Inventory | LLM-2026-002 | `docs/team/acceptance/2026-05-12_cap_2_1_js_asset_inventory_ACCEPTED.md` | script inventory, signature/token/challenge clues, API/GraphQL/WebSocket/sourcemap extraction |
 | CAP-1.2 Transport Diagnostics Increment | LLM-2026-000 | supervisor direct work | transport profile, server header, and edge/cache header difference detection |
+| CAP-4.2 Browser Fingerprint Profile | LLM-2026-001 | `docs/team/acceptance/2026-05-12_cap_4_2_browser_fingerprint_ACCEPTED.md` | config-side browser fingerprint consistency report with risk/recommendations |
+| CAP-2.1 JS Static Analysis | LLM-2026-002 | `docs/team/acceptance/2026-05-12_cap_2_1_js_static_analysis_ACCEPTED.md` | JS string table, endpoint strings, suspicious function/call clues |
+| Capability Round 2 Audit | LLM-2026-004 | `docs/team/acceptance/2026-05-12_capability_round2_audit_ACCEPTED.md` | identified integration gap; supervisor added JS evidence path |
+| JS Evidence Integration | LLM-2026-000 | `docs/team/acceptance/2026-05-12_js_evidence_integration_ACCEPTED.md` | browser/HTML JS evidence combines inventory and static analysis into `recon_report.js_evidence` |
+| Browser Interception Recon Path | LLM-2026-000 | `docs/team/acceptance/2026-05-12_browser_interception_recon_path_ACCEPTED.md` | opt-in `constraints.intercept_browser=true` feeds captured JS assets into `recon_report.js_evidence` |
+| Strategy JS Evidence Advisory | LLM-2026-000 | `docs/team/acceptance/2026-05-12_strategy_js_evidence_advisory_ACCEPTED.md` | Strategy consumes `js_evidence` as advisory endpoint/hook/challenge hints without overriding stronger evidence |
+| Runtime Fingerprint Probe | LLM-2026-000 | `docs/team/acceptance/2026-05-12_cap_4_2_runtime_fingerprint_probe_ACCEPTED.md` | opt-in `constraints.probe_fingerprint=true` samples navigator/screen/Intl/WebGL/canvas/font runtime evidence |
+| Strategy JS Evidence QA | LLM-2026-001 | `docs/team/acceptance/2026-05-12_cap_5_1_strategy_js_evidence_qa_ACCEPTED.md` | 58 tests prove JS evidence remains advisory and bounded |
+| WebSocket Observation MVP | LLM-2026-002 | `docs/team/acceptance/2026-05-12_cap_1_4_websocket_observation_ACCEPTED.md` | connection/frame models, preview truncation, redaction, mocked Playwright WS event path |
+| Capability Matrix Refresh | LLM-2026-004 | `docs/team/acceptance/2026-05-12_capability_matrix_refresh_audit_ACCEPTED.md` | readable matrix aligned to CAP-2.1, CAP-4.2, CAP-4.4, CAP-5.1 current status |
+| Proxy Pool And Crypto Evidence | LLM-2026-000 | `docs/team/acceptance/2026-05-12_proxy_pool_and_crypto_evidence_ACCEPTED.md` | pluggable proxy pool foundation plus built-in JS crypto/signature evidence |
 
 ## Upcoming Candidate Tasks
 
-1. CAP-4.4 + CAP-2.1: Integrate browser JS captures -> JS asset inventory -> strategy hints.
-2. CAP-1.2: HTTP/TLS transport diagnostics toward impersonation-profile/ALPN evidence.
-3. CAP-5.2: VisualRecon/OCR MVP on persisted screenshots.
-4. CAP-3.1: Wrap LangGraph workflow as a `BatchRunner` processor.
-5. CAP-3.6: Add runtime site/crawl profile files for selectors, API hints, pagination, access config, and quality overrides.
-6. Resolve Easy Mode CLI Tests conditional acceptance: align 001 handoff/dev log with actual tests or restore missing test coverage.
-7. Open-source polish: `SECURITY.md`, PR template, release checklist pass.
+1. CAP-5.1 + CAP-2.x: Convert crypto/signature evidence into Strategy hook/sandbox/replay-blocker action hints.
+2. CAP-1.4 + CAP-2.1: Integrate WebSocket observation into Recon as an opt-in evidence channel.
+3. CAP-3.3: Add paid proxy provider adapter template and persistent proxy health store.
+4. CAP-5.2: VisualRecon/OCR MVP on persisted screenshots.
+5. CAP-4.2: Fingerprint profile pool and runtime/config comparison report for real browser training.
+6. CAP-1.2: HTTP/TLS transport diagnostics toward ALPN/JA3 evidence and impersonation-profile selection.
+7. CAP-3.1: Wrap LangGraph workflow as a `BatchRunner` processor.
+8. CAP-3.6: Add runtime site/crawl profile files for selectors, API hints, pagination, access config, and quality overrides.
 
 ## Supervisor Notes
 

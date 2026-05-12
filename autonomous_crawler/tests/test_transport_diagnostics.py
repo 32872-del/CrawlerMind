@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from autonomous_crawler.agents.recon import recon_node
-from autonomous_crawler.tools.fetch_policy import FetchAttempt
+from autonomous_crawler.tools.fetch_policy import BestFetchResult, FetchAttempt
 from autonomous_crawler.tools.html_recon import MOCK_CHALLENGE_HTML, MOCK_PRODUCT_HTML
 from autonomous_crawler.tools.transport_diagnostics import (
     diagnose_transport_modes,
@@ -120,7 +120,28 @@ class TransportDiagnosticsTests(unittest.TestCase):
         self.assertTrue(any("optional fallback" in item for item in report.recommendations))
 
     @patch("autonomous_crawler.agents.recon.diagnose_transport_modes")
-    def test_recon_opt_in_records_transport_diagnostics(self, mock_diag: MagicMock) -> None:
+    @patch("autonomous_crawler.agents.recon.fetch_best_html")
+    def test_recon_opt_in_records_transport_diagnostics(
+        self,
+        mock_fetch_best: MagicMock,
+        mock_diag: MagicMock,
+    ) -> None:
+        attempt = FetchAttempt(
+            mode="requests",
+            url="https://example.com",
+            html=MOCK_PRODUCT_HTML,
+            status_code=200,
+            score=70,
+            reasons=["status_ok"],
+        )
+        mock_fetch_best.return_value = BestFetchResult(
+            url="https://example.com",
+            html=MOCK_PRODUCT_HTML,
+            status_code=200,
+            mode="requests",
+            score=70,
+            attempts=[attempt],
+        )
         mock_diag.return_value.to_dict.return_value = {
             "url": "https://example.com",
             "selected_mode": "curl_cffi",

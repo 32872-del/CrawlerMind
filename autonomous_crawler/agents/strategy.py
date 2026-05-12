@@ -194,6 +194,8 @@ def strategy_node(state: dict[str, Any]) -> dict[str, Any]:
         strategy["retry_feedback"] = validation.get("anomalies", [])
         strategy["rationale"] += f" (retry #{retries})"
 
+    _attach_js_evidence_hints(strategy, recon_report)
+
     if task_type == "product_list":
         strategy["site_spec_draft"] = build_site_spec(
             user_goal=state.get("user_goal", ""),
@@ -279,6 +281,91 @@ def _build_api_strategy(
     if not is_graphql and api_method == "POST" and best_candidate.get("post_data_preview"):
         strategy["api_post_data"] = best_candidate["post_data_preview"]
     return strategy
+
+
+def _attach_js_evidence_hints(
+    strategy: dict[str, Any],
+    recon_report: dict[str, Any],
+) -> None:
+    """Attach JS evidence as advisory hints without overriding strategy."""
+    js_evidence = recon_report.get("js_evidence") or {}
+    if not isinstance(js_evidence, dict):
+        return
+
+    hints = _build_js_evidence_hints(js_evidence)
+    if not hints:
+        return
+
+    strategy["js_evidence_hints"] = hints
+    rationale_bits: list[str] = []
+    if hints.get("api_endpoints"):
+        rationale_bits.append("JS evidence found endpoint strings")
+    if hints.get("suspicious_calls"):
+        rationale_bits.append("JS evidence found suspicious call clues")
+    if hints.get("categories"):
+        categories = set(hints.get("categories") or [])
+        if categories.intersection({"challenge", "fingerprint", "anti_bot"}):
+            strategy["js_evidence_warning"] = "challenge_or_fingerprint_clues"
+            rationale_bits.append("JS evidence found challenge/fingerprint clues")
+
+    if rationale_bits:
+        strategy["rationale"] += " [JS evidence: " + "; ".join(rationale_bits) + "]"
+
+    if (
+        strategy.get("mode") == "api_intercept"
+        and not strategy.get("api_endpoint")
+        and hints.get("api_endpoints")
+    ):
+        strategy["api_endpoint"] = hints["api_endpoints"][0]
+        strategy["api_method"] = strategy.get("api_method") or "GET"
+        strategy["headers"] = {**(strategy.get("headers") or {}), "Accept": "application/json"}
+        strategy["api_endpoint_source"] = "js_evidence"
+
+
+def _build_js_evidence_hints(js_evidence: dict[str, Any]) -> dict[str, Any]:
+    items = [
+        item for item in js_evidence.get("items", [])
+        if isinstance(item, dict)
+    ]
+    endpoints = _dedupe_strings(js_evidence.get("top_endpoints", []), limit=10)
+    calls = _dedupe_strings(js_evidence.get("top_suspicious_calls", []), limit=10)
+    categories: list[str] = []
+    high_score_sources: list[dict[str, Any]] = []
+    for item in items:
+        categories.extend(str(value) for value in item.get("keyword_categories", []) if value)
+        if int(item.get("total_score") or 0) >= 50:
+            high_score_sources.append({
+                "source": item.get("source", ""),
+                "url": item.get("url", ""),
+                "inline_id": item.get("inline_id", ""),
+                "score": int(item.get("total_score") or 0),
+                "reasons": list(item.get("reasons") or [])[:5],
+            })
+
+    hints: dict[str, Any] = {}
+    if endpoints:
+        hints["api_endpoints"] = endpoints
+    if calls:
+        hints["suspicious_calls"] = calls
+    if categories:
+        hints["categories"] = sorted(set(categories))
+    if high_score_sources:
+        hints["high_score_sources"] = high_score_sources[:5]
+    return hints
+
+
+def _dedupe_strings(values: Any, *, limit: int) -> list[str]:
+    result: list[str] = []
+    seen: set[str] = set()
+    for value in values or []:
+        text = str(value).strip()
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        result.append(text)
+        if len(result) >= limit:
+            break
+    return result
 
 
 _STRATEGY_ALLOWED_MODES = frozenset({"http", "browser", "api_intercept"})

@@ -24,6 +24,7 @@ except ImportError:
 
 BLOCKABLE_RESOURCE_TYPES = {"image", "media", "font", "stylesheet"}
 API_RESOURCE_TYPES = {"xhr", "fetch"}
+MAX_JS_TEXT_PREVIEW_CHARS = 20000
 
 
 @dataclass(frozen=True)
@@ -261,6 +262,8 @@ def _capture_js_asset(
         "content_type": content_type,
         "size_bytes": len(body_bytes),
         "sha256": sha256,
+        "text_preview": body_text[:MAX_JS_TEXT_PREVIEW_CHARS],
+        "text_truncated": len(body_text) > MAX_JS_TEXT_PREVIEW_CHARS,
     }
 
 

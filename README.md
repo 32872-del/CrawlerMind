@@ -216,6 +216,15 @@ python -m unittest autonomous_crawler.tests.test_real_browser_smoke -v
   scripts for future hook work.
 - JS asset inventory foundation: rank script assets by API endpoints, GraphQL,
   WebSocket, sourcemap, signature/token/encryption/challenge, and bundler clues.
+- JS evidence report in Recon: inline/captured JS can be combined with static
+  string/function/call analysis and stored as `recon_report.js_evidence`.
+- Opt-in browser interception in Recon via `constraints.intercept_browser=true`
+  to feed captured JS into the evidence report.
+- Strategy advisory hints from JS evidence: endpoint strings, suspicious
+  calls, and challenge/fingerprint categories are surfaced without overriding
+  stronger deterministic strategy choices.
+- Browser fingerprint profile foundation: config-side UA/viewport/locale/
+  timezone/proxy consistency report with risk and recommendations.
 - Transport diagnostics foundation: compare `requests`, `curl_cffi`, and
   browser behavior across status, HTTP version, transport profile, challenge,
   server, and edge/cache header differences.

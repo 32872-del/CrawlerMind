@@ -200,6 +200,14 @@ bypass, and no required API keys.
     redacted access context in fetch attempts.
   - Recon can pass access config through to fetch policy and stores a safe
     access context in `recon_report.access_config`.
+- CAP-3.3 Pluggable proxy pool foundation added on 2026-05-12:
+  - `tools/proxy_pool.py` defines `ProxyPoolProvider`, `ProxyEndpoint`,
+    `ProxyPoolConfig`, `ProxySelection`, and `StaticProxyPoolProvider`.
+  - Static pools support `round_robin`, `domain_sticky`, and `first_healthy`
+    selection, failure-count exclusion, cooldown checks, and safe summaries.
+  - `ProxyManager` now keeps manual per-domain rules first, proxy pool second,
+    and default proxy last. Proxy support remains opt-in and credentials are
+    redacted.
 - Browser Context foundation added on 2026-05-12:
   - `tools/browser_context.py` centralizes Playwright launch/context settings:
     headless, user agent, viewport, locale, timezone, extra headers,
@@ -263,8 +271,44 @@ bypass, and no required API keys.
   - `tools/js_asset_inventory.py` extracts script assets and ranks JS clues:
     signature/token/encryption/challenge/fingerprint keywords, API endpoints,
     GraphQL strings, WebSocket URLs, and sourcemap references.
-  - These modules are still capability foundations. They are not yet wired into
-    the main recon/executor loop as automatic JS-capture-to-analysis evidence.
+  - `tools/js_static_analysis.py` adds the pre-AST static-analysis layer:
+    string table, endpoint strings, suspicious function names, and suspicious
+    call clues.
+  - `tools/js_crypto_analysis.py` adds built-in crypto/signature evidence:
+    hash/HMAC/signature/WebCrypto/AES/RSA/base64/timestamp/nonce/param-sort/
+    custom-token clues. This is evidence-only; it does not execute JS or
+    recover keys.
+  - `tools/js_evidence.py` now connects JS inventory and static analysis into
+    ranked evidence, including `crypto_analysis` and `top_crypto_signals`.
+    Recon stores this under `recon_report.js_evidence` for fetched HTML.
+- CAP-4.2 Browser Fingerprint Profile accepted on 2026-05-12:
+  - `tools/browser_fingerprint.py` turns `BrowserContextConfig` into a
+    serializable config-side fingerprint profile.
+  - Reports UA/viewport mismatch, locale/timezone mismatch, default UA with
+    custom profile, proxy/default mismatch, risk level, and recommendations.
+  - Config-side profile reporting remains useful before launching a browser.
+- CAP-4.2 Runtime Fingerprint Probe accepted on 2026-05-12:
+  - `tools/browser_fingerprint_probe.py` launches Playwright and samples
+    browser-side evidence: navigator identity, webdriver, timezone, screen,
+    viewport, WebGL vendor/renderer, canvas hash metadata, and a bounded font
+    probe.
+  - Recon can run it through `constraints.probe_fingerprint=true` and stores
+    evidence under `recon_report.browser_fingerprint_probe`.
+  - This is evidence-only; no stealth/spoofing or fingerprint pool is
+    implemented yet.
+- Opt-in Browser Interception Recon Path accepted on 2026-05-12:
+  - Recon supports `constraints.intercept_browser=true`.
+  - When enabled, Recon runs `intercept_page_resources()`, stores
+    `recon_report.browser_interception`, and feeds captured JS assets into
+    `recon_report.js_evidence`.
+  - Default Recon remains unchanged unless this constraint is explicitly set.
+- Strategy JS Evidence Advisory accepted on 2026-05-12:
+  - Strategy reads `recon_report.js_evidence`.
+  - Adds `crawl_strategy.js_evidence_hints` and optional
+    `crawl_strategy.js_evidence_warning`.
+  - JS evidence is advisory: it can explain API/hook/challenge clues and fill a
+    missing endpoint only after `api_intercept` has already been selected; it
+    does not override good DOM, observed API, or challenge-browser decisions.
 - P1 crawl foundation completed for real-site training:
   - `tools/site_zoo.py` provides static, SPA, structured-data, challenge,
     API-backed, product-detail, and variant-detail fixtures.
@@ -350,7 +394,35 @@ bypass, and no required API keys.
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 647 tests (skipped=4)
+Ran 888 tests
+OK (skipped=4)
+```
+
+Latest supervisor acceptance verification on 2026-05-12:
+
+```text
+python -m unittest discover -s autonomous_crawler/tests
+Ran 888 tests in 43.847s
+OK (skipped=4)
+```
+
+Latest CAP-3.3/CAP-2.x capability verification on 2026-05-12:
+
+```text
+python -m unittest autonomous_crawler.tests.test_proxy_pool autonomous_crawler.tests.test_access_layer -v
+Ran 83 tests
+OK
+
+python -m unittest autonomous_crawler.tests.test_js_crypto_analysis autonomous_crawler.tests.test_js_evidence autonomous_crawler.tests.test_js_static_analysis -v
+Ran 66 tests
+OK
+```
+
+Latest CAP-4.2 runtime fingerprint probe verification on 2026-05-12:
+
+```text
+python -m unittest autonomous_crawler.tests.test_browser_fingerprint_probe -v
+Ran 22 tests
 OK
 ```
 
