@@ -208,6 +208,74 @@ bypass, and no required API keys.
   - `ProxyManager` now keeps manual per-domain rules first, proxy pool second,
     and default proxy last. Proxy support remains opt-in and credentials are
     redacted.
+  - `storage/proxy_health.py` adds persistent SQLite success/failure/cooldown
+    tracking with credential-safe proxy IDs and redacted labels.
+  - `StaticProxyPoolProvider` can optionally write through to a health store
+    and skip proxies in persisted cooldown.
+  - `ProviderAdapter` provides a template for future paid/API-backed proxy
+    providers. No concrete vendor adapter is implemented yet.
+- CAP-3.3 Proxy health trace accepted on 2026-05-12:
+  - `tools/proxy_trace.py` adds credential-safe proxy selection traces and
+    aggregate health summaries.
+  - Traces can be built from `ProxySelection` or `ProxyManager` and can enrich
+    output with `ProxyHealthStore` cooldown/failure evidence.
+  - Error messages, proxy credentials, and token/password/API-key patterns are
+    redacted.
+- CAP-5.1 Strategy Evidence Report added on 2026-05-12:
+  - `tools/strategy_evidence.py` normalizes DOM, observed API, JS evidence,
+    crypto/signature evidence, transport diagnostics, runtime fingerprint
+    probe, challenge/access diagnostics, and WebSocket summary into ranked
+    `EvidenceSignal` records.
+  - Strategy now attaches `crawl_strategy.strategy_evidence`.
+  - When crypto/signature/encryption evidence is present, Strategy attaches
+    `crawl_strategy.reverse_engineering_hints`; API replay mode also gets
+    `crawl_strategy.api_replay_warning`.
+  - This remains evidence-only and advisory. It does not execute JS, recover
+    keys, solve challenges, or override strong DOM/API/browser decisions.
+- CAP-5.1 Strategy Scoring Policy added on 2026-05-12:
+  - `tools/strategy_scoring.py` scores `http`, `api_intercept`, `browser`,
+    `deeper_recon`, and `manual_handoff` from normalized evidence.
+  - Strategy now attaches `crawl_strategy.strategy_scorecard`,
+    `crawl_strategy.strategy_guardrails`, and an advisory
+    `crawl_strategy.strategy_scorecard_warning` when scorecard guidance differs
+    from deterministic routing.
+  - This is still advisory-first; it does not replace final deterministic mode
+    selection yet.
+- CAP-6.2 Unified AntiBotReport added on 2026-05-12:
+  - `tools/anti_bot_report.py` consolidates access diagnostics, HTTP 429/API
+    block evidence, transport diagnostics, browser fingerprint probe results,
+    JS anti-bot/crypto clues, WebSocket runtime evidence, proxy health traces,
+    and Strategy warnings into one safe report.
+  - Strategy now attaches `crawl_strategy.anti_bot_report` with risk level,
+    risk score, categories, findings, recommended action, next steps,
+    guardrails, and evidence sources.
+  - This remains diagnostic/advisory. It does not solve CAPTCHA, bypass login,
+    replay signed APIs, or enable proxies automatically.
+- CAP-1.4 WebSocket Recon opt-in integration accepted on 2026-05-12:
+  - Recon can run `observe_websocket()` through
+    `constraints.observe_websocket=true`.
+  - Results are stored as `recon_report.websocket_observation` and compact
+    `recon_report.websocket_summary`.
+  - Default behavior is unchanged; non-HTTP URLs and unset constraints do not
+    run WebSocket observation.
+  - This is opt-in and evidence-only; no frame replay, protocol reverse
+    engineering, or binary decoding is implemented yet.
+- CAP-1.4 Real WebSocket smoke accepted on 2026-05-12:
+  - `tests/test_real_websocket_smoke.py` runs a local HTTP page plus local
+    WebSocket echo server and validates real Playwright WebSocket events.
+  - The smoke covers sent/received frames, summaries, JSON serialization,
+    truncation, sensitive preview redaction, and pages with no WebSockets.
+  - It skips cleanly if browser or `websockets` dependencies are unavailable.
+- Aggressive capability sprint documentation audit accepted on 2026-05-12:
+  - `docs/plans/2026-05-12_CAPABILITY_IMPLEMENTATION_MATRIX.md` was refreshed
+    as readable UTF-8 Chinese text.
+  - Capability maturity labels now distinguish production-ready, opt-in,
+    evidence-only, mocked-only, and initial work to avoid overclaiming.
+- Advanced diagnostics runbook accepted on 2026-05-12:
+  - `docs/runbooks/ADVANCED_DIAGNOSTICS.md` explains advanced diagnostics,
+    enabling constraints, outputs, maturity labels, and explicit limitations.
+  - README links to the runbook without turning the front page into an internal
+    engineering document.
 - Browser Context foundation added on 2026-05-12:
   - `tools/browser_context.py` centralizes Playwright launch/context settings:
     headless, user agent, viewport, locale, timezone, extra headers,
@@ -415,6 +483,84 @@ OK
 
 python -m unittest autonomous_crawler.tests.test_js_crypto_analysis autonomous_crawler.tests.test_js_evidence autonomous_crawler.tests.test_js_static_analysis -v
 Ran 66 tests
+OK
+```
+
+Latest CAP-5.1 Strategy Evidence Report verification on 2026-05-12:
+
+```text
+python -m unittest autonomous_crawler.tests.test_strategy_evidence autonomous_crawler.tests.test_strategy_js_evidence autonomous_crawler.tests.test_js_crypto_analysis -v
+Ran 73 tests
+OK
+
+python -m unittest discover -s autonomous_crawler/tests
+Ran 968 tests in 46.115s
+OK (skipped=4)
+```
+
+Latest unified capability sprint acceptance verification on 2026-05-12:
+
+```text
+python -m unittest autonomous_crawler.tests.test_recon_websocket_observation autonomous_crawler.tests.test_websocket_observer -v
+Ran 62 tests
+OK
+
+python -m unittest autonomous_crawler.tests.test_proxy_health autonomous_crawler.tests.test_proxy_pool -v
+Ran 50 tests
+OK
+
+python -m unittest discover -s autonomous_crawler/tests
+Ran 968 tests in 45.110s
+OK (skipped=4)
+
+python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py run_results.py run_simple.py clm.py
+OK
+```
+
+Latest CAP-5.1 Strategy Scoring Policy verification on 2026-05-12:
+
+```text
+python -m unittest autonomous_crawler.tests.test_strategy_scoring autonomous_crawler.tests.test_strategy_evidence autonomous_crawler.tests.test_strategy_js_evidence -v
+Ran 73 tests
+OK
+
+python -m unittest discover -s autonomous_crawler/tests
+Ran 1020 tests in 69.209s
+OK (skipped=4)
+```
+
+Latest CAP-6.2 AntiBotReport verification on 2026-05-12:
+
+```text
+python -m unittest autonomous_crawler.tests.test_anti_bot_report autonomous_crawler.tests.test_strategy_evidence autonomous_crawler.tests.test_strategy_scoring -v
+Ran 21 tests
+OK
+
+python -m unittest autonomous_crawler.tests.test_access_diagnostics autonomous_crawler.tests.test_access_layer autonomous_crawler.tests.test_error_codes -v
+Ran 97 tests
+OK
+```
+
+Latest worker-output acceptance verification on 2026-05-12:
+
+```text
+python -m unittest autonomous_crawler.tests.test_real_websocket_smoke autonomous_crawler.tests.test_websocket_observer autonomous_crawler.tests.test_recon_websocket_observation -v
+Ran 68 tests
+OK
+
+python -m unittest autonomous_crawler.tests.test_proxy_trace autonomous_crawler.tests.test_proxy_health autonomous_crawler.tests.test_proxy_pool -v
+Ran 89 tests
+OK
+```
+
+Latest full-suite verification after worker acceptance on 2026-05-12:
+
+```text
+python -m unittest discover -s autonomous_crawler/tests
+Ran 1026 tests in 68.851s
+OK (skipped=4)
+
+python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py run_results.py run_simple.py clm.py
 OK
 ```
 

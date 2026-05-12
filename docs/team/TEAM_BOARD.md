@@ -6,11 +6,11 @@ Last updated: 2026-05-12
 
 | Employee ID | Display Name | Current Project Role | Status | Current Assignment |
 |---|---|---|---|---|
-| LLM-2026-000 | Supervisor Codex | Project Supervisor | active | project direction, assignments, acceptance |
-| LLM-2026-001 | Worker Alpha | Strategy QA Worker | accepted | CAP-5.1 Strategy JS Evidence QA completed |
-| LLM-2026-002 | Worker Beta | WebSocket Capability Worker | accepted | CAP-1.4 WebSocket Observation MVP completed |
+| LLM-2026-000 | Supervisor Codex | Project Supervisor | active | CAP-6.2 AntiBotReport completed; worker outputs accepted; ready for next assignment |
+| LLM-2026-001 | Worker Alpha | WebSocket Recon Worker | accepted | CAP-1.4 Real WebSocket Smoke accepted |
+| LLM-2026-002 | Worker Beta | Proxy Infrastructure Worker | accepted | CAP-3.3 Proxy Health Trace accepted |
 | LLM-2026-003 | Worker Gamma | Unassigned | standby | none |
-| LLM-2026-004 | Worker Delta | Capability Documentation Auditor | accepted | Capability Matrix Refresh Audit completed |
+| LLM-2026-004 | Worker Delta | Capability Documentation Auditor | accepted | Advanced Diagnostics Runbook accepted |
 
 ## Current Project Roles
 
@@ -157,17 +157,27 @@ Last updated: 2026-05-12
 | WebSocket Observation MVP | LLM-2026-002 | `docs/team/acceptance/2026-05-12_cap_1_4_websocket_observation_ACCEPTED.md` | connection/frame models, preview truncation, redaction, mocked Playwright WS event path |
 | Capability Matrix Refresh | LLM-2026-004 | `docs/team/acceptance/2026-05-12_capability_matrix_refresh_audit_ACCEPTED.md` | readable matrix aligned to CAP-2.1, CAP-4.2, CAP-4.4, CAP-5.1 current status |
 | Proxy Pool And Crypto Evidence | LLM-2026-000 | `docs/team/acceptance/2026-05-12_proxy_pool_and_crypto_evidence_ACCEPTED.md` | pluggable proxy pool foundation plus built-in JS crypto/signature evidence |
+| Strategy Evidence Report | LLM-2026-000 | `docs/team/acceptance/2026-05-12_strategy_evidence_report_ACCEPTED.md` | unified DOM/API/JS/crypto/transport/fingerprint/challenge/WebSocket evidence report plus replay-risk action hints |
+| WebSocket Recon Opt-in Integration | LLM-2026-001 | `docs/team/acceptance/2026-05-12_cap_1_4_websocket_recon_integration_ACCEPTED.md` | Recon stores `websocket_observation` and `websocket_summary` only when `constraints.observe_websocket=true` |
+| Proxy Health Store | LLM-2026-002 | `docs/team/acceptance/2026-05-12_cap_3_3_proxy_health_store_ACCEPTED.md` | SQLite proxy health store, cooldown, credential-safe IDs, and provider adapter template |
+| Aggressive Capability Sprint Audit | LLM-2026-004 | `docs/team/acceptance/2026-05-12_aggressive_capability_sprint_audit_ACCEPTED.md` | capability matrix refreshed with maturity labels and overclaiming guardrails |
+| Strategy Scoring Policy | LLM-2026-000 | `docs/team/acceptance/2026-05-12_strategy_scoring_policy_ACCEPTED.md` | conservative scorecard for http/api/browser/deeper_recon/manual_handoff attached to Strategy output |
+| Unified AntiBotReport | LLM-2026-000 | `docs/team/acceptance/2026-05-12_anti_bot_report_ACCEPTED.md` | CAP-6.2 report unifies access, transport, fingerprint, JS/crypto, proxy, API-block, and WebSocket evidence |
+| Real WebSocket Smoke | LLM-2026-001 | `docs/team/acceptance/2026-05-12_real_websocket_smoke_ACCEPTED.md` | local real-browser WebSocket smoke proves Playwright WS events, frame capture, truncation, and redaction |
+| Proxy Health Trace | LLM-2026-002 | `docs/team/acceptance/2026-05-12_proxy_health_trace_ACCEPTED.md` | redacted proxy trace and aggregate health evidence accepted |
+| Advanced Diagnostics Runbook | LLM-2026-004 | `docs/team/acceptance/2026-05-12_advanced_diagnostics_docs_ACCEPTED.md` | public-facing advanced diagnostics guide accepted without overclaiming |
 
 ## Upcoming Candidate Tasks
 
-1. CAP-5.1 + CAP-2.x: Convert crypto/signature evidence into Strategy hook/sandbox/replay-blocker action hints.
-2. CAP-1.4 + CAP-2.1: Integrate WebSocket observation into Recon as an opt-in evidence channel.
-3. CAP-3.3: Add paid proxy provider adapter template and persistent proxy health store.
-4. CAP-5.2: VisualRecon/OCR MVP on persisted screenshots.
-5. CAP-4.2: Fingerprint profile pool and runtime/config comparison report for real browser training.
-6. CAP-1.2: HTTP/TLS transport diagnostics toward ALPN/JA3 evidence and impersonation-profile selection.
-7. CAP-3.1: Wrap LangGraph workflow as a `BatchRunner` processor.
-8. CAP-3.6: Add runtime site/crawl profile files for selectors, API hints, pagination, access config, and quality overrides.
+1. CAP-5.1: Calibrate StrategyScoringPolicy on real training cases and decide narrow cases where it may influence final mode.
+2. CAP-6.2: Calibrate AntiBotReport on controlled and real training cases, then expose compact report summaries in CLI/API outputs.
+3. CAP-3.3: Connect proxy trace evidence to fetch/runner reporting.
+4. CAP-1.4: Preserve real WebSocket smoke as a training fixture and design protocol-analysis follow-up tasks.
+5. CAP-5.2: VisualRecon/OCR MVP on persisted screenshots.
+6. CAP-4.2: Fingerprint profile pool and runtime/config comparison report for real browser training.
+7. CAP-1.2: HTTP/TLS transport diagnostics toward ALPN/JA3 evidence and impersonation-profile selection.
+8. CAP-3.1: Wrap LangGraph workflow as a `BatchRunner` processor.
+9. CAP-3.6: Add runtime site/crawl profile files for selectors, API hints, pagination, access config, and quality overrides.
 
 ## Supervisor Notes
 

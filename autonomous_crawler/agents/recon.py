@@ -28,6 +28,7 @@ from ..tools.browser_interceptor import intercept_page_resources
 from ..tools.browser_fingerprint_probe import probe_browser_fingerprint
 from ..tools.js_evidence import build_js_evidence_report
 from ..tools.transport_diagnostics import diagnose_transport_modes
+from ..tools.websocket_observer import build_ws_summary, observe_websocket
 
 
 @preserve_state
@@ -205,6 +206,21 @@ def recon_node(state: dict[str, Any]) -> dict[str, Any]:
             )
         )
 
+    if _should_observe_websocket(existing_report, target_url):
+        ws_result = observe_websocket(target_url)
+        ws_result_dict = ws_result.to_dict()
+        recon_report["websocket_observation"] = ws_result_dict
+        ws_summary = build_ws_summary(ws_result)
+        recon_report["websocket_summary"] = ws_summary
+        network_messages.append(
+            (
+                "[Recon] WebSocket observation "
+                f"status={ws_result.status}, "
+                f"connections={len(ws_result.connections)}, "
+                f"frames={ws_result.total_frames}"
+            )
+        )
+
     return {
         "status": "recon_done",
         "recon_report": recon_report,
@@ -245,6 +261,13 @@ def _should_intercept_browser(existing_report: dict[str, Any], target_url: str) 
 def _should_probe_fingerprint(existing_report: dict[str, Any], target_url: str) -> bool:
     constraints = existing_report.get("constraints") or {}
     if not constraints.get("probe_fingerprint"):
+        return False
+    return target_url.startswith(("http://", "https://"))
+
+
+def _should_observe_websocket(existing_report: dict[str, Any], target_url: str) -> bool:
+    constraints = existing_report.get("constraints") or {}
+    if not constraints.get("observe_websocket"):
         return False
     return target_url.startswith(("http://", "https://"))
 

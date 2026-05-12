@@ -8,8 +8,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 import itertools
+import time
 from typing import Any, Protocol, runtime_checkable
 from urllib.parse import urlparse
+
+try:
+    from autonomous_crawler.storage.proxy_health import ProxyHealthStore
+except ImportError:  # pragma: no cover
+    ProxyHealthStore = None  # type: ignore[assignment,misc]
 
 
 SUPPORTED_POOL_STRATEGIES = {"round_robin", "domain_sticky", "first_healthy"}
@@ -164,14 +170,29 @@ class ProxyPoolProvider(Protocol):
 
 
 class StaticProxyPoolProvider:
-    """In-memory static proxy pool with deterministic rotation."""
+    """In-memory static proxy pool with deterministic rotation.
 
-    def __init__(self, config: ProxyPoolConfig | dict[str, Any] | None = None) -> None:
+    Optionally backed by a ``ProxyHealthStore`` for persistence across
+    restarts.  When a health store is injected, ``report_result`` writes
+    through to SQLite and ``_available_endpoints`` checks cooldown state.
+    """
+
+    def __init__(
+        self,
+        config: ProxyPoolConfig | dict[str, Any] | None = None,
+        *,
+        health_store: Any | None = None,
+    ) -> None:
         self.config = ProxyPoolConfig.from_dict(config)
         self._cycle = itertools.count()
         self._domain_sticky: dict[str, str] = {}
         self._failures: dict[str, int] = {}
         self._last_errors: dict[str, str] = {}
+        self._health_store = health_store
+
+    def set_health_store(self, health_store: Any) -> None:
+        """Attach a health store after construction (e.g. for trace integration)."""
+        self._health_store = health_store
 
     def select(self, target_url: str, *, now: float = 0.0) -> ProxySelection:
         errors = tuple(self.config.validate())
@@ -207,12 +228,22 @@ class StaticProxyPoolProvider:
     def report_result(self, proxy_url: str, *, ok: bool, error: str = "", now: float = 0.0) -> None:
         if not proxy_url:
             return
+        now = now or time.time()
         if ok:
             self._failures[proxy_url] = 0
             self._last_errors.pop(proxy_url, None)
         else:
             self._failures[proxy_url] = self._failures.get(proxy_url, 0) + 1
             self._last_errors[proxy_url] = str(error or "proxy failure")[:200]
+
+        # Write through to health store if available
+        if self._health_store is not None:
+            if ok:
+                self._health_store.record_success(proxy_url, now=now)
+            else:
+                self._health_store.record_failure(
+                    proxy_url, error=error, now=now, max_failures=self.config.max_failures,
+                )
 
     def to_safe_dict(self) -> dict[str, Any]:
         payload = self.config.to_safe_dict()
@@ -233,6 +264,9 @@ class StaticProxyPoolProvider:
                 continue
             failures = self._failures.get(endpoint.url, endpoint.failure_count)
             if failures >= self.config.max_failures:
+                continue
+            # Check health store cooldown if available
+            if self._health_store is not None and not self._health_store.is_available(endpoint.url, now=now):
                 continue
             result.extend([endpoint] * max(endpoint.weight, 1))
         return result
@@ -277,3 +311,58 @@ def _safe_float(value: Any) -> float:
         return float(value)
     except (TypeError, ValueError):
         return 0.0
+
+
+# ---------------------------------------------------------------------------
+# Provider adapter template (CAP-3.3)
+# ---------------------------------------------------------------------------
+
+class ProviderAdapter:
+    """Template for paid/API-backed proxy provider adapters.
+
+    Subclass this and override ``_fetch_endpoints`` to integrate a real
+    provider API.  The base class provides lifecycle hooks and health-store
+    integration so subclasses only need the vendor-specific fetch logic.
+
+    Example::
+
+        class BrightDataProvider(ProviderAdapter):
+            provider_name = "brightdata"
+
+            def _fetch_endpoints(self, *, now: float = 0.0) -> list[ProxyEndpoint]:
+                # Call vendor API, return list of ProxyEndpoint
+                ...
+
+    The adapter is not wired into the main crawl flow yet.  It exists so
+    future integration only needs config + a concrete subclass.
+    """
+
+    provider_name: str = "abstract"
+
+    def __init__(self, *, health_store: Any | None = None) -> None:
+        self._health_store = health_store
+
+    def fetch_endpoints(self, *, now: float = 0.0) -> list[ProxyEndpoint]:
+        """Public entry point.  Calls ``_fetch_endpoints`` and logs errors."""
+        try:
+            return self._fetch_endpoints(now=now)
+        except Exception:
+            return []
+
+    def _fetch_endpoints(self, *, now: float = 0.0) -> list[ProxyEndpoint]:
+        """Override in subclass to call vendor API."""
+        raise NotImplementedError
+
+    def report_result(self, proxy_url: str, *, ok: bool, error: str = "", now: float = 0.0) -> None:
+        """Report result through to health store if available."""
+        if self._health_store is not None:
+            if ok:
+                self._health_store.record_success(proxy_url, now=now or time.time())
+            else:
+                self._health_store.record_failure(proxy_url, error=error, now=now or time.time())
+
+    def to_safe_dict(self) -> dict[str, Any]:
+        return {
+            "provider": self.provider_name,
+            "has_health_store": self._health_store is not None,
+        }

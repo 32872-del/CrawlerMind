@@ -307,6 +307,7 @@ bash scripts/run_api_unix.sh
 - Quick start (Windows): [docs/runbooks/QUICK_START_WINDOWS.md](docs/runbooks/QUICK_START_WINDOWS.md)
 - Quick start (Linux/macOS): [docs/runbooks/QUICK_START_LINUX_MAC.md](docs/runbooks/QUICK_START_LINUX_MAC.md)
 - Quick start (Chinese): [docs/runbooks/QUICK_START_CN.md](docs/runbooks/QUICK_START_CN.md)
+- Advanced diagnostics: [docs/runbooks/ADVANCED_DIAGNOSTICS.md](docs/runbooks/ADVANCED_DIAGNOSTICS.md)
 - Ecommerce workflow: [docs/process/ECOMMERCE_CRAWL_WORKFLOW.md](docs/process/ECOMMERCE_CRAWL_WORKFLOW.md)
 - Blueprint: [docs/blueprints/AUTONOMOUS_CRAWL_AGENT_BLUEPRINT.md](docs/blueprints/AUTONOMOUS_CRAWL_AGENT_BLUEPRINT.md)
 - Team board: [docs/team/TEAM_BOARD.md](docs/team/TEAM_BOARD.md)

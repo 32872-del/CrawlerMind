@@ -12,7 +12,13 @@ from typing import Any, Callable
 
 from .base import preserve_state
 from ..errors import classify_llm_error, format_error_entry
+from ..tools.anti_bot_report import build_anti_bot_report
 from ..tools.site_spec_adapter import build_site_spec
+from ..tools.strategy_evidence import (
+    build_strategy_evidence_report,
+    has_high_crypto_replay_risk,
+)
+from ..tools.strategy_scoring import score_strategy_candidates
 from ..llm.protocols import StrategyAdvisor
 from ..llm.audit import build_decision_record
 
@@ -194,7 +200,20 @@ def strategy_node(state: dict[str, Any]) -> dict[str, Any]:
         strategy["retry_feedback"] = validation.get("anomalies", [])
         strategy["rationale"] += f" (retry #{retries})"
 
+    evidence_report = build_strategy_evidence_report(recon_report)
+    strategy["strategy_evidence"] = evidence_report.to_dict()
+    scorecard = score_strategy_candidates(evidence_report)
+    strategy["strategy_scorecard"] = scorecard.to_dict()
+    anti_bot_report = build_anti_bot_report(
+        recon_report,
+        strategy_evidence=evidence_report,
+        strategy_scorecard=strategy["strategy_scorecard"],
+    )
+    strategy["anti_bot_report"] = anti_bot_report.to_dict()
+
     _attach_js_evidence_hints(strategy, recon_report)
+    _attach_reverse_engineering_hints(strategy, evidence_report)
+    _attach_scorecard_advisory(strategy, scorecard)
 
     if task_type == "product_list":
         strategy["site_spec_draft"] = build_site_spec(
@@ -320,6 +339,44 @@ def _attach_js_evidence_hints(
         strategy["api_method"] = strategy.get("api_method") or "GET"
         strategy["headers"] = {**(strategy.get("headers") or {}), "Accept": "application/json"}
         strategy["api_endpoint_source"] = "js_evidence"
+
+
+def _attach_reverse_engineering_hints(
+    strategy: dict[str, Any],
+    evidence_report: Any,
+) -> None:
+    """Attach reverse-engineering hints without changing core routing."""
+    hints = getattr(evidence_report, "action_hints", {}) or {}
+    if not hints:
+        return
+
+    strategy["reverse_engineering_hints"] = hints
+    if strategy.get("mode") == "api_intercept" and has_high_crypto_replay_risk(evidence_report):
+        strategy["api_replay_warning"] = "signature_or_encryption_evidence"
+        strategy["rationale"] += " [RE evidence: API replay may require signature/encryption runtime inputs]"
+
+
+def _attach_scorecard_advisory(
+    strategy: dict[str, Any],
+    scorecard: Any,
+) -> None:
+    """Attach scorecard guidance without replacing deterministic routing."""
+    executable_mode = getattr(scorecard, "executable_recommended_mode", "")
+    recommended = getattr(scorecard, "recommended", "")
+    current_mode = strategy.get("mode", "")
+    advisory_differs = recommended and recommended != current_mode
+    executable_differs = executable_mode and current_mode and executable_mode != current_mode
+    if executable_differs or advisory_differs:
+        strategy["strategy_scorecard_warning"] = {
+            "current_mode": current_mode,
+            "scorecard_mode": executable_mode,
+            "recommended": recommended,
+            "reason": "scorecard advisory differs from deterministic strategy",
+        }
+
+    guardrails = list(getattr(scorecard, "guardrails", []) or [])
+    if guardrails:
+        strategy["strategy_guardrails"] = guardrails
 
 
 def _build_js_evidence_hints(js_evidence: dict[str, Any]) -> dict[str, Any]:
