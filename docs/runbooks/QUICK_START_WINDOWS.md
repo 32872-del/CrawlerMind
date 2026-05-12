@@ -1,6 +1,7 @@
 # Crawler-Mind Windows Quick Start
 
-This guide assumes Windows PowerShell from the repository root.
+This guide uses the Easy Mode CLI. Run all commands from the repository root in
+PowerShell.
 
 ## 1. Clone
 
@@ -9,7 +10,7 @@ git clone https://github.com/32872-del/CrawlerMind.git
 cd CrawlerMind
 ```
 
-## 2. Create Virtual Environment
+## 2. Create Environment
 
 ```powershell
 python -m venv .venv
@@ -17,13 +18,11 @@ python -m venv .venv
 python -m pip install --upgrade pip
 ```
 
-If PowerShell blocks activation, run:
+If PowerShell blocks activation:
 
 ```powershell
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ```
-
-Then activate again.
 
 ## 3. Install Dependencies
 
@@ -32,79 +31,92 @@ python -m pip install -r requirements.txt
 playwright install
 ```
 
-`playwright install` is required for browser fallback and browser smoke tests.
+`playwright install` is needed for browser fallback. You can skip it for static
+HTML/API-only experiments.
 
-## 4. Configure LLM
-
-```powershell
-Copy-Item clm_config.example.json clm_config.json
-notepad clm_config.json
-```
-
-Fill the provider fields:
-
-```json
-{
-  "llm": {
-    "enabled": true,
-    "base_url": "https://api.openai.com/v1",
-    "model": "gpt-4o-mini",
-    "api_key": "your-api-key",
-    "use_response_format": true
-  }
-}
-```
-
-If your provider does not support `response_format`, set:
-
-```json
-"use_response_format": false
-```
-
-## 5. Check LLM
+## 4. Initialize CLM
 
 ```powershell
-python run_simple.py --check-llm
+python clm.py init
 ```
 
-## 6. Run Local Mock
+This creates `clm_config.json` with LLM disabled by default.
+
+## 5. Check Setup
 
 ```powershell
-python run_simple.py "collect product titles and prices" mock://catalog
+python clm.py check
 ```
 
-Expected result:
+No API key is required.
+
+## 6. First Crawl
+
+```powershell
+python clm.py crawl "collect product titles and prices" mock://catalog --output dev_logs/runtime/mock_result.json
+```
+
+Expected:
 
 ```text
 Final Status: completed
 Extracted Data: 2 items
 ```
 
-## 7. Run Real Smoke
+## 7. Public Crawl
 
 ```powershell
-python run_simple.py "collect top 30 hot searches" "https://top.baidu.com/board?tab=realtime"
+python clm.py crawl "collect top 30 hot searches" "https://top.baidu.com/board?tab=realtime" --output dev_logs/runtime/baidu_hot.json
 ```
 
-## 8. Start API
+## 8. Optional LLM
+
+```powershell
+python clm.py init --force --enable-llm --base-url https://api.openai.com/v1 --model gpt-4o-mini --api-key your-real-api-key
+python clm.py check --llm
+python clm.py crawl "collect top 30 hot searches" "https://top.baidu.com/board?tab=realtime" --llm
+```
+
+If your provider does not support OpenAI `response_format`, add:
+
+```powershell
+--disable-response-format
+```
+
+`clm_config.json` is git-ignored. Do not commit real API keys.
+
+## 9. Results
+
+Easy Mode can write JSON or Excel:
+
+```powershell
+python clm.py crawl "collect product titles and prices" mock://catalog --output dev_logs/runtime/mock_result.xlsx
+```
+
+Persisted workflow history is stored in:
+
+```text
+autonomous_crawler/storage/runtime/crawl_results.sqlite3
+```
+
+Inspect persisted runs:
+
+```powershell
+python run_results.py list
+python run_results.py show <task_id>
+python run_results.py items <task_id>
+python run_results.py export-json <task_id> output.json
+python run_results.py export-csv <task_id> output.csv
+```
+
+## 10. Optional Service And Tests
 
 ```powershell
 uvicorn autonomous_crawler.api.app:app --reload
-```
-
-Open:
-
-```text
-http://127.0.0.1:8000/docs
-```
-
-## 9. Run Tests
-
-```powershell
 python -m unittest discover -s autonomous_crawler/tests
 ```
 
-Optional browser smoke:
+Browser smoke:
 
 ```powershell
 $env:AUTONOMOUS_CRAWLER_RUN_BROWSER_SMOKE='1'
@@ -113,6 +125,7 @@ python -m unittest autonomous_crawler.tests.test_real_browser_smoke -v
 
 ## Notes
 
-- `clm_config.json` is ignored by Git.
-- Runtime SQLite and cache files are ignored by Git.
-- Use `python run_results.py list` to inspect persisted crawl results.
+- Use `python clm.py smoke --kind runner` for a local smoke test.
+- Use `python clm.py train` to list developer training scripts.
+- `run_simple.py` is kept as a legacy/developer entry point; new users should
+  start with `clm.py`.

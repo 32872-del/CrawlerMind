@@ -3,7 +3,9 @@
 ## Theme
 
 Today focused on turning ecommerce crawl lessons into durable project
-foundation work instead of hard-coding rules for individual sites.
+foundation work instead of hard-coding rules for individual sites. Later in the
+day, the project also shifted toward lower-friction first use through CLM Easy
+Mode.
 
 ## Completed
 
@@ -25,6 +27,19 @@ foundation work instead of hard-coding rules for individual sites.
   - round 1: five public targets with 50 records each
   - round 2: Tatuum, The Sting, and BalticBHP with 200 product records each
   - total: 850 exported rows
+- Partitioned `dev_logs/` into development, audits, training, smoke, stress,
+  and runtime sections.
+- Added `clm.py` Easy Mode CLI:
+  - `python clm.py init`
+  - `python clm.py check`
+  - `python clm.py crawl ...`
+  - `python clm.py smoke --kind runner`
+  - `python clm.py train`
+- Updated README and Windows/Linux/macOS/Chinese quick starts so `clm.py` is
+  the primary user path.
+- Accepted Easy Mode quick-start docs and Easy Mode docs audit.
+- Conditionally accepted Easy Mode CLI tests because the worker handoff claims
+  59 tests, while the current repository file contains 7 tests.
 
 ## Current Product State
 
@@ -43,21 +58,30 @@ Crawler-Mind now has a stronger ecommerce base:
 This supports the next phase: real ecommerce training with checkpointed storage
 and controlled expansion from 5-product samples to larger pilot runs.
 
+Crawler-Mind also now has a clearer first-use path. A new user can install
+dependencies, run `python clm.py init`, run `python clm.py check`, and run a
+mock crawl with a JSON or Excel output file without learning the older
+development scripts first.
+
 ## Main Limitation
 
-The agent now has the first version of that production loop as a generic
-runner, but it is not yet wired to the full LangGraph workflow or to real
-site/crawl profiles.
+- The production loop exists as a generic runner, but it is not yet wired to
+  the full LangGraph workflow or real site/crawl profiles.
+- Easy Mode is useful but still thin: it wraps existing behavior and needs more
+  polished error handling, richer `check` output, and stronger tests before a
+  public release.
 
 ## Next Recommended Work
 
-1. Wrap the LangGraph crawl workflow as a `BatchRunner` processor.
-2. Convert the 2026-05-09 ecommerce samples into deterministic fixtures/tests.
-3. Add runtime site/crawl profile files for selectors, API hints, pagination,
+1. Resolve Easy Mode CLI test inconsistency: either correct the worker handoff
+   to match the current 7 tests or restore/add the intended missing cases.
+2. Wrap the LangGraph crawl workflow as a `BatchRunner` processor.
+3. Convert the 2026-05-09 ecommerce samples into deterministic fixtures/tests.
+4. Add runtime site/crawl profile files for selectors, API hints, pagination,
    and quality overrides.
-4. Run a 100-product pilot on an approved ecommerce target before attempting a
+5. Run a 100-product pilot on an approved ecommerce target before attempting a
    larger real run.
-5. Add progress reporting that can later feed FastAPI and the planned frontend.
-6. Convert the real-site extraction differences discovered today into profile
+6. Add progress reporting that can later feed FastAPI and the planned frontend.
+7. Convert the real-site extraction differences discovered today into profile
    fixtures: sitemap product discovery, embedded option sizes, visible radio
    sizes, empty-200 fetch fallback, and Tatuum color extraction.

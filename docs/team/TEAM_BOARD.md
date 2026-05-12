@@ -1,16 +1,16 @@
 # Team Board
 
-Last updated: 2026-05-11
+Last updated: 2026-05-12
 
 ## Active Employees
 
 | Employee ID | Display Name | Current Project Role | Status | Current Assignment |
 |---|---|---|---|---|
 | LLM-2026-000 | Supervisor Codex | Project Supervisor | active | project direction, assignments, acceptance |
-| LLM-2026-001 | Worker Alpha | Browser / DOM Recon Worker | accepted | Rendered DOM Selector Training |
-| LLM-2026-002 | Worker Beta | QA / Browser Network Auditor | accepted | Browser Network Observation Timing QA |
+| LLM-2026-001 | Worker Alpha | Browser Fingerprint Worker | assigned | CAP-4.2 Browser Fingerprint Profile Report |
+| LLM-2026-002 | Worker Beta | JS Static Analysis Worker | assigned | CAP-2.1 JS AST/String Table MVP |
 | LLM-2026-003 | Worker Gamma | Unassigned | standby | none |
-| LLM-2026-004 | Worker Delta | Documentation Worker | standby | none |
+| LLM-2026-004 | Worker Delta | Capability Alignment Auditor | assigned | Capability Round 2 Audit |
 
 ## Current Project Roles
 
@@ -30,6 +30,8 @@ Last updated: 2026-05-11
 | Backlog Item | Source | Status | Notes |
 |---|---|---|---|
 | Real-Site Training Ladder | `docs/team/training/2026-05-08_REAL_SITE_TRAINING_LADDER.md` | active | Long-term training map for future assignments and acceptance records |
+| Top Crawler Capability Roadmap | `docs/plans/2026-05-12_TOP_CRAWLER_CAPABILITY_ROADMAP.md` | active | Converts expert crawler skill checklist into CLM product capability roadmap |
+| Capability Implementation Matrix | `docs/plans/2026-05-12_CAPABILITY_IMPLEMENTATION_MATRIX.md` | active | Maps CLM work directly to the top crawler capability checklist; future tasks must cite CAP IDs |
 
 ## Assignment Records
 
@@ -66,6 +68,18 @@ Last updated: 2026-05-11
 | Resumable Runner QA Audit | LLM-2026-001 | QA / Runner Auditor | accepted | `docs/team/acceptance/2026-05-11_resumable_runner_qa_ACCEPTED.md` |
 | Training Fixture Plan | LLM-2026-002 | Training / Fixture Planner | accepted | `docs/team/acceptance/2026-05-11_training_fixture_plan_ACCEPTED.md` |
 | Runner Docs Consistency Audit | LLM-2026-004 | Documentation Worker | accepted | `docs/team/acceptance/2026-05-11_runner_docs_audit_ACCEPTED.md` |
+| Easy Mode CLI Tests | LLM-2026-001 | ROLE-CLI-QA | conditionally accepted | `docs/team/acceptance/2026-05-11_easy_mode_cli_tests_CONDITIONAL.md` |
+| Easy Mode Quick Start Docs | LLM-2026-002 | ROLE-DOCS-QA | accepted | `docs/team/acceptance/2026-05-11_easy_mode_quick_start_ACCEPTED.md` |
+| Easy Mode Docs And Command Consistency Audit | LLM-2026-004 | ROLE-DOCS-AUDIT | accepted | `docs/team/acceptance/2026-05-11_easy_mode_docs_audit_ACCEPTED.md` |
+| Access Layer QA | LLM-2026-001 | ROLE-ACCESS-QA | accepted | `docs/team/acceptance/2026-05-12_access_layer_qa_ACCEPTED.md` |
+| Access Layer Runbook | LLM-2026-002 | ROLE-ACCESS-DOCS | accepted | `docs/team/acceptance/2026-05-12_access_layer_runbook_ACCEPTED.md` |
+| Access Layer Safety Audit | LLM-2026-004 | ROLE-ACCESS-AUDIT | accepted | `docs/team/acceptance/2026-05-12_access_layer_safety_audit_ACCEPTED.md` |
+| CAP-4.4 Browser Interception And JS Capture | LLM-2026-001 | ROLE-BROWSER-CAPABILITY | accepted | `docs/team/acceptance/2026-05-12_cap_4_4_browser_interception_ACCEPTED.md` |
+| CAP-2.1 JS Asset Inventory | LLM-2026-002 | ROLE-JS-RECON | accepted | `docs/team/acceptance/2026-05-12_cap_2_1_js_asset_inventory_ACCEPTED.md` |
+| CAP-4.4 / CAP-2.1 Capability Alignment Audit | LLM-2026-004 | ROLE-CAPABILITY-AUDIT | accepted | `docs/team/acceptance/2026-05-12_capability_alignment_audit_ACCEPTED.md` |
+| CAP-4.2 Browser Fingerprint Profile Report | LLM-2026-001 | ROLE-BROWSER-FINGERPRINT | assigned | pending |
+| CAP-2.1 JS AST/String Table MVP | LLM-2026-002 | ROLE-JS-AST | assigned | pending |
+| Capability Round 2 Audit | LLM-2026-004 | ROLE-CAPABILITY-AUDIT | assigned | pending |
 
 ## Recent Accepted Work Log
 
@@ -119,15 +133,24 @@ Last updated: 2026-05-11
 | Training Fixture Plan | LLM-2026-002 | `docs/team/acceptance/2026-05-11_training_fixture_plan_ACCEPTED.md` | six generic training scenarios accepted for fixture/test implementation |
 | Runner Docs Consistency Audit | LLM-2026-004 | `docs/team/acceptance/2026-05-11_runner_docs_audit_ACCEPTED.md` | generic runner framing risk accepted and supervisor docs updated |
 | Two-Round Real-Site Training | LLM-2026-000 | supervisor direct work | 850 rows exported; round 1: 5 public targets x 50; round 2: 3 ecommerce sites x 200 |
+| Easy Mode CLI Mainline | LLM-2026-000 | supervisor direct work | `clm.py` added with init/check/crawl/smoke/train |
+| Easy Mode Quick Start Alignment | LLM-2026-000 | supervisor direct work | README and platform quick starts now center `clm.py` |
+| Access Layer QA | LLM-2026-001 | `docs/team/acceptance/2026-05-12_access_layer_qa_ACCEPTED.md` | 62 Access Layer tests covering proxy/session/rate-limit/challenge/trace safety |
+| Access Layer Runbook | LLM-2026-002 | `docs/team/acceptance/2026-05-12_access_layer_runbook_ACCEPTED.md` | user/developer runbook for authorized sessions, proxies, rate limits, challenges, and future UI |
+| Access Layer Safety Audit | LLM-2026-004 | `docs/team/acceptance/2026-05-12_access_layer_safety_audit_ACCEPTED.md` | 6 findings; supervisor fixed global session warning and storage-state path redaction |
+| Access Config Resolver And Artifact Manifest | LLM-2026-000 | supervisor direct work | unified access config resolver plus recon/browser artifact manifests |
+| CAP-4.4 Browser Interception And JS Capture | LLM-2026-001 | `docs/team/acceptance/2026-05-12_cap_4_4_browser_interception_ACCEPTED.md` | Playwright route interception, resource blocking, JS/API metadata capture, init-script injection |
+| CAP-2.1 JS Asset Inventory | LLM-2026-002 | `docs/team/acceptance/2026-05-12_cap_2_1_js_asset_inventory_ACCEPTED.md` | script inventory, signature/token/challenge clues, API/GraphQL/WebSocket/sourcemap extraction |
+| CAP-1.2 Transport Diagnostics Increment | LLM-2026-000 | supervisor direct work | transport profile, server header, and edge/cache header difference detection |
 
 ## Upcoming Candidate Tasks
 
-1. Add runner retry limits and progress events.
-2. Wrap the LangGraph crawl workflow as a `BatchRunner` processor.
-3. Convert 2026-05-11 real-site findings into fixtures/tests, including Tatuum color extraction.
-4. Add runtime site/crawl profile files for selectors, API hints, pagination, field extraction, and quality overrides.
-5. Harden observed API pagination on real public pagination targets after the deterministic guards are stable.
-6. Durable job registry design after the in-memory FastAPI MVP stabilizes.
+1. CAP-4.4 + CAP-2.1: Integrate browser JS captures -> JS asset inventory -> strategy hints.
+2. CAP-1.2: HTTP/TLS transport diagnostics toward impersonation-profile/ALPN evidence.
+3. CAP-5.2: VisualRecon/OCR MVP on persisted screenshots.
+4. CAP-3.1: Wrap LangGraph workflow as a `BatchRunner` processor.
+5. CAP-3.6: Add runtime site/crawl profile files for selectors, API hints, pagination, access config, and quality overrides.
+6. Resolve Easy Mode CLI Tests conditional acceptance: align 001 handoff/dev log with actual tests or restore missing test coverage.
 7. Open-source polish: `SECURITY.md`, PR template, release checklist pass.
 
 ## Supervisor Notes

@@ -19,9 +19,12 @@ from typing import Any
 
 from .base import preserve_state
 from ..errors import FETCH_HTTP_ERROR, FETCH_UNSUPPORTED_SCHEME, RECON_FAILED, format_error_entry
+from ..tools.access_config import resolve_access_config
+from ..tools.artifact_manifest import build_recon_artifact_manifest, persist_artifact_bundle
 from ..tools.html_recon import build_recon_report, fetch_best_html
 from ..tools.api_candidates import build_direct_json_candidate, build_graphql_candidate
 from ..tools.browser_network_observer import observe_browser_network
+from ..tools.transport_diagnostics import diagnose_transport_modes
 
 
 @preserve_state
@@ -49,7 +52,13 @@ def recon_node(state: dict[str, Any]) -> dict[str, Any]:
             ],
         }
 
-    fetch_result = fetch_best_html(target_url)
+    access_config = resolve_access_config(state, existing_report)
+    fetch_result = fetch_best_html(target_url, access_config={
+        "session_profile": access_config.session_profile,
+        "proxy": access_config.proxy,
+        "rate_limit": access_config.rate_limit,
+        "browser_context": access_config.browser_context,
+    })
     if fetch_result.error:
         error_msg = fetch_result.error
         if "unsupported scheme" in error_msg.lower():
@@ -73,6 +82,7 @@ def recon_node(state: dict[str, Any]) -> dict[str, Any]:
         }
 
     inferred_report = build_recon_report(fetch_result.url, fetch_result.html)
+    safe_access_config = _safe_access_config(fetch_result.to_trace()) or access_config.to_safe_dict(target_url)
     recon_report = {
         **existing_report,
         **inferred_report,
@@ -83,10 +93,40 @@ def recon_node(state: dict[str, Any]) -> dict[str, Any]:
             "selected_score": fetch_result.score,
         },
         "fetch_trace": fetch_result.to_trace(),
+        "access_config": safe_access_config,
     }
+    manifest = build_recon_artifact_manifest(
+        target_url=target_url,
+        fetch_trace=recon_report["fetch_trace"],
+        access_config=safe_access_config,
+        access_decision=recon_report.get("access_diagnostics", {}).get("access_decision", {}),
+    )
+    recon_report["artifact_manifest"] = persist_artifact_bundle(
+        manifest,
+        run_id=str(state.get("task_id") or target_url),
+        html=fetch_result.html,
+    )
     network_messages: list[str] = []
+    if _should_diagnose_transport(existing_report, target_url):
+        transport_report = diagnose_transport_modes(
+            target_url,
+            headers=None,
+            modes=["requests", "curl_cffi", "browser"],
+        ).to_dict()
+        recon_report["transport_diagnostics"] = transport_report
+        network_messages.append(
+            (
+                "[Recon] Transport diagnostics "
+                f"sensitive={transport_report['transport_sensitive']}, "
+                f"selected={transport_report['selected_mode']}"
+            )
+        )
+
     if _should_observe_network(existing_report, target_url):
-        observation = observe_browser_network(target_url)
+        observation = observe_browser_network(
+            target_url,
+            browser_context=access_config.browser_context,
+        )
         observation_dict = observation.to_dict()
         recon_report["network_observation"] = observation_dict
         if observation.api_candidates:
@@ -123,6 +163,22 @@ def _should_observe_network(existing_report: dict[str, Any], target_url: str) ->
     if not constraints.get("observe_network"):
         return False
     return target_url.startswith(("http://", "https://"))
+
+
+def _should_diagnose_transport(existing_report: dict[str, Any], target_url: str) -> bool:
+    constraints = existing_report.get("constraints") or {}
+    if not constraints.get("transport_diagnostics"):
+        return False
+    return target_url.startswith(("http://", "https://"))
+
+
+def _safe_access_config(fetch_trace: dict[str, Any]) -> dict[str, Any]:
+    attempts = fetch_trace.get("attempts") or []
+    for attempt in attempts:
+        context = attempt.get("access_context") or {}
+        if context:
+            return context
+    return {}
 
 
 def _merge_api_candidates(

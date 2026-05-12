@@ -131,8 +131,10 @@ class BrowserNetworkObserverPlaywrightTests(unittest.TestCase):
         mock_page.on.side_effect = on_event
         mock_page.goto.side_effect = goto
 
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
         mock_browser = MagicMock()
-        mock_browser.new_page.return_value = mock_page
+        mock_browser.new_context.return_value = mock_context
 
         mock_pw = MagicMock()
         mock_pw.chromium.launch.return_value = mock_browser
@@ -159,8 +161,10 @@ class BrowserNetworkObserverPlaywrightTests(unittest.TestCase):
         mock_page = MagicMock()
         mock_page.goto.side_effect = RuntimeError("Navigation failed")
 
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
         mock_browser = MagicMock()
-        mock_browser.new_page.return_value = mock_page
+        mock_browser.new_context.return_value = mock_context
 
         mock_pw = MagicMock()
         mock_pw.chromium.launch.return_value = mock_browser
@@ -197,8 +201,10 @@ class BrowserNetworkObserverPlaywrightTests(unittest.TestCase):
             callbacks["response"](response) for response in responses
         ]
 
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
         mock_browser = MagicMock()
-        mock_browser.new_page.return_value = mock_page
+        mock_browser.new_context.return_value = mock_context
         mock_pw = MagicMock()
         mock_pw.chromium.launch.return_value = mock_browser
         mock_pw_cls.return_value.__enter__ = MagicMock(return_value=mock_pw)
@@ -277,7 +283,15 @@ class NetworkObservationResultToDictTests(unittest.TestCase):
         )
         d = result.to_dict()
 
-        expected_keys = {"url", "final_url", "status", "error", "entries", "api_candidates"}
+        expected_keys = {
+            "url",
+            "final_url",
+            "status",
+            "error",
+            "entries",
+            "api_candidates",
+            "browser_context",
+        }
         self.assertEqual(set(d.keys()), expected_keys)
         self.assertEqual(d["url"], "https://example.com")
         self.assertEqual(d["final_url"], "https://example.com/page")
@@ -528,8 +542,10 @@ class ObserveNetworkEdgeCaseTests(unittest.TestCase):
             captured_kwargs.update(kwargs)
 
         mock_page.goto.side_effect = goto_capture
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
         mock_browser = MagicMock()
-        mock_browser.new_page.return_value = mock_page
+        mock_browser.new_context.return_value = mock_context
         mock_pw = MagicMock()
         mock_pw.chromium.launch.return_value = mock_browser
         mock_pw_cls.return_value.__enter__ = MagicMock(return_value=mock_pw)
@@ -545,8 +561,10 @@ class ObserveNetworkEdgeCaseTests(unittest.TestCase):
         mock_page.url = "https://example.com"
         captured_kwargs = {}
         mock_page.goto.side_effect = lambda *args, **kwargs: captured_kwargs.update(kwargs)
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
         mock_browser = MagicMock()
-        mock_browser.new_page.return_value = mock_page
+        mock_browser.new_context.return_value = mock_context
         mock_pw = MagicMock()
         mock_pw.chromium.launch.return_value = mock_browser
         mock_pw_cls.return_value.__enter__ = MagicMock(return_value=mock_pw)
@@ -561,8 +579,10 @@ class ObserveNetworkEdgeCaseTests(unittest.TestCase):
         mock_page = MagicMock()
         mock_page.url = "https://example.com"
         mock_page.goto.return_value = None
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
         mock_browser = MagicMock()
-        mock_browser.new_page.return_value = mock_page
+        mock_browser.new_context.return_value = mock_context
         mock_pw = MagicMock()
         mock_pw.chromium.launch.return_value = mock_browser
         mock_pw_cls.return_value.__enter__ = MagicMock(return_value=mock_pw)
@@ -582,8 +602,10 @@ class ObserveNetworkEdgeCaseTests(unittest.TestCase):
         mock_page = MagicMock()
         mock_page.url = "https://example.com"
         mock_page.goto.return_value = None
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
         mock_browser = MagicMock()
-        mock_browser.new_page.return_value = mock_page
+        mock_browser.new_context.return_value = mock_context
         mock_pw = MagicMock()
         mock_pw.chromium.launch.return_value = mock_browser
         mock_pw_cls.return_value.__enter__ = MagicMock(return_value=mock_pw)
@@ -598,8 +620,10 @@ class ObserveNetworkEdgeCaseTests(unittest.TestCase):
         mock_page = MagicMock()
         mock_page.url = "https://example.com"
         mock_page.goto.return_value = None
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
         mock_browser = MagicMock()
-        mock_browser.new_page.return_value = mock_page
+        mock_browser.new_context.return_value = mock_context
         mock_pw = MagicMock()
         mock_pw.chromium.launch.return_value = mock_browser
         mock_pw_cls.return_value.__enter__ = MagicMock(return_value=mock_pw)
@@ -613,8 +637,10 @@ class ObserveNetworkEdgeCaseTests(unittest.TestCase):
     def test_browser_closed_on_navigation_error(self, mock_pw_cls: MagicMock) -> None:
         mock_page = MagicMock()
         mock_page.goto.side_effect = TimeoutError("timeout")
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
         mock_browser = MagicMock()
-        mock_browser.new_page.return_value = mock_page
+        mock_browser.new_context.return_value = mock_context
         mock_pw = MagicMock()
         mock_pw.chromium.launch.return_value = mock_browser
         mock_pw_cls.return_value.__enter__ = MagicMock(return_value=mock_pw)
@@ -644,8 +670,10 @@ class ObserveNetworkEdgeCaseTests(unittest.TestCase):
         callbacks = {}
         mock_page.on.side_effect = lambda event, callback: callbacks.setdefault(event, callback)
         mock_page.goto.side_effect = lambda *a, **kw: callbacks["response"](mock_response)
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
         mock_browser = MagicMock()
-        mock_browser.new_page.return_value = mock_page
+        mock_browser.new_context.return_value = mock_context
         mock_pw = MagicMock()
         mock_pw.chromium.launch.return_value = mock_browser
         mock_pw_cls.return_value.__enter__ = MagicMock(return_value=mock_pw)
@@ -662,8 +690,10 @@ class ObserveNetworkEdgeCaseTests(unittest.TestCase):
         mock_page = MagicMock()
         mock_page.url = "https://example.com"
         mock_page.goto.return_value = None
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
         mock_browser = MagicMock()
-        mock_browser.new_page.return_value = mock_page
+        mock_browser.new_context.return_value = mock_context
         mock_pw = MagicMock()
         mock_pw.chromium.launch.return_value = mock_browser
         mock_pw_cls.return_value.__enter__ = MagicMock(return_value=mock_pw)
@@ -678,8 +708,10 @@ class ObserveNetworkEdgeCaseTests(unittest.TestCase):
         mock_page = MagicMock()
         mock_page.url = "https://example.com"
         mock_page.goto.return_value = None
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
         mock_browser = MagicMock()
-        mock_browser.new_page.return_value = mock_page
+        mock_browser.new_context.return_value = mock_context
         mock_pw = MagicMock()
         mock_pw.chromium.launch.return_value = mock_browser
         mock_pw_cls.return_value.__enter__ = MagicMock(return_value=mock_pw)
@@ -709,8 +741,10 @@ class ObserveNetworkEdgeCaseTests(unittest.TestCase):
         callbacks = {}
         mock_page.on.side_effect = lambda event, callback: callbacks.setdefault(event, callback)
         mock_page.goto.side_effect = lambda *a, **kw: callbacks["response"](mock_response)
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
         mock_browser = MagicMock()
-        mock_browser.new_page.return_value = mock_page
+        mock_browser.new_context.return_value = mock_context
         mock_pw = MagicMock()
         mock_pw.chromium.launch.return_value = mock_browser
         mock_pw_cls.return_value.__enter__ = MagicMock(return_value=mock_pw)
@@ -759,8 +793,10 @@ class ObserveNetworkEdgeCaseTests(unittest.TestCase):
             callback_holder["response"](during_goto_response)
 
         mock_page.goto.side_effect = goto_side_effect
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
         mock_browser = MagicMock()
-        mock_browser.new_page.return_value = mock_page
+        mock_browser.new_context.return_value = mock_context
         mock_pw = MagicMock()
         mock_pw.chromium.launch.return_value = mock_browser
         mock_pw_cls.return_value.__enter__ = MagicMock(return_value=mock_pw)

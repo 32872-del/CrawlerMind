@@ -15,7 +15,13 @@ import httpx
 from bs4 import BeautifulSoup
 
 from .access_diagnostics import diagnose_access
+from .access_config import AccessConfig
+from .browser_context import BrowserContextConfig
 from .browser_fetch import fetch_rendered_html
+from .proxy_manager import ProxyConfig, ProxyManager
+from .rate_limiter import DomainRateLimiter, global_rate_limiter
+from .rate_limit_policy import RateLimitPolicy
+from .session_profile import SessionProfile
 
 
 FetchFn = Callable[[str, dict[str, str] | None], "FetchAttempt"]
@@ -27,21 +33,29 @@ class FetchAttempt:
     url: str
     html: str = ""
     status_code: int | None = None
+    response_headers: dict[str, str] | None = None
+    http_version: str = ""
     error: str = ""
     score: int = 0
     reasons: list[str] | None = None
     diagnostics: dict[str, Any] | None = None
+    access_context: dict[str, Any] | None = None
+    rate_limit_event: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "mode": self.mode,
             "url": self.url,
             "status_code": self.status_code,
+            "response_headers": dict(self.response_headers or {}),
+            "http_version": self.http_version,
             "error": self.error,
             "html_chars": len(self.html or ""),
             "score": self.score,
             "reasons": list(self.reasons or []),
             "diagnostics": self.diagnostics or {},
+            "access_context": self.access_context or {},
+            "rate_limit_event": self.rate_limit_event or {},
         }
 
 
@@ -71,32 +85,70 @@ def fetch_best_page(
     modes: list[str] | None = None,
     fetchers: dict[str, FetchFn] | None = None,
     browser_options: dict[str, Any] | None = None,
+    session_profile: SessionProfile | dict[str, Any] | None = None,
+    proxy_config: ProxyConfig | dict[str, Any] | None = None,
+    rate_limit_policy: RateLimitPolicy | dict[str, Any] | None = None,
+    rate_limiter: DomainRateLimiter | None = None,
+    stop_on_good_enough: bool = True,
+    skip_browser_after_transport_errors: bool = True,
 ) -> BestFetchResult:
     """Try fetch modes in order and return the highest-quality HTML."""
     selected_modes = modes or ["requests", "curl_cffi", "browser"]
     attempts: list[FetchAttempt] = []
     custom_fetchers = fetchers or {}
     options = browser_options or {}
+    access_config = AccessConfig(
+        session_profile=session_profile if isinstance(session_profile, SessionProfile) else SessionProfile.from_dict(session_profile),
+        proxy=proxy_config if isinstance(proxy_config, ProxyConfig) else ProxyConfig.from_dict(proxy_config),
+        rate_limit=rate_limit_policy if isinstance(rate_limit_policy, RateLimitPolicy) else RateLimitPolicy.from_dict(rate_limit_policy),
+        browser_context=BrowserContextConfig.from_dict((browser_options or {}).get("browser_context")),
+    )
+    session = access_config.session_profile
+    proxy_manager = ProxyManager(access_config.proxy)
+    rate_policy = access_config.rate_limit
+    limiter = rate_limiter or global_rate_limiter(rate_policy)
+    merged_headers = {**(headers or {}), **session.headers_for(url)}
+    proxy_url = proxy_manager.select_proxy(url)
+    access_context = {
+        "session": session.to_safe_dict() if session_profile else {},
+        "proxy": proxy_manager.describe_selection(url),
+        "rate_limit": rate_policy.decide(url).to_dict(),
+        "browser_context": access_config.browser_context.to_safe_dict(),
+    }
 
     for mode in selected_modes:
-        if mode == "browser" and _should_skip_browser_after_transport_errors(attempts):
+        rate_event = limiter.before_request(url, reason=f"fetch:{mode}")
+        if (
+            mode == "browser"
+            and skip_browser_after_transport_errors
+            and _should_skip_browser_after_transport_errors(attempts)
+        ):
             attempt = FetchAttempt(
                 mode="browser",
                 url=url,
                 error="skipped after transport-level fetch errors",
             )
+            attempt.rate_limit_event = rate_event.to_dict()
             attempt.score, attempt.reasons = score_html_attempt(attempt)
             attempts.append(attempt)
             break
         if mode == "browser":
-            attempt = custom_fetchers.get(mode, _fetch_browser)(url, headers, options)  # type: ignore[arg-type]
+            if mode in custom_fetchers:
+                attempt = custom_fetchers[mode](url, merged_headers)  # type: ignore[misc]
+            else:
+                attempt = _fetch_browser(url, merged_headers, options, session, proxy_url)
         else:
-            fetcher = custom_fetchers.get(mode, _fetch_requests if mode == "requests" else _fetch_curl_cffi)
-            attempt = fetcher(url, headers)
+            if mode in custom_fetchers:
+                attempt = custom_fetchers[mode](url, merged_headers)
+            else:
+                fetcher = _fetch_requests if mode == "requests" else _fetch_curl_cffi
+                attempt = fetcher(url, merged_headers, proxy_url)
+        attempt.access_context = access_context
+        attempt.rate_limit_event = rate_event.to_dict()
         attempt.score, attempt.reasons = score_html_attempt(attempt)
         attempts.append(attempt)
 
-        if _is_good_enough(attempt):
+        if stop_on_good_enough and _is_good_enough(attempt):
             break
 
     best = max(attempts, key=lambda item: item.score, default=None)
@@ -138,7 +190,7 @@ def score_html_attempt(attempt: FetchAttempt) -> tuple[int, list[str]]:
         return -100, [f"error:{attempt.error}"]
 
     html = attempt.html or ""
-    diagnostics = diagnose_access(html, url=attempt.url)
+    diagnostics = diagnose_access(html, url=attempt.url, status_code=attempt.status_code)
     attempt.diagnostics = diagnostics
     signals = diagnostics.get("signals", {})
     text_chars = int(signals.get("text_chars") or 0)
@@ -234,12 +286,18 @@ def _should_skip_browser_after_transport_errors(attempts: list[FetchAttempt]) ->
     return all(attempt.error and not attempt.html for attempt in attempts)
 
 
-def _fetch_requests(url: str, headers: dict[str, str] | None = None) -> FetchAttempt:
+def _fetch_requests(
+    url: str,
+    headers: dict[str, str] | None = None,
+    proxy_url: str = "",
+) -> FetchAttempt:
     try:
+        proxy_arg = proxy_url or None
         with httpx.Client(
             follow_redirects=True,
             timeout=httpx.Timeout(20.0, connect=10.0),
             headers=headers,
+            proxy=proxy_arg,
         ) as client:
             response = client.get(url)
             return FetchAttempt(
@@ -247,27 +305,39 @@ def _fetch_requests(url: str, headers: dict[str, str] | None = None) -> FetchAtt
                 url=str(response.url),
                 html=response.text,
                 status_code=response.status_code,
+                response_headers=dict(response.headers),
+                http_version=response.http_version,
             )
     except httpx.HTTPError as exc:
         return FetchAttempt(mode="requests", url=url, error=str(exc))
 
 
-def _fetch_curl_cffi(url: str, headers: dict[str, str] | None = None) -> FetchAttempt:
+def _fetch_curl_cffi(
+    url: str,
+    headers: dict[str, str] | None = None,
+    proxy_url: str = "",
+) -> FetchAttempt:
     try:
         import curl_cffi.requests as curl_requests
 
+        kwargs: dict[str, Any] = {}
+        if proxy_url:
+            kwargs["proxy"] = proxy_url
         response = curl_requests.get(
             url,
             headers=headers,
             timeout=20,
             impersonate="chrome124",
             allow_redirects=True,
+            **kwargs,
         )
         return FetchAttempt(
             mode="curl_cffi",
             url=str(response.url),
             html=response.text,
             status_code=response.status_code,
+            response_headers=dict(getattr(response, "headers", {}) or {}),
+            http_version=str(getattr(response, "http_version", "") or ""),
         )
     except Exception as exc:
         return FetchAttempt(mode="curl_cffi", url=url, error=str(exc))
@@ -277,6 +347,8 @@ def _fetch_browser(
     url: str,
     headers: dict[str, str] | None = None,
     options: dict[str, Any] | None = None,
+    session_profile: SessionProfile | None = None,
+    proxy_url: str = "",
 ) -> FetchAttempt:
     options = options or {}
     result = fetch_rendered_html(
@@ -285,6 +357,10 @@ def _fetch_browser(
         wait_until=str(options.get("wait_until", "domcontentloaded")),
         timeout_ms=int(options.get("timeout_ms", 30000)),
         screenshot=bool(options.get("screenshot", False)),
+        headers=headers,
+        storage_state_path=session_profile.storage_state_path if session_profile else "",
+        proxy_url=proxy_url,
+        browser_context=options.get("browser_context"),
     )
     if result.status == "ok":
         return FetchAttempt(
@@ -292,5 +368,7 @@ def _fetch_browser(
             url=result.url,
             html=result.html,
             status_code=200,
+            response_headers={},
+            http_version="browser",
         )
     return FetchAttempt(mode="browser", url=url, error=result.error)

@@ -12,6 +12,9 @@ from typing import Any
 
 from bs4 import BeautifulSoup
 
+from .access_policy import decide_access
+from .challenge_detector import detect_challenge_signal
+
 
 CHALLENGE_PATTERNS = [
     "cf-challenge",
@@ -36,13 +39,26 @@ API_HINT_RE = re.compile(
 )
 
 
-def diagnose_access(html: str, url: str = "", target_selector: str = "") -> dict[str, Any]:
+def diagnose_access(
+    html: str,
+    url: str = "",
+    target_selector: str = "",
+    status_code: int | None = None,
+    response_headers: dict[str, Any] | None = None,
+    has_authorized_session: bool = False,
+    proxy_enabled: bool = False,
+) -> dict[str, Any]:
     """Return access signals, findings, and safe recommendations."""
     html = html or ""
     soup = BeautifulSoup(html, "lxml")
     text_chars = len(soup.get_text(" ", strip=True))
     scripts = soup.find_all("script")
-    challenge = detect_challenge(html)
+    challenge_details = detect_challenge_signal(
+        html,
+        status_code=status_code,
+        response_headers=response_headers,
+    )
+    challenge = challenge_details.primary_marker
     selector_error = ""
     target_count = 0
     if target_selector:
@@ -65,6 +81,7 @@ def diagnose_access(html: str, url: str = "", target_selector: str = "") -> dict
         "target_count": target_count,
         "selector_error": selector_error,
         "challenge": challenge,
+        "challenge_details": challenge_details.to_dict(),
         "structured_data": structured,
         "api_hints": api_hints[:20],
     }
@@ -131,23 +148,25 @@ def diagnose_access(html: str, url: str = "", target_selector: str = "") -> dict
             "action": {"mode": "http"},
         })
 
+    access_decision = decide_access(
+        {"findings": findings, "signals": signals},
+        status_code=status_code,
+        has_authorized_session=has_authorized_session,
+        proxy_enabled=proxy_enabled,
+    )
+
     return {
         "ok": not bool(challenge),
         "findings": findings,
         "signals": signals,
         "recommendations": recommendations,
+        "access_decision": access_decision.to_dict(),
     }
 
 
 def detect_challenge(html: str) -> str:
     """Return the first challenge marker found in HTML, or an empty string."""
-    if _looks_like_json_payload(html):
-        return ""
-    sample = (html or "")[:200_000].lower()
-    for pattern in CHALLENGE_PATTERNS:
-        if pattern.lower() in sample:
-            return pattern
-    return ""
+    return detect_challenge_signal(html).primary_marker
 
 
 def detect_structured_data(html: str) -> dict[str, Any]:

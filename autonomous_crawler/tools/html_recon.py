@@ -15,6 +15,7 @@ import httpx
 from bs4 import BeautifulSoup, Tag
 
 from .access_diagnostics import diagnose_access, detect_challenge
+from .access_config import AccessConfig
 from .api_candidates import build_api_candidates, build_direct_json_candidate
 from .fetch_policy import BestFetchResult, FetchAttempt, fetch_best_page
 from .site_zoo import fixture_by_url
@@ -344,7 +345,11 @@ def fetch_html(url: str, headers: dict[str, str] | None = None) -> FetchResult:
         return FetchResult(url=url, html="", error=str(exc))
 
 
-def fetch_best_html(url: str, headers: dict[str, str] | None = None) -> BestFetchResult:
+def fetch_best_html(
+    url: str,
+    headers: dict[str, str] | None = None,
+    access_config: dict[str, Any] | None = None,
+) -> BestFetchResult:
     """Fetch the best available HTML for recon, including deterministic mocks."""
     mock = _mock_best_fetch(url)
     if mock is not None:
@@ -366,7 +371,15 @@ def fetch_best_html(url: str, headers: dict[str, str] | None = None) -> BestFetc
         )
 
     merged_headers = {**DEFAULT_RECON_HEADERS, **(headers or {})}
-    return fetch_best_page(url, headers=merged_headers)
+    resolved_access = AccessConfig.from_dict(access_config)
+    return fetch_best_page(
+        url,
+        headers=merged_headers,
+        session_profile=resolved_access.session_profile,
+        proxy_config=resolved_access.proxy,
+        rate_limit_policy=resolved_access.rate_limit,
+        browser_options={"browser_context": resolved_access.browser_context},
+    )
 
 
 def _mock_best_fetch(url: str) -> BestFetchResult | None:

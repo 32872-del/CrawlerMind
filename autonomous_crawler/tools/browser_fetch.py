@@ -11,6 +11,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from .browser_context import BrowserContextConfig, normalize_wait_until
+
 try:
     from playwright.sync_api import sync_playwright, Error as PlaywrightError
 except ImportError:
@@ -29,6 +31,7 @@ class BrowserFetchResult:
     status: str
     error: str = ""
     screenshot_path: str = ""
+    browser_context: dict[str, Any] = field(default_factory=dict)
 
 
 def fetch_rendered_html(
@@ -37,6 +40,10 @@ def fetch_rendered_html(
     wait_until: str = "domcontentloaded",
     timeout_ms: int = 30000,
     screenshot: bool = False,
+    headers: dict[str, str] | None = None,
+    storage_state_path: str = "",
+    proxy_url: str = "",
+    browser_context: BrowserContextConfig | dict[str, Any] | None = None,
 ) -> BrowserFetchResult:
     """Fetch a page using Playwright and return rendered HTML.
 
@@ -46,6 +53,10 @@ def fetch_rendered_html(
         wait_until: Playwright load state: "domcontentloaded", "load", or "networkidle".
         timeout_ms: Navigation timeout in milliseconds.
         screenshot: If True, save a screenshot and return its path.
+        headers: Optional extra HTTP headers for the browser context.
+        storage_state_path: Optional Playwright storage-state file supplied by
+            an authorized user.
+        proxy_url: Optional explicit proxy server URL.
 
     Returns:
         BrowserFetchResult with rendered HTML or error details.
@@ -58,15 +69,24 @@ def fetch_rendered_html(
             error="playwright is not installed",
         )
 
-    valid_wait_until = {"domcontentloaded", "load", "networkidle"}
-    if wait_until not in valid_wait_until:
-        wait_until = "domcontentloaded"
+    wait_until = normalize_wait_until(wait_until, default="domcontentloaded")
+    context_config = (
+        browser_context
+        if isinstance(browser_context, BrowserContextConfig)
+        else BrowserContextConfig.from_dict(browser_context)
+    )
+    context_config = context_config.with_runtime_overrides(
+        headers=headers,
+        storage_state_path=storage_state_path,
+        proxy_url=proxy_url,
+    )
 
     try:
         with sync_playwright() as pw:
-            browser = pw.chromium.launch(headless=True)
+            browser = pw.chromium.launch(**context_config.launch_options())
             try:
-                page = browser.new_page()
+                context = browser.new_context(**context_config.context_options())
+                page = context.new_page()
                 page.goto(url, wait_until=wait_until, timeout=timeout_ms)
 
                 if wait_selector:
@@ -93,6 +113,7 @@ def fetch_rendered_html(
                     html=html,
                     status="ok",
                     screenshot_path=screenshot_path,
+                    browser_context=context_config.to_safe_dict(),
                 )
             finally:
                 browser.close()

@@ -9,6 +9,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 
 from autonomous_crawler.agents.executor import executor_node
+from autonomous_crawler.tools.browser_context import BrowserContextConfig
 from autonomous_crawler.tools.browser_fetch import BrowserFetchResult
 
 
@@ -67,13 +68,16 @@ class TestBrowserSuccessPath(unittest.TestCase):
             "error_log": [],
         })
 
-        mock_fetch.assert_called_once_with(
-            url="https://example.com",
-            wait_selector=".content-loaded",
-            wait_until="networkidle",
-            timeout_ms=60000,
-            screenshot=True,
-        )
+        kwargs = mock_fetch.call_args.kwargs
+        self.assertEqual(kwargs["url"], "https://example.com")
+        self.assertEqual(kwargs["wait_selector"], ".content-loaded")
+        self.assertEqual(kwargs["wait_until"], "networkidle")
+        self.assertEqual(kwargs["timeout_ms"], 60000)
+        self.assertTrue(kwargs["screenshot"])
+        self.assertEqual(kwargs["headers"], {})
+        self.assertEqual(kwargs["storage_state_path"], "")
+        self.assertEqual(kwargs["proxy_url"], "")
+        self.assertIsInstance(kwargs["browser_context"], BrowserContextConfig)
 
     @patch("autonomous_crawler.agents.executor.fetch_rendered_html")
     def test_browser_mode_includes_screenshot_path(self, mock_fetch: MagicMock) -> None:
@@ -256,8 +260,11 @@ class TestBrowserFetchUnit(unittest.TestCase):
         mock_page.url = "https://example.com"
         mock_page.content.return_value = "<html>rendered</html>"
 
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
+
         mock_browser = MagicMock()
-        mock_browser.new_page.return_value = mock_page
+        mock_browser.new_context.return_value = mock_context
 
         mock_pw = MagicMock()
         mock_pw.chromium.launch.return_value = mock_browser
@@ -291,8 +298,11 @@ class TestBrowserFetchUnit(unittest.TestCase):
         mock_page.url = "https://example.com"
         mock_page.content.return_value = "<html>loaded</html>"
 
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
+
         mock_browser = MagicMock()
-        mock_browser.new_page.return_value = mock_page
+        mock_browser.new_context.return_value = mock_context
 
         mock_pw = MagicMock()
         mock_pw.chromium.launch.return_value = mock_browser
@@ -310,8 +320,11 @@ class TestBrowserFetchUnit(unittest.TestCase):
         mock_page.url = "https://example.com"
         mock_page.content.return_value = "<html></html>"
 
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
+
         mock_browser = MagicMock()
-        mock_browser.new_page.return_value = mock_page
+        mock_browser.new_context.return_value = mock_context
 
         mock_pw = MagicMock()
         mock_pw.chromium.launch.return_value = mock_browser

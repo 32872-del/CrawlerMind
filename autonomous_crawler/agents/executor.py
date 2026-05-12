@@ -19,6 +19,8 @@ from ..errors import (
     FETCH_UNSUPPORTED_SCHEME,
     format_error_entry,
 )
+from ..tools.access_config import resolve_access_config
+from ..tools.artifact_manifest import build_browser_artifact_manifest, persist_artifact_bundle
 from ..tools.browser_fetch import fetch_rendered_html
 from ..tools.fnspider_adapter import load_goods_rows, run_fnspider_site_spec
 from ..tools.html_recon import MOCK_RANKING_HTML
@@ -179,6 +181,8 @@ def executor_node(state: dict[str, Any]) -> dict[str, Any]:
         wait_until = strategy.get("wait_until", "domcontentloaded")
         timeout_ms = int(strategy.get("timeout_ms", 30000))
         screenshot = bool(strategy.get("screenshot", False))
+        recon_report = state.get("recon_report", {})
+        access_config = resolve_access_config(state, recon_report if isinstance(recon_report, dict) else {})
 
         browser_result = fetch_rendered_html(
             url=target_url,
@@ -186,15 +190,35 @@ def executor_node(state: dict[str, Any]) -> dict[str, Any]:
             wait_until=wait_until,
             timeout_ms=timeout_ms,
             screenshot=screenshot,
+            headers=access_config.session_profile.headers_for(target_url),
+            storage_state_path=access_config.session_profile.storage_state_path,
+            proxy_url=access_config.proxy_for(target_url),
+            browser_context=access_config.browser_context,
         )
 
         if browser_result.status == "ok":
+            manifest = build_browser_artifact_manifest(
+                target_url=target_url,
+                final_url=browser_result.url,
+                browser_context=browser_result.browser_context,
+                screenshot_path=browser_result.screenshot_path,
+                access_decision=state.get("recon_report", {}).get("access_diagnostics", {}).get("access_decision", {})
+                if isinstance(state.get("recon_report"), dict)
+                else {},
+            )
+            persisted_manifest = persist_artifact_bundle(
+                manifest,
+                run_id=str(state.get("task_id") or target_url),
+                html=browser_result.html,
+            )
             return {
                 "status": "executed",
                 "visited_urls": [browser_result.url],
                 "raw_html": {browser_result.url: browser_result.html},
                 "api_responses": [],
                 "screenshot_path": browser_result.screenshot_path,
+                "browser_context": browser_result.browser_context,
+                "artifact_manifest": persisted_manifest,
                 "messages": state.get("messages", []) + [
                     f"[Executor] Mode=browser, fetched {browser_result.url} ({len(browser_result.html)} chars)"
                 ],

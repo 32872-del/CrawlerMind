@@ -4,6 +4,8 @@ import unittest
 
 from autonomous_crawler.agents.recon import recon_node
 from autonomous_crawler.agents.strategy import strategy_node
+from autonomous_crawler.tools.rate_limiter import DomainRateLimiter
+from autonomous_crawler.tools.rate_limit_policy import RateLimitPolicy
 from autonomous_crawler.tools.fetch_policy import FetchAttempt, fetch_best_page, score_html_attempt
 from autonomous_crawler.tools.html_recon import (
     MOCK_CHALLENGE_HTML,
@@ -118,6 +120,41 @@ class FetchPolicyTests(unittest.TestCase):
         self.assertEqual(result.error, "DNS resolution failed")
         self.assertEqual(result.attempts[-1].mode, "browser")
         self.assertIn("skipped", result.attempts[-1].error)
+
+    def test_fetch_best_page_records_rate_limit_event(self) -> None:
+        sleeps: list[float] = []
+        now = {"value": 0.0}
+
+        def clock() -> float:
+            return now["value"]
+
+        def sleeper(seconds: float) -> None:
+            sleeps.append(seconds)
+            now["value"] += seconds
+
+        limiter = DomainRateLimiter(
+            RateLimitPolicy.from_dict({"default": {"delay_seconds": 2}}),
+            clock=clock,
+            sleeper=sleeper,
+        )
+
+        def weak_fetch(url: str, headers: dict[str, str] | None) -> FetchAttempt:
+            return FetchAttempt(mode="requests", url=url, html="", status_code=500)
+
+        def good_fetch(url: str, headers: dict[str, str] | None, options=None) -> FetchAttempt:
+            return FetchAttempt(mode="browser", url=url, html=MOCK_PRODUCT_HTML, status_code=200)
+
+        result = fetch_best_page(
+            "https://example.com",
+            modes=["requests", "browser"],
+            fetchers={"requests": weak_fetch, "browser": good_fetch},
+            rate_limiter=limiter,
+        )
+
+        self.assertEqual(result.mode, "browser")
+        self.assertEqual(result.attempts[0].rate_limit_event["slept_seconds"], 0.0)
+        self.assertEqual(result.attempts[1].rate_limit_event["slept_seconds"], 2.0)
+        self.assertEqual(sleeps, [2.0])
 
     def test_fetch_best_html_mock_js_shell_records_escalation_trace(self) -> None:
         result = fetch_best_html("mock://js-shell")

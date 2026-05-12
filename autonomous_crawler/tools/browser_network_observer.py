@@ -10,6 +10,8 @@ import json
 from dataclasses import dataclass, field
 from typing import Any
 
+from .browser_context import BrowserContextConfig, normalize_wait_until
+
 try:
     from playwright.sync_api import sync_playwright
 except ImportError:
@@ -65,6 +67,7 @@ class NetworkObservationResult:
     error: str = ""
     entries: list[NetworkEntry] = field(default_factory=list)
     api_candidates: list[dict[str, Any]] = field(default_factory=list)
+    browser_context: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -74,6 +77,7 @@ class NetworkObservationResult:
             "error": self.error,
             "entries": [entry.to_dict() for entry in self.entries],
             "api_candidates": list(self.api_candidates),
+            "browser_context": dict(self.browser_context),
         }
 
 
@@ -85,6 +89,10 @@ def observe_browser_network(
     max_entries: int = 50,
     capture_json_preview: bool = True,
     render_time_ms: int = 0,
+    browser_context: BrowserContextConfig | dict[str, Any] | None = None,
+    headers: dict[str, str] | None = None,
+    storage_state_path: str = "",
+    proxy_url: str = "",
 ) -> NetworkObservationResult:
     """Observe browser network traffic and return API candidates.
 
@@ -98,17 +106,26 @@ def observe_browser_network(
             error="playwright is not installed",
         )
 
-    valid_wait_until = {"domcontentloaded", "load", "networkidle"}
-    if wait_until not in valid_wait_until:
-        wait_until = "networkidle"
+    wait_until = normalize_wait_until(wait_until, default="networkidle")
+    context_config = (
+        browser_context
+        if isinstance(browser_context, BrowserContextConfig)
+        else BrowserContextConfig.from_dict(browser_context)
+    )
+    context_config = context_config.with_runtime_overrides(
+        headers=headers,
+        storage_state_path=storage_state_path,
+        proxy_url=proxy_url,
+    )
 
     entries: list[NetworkEntry] = []
 
     try:
         with sync_playwright() as pw:
-            browser = pw.chromium.launch(headless=True)
+            browser = pw.chromium.launch(**context_config.launch_options())
             try:
-                page = browser.new_page()
+                context = browser.new_context(**context_config.context_options())
+                page = context.new_page()
 
                 def on_response(response: Any) -> None:
                     if len(entries) >= max_entries:
@@ -135,6 +152,7 @@ def observe_browser_network(
                     final_url=final_url,
                     entries=entries,
                     api_candidates=candidates,
+                    browser_context=context_config.to_safe_dict(),
                 )
             finally:
                 browser.close()
@@ -145,6 +163,7 @@ def observe_browser_network(
             error=str(exc),
             entries=entries,
             api_candidates=build_api_candidates_from_entries(entries),
+            browser_context=context_config.to_safe_dict(),
         )
 
 

@@ -2,10 +2,24 @@
 
 ## Current Stage
 
-The project is an early but runnable MVP. The LangGraph workflow exists and can
-complete deterministic fixture crawls, real Baidu realtime hot-search
-extraction, public JSON/GraphQL/API workflows, and one public SPA observed API
-replay workflow on HN Algolia.
+The project is a runnable MVP with a beginner-facing Easy Mode CLI. The
+LangGraph workflow exists and can complete deterministic fixture crawls, real
+Baidu realtime hot-search extraction, public JSON/GraphQL/API workflows, one
+public SPA observed API replay workflow on HN Algolia, and selected ecommerce
+training runs.
+
+The product target has been sharpened on 2026-05-12: CLM should become an
+agent that productizes advanced crawler development, not just a simple scraper.
+The next major capability track is the Access Layer: proxy/session/rate-limit/
+browser-context/challenge-diagnosis infrastructure with explicit compliance
+boundaries.
+
+Access Layer MVP work has started on 2026-05-12. The first shipped slice turns
+advanced access concerns into explicit, testable policy objects: structured
+challenge detection, access decisions, opt-in proxy configuration, authorized
+session profiles, and per-domain rate-limit/backoff rules. The default behavior
+remains deterministic and conservative: no proxy, no CAPTCHA solving, no hidden
+bypass, and no required API keys.
 
 ## Completed
 
@@ -53,6 +67,9 @@ replay workflow on HN Algolia.
 - Multi-Codex collaboration guide added.
 - `run_results.py` CLI added for listing, inspecting, and exporting persisted
   crawl results.
+- Easy Mode CLI added through `clm.py`:
+  `init`, `check`, `crawl`, `smoke`, and `train`. New users should start here
+  instead of using the older development scripts directly.
 - Full-record ZIP package was generated and verified.
 - Error-path hardening: 30 new tests covering unsupported URL schemes, HTTP
   failures, empty HTML, invalid CSS selectors, retry exhaustion, and failure
@@ -117,9 +134,9 @@ replay workflow on HN Algolia.
   optional `CLM_LLM_API_KEY`, and related tuning env vars. The adapter is
   opt-in through `run_skeleton.py --llm` or `CLM_LLM_ENABLED=1`; normal tests
   use fake clients and require no API key or network.
-- Simplified user entrypoint added: copy `clm_config.example.json` to
-  `clm_config.json`, fill API settings, then run `python run_simple.py "<goal>"
-  "<url>"`. Missing config falls back to deterministic mode.
+- Legacy simple entrypoint retained: `run_simple.py` still supports config-file
+  based crawls and LLM diagnostics. Current user-facing docs now prefer
+  `python clm.py ...`.
 - OpenAI-compatible adapter hardened for practical providers: root base URLs
   are normalized to `/v1/chat/completions`, response previews are bounded and
   redacted, content parts and `choices[0].text` are supported, and unsupported
@@ -136,10 +153,9 @@ replay workflow on HN Algolia.
   base_url/model), background workflow passes advisor to graph compiler, and
   `llm_enabled`/`llm_decisions`/`llm_errors` are stored in persisted state.
   11 new tests (38 API tests, 186 suite tests).
-- LLM provider diagnostics added: `python run_simple.py --check-llm` validates
-  `clm_config.json`, prints the resolved endpoint without exposing the API key,
-  and sends a minimal JSON chat request through the same OpenAI-compatible
-  adapter path used by Planner/Strategy.
+- LLM provider diagnostics added. Current Easy Mode path is
+  `python clm.py check --llm`; the legacy path
+  `python run_simple.py --check-llm` remains available.
 - Structured error codes added: 11 machine-readable error code constants
   (`LLM_CONFIG_INVALID`, `LLM_PROVIDER_UNREACHABLE`, `LLM_RESPONSE_INVALID`,
   `FETCH_UNSUPPORTED_SCHEME`, `FETCH_HTTP_ERROR`, `BROWSER_RENDER_FAILED`,
@@ -168,6 +184,87 @@ replay workflow on HN Algolia.
   `recon_report.fetch.selected_mode`, `selected_score`, and `fetch_trace`.
   Strategy keeps browser mode when Recon selected browser-rendered HTML. Pure
   transport failures skip browser launch to avoid slow redundant failures.
+- P1 Access Layer MVP started on 2026-05-12:
+  - `tools/challenge_detector.py` provides structured Cloudflare/CAPTCHA/login/
+    429/access-block classification.
+  - `tools/access_policy.py` converts diagnostics into auditable decisions such
+    as `standard_http`, `browser_render`, `backoff`, `manual_handoff`, and
+    `authorized_browser_review`.
+  - `tools/proxy_manager.py` adds opt-in proxy selection with credential
+    redaction and per-domain routing.
+  - `tools/session_profile.py` adds authorized header/cookie/storage-state
+    profile modeling with domain scoping and safe summaries.
+  - `tools/rate_limit_policy.py` adds per-domain delay, retry cap, and backoff
+    decisions.
+  - `fetch_policy.fetch_best_page()` can now receive access config and records
+    redacted access context in fetch attempts.
+  - Recon can pass access config through to fetch policy and stores a safe
+    access context in `recon_report.access_config`.
+- Browser Context foundation added on 2026-05-12:
+  - `tools/browser_context.py` centralizes Playwright launch/context settings:
+    headless, user agent, viewport, locale, timezone, extra headers,
+    storage-state path, proxy URL, JavaScript toggle, HTTPS-error handling, and
+    color scheme.
+  - `browser_fetch.fetch_rendered_html()` and
+    `browser_network_observer.observe_browser_network()` now use the same
+    context model, so rendering and API observation can run under a consistent
+    browser environment.
+  - Browser context summaries redact sensitive headers and proxy credentials.
+  - Executor browser mode can receive `access_config.browser_context` from
+    workflow state or recon constraints and records the safe context used.
+- Access Layer QA/docs/audit accepted on 2026-05-12:
+  - Worker QA expanded Access Layer coverage to include proxy default-off,
+    session redaction, 429 backoff decisions, challenge no-auto-solve behavior,
+    and fetch-trace leak prevention.
+  - Access Layer runbook added at `docs/runbooks/ACCESS_LAYER.md`.
+  - Safety audit accepted; supervisor fixed two product-hardening findings:
+    empty `allowed_domains` now emits a global-session warning, and
+    `storage_state_path` is redacted in safe summaries.
+- Unified Access Config and Artifact Manifest foundation added on 2026-05-12:
+  - `tools/access_config.py` resolves session/profile/proxy/rate/browser
+    configuration from workflow state and recon constraints into typed objects.
+  - Recon and Executor now share the same access-config resolver.
+  - Browser executor passes resolved session headers, Playwright storage state,
+    proxy URL, and browser context to browser fetch.
+  - `tools/artifact_manifest.py` adds serializable recon/browser evidence
+    manifests for future artifact persistence and enterprise debugging.
+  - Recon and browser executor results now include `artifact_manifest`.
+- Rate-limit enforcement and artifact persistence started on 2026-05-12:
+  - `tools/rate_limiter.py` adds executable per-domain throttling with
+    injectable clock/sleeper for deterministic tests.
+  - `fetch_policy.fetch_best_page()` now enforces the configured rate-limit
+    delay before each fetch-mode attempt and records `rate_limit_event` in each
+    fetch attempt trace.
+  - `artifact_manifest.persist_artifact_bundle()` writes `manifest.json`,
+    optional `snapshot.html`, and optional `network_trace.json` under
+    `autonomous_crawler/tools/runtime/artifacts/`.
+  - Recon and browser executor now persist artifact bundles so complex-site
+    failures have a replay/debug evidence index.
+- CAP-1.2 HTTP/TLS transport diagnostics started on 2026-05-12:
+  - `tools/transport_diagnostics.py` compares transport modes for a target URL:
+    `requests`, `curl_cffi`, and browser.
+  - Reports status-code differences, HTTP-version differences, challenge
+    differences, mode-specific transport errors, response header clues, and
+    selected transport recommendation.
+  - Diagnostics now include transport profile labels such as `httpx-default`,
+    `curl_cffi:chrome124`, and `playwright-browser-context`, plus server-header
+    and edge/cache-header difference findings.
+  - `fetch_policy.FetchAttempt` now records response headers and HTTP version
+    where available.
+  - Recon can run transport diagnostics through
+    `constraints.transport_diagnostics=true`.
+  - This is a diagnostic foundation, not full JA3/ALPN/SNI fingerprint control
+    yet.
+- CAP-4.4 Browser Interception and CAP-2.1 JS Asset Inventory accepted on
+  2026-05-12:
+  - `tools/browser_interceptor.py` adds Playwright route interception,
+    resource blocking, JS/API response metadata capture, and init-script
+    injection.
+  - `tools/js_asset_inventory.py` extracts script assets and ranks JS clues:
+    signature/token/encryption/challenge/fingerprint keywords, API endpoints,
+    GraphQL strings, WebSocket URLs, and sourcemap references.
+  - These modules are still capability foundations. They are not yet wired into
+    the main recon/executor loop as automatic JS-capture-to-analysis evidence.
 - P1 crawl foundation completed for real-site training:
   - `tools/site_zoo.py` provides static, SPA, structured-data, challenge,
     API-backed, product-detail, and variant-detail fixtures.
@@ -253,8 +350,33 @@ replay workflow on HN Algolia.
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 447 tests (skipped=4)
+Ran 647 tests (skipped=4)
 OK
+```
+
+Latest capability verification on 2026-05-12:
+
+```text
+python -m unittest autonomous_crawler.tests.test_transport_diagnostics autonomous_crawler.tests.test_browser_interceptor autonomous_crawler.tests.test_js_asset_inventory -v
+Ran 108 tests
+OK
+```
+
+Latest Easy Mode verification on 2026-05-11:
+
+```text
+python -m unittest autonomous_crawler.tests.test_clm_cli -v
+Ran 7 tests
+OK
+
+python clm.py check --config dev_logs/runtime/clm_test_config.json
+OK
+
+python clm.py smoke --kind runner
+accepted: true
+
+python clm.py crawl "collect product titles" mock://catalog --config dev_logs/runtime/clm_test_config.json --no-llm --output dev_logs/runtime/clm_mock_output.json
+Final Status: completed
 ```
 
 Additional verification on 2026-05-09:
@@ -313,16 +435,23 @@ OK
 
 ## Next Development Goal
 
-Move from the local MVP toward a more robust crawl service:
+Move from a runnable engineering MVP toward a simpler user-facing crawl tool
+and then a more robust crawl service:
 
 ```text
-resumable runner + profile-driven crawl execution + broader dynamic-page training
+Easy Mode CLI + Access Layer + resumable runner + profile-driven crawl execution + broader dynamic-page training
+```
+
+Reference roadmap:
+
+```text
+docs/plans/2026-05-12_TOP_CRAWLER_CAPABILITY_ROADMAP.md
 ```
 
 The last verified real LLM-assisted workflow is:
 
 ```text
-python run_simple.py "collect top 30 hot searches" https://top.baidu.com/board?tab=realtime
+python clm.py crawl "collect top 30 hot searches" https://top.baidu.com/board?tab=realtime --llm
 Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM errors: 0
 ```
 
@@ -416,3 +545,7 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
   site, but real runs need incremental checkpointing, fetch fallback for empty
   HTTP 200 responses, and profile-based field extraction. Known gap: Tatuum
   color extraction remains incomplete even though the site exposes color data.
+27. ~~Add CLM Easy Mode user entrypoint.~~ Done 2026-05-11.
+    `clm.py` now provides `init`, `check`, `crawl`, `smoke`, and `train`.
+    README and platform quick starts now use `clm.py` as the primary user path.
+    `run_simple.py` remains as a legacy/developer compatibility command.
