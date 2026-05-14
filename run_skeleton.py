@@ -19,6 +19,7 @@ sys.path.insert(0, ".")
 from autonomous_crawler.llm import OpenAICompatibleAdvisor, PlanningAdvisor
 from autonomous_crawler.llm import LLMConfigurationError
 from autonomous_crawler.storage import save_crawl_result
+from autonomous_crawler.tools.anti_bot_report import summarize_anti_bot_report
 from autonomous_crawler.workflows.crawl_graph import compile_crawl_graph
 
 
@@ -113,6 +114,21 @@ def run_crawl(
     print(f"  Mode: {strategy.get('mode', '?')}")
     print(f"  Method: {strategy.get('extraction_method', '?')}")
     print(f"  Rationale: {strategy.get('rationale', '?')}")
+
+    anti_bot_report = strategy.get("anti_bot_report") or {}
+    if anti_bot_report:
+        summary = summarize_anti_bot_report(anti_bot_report)
+        print("\n--- AntiBot Report ---")
+        print(f"  Risk: {summary['risk_level']} ({summary['risk_score']}/100)")
+        print(f"  Action: {summary['recommended_action']}")
+        if summary.get("categories"):
+            print(f"  Categories: {', '.join(summary['categories'])}")
+        for finding in summary.get("top_findings", []):
+            print(
+                "  - "
+                f"{finding.get('code', '?')}: "
+                f"{finding.get('summary', '?')}"
+            )
 
     decisions = final_state.get("llm_decisions") or []
     if decisions:

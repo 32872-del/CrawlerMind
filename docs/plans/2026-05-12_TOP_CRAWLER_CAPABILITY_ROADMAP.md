@@ -27,31 +27,29 @@ diagnose access problems, choose an execution strategy, inspect browser/API
 traffic, manage long-running jobs, preserve evidence, and help developers build
 site-specific profiles without hard-coding every site into the core.
 
-## Safety Boundary
+## Capability Direction
 
-CLM should support authorized advanced crawling. It should not become a default
-black-box bypass or abuse tool.
+CLM should support advanced crawler development as a productized workflow. The
+capability layer should be strong enough for developers and enterprise teams to
+handle difficult public or customer-approved targets without hand-writing a new
+framework every time.
 
-Allowed product direction:
+Core product direction:
 
 - diagnose Cloudflare/CAPTCHA/login/access-control pages
-- support user-provided authorized sessions and cookies
-- support proxy configuration and health checks
+- support user-provided sessions, cookies, headers, browser profiles, and site
+  profiles
+- support proxy configuration, rotation, health checks, and provider adapters
 - support browser rendering, network observation, screenshots, OCR, and visual
   field detection
-- generate reverse-engineering reports for public/authorized data flows
-- keep rate limits, retry caps, and domain politeness controls
+- generate reverse-engineering reports for API/JS/signature data flows
+- build optional runtime tracks for CAPTCHA/OCR, protected browser profiles,
+  JS hook/sandbox analysis, and long-running spider execution
+- keep rate limits, retry caps, domain politeness controls, and audit evidence
+  as runtime/governance configuration
 
-Not a default product direction:
-
-- automatic CAPTCHA cracking as the standard path
-- stealing or replaying private authenticated tokens
-- bypassing login or paywalls without authorization
-- hostile Cloudflare challenge circumvention
-- credential/proxy black-box abuse
-
-If a feature can cross the line, implement it as diagnosis, manual handoff, or
-authorized-plugin integration with explicit user configuration and logs.
+Usage rules, customer responsibility, release terms, and commercial deployment
+policy live in `docs/governance/CRAWLING_GOVERNANCE.md`.
 
 ## Capability Gap Matrix
 
@@ -61,10 +59,10 @@ authorized-plugin integration with explicit user configuration and logs.
 | TLS/browser fingerprint | JA3/HTTP2/browser consistency awareness | `curl_cffi` exists through fnspider, not productized | needs access strategy layer |
 | Playwright/browser | rendered DOM, screenshots, context control, network observation | browser fetch, screenshots, network observer MVP | needs context manager, storage state, routing, artifacts |
 | Scrapy/Selenium | framework-level crawler compatibility | no Scrapy/Selenium integration | likely optional adapters, not core dependency |
-| API replay | observe XHR/fetch/GraphQL, replay public data APIs | API candidate observation and replay MVP | needs stronger pagination, auth boundary, profiles |
+| API replay | observe XHR/fetch/GraphQL, replay data APIs | API candidate observation and replay MVP | needs stronger pagination, auth profiles, validation |
 | JS reverse engineering | AST, hooks, signatures, Wasm, CDP | not implemented | future expert-assist module |
 | Mobile reverse engineering | Frida/Xposed/SSL pinning analysis | not implemented | out of MVP; possible future external integration |
-| CAPTCHA/OCR | detect, classify, solve or handoff | detect only; no OCR/solver | implement visual diagnosis/manual handoff first |
+| CAPTCHA/OCR | detect, classify, solve or handoff | detection only; OCR/solver planned | implement VisualRecon and provider interface |
 | Proxy pool | config, rotation, health score, per-domain routing | fnspider traces only; no CLM manager | high-priority Access Layer gap |
 | Session/cookies | authorized cookie/localStorage profiles | not productized | high-priority Access Layer gap |
 | Rate limiting | per-domain politeness, backoff, retry caps | partial runner/frontier basis | high-priority reliability gap |
@@ -74,6 +72,32 @@ authorized-plugin integration with explicit user configuration and logs.
 | Compliance/governance | risk classification, logs, data handling | safety docs exist | needs explicit access policy engine |
 
 ## Target Architecture Layers
+
+### Layer 0: Native Crawler Backend Absorption
+
+Purpose: turn proven crawler-engine capabilities into CLM-owned runtime
+modules instead of leaving them as scattered tool calls or third-party wrappers.
+
+Current main source:
+
+```text
+F:\datawork\Scrapling-0.4.8
+```
+
+Near-term target:
+
+- absorb static fetch behavior into `NativeFetchRuntime`
+- absorb parser/adaptive selector behavior into `NativeParserRuntime`
+- absorb browser/protected/session/proxy behavior into CLM browser runtime
+- absorb spider scheduler/checkpoint/request-result concepts into BatchRunner
+- keep transition adapters only as comparison baselines until native modules are
+  stronger
+
+Tracking docs:
+
+- `docs/plans/2026-05-14_SCRAPLING_FIRST_RUNTIME_PLAN.md`
+- `docs/plans/2026-05-14_SCRAPLING_ABSORPTION_RECORD.md`
+- `docs/runbooks/SCRAPLING_FIRST_RUNTIME.md`
 
 ### Layer 1: Easy Mode
 
@@ -197,17 +221,17 @@ Goal: stop treating real-world access problems as random failures.
 
 Deliverables:
 
-- `access_policy.py`: safe boundaries and risk classification
+- `access_policy.py`: strategy classification and governance hooks
 - `proxy_manager.py`: config model, disabled default, health check hooks
-- `session_profile.py`: authorized cookies/headers/storage-state model
+- `session_profile.py`: cookies/headers/storage-state model
 - `rate_limit_policy.py`: per-domain delay, retry cap, backoff
 - `challenge_detector.py`: structured Cloudflare/CAPTCHA/login/429 detection
-- docs/runbook for authorized sessions and proxies
+- docs/runbook for sessions, proxies, and runtime profiles
 
 Acceptance:
 
-- no real proxy credentials in repo
-- no CAPTCHA solving by default
+- redacted proxy/session values in repo outputs
+- CAPTCHA/OCR provider track designed as a plug-in capability
 - deterministic tests for proxy/session/rate-limit decisions
 - crawl final state records access decisions
 
@@ -220,14 +244,14 @@ Deliverables:
 - browser context config: UA, viewport, locale, timezone, storage_state
 - optional screenshot artifact per failure/challenge
 - network observation artifacts with redacted headers
-- stronger API replay guardrails
-- POST pagination loop support where safe
+- stronger API replay validation
+- POST pagination loop support
 
 Acceptance:
 
 - local SPA tests
 - one public API-backed SPA training target
-- no private token replay
+- auth/profile handling documented in governance and runtime config
 
 ### P3: Profile System
 
@@ -259,13 +283,13 @@ Deliverables:
 
 Acceptance:
 
-- no CAPTCHA solving by default
-- visual extraction helps fields or diagnostics on controlled fixtures
+- OCR/layout extraction helps fields or diagnostics on controlled fixtures
+- CAPTCHA/OCR provider interface has a clear plug-in contract
 
 ### P5: Expert Reverse-Engineering Assist
 
-Goal: assist developers with JS/API analysis while preserving legal/ethical
-boundaries.
+Goal: assist developers with JS/API analysis and turn repeatable reverse
+engineering work into CLM-supported workflows.
 
 Deliverables:
 
@@ -278,7 +302,7 @@ Deliverables:
 Acceptance:
 
 - reports evidence and hypotheses
-- does not automatically bypass access controls
+- supports profile generation, hook planning, and request-building hypotheses
 
 ## Strategic Decision
 

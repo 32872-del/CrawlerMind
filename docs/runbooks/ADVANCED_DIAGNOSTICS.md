@@ -3,22 +3,13 @@
 This document explains CLM's advanced diagnostics for open-source users,
 new team members, and enterprise evaluators.
 
-These capabilities help explain why a crawl is hard. They are not bypass tools.
-Most of them are opt-in, evidence-only, or still initial foundations.
+These capabilities explain why a crawl is hard and provide the evidence needed
+to choose a stronger runtime, profile, proxy/session configuration, API replay
+path, browser path, or future reverse-engineering workflow.
 
-## Safety Summary
-
-CLM does not:
-
-- crack login systems
-- solve or bypass CAPTCHAs by default
-- automatically bypass Cloudflare or managed challenges
-- recover private keys, API secrets, session cookies, or signing keys
-- run a production proxy platform by default
-- perform full JavaScript reverse engineering
-
-Advanced diagnostics should be used on public pages, owned systems, test
-fixtures, or targets where you have explicit authorization.
+Usage policy, customer authorization language, and commercial deployment rules
+belong in `docs/governance/CRAWLING_GOVERNANCE.md`. This runbook focuses on
+capability shape, inputs, outputs, and maturity.
 
 ## Maturity Labels
 
@@ -26,7 +17,7 @@ fixtures, or targets where you have explicit authorization.
 |---|---|
 | `production-ready` | Default path or stable user-facing behavior with broad tests |
 | `opt-in` | Must be enabled through constraints or configuration |
-| `evidence-only` | Produces diagnostics, reports, hints, or warnings; does not execute bypasses |
+| `evidence-only` | Produces diagnostics, reports, hints, or warnings; does not execute runtime actions by itself |
 | `initial` | Useful foundation exists, but it is not a complete product feature |
 | `mocked only` | Mostly validated through mocks/fixtures, not real external targets |
 | `advisory` | Can inform Strategy output, but does not own final routing decisions |
@@ -99,12 +90,12 @@ recon_report.transport_diagnostics
 crawl_strategy.strategy_evidence.signals[source=transport]
 ```
 
-What it does not do:
+Growth areas:
 
-- no JA3 spoofing or TLS fingerprint control
-- no ALPN/SNI tuning
-- no hidden bypass
-- no automatic retry storm against protected targets
+- JA3 evidence and TLS fingerprint control
+- ALPN/SNI tuning
+- impersonation-profile selection
+- adaptive retry/backoff based on transport outcome
 
 ## Browser Interception
 
@@ -142,13 +133,12 @@ recon_report.js_evidence
 crawl_strategy.strategy_evidence.signals[source=js]
 ```
 
-What it does not do:
+Growth areas:
 
-- not enabled by default
-- no request rewriting as a production feature yet
-- no full JS bundle archival policy yet
-- no stealth mode
-- no CAPTCHA or challenge bypass
+- request rewriting as a production feature
+- full JS bundle archival policy
+- stronger browser runtime profiles
+- integration with the Scrapling protected browser runtime
 
 ## Browser Network Observation
 
@@ -184,12 +174,12 @@ recon_report.api_candidates
 crawl_strategy.strategy_evidence.signals[source=api]
 ```
 
-What it does not do:
+Growth areas:
 
-- no credential theft
-- no login bypass
-- no private API authorization bypass
-- no automatic replay of unsafe or blocked API candidates
+- richer API authorization profile support
+- safer blocked-candidate classification
+- stronger replay validation before Strategy uses a candidate
+- pagination and cursor inference across more real sites
 
 ## WebSocket Observation
 
@@ -224,13 +214,12 @@ recon_report.websocket_summary
 crawl_strategy.strategy_evidence.signals[source=websocket]
 ```
 
-What it does not do:
+Growth areas:
 
-- no frame replay
-- no protocol reverse engineering
-- no binary protocol decoding
-- no WebSocket message mutation
-- no login or challenge bypass
+- frame replay in controlled training fixtures
+- protocol reverse-engineering reports
+- binary protocol decoding
+- WebSocket message mutation for authorized test harnesses
 
 ## Runtime Fingerprint Probe
 
@@ -263,12 +252,12 @@ recon_report.browser_fingerprint_probe
 crawl_strategy.strategy_evidence.signals[source=fingerprint]
 ```
 
-What it does not do:
+Growth areas:
 
-- no stealth or anti-fingerprint spoofing
-- no fingerprint pool rotation
-- no promise that a target will accept the browser profile
-- no CAPTCHA or Cloudflare bypass
+- browser fingerprint pool rotation
+- runtime/config fingerprint consistency scoring
+- stronger browser identity profiles
+- real-site calibration against accepted and rejected profiles
 
 ## JS Evidence And Crypto Evidence
 
@@ -302,15 +291,15 @@ crawl_strategy.strategy_evidence.signals[source=js]
 crawl_strategy.strategy_evidence.signals[source=crypto]
 ```
 
-What it does not do:
+Growth areas:
 
-- no full AST parser yet
-- no deobfuscation
-- no source-map download by default
-- no JS execution
-- no key recovery
-- no signature bypass
-- no CAPTCHA solving
+- full AST parser
+- deobfuscation workflow
+- source-map discovery and download
+- sandboxed JS execution
+- signature-function localization
+- hook-assisted runtime tracing
+- optional CAPTCHA/OCR provider integrations
 
 ## Proxy Pool And Proxy Health
 
@@ -356,13 +345,13 @@ fetch_trace.attempts[].access_context
 autonomous_crawler/storage/runtime/proxy_health.sqlite3
 ```
 
-What it does not do:
+Growth areas:
 
-- no proxy is used by default
-- no bundled paid proxy provider
-- no automatic anti-bot bypass
-- no guarantee that a proxy will work on a target
-- no cross-process production proxy platform yet
+- bundled provider adapter examples
+- production proxy quality scoring
+- cross-process proxy health sharing
+- BatchRunner proxy metrics
+- real provider smoke tests
 
 ## StrategyEvidenceReport
 
@@ -397,13 +386,13 @@ crawl_strategy.reverse_engineering_hints
 crawl_strategy.api_replay_warning
 ```
 
-What it does not do:
+Growth areas:
 
-- does not replace deterministic final mode selection yet
-- does not execute JS or hooks
-- does not bypass signatures or challenges
-- does not make blocked API replay safe
-- does not guarantee crawl success
+- allow scorecard to influence final mode in well-tested cases
+- execute JS hooks through a sandboxed reverse-engineering path
+- connect signature evidence to request-building profiles
+- promote blocked API candidates only after replay validation
+- calibrate success prediction against training data
 
 ## AntiBotReport
 
@@ -433,13 +422,12 @@ Output:
 crawl_strategy.anti_bot_report
 ```
 
-What it does not do:
+Growth areas:
 
-- no CAPTCHA solving
-- no login bypass
-- no automatic Cloudflare or managed-challenge bypass
-- no signed API replay
-- no automatic proxy enablement
+- plug AntiBotReport into CLI/API summaries
+- calibrate risk scores on real training cases
+- connect report categories to stronger runtime profiles
+- integrate optional OCR/CAPTCHA/provider tracks when those modules land
 
 ## How To Read The Evidence
 
@@ -465,8 +453,9 @@ Use this rough interpretation:
 3. Read `recon_report` first, then `crawl_strategy`.
 4. Prefer public APIs or stable DOM when evidence supports them.
 5. Treat challenge, crypto, fingerprint, and proxy evidence as risk signals.
-6. Escalate to manual review when the page requires login, CAPTCHA, or managed
-   challenge handling.
+6. When evidence points to a harder target, decide whether to use a stronger
+   runtime profile, a site profile, a reverse-engineering task, or a governance
+   review.
 
 ## Related Docs
 

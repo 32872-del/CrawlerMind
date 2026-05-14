@@ -9,6 +9,8 @@ from pathlib import Path
 from collections.abc import Iterator
 from typing import Any
 
+from ..tools.anti_bot_report import summarize_anti_bot_report
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DB_PATH = PROJECT_ROOT / "autonomous_crawler" / "storage" / "runtime" / "crawl_results.sqlite3"
@@ -55,12 +57,19 @@ class CrawlResultStore:
                     item_count INTEGER NOT NULL DEFAULT 0,
                     confidence REAL NOT NULL DEFAULT 0,
                     is_valid INTEGER NOT NULL DEFAULT 0,
+                    anti_bot_summary_json TEXT NOT NULL DEFAULT '{}',
                     final_state_json TEXT NOT NULL,
                     error_log_json TEXT NOT NULL,
                     created_at TEXT NOT NULL,
                     updated_at TEXT NOT NULL
                 )
                 """
+            )
+            _ensure_column(
+                conn,
+                table="crawl_tasks",
+                column="anti_bot_summary_json",
+                ddl="ALTER TABLE crawl_tasks ADD COLUMN anti_bot_summary_json TEXT NOT NULL DEFAULT '{}'",
             )
             conn.execute(
                 """
@@ -102,6 +111,8 @@ class CrawlResultStore:
         now = utc_now_iso()
         final_state_json = _to_json(state)
         error_log_json = _to_json(state.get("error_log") or [])
+        anti_bot_summary = _build_anti_bot_summary(state)
+        anti_bot_summary_json = _to_json(anti_bot_summary)
 
         with self.connection() as conn:
             existing = conn.execute(
@@ -113,10 +124,10 @@ class CrawlResultStore:
                 """
                 INSERT INTO crawl_tasks (
                     task_id, user_goal, target_url, status, item_count,
-                    confidence, is_valid, final_state_json, error_log_json,
-                    created_at, updated_at
+                    confidence, is_valid, anti_bot_summary_json,
+                    final_state_json, error_log_json, created_at, updated_at
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(task_id) DO UPDATE SET
                     user_goal = excluded.user_goal,
                     target_url = excluded.target_url,
@@ -124,6 +135,7 @@ class CrawlResultStore:
                     item_count = excluded.item_count,
                     confidence = excluded.confidence,
                     is_valid = excluded.is_valid,
+                    anti_bot_summary_json = excluded.anti_bot_summary_json,
                     final_state_json = excluded.final_state_json,
                     error_log_json = excluded.error_log_json,
                     updated_at = excluded.updated_at
@@ -136,6 +148,7 @@ class CrawlResultStore:
                     int(extracted.get("item_count") or len(items)),
                     float(extracted.get("confidence") or 0.0),
                     1 if validation.get("is_valid") else 0,
+                    anti_bot_summary_json,
                     final_state_json,
                     error_log_json,
                     created_at,
@@ -193,7 +206,8 @@ class CrawlResultStore:
             rows = conn.execute(
                 """
                 SELECT task_id, user_goal, target_url, status, item_count,
-                       confidence, is_valid, created_at, updated_at
+                       confidence, is_valid, anti_bot_summary_json, final_state_json,
+                       created_at, updated_at
                 FROM crawl_tasks
                 ORDER BY updated_at DESC
                 LIMIT ?
@@ -216,6 +230,15 @@ def list_crawl_results(limit: int = 20, db_path: str | Path | None = None) -> li
 
 
 def _row_to_task(row: sqlite3.Row, include_final_state: bool = True) -> dict[str, Any]:
+    final_state = None
+    if "final_state_json" in row.keys() and (include_final_state or "anti_bot_summary_json" in row.keys()):
+        try:
+            final_state = json.loads(row["final_state_json"])
+        except (TypeError, ValueError, json.JSONDecodeError):
+            final_state = None
+    anti_bot_summary = _json_or_none(row["anti_bot_summary_json"]) if "anti_bot_summary_json" in row.keys() else None
+    if (anti_bot_summary is None or anti_bot_summary == {}) and isinstance(final_state, dict):
+        anti_bot_summary = _build_anti_bot_summary(final_state)
     result = {
         "task_id": row["task_id"],
         "user_goal": row["user_goal"],
@@ -224,11 +247,12 @@ def _row_to_task(row: sqlite3.Row, include_final_state: bool = True) -> dict[str
         "item_count": row["item_count"],
         "confidence": row["confidence"],
         "is_valid": bool(row["is_valid"]),
+        "anti_bot_summary": anti_bot_summary,
         "created_at": row["created_at"],
         "updated_at": row["updated_at"],
     }
-    if include_final_state and "final_state_json" in row.keys():
-        result["final_state"] = json.loads(row["final_state_json"])
+    if include_final_state and final_state is not None:
+        result["final_state"] = final_state
         result["error_log"] = json.loads(row["error_log_json"])
     return result
 
@@ -241,3 +265,25 @@ def _optional_text(value: Any) -> str | None:
 
 def _to_json(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, default=str)
+
+
+def _json_or_none(value: Any) -> Any:
+    if value in (None, ""):
+        return None
+    try:
+        return json.loads(value)
+    except (TypeError, ValueError, json.JSONDecodeError):
+        return None
+
+
+def _build_anti_bot_summary(state: dict[str, Any]) -> dict[str, Any]:
+    strategy = state.get("crawl_strategy") if isinstance(state.get("crawl_strategy"), dict) else {}
+    anti_bot_report = strategy.get("anti_bot_report") if isinstance(strategy.get("anti_bot_report"), dict) else {}
+    return summarize_anti_bot_report(anti_bot_report)
+
+
+def _ensure_column(conn: sqlite3.Connection, *, table: str, column: str, ddl: str) -> None:
+    existing = conn.execute(f"PRAGMA table_info({table})").fetchall()
+    if any(str(row["name"]) == column for row in existing):
+        return
+    conn.execute(ddl)

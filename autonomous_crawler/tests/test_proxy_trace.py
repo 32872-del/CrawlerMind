@@ -437,5 +437,158 @@ class CredentialSafetyTests(unittest.TestCase):
             trace.selected = True  # type: ignore[misc]
 
 
+# ======================================================================
+# Executor proxy_trace integration (CAP-3.3 reporting)
+# ======================================================================
+
+class ExecutorProxyTraceTests(unittest.TestCase):
+    """Verify executor_node includes proxy_trace in all return paths."""
+
+    def _run_executor(self, state: dict) -> dict:
+        from autonomous_crawler.agents.executor import executor_node
+        return executor_node(state)
+
+    def test_mock_products_has_proxy_trace(self) -> None:
+        result = self._run_executor({
+            "target_url": "mock://products",
+            "crawl_strategy": {"mode": "http"},
+            "messages": [],
+            "error_log": [],
+        })
+        self.assertIn("proxy_trace", result)
+        trace = result["proxy_trace"]
+        self.assertIsInstance(trace, dict)
+        self.assertIn("selected", trace)
+        self.assertIn("source", trace)
+
+    def test_mock_ranking_has_proxy_trace(self) -> None:
+        result = self._run_executor({
+            "target_url": "mock://ranking",
+            "crawl_strategy": {"mode": "http"},
+            "messages": [],
+            "error_log": [],
+        })
+        self.assertIn("proxy_trace", result)
+
+    def test_mock_json_direct_has_proxy_trace(self) -> None:
+        result = self._run_executor({
+            "target_url": "mock://json-direct",
+            "crawl_strategy": {"mode": "api_intercept"},
+            "messages": [],
+            "error_log": [],
+        })
+        self.assertIn("proxy_trace", result)
+
+    def test_default_proxy_disabled(self) -> None:
+        """Without access_config, proxy should be disabled."""
+        result = self._run_executor({
+            "target_url": "mock://products",
+            "crawl_strategy": {"mode": "http"},
+            "messages": [],
+            "error_log": [],
+        })
+        trace = result["proxy_trace"]
+        self.assertFalse(trace["selected"])
+        self.assertEqual(trace["source"], "disabled")
+
+    def test_proxy_trace_with_pool_config(self) -> None:
+        """When access_config has proxy pool, trace should reflect it."""
+        result = self._run_executor({
+            "target_url": "mock://products",
+            "crawl_strategy": {"mode": "http"},
+            "access_config": {
+                "proxy": {
+                    "enabled": True,
+                    "pool": {
+                        "enabled": True,
+                        "endpoints": ["http://pool.proxy:8080"],
+                    },
+                },
+            },
+            "messages": [],
+            "error_log": [],
+        })
+        trace = result["proxy_trace"]
+        self.assertTrue(trace["selected"])
+        self.assertIn("pool", trace["source"])
+        self.assertEqual(trace["provider"], "static")
+
+    def test_proxy_trace_with_per_domain(self) -> None:
+        """Per-domain proxy should appear in trace source."""
+        result = self._run_executor({
+            "target_url": "mock://products",
+            "crawl_strategy": {"mode": "http"},
+            "access_config": {
+                "proxy": {
+                    "enabled": True,
+                    "per_domain": {"mock": "http://domain.proxy:8080"},
+                },
+            },
+            "messages": [],
+            "error_log": [],
+        })
+        trace = result["proxy_trace"]
+        # mock://products has no hostname, so per_domain won't match
+        # but proxy is enabled, so it should show as enabled (not disabled)
+        self.assertNotEqual(trace["source"], "disabled")
+
+    def test_proxy_trace_no_credentials_leaked(self) -> None:
+        """Executor proxy_trace must never contain plaintext credentials."""
+        result = self._run_executor({
+            "target_url": "mock://products",
+            "crawl_strategy": {"mode": "http"},
+            "access_config": {
+                "proxy": {
+                    "enabled": True,
+                    "default_proxy": "http://admin:topsecret@proxy.example:8080",
+                },
+            },
+            "messages": [],
+            "error_log": [],
+        })
+        trace_str = str(result["proxy_trace"])
+        self.assertNotIn("topsecret", trace_str)
+        self.assertNotIn("admin:topsecret", trace_str)
+        self.assertIn("***", trace_str)
+
+    def test_proxy_trace_in_failed_fnspider(self) -> None:
+        """Failed fnspider path still includes proxy_trace."""
+        result = self._run_executor({
+            "target_url": "mock://products",
+            "crawl_strategy": {"mode": "http", "engine": "fnspider", "site_spec_draft": {}},
+            "messages": [],
+            "error_log": [],
+        })
+        # fnspider with empty spec will fail, but proxy_trace should still be present
+        self.assertIn("proxy_trace", result)
+
+    def test_proxy_trace_default_http_mode(self) -> None:
+        """Default HTTP mode (non-mock) includes proxy_trace on scheme error."""
+        result = self._run_executor({
+            "target_url": "ftp://example.com/file",
+            "crawl_strategy": {"mode": "http"},
+            "messages": [],
+            "error_log": [],
+        })
+        self.assertIn("proxy_trace", result)
+        self.assertEqual(result["status"], "failed")
+        self.assertEqual(result["error_code"], "FETCH_UNSUPPORTED_SCHEME")
+
+    def test_proxy_trace_shape_consistent(self) -> None:
+        """Proxy trace dict always has the core fields."""
+        result = self._run_executor({
+            "target_url": "mock://products",
+            "crawl_strategy": {"mode": "http"},
+            "messages": [],
+            "error_log": [],
+        })
+        trace = result["proxy_trace"]
+        self.assertIn("selected", trace)
+        self.assertIn("proxy", trace)
+        self.assertIn("source", trace)
+        # Optional fields should not appear when empty
+        self.assertNotIn("errors", trace)
+
+
 if __name__ == "__main__":
     unittest.main()

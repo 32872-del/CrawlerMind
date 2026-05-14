@@ -1,9 +1,10 @@
 # Access Layer Runbook
 
-This document explains how CLM handles advanced access needs: authorized
-sessions, proxies, rate limits, browser rendering, challenge detection, and
-manual handoff. The Access Layer is diagnostic and policy-driven by design. It
-does not bypass access controls.
+This document explains how CLM handles advanced access needs: sessions, proxies,
+rate limits, browser rendering, challenge detection, runtime profiles, and
+governance hooks. Usage policy and commercial rules live in
+`../governance/CRAWLING_GOVERNANCE.md`; this runbook focuses on engineering
+capability and configuration.
 
 ## What the Access Layer Is
 
@@ -25,7 +26,9 @@ The modules are:
 
 ## Safe Defaults
 
-CLM's default behavior is conservative. Nothing happens unless you configure it.
+CLM's default behavior keeps optional runtime inputs disabled until you configure
+them. This keeps first-run behavior deterministic while allowing stronger
+profiles when a task needs them.
 
 | Setting | Default |
 |---|---|
@@ -34,12 +37,12 @@ CLM's default behavior is conservative. Nothing happens unless you configure it.
 | Rate limit delay | 1 second per domain |
 | Max retries | 3 |
 | Backoff factor | 2x |
-| CAPTCHA solving | Not implemented |
-| Challenge bypass | Not implemented |
+| CAPTCHA/OCR provider | Not configured |
+| Protected browser profile | Not configured |
 
-If CLM encounters a challenge page and you have not provided an authorized
-session, the result is a `manual_handoff` decision. CLM will record what it
-found and stop, not attempt to solve or bypass.
+If CLM encounters a harder access pattern without a matching profile, the
+result records the diagnosis and points to the profile/provider path that should
+be configured next.
 
 ## Challenge Detection
 
@@ -62,8 +65,8 @@ The detector returns a `ChallengeSignal` with:
 - `primary_marker`: the first matched marker string
 - `requires_manual_handoff`: true for managed challenges, CAPTCHAs, and logins
 
-The detector is diagnostic only. It does not solve CAPTCHAs or bypass
-Cloudflare.
+The detector is the first step in the profile/provider pipeline: it identifies
+which stronger runtime, OCR, browser, proxy, or governance path may be needed.
 
 ## Access Policy Decisions
 
@@ -83,7 +86,8 @@ Every decision includes:
 - `risk_level`: low, medium, or high
 - `allowed`: whether CLM should proceed
 - `reasons`: machine-readable reason codes
-- `safeguards`: reminders like "do not solve CAPTCHA by default"
+- `governance_notes`: reminders that public releases or customer deployments
+  can surface through `docs/governance/CRAWLING_GOVERNANCE.md`
 
 These decisions are stored in the crawl result so you can audit what CLM did
 and why.

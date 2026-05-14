@@ -8,18 +8,24 @@ Baidu realtime hot-search extraction, public JSON/GraphQL/API workflows, one
 public SPA observed API replay workflow on HN Algolia, and selected ecommerce
 training runs.
 
-The product target has been sharpened on 2026-05-12: CLM should become an
-agent that productizes advanced crawler development, not just a simple scraper.
-The next major capability track is the Access Layer: proxy/session/rate-limit/
-browser-context/challenge-diagnosis infrastructure with explicit compliance
-boundaries.
+The product target has been sharpened: CLM should become an agent that
+productizes advanced crawler development, not just a simple scraper. The
+current major capability track is Scrapling capability absorption plus the
+access/browser/proxy/JS evidence stack needed for difficult real-world
+collection.
 
-Access Layer MVP work has started on 2026-05-12. The first shipped slice turns
+Access Layer MVP work started on 2026-05-12. The first shipped slice turns
 advanced access concerns into explicit, testable policy objects: structured
-challenge detection, access decisions, opt-in proxy configuration, authorized
-session profiles, and per-domain rate-limit/backoff rules. The default behavior
-remains deterministic and conservative: no proxy, no CAPTCHA solving, no hidden
-bypass, and no required API keys.
+challenge detection, access decisions, proxy configuration, session profiles,
+browser-context configuration, and per-domain rate-limit/backoff rules.
+
+Scrapling capability absorption work started on 2026-05-14. The intent is not
+to leave CLM as a thin wrapper around the `scrapling` package. The intent is to
+use Scrapling 0.4.8 as a strong engineering reference, then absorb its useful
+capabilities into CLM-owned runtime/backend modules. CLM now has runtime
+protocol models, transition adapters for Scrapling static/parser/browser/proxy
+paths, and executor routing through `engine="scrapling"`. This is a bridge for
+training and comparison; it is not the final backend shape.
 
 ## Completed
 
@@ -83,6 +89,23 @@ bypass, and no required API keys.
 - Browser fallback MVP: Playwright-based browser executor for SPA and anti-bot
   pages. Supports wait_selector, wait_until, timeout, and optional screenshots.
   Executor now has four paths: HTTP, browser, mock, and fnspider.
+- Scrapling capability absorption path accepted on 2026-05-14:
+  - `autonomous_crawler/runtime/` defines CLM-owned runtime models and
+    protocols.
+  - `ScraplingStaticRuntime` is a transition adapter for Scrapling static
+    fetching.
+  - `ScraplingParserRuntime` is a transition adapter for Scrapling selector
+    parsing.
+  - `ScraplingBrowserRuntime` maps dynamic/protected browser config, sessions,
+    XHR capture fields, and proxy conversion as a transition adapter.
+  - Planner/Strategy accept `engine="scrapling"`.
+  - Executor routes static/http Scrapling work through
+    `ScraplingStaticRuntime.fetch()` and browser Scrapling work through
+    `ScraplingBrowserRuntime.render()`.
+  - Focused Scrapling runtime suite: 162 tests passing.
+  - Follow-up goal: replace adapter-backed behavior with CLM-native
+    fetch/parser/browser/spider/checkpoint implementations that absorb
+    Scrapling's capabilities.
 - Supervisor/worker LLM team workspace added under `docs/team/`, including
   badges, assignments, acceptance protocol, accepted-work records, and new LLM
   onboarding.
@@ -249,8 +272,9 @@ bypass, and no required API keys.
   - Strategy now attaches `crawl_strategy.anti_bot_report` with risk level,
     risk score, categories, findings, recommended action, next steps,
     guardrails, and evidence sources.
-  - This remains diagnostic/advisory. It does not solve CAPTCHA, bypass login,
-    replay signed APIs, or enable proxies automatically.
+  - This remains diagnostic/advisory today. Future OCR/CAPTCHA provider,
+    protected browser, signed-request profile, and proxy-provider tracks are
+    tracked in the capability roadmap and governance docs.
 - CAP-1.4 WebSocket Recon opt-in integration accepted on 2026-05-12:
   - Recon can run `observe_websocket()` through
     `constraints.observe_websocket=true`.
@@ -629,6 +653,11 @@ OK
 - Planner and Strategy can use optional LLM advisors through CLI/config and now
   also through FastAPI request-level configuration. Deterministic fallback
   remains the default.
+- Scrapling absorption is in transition. CLM can route through Scrapling-backed
+  adapters today, but the full ability set has not yet been converted into
+  CLM-native backend modules. Missing absorption areas include async fetch,
+  adaptive parser internals, spider scheduler/checkpoint/request-result models,
+  robots/link extraction, and real protected-browser training.
 - Recon selector inference is heuristic and currently strongest for product
   cards and Baidu-style ranking lists.
 - `site_spec_draft` detail selectors are drafts when only a list page is known.
@@ -654,10 +683,10 @@ OK
 ## Next Development Goal
 
 Move from a runnable engineering MVP toward a simpler user-facing crawl tool
-and then a more robust crawl service:
+and a stronger CLM-native crawler backend:
 
 ```text
-Easy Mode CLI + Access Layer + resumable runner + profile-driven crawl execution + broader dynamic-page training
+Easy Mode CLI + Access Layer + Scrapling capability absorption + resumable runner + profile-driven crawl execution + broader dynamic-page training
 ```
 
 Reference roadmap:
@@ -674,6 +703,24 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
 ```
 
 ## Next Tasks
+
+Current supervisor priority:
+
+```text
+SCRAPLING-ABSORB: turn Scrapling 0.4.8 capabilities into CLM-native runtime/backend modules.
+```
+
+Immediate steps:
+
+1. Build CLM-native static fetch and parser runtimes that match the current
+   Scrapling transition adapters on focused tests.
+2. Use the Scrapling adapter path as an oracle/benchmark, then run real static
+   and SPA training against both paths.
+3. Absorb Scrapling spider scheduler/checkpoint/request/result/session/robots
+   concepts into CLM BatchRunner and URLFrontier.
+4. Convert dynamic/protected browser concepts into CLM-native browser runtime
+   behavior with runtime events, artifacts, XHR evidence, session continuity,
+   and proxy traces.
 
 1. ~~Add error-path tests for HTTP failures, empty HTML, invalid selectors, and
    retry exhaustion.~~ Done 2026-05-06.

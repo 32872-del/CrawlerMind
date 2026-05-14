@@ -73,6 +73,39 @@ class AntiBotReport:
         }
 
 
+def summarize_anti_bot_report(report: AntiBotReport | dict[str, Any] | None) -> dict[str, Any]:
+    """Return a compact, human-friendly summary of an anti-bot report."""
+    if report is None:
+        return {
+            "detected": False,
+            "risk_level": "low",
+            "risk_score": 0,
+            "recommended_action": "standard_http",
+            "categories": [],
+            "top_findings": [],
+        }
+    payload = report.to_dict() if isinstance(report, AntiBotReport) else (report if isinstance(report, dict) else {})
+    findings = list(payload.get("findings") or [])
+    top_findings = []
+    for finding in findings[:3]:
+        if not isinstance(finding, dict):
+            continue
+        top_findings.append({
+            "code": finding.get("code", ""),
+            "category": finding.get("category", ""),
+            "severity": finding.get("severity", ""),
+            "summary": finding.get("summary", ""),
+        })
+    return {
+        "detected": bool(payload.get("detected")),
+        "risk_level": str(payload.get("risk_level") or "low"),
+        "risk_score": _safe_int(payload.get("risk_score")),
+        "recommended_action": str(payload.get("recommended_action") or "standard_http"),
+        "categories": list(payload.get("categories") or [])[:8],
+        "top_findings": top_findings,
+    }
+
+
 def build_anti_bot_report(
     recon_report: dict[str, Any],
     *,

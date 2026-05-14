@@ -1,5 +1,6 @@
 beautifulsoup4
 botasaurus
+cssselect
 curl_cffi
 fake_useragent
 fastapi
@@ -9,7 +10,10 @@ langchain-openai
 langgraph
 loguru
 lxml
+orjson
 playwright
 pydantic
 redis
+tld
 uvicorn
+w3lib

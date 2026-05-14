@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 
 from autonomous_crawler.storage import CrawlResultStore
+from autonomous_crawler.tools.anti_bot_report import AntiBotFinding, AntiBotReport
 
 
 class CrawlResultStoreTests(unittest.TestCase):
@@ -21,6 +22,8 @@ class CrawlResultStoreTests(unittest.TestCase):
             self.assertEqual(loaded["status"], "completed")
             self.assertEqual(loaded["item_count"], 2)
             self.assertTrue(loaded["is_valid"])
+            self.assertIn("anti_bot_summary", loaded)
+            self.assertEqual(loaded["anti_bot_summary"]["recommended_action"], "standard_http")
             self.assertEqual(loaded["final_state"]["target_url"], "mock://ranking")
             self.assertEqual(loaded["items"][0]["title"], "Alpha Topic")
             self.assertEqual(loaded["items"][1]["rank"], "2")
@@ -46,6 +49,47 @@ class CrawlResultStoreTests(unittest.TestCase):
             self.assertFalse(loaded["is_valid"])
             self.assertEqual(len(loaded["items"]), 1)
 
+    def test_store_persists_anti_bot_summary(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            store = CrawlResultStore(Path(tmpdir) / "results.sqlite3")
+            state = _sample_state()
+            state["crawl_strategy"] = {
+                "anti_bot_report": AntiBotReport(
+                    detected=True,
+                    risk_level="high",
+                    risk_score=88,
+                    recommended_action="manual_handoff",
+                    categories=["challenge"],
+                    findings=[AntiBotFinding(
+                        code="access_managed_challenge",
+                        category="challenge",
+                        severity="high",
+                        source="access_diagnostics",
+                        summary="Managed challenge detected.",
+                    )],
+                ).to_dict()
+            }
+
+            store.save_final_state(state)
+            loaded = store.get_task("task-1")
+
+            self.assertIsNotNone(loaded)
+            assert loaded is not None
+            self.assertEqual(loaded["anti_bot_summary"]["recommended_action"], "manual_handoff")
+            self.assertIn("challenge", loaded["anti_bot_summary"]["categories"])
+
+    def test_store_backfills_missing_summary_from_final_state(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            store = CrawlResultStore(Path(tmpdir) / "results.sqlite3")
+            state = _sample_state()
+            store.save_final_state(state)
+
+            loaded = store.get_task("task-1")
+
+            self.assertIsNotNone(loaded)
+            assert loaded is not None
+            self.assertEqual(loaded["anti_bot_summary"]["recommended_action"], "standard_http")
+
     def test_store_lists_recent_tasks(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             store = CrawlResultStore(Path(tmpdir) / "results.sqlite3")
@@ -58,6 +102,8 @@ class CrawlResultStoreTests(unittest.TestCase):
 
             self.assertEqual([task["task_id"] for task in tasks], ["task-2", "task-1"])
             self.assertNotIn("final_state", tasks[0])
+            self.assertIn("anti_bot_summary", tasks[0])
+            self.assertEqual(tasks[0]["anti_bot_summary"]["recommended_action"], "standard_http")
 
 
 def _sample_state(task_id: str = "task-1") -> dict:

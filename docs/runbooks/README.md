@@ -22,6 +22,8 @@ Current runbooks:
 - `LONG_RUNNING_ECOMMERCE_RUNS.md`
 - `RESUMABLE_BATCH_RUNNER.md`
 - `ACCESS_LAYER.md`
+- `ADVANCED_DIAGNOSTICS.md`
+- `SCRAPLING_FIRST_RUNTIME.md` (Scrapling capability absorption runbook)
 
 Recommended first read:
 

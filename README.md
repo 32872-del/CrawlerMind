@@ -7,8 +7,8 @@ Planner -> Recon -> Strategy -> Executor -> Extractor -> Validator
 ```
 
 It is a local research and engineering framework for building a stronger crawl
-agent. It is already runnable, but it is not yet a universal crawler. See
-[Current Limits](#current-limits).
+agent. It is already runnable, and the current focus is turning advanced crawler
+engineering patterns into stable, reusable CLM runtime capabilities.
 
 ## Quick Start
 
@@ -159,6 +159,12 @@ Real provider check:
 python clm.py check --llm
 ```
 
+Legacy developer path:
+
+```bash
+python run_simple.py --check-llm
+```
+
 Run with LLM forced on:
 
 ```bash
@@ -207,6 +213,11 @@ python -m unittest autonomous_crawler.tests.test_real_browser_smoke -v
 
 - Easy Mode CLI: `init`, `check`, `crawl`, `smoke`, and `train`.
 - Static HTML crawling and selector inference.
+- Scrapling capability absorption has started: CLM has transition adapters for
+  static fetch, parser extraction, browser/session/proxy contracts, and
+  executor routing through `engine="scrapling"`. These adapters are a bridge and
+  benchmark while the same capabilities are rebuilt as CLM-native runtime
+  modules.
 - Playwright browser fallback for rendered pages.
 - Public JSON API and GraphQL API collection.
 - Browser network observation with safe observed public JSON POST API replay.
@@ -236,23 +247,29 @@ python -m unittest autonomous_crawler.tests.test_real_browser_smoke -v
 - Generic resumable batch runner and product checkpoint foundation.
 - Local synthetic stress testing for 30,000 ecommerce records.
 
-## Current Limits
+## Current Growth Areas
 
-- Not yet a universal crawler. Dynamic sites, infinite scroll, and complex
-  anti-bot pages need more training and tests.
-- Cloudflare/CAPTCHA/login-required targets are diagnosis-only unless you have
-  explicit authorization and provide a compliant access path.
+- Scrapling absorption is not complete. The current adapter path is useful, but
+  CLM still needs native fetch/parser/browser/spider/checkpoint implementations
+  that absorb Scrapling's capabilities without making the product a thin wrapper
+  around the external package.
+- Dynamic sites, infinite scroll, and complex anti-bot pages need broader
+  real-site training and pressure tests.
+- CAPTCHA/OCR, visual recognition, protected browser profiles, and deeper JS
+  reverse-engineering are active roadmap capabilities, not finished product
+  paths yet.
 - API pagination is an MVP; it still needs broader real-site hardening.
 - FastAPI job registry is in-memory; state is lost on restart.
 - No frontend UI yet.
 - Site-specific quirks should become profiles or fixtures, not hard-coded core
   behavior.
 
-## Safety
+## Governance
 
-Use this project only on targets you are allowed to access. Do not use it to
-bypass login systems, CAPTCHA, Cloudflare challenges, or other access controls
-without explicit authorization.
+Usage policy and commercial deployment rules belong in governance documents,
+not inside crawler capability modules. See
+`docs/governance/CRAWLING_GOVERNANCE.md` when preparing public releases,
+enterprise pilots, or customer-facing terms.
 
 ## Developer And Legacy Commands
 
@@ -304,10 +321,12 @@ bash scripts/run_api_unix.sh
 ## Important Docs
 
 - Current status: [PROJECT_STATUS.md](PROJECT_STATUS.md)
+- Quick start and diagnostics: [docs/runbooks/QUICK_START_CN.md](docs/runbooks/QUICK_START_CN.md)
+- Advanced diagnostics: [docs/runbooks/ADVANCED_DIAGNOSTICS.md](docs/runbooks/ADVANCED_DIAGNOSTICS.md)
+- Access Layer: [docs/runbooks/ACCESS_LAYER.md](docs/runbooks/ACCESS_LAYER.md)
+- Scrapling capability absorption: [docs/plans/2026-05-14_SCRAPLING_ABSORPTION_RECORD.md](docs/plans/2026-05-14_SCRAPLING_ABSORPTION_RECORD.md)
 - Quick start (Windows): [docs/runbooks/QUICK_START_WINDOWS.md](docs/runbooks/QUICK_START_WINDOWS.md)
 - Quick start (Linux/macOS): [docs/runbooks/QUICK_START_LINUX_MAC.md](docs/runbooks/QUICK_START_LINUX_MAC.md)
-- Quick start (Chinese): [docs/runbooks/QUICK_START_CN.md](docs/runbooks/QUICK_START_CN.md)
-- Advanced diagnostics: [docs/runbooks/ADVANCED_DIAGNOSTICS.md](docs/runbooks/ADVANCED_DIAGNOSTICS.md)
 - Ecommerce workflow: [docs/process/ECOMMERCE_CRAWL_WORKFLOW.md](docs/process/ECOMMERCE_CRAWL_WORKFLOW.md)
 - Blueprint: [docs/blueprints/AUTONOMOUS_CRAWL_AGENT_BLUEPRINT.md](docs/blueprints/AUTONOMOUS_CRAWL_AGENT_BLUEPRINT.md)
 - Team board: [docs/team/TEAM_BOARD.md](docs/team/TEAM_BOARD.md)

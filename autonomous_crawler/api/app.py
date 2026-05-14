@@ -16,6 +16,7 @@ from ..llm.openai_compatible import (
     OpenAICompatibleConfig,
 )
 from ..storage import list_crawl_results, load_crawl_result, save_crawl_result
+from ..tools.anti_bot_report import summarize_anti_bot_report
 from ..workflows.crawl_graph import compile_crawl_graph
 
 
@@ -44,6 +45,7 @@ class CrawlResponse(BaseModel):
     item_count: int
     is_valid: bool
     error_code: str | None = None
+    anti_bot_summary: dict[str, Any] | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -195,12 +197,15 @@ def _background_crawl(
 
         extracted = final_state.get("extracted_data") or {}
         validation = final_state.get("validation_result") or {}
+        strategy = final_state.get("crawl_strategy") or {}
+        anti_bot_report = strategy.get("anti_bot_report") or {}
         _update_job(
             task_id,
             status=final_state.get("status", "completed"),
             item_count=int(extracted.get("item_count") or 0),
             is_valid=bool(validation.get("is_valid")),
             error_code=final_state.get("error_code"),
+            anti_bot_summary=summarize_anti_bot_report(anti_bot_report) if anti_bot_report else None,
         )
     except Exception as exc:
         from ..errors import classify_llm_error
@@ -257,6 +262,7 @@ def create_app() -> FastAPI:
             "item_count": 0,
             "is_valid": False,
             "error_code": None,
+            "anti_bot_summary": None,
         }
 
     @app.get("/crawl/{task_id}")
@@ -275,6 +281,7 @@ def create_app() -> FastAPI:
                 "is_valid": job["is_valid"],
                 "error": job.get("error", ""),
                 "error_code": job.get("error_code"),
+                "anti_bot_summary": job.get("anti_bot_summary"),
             }
 
         # Fall back to persisted result

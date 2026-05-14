@@ -88,6 +88,23 @@ def strategy_node(state: dict[str, Any]) -> dict[str, Any]:
             "max_items": constraints.get("max_items", 0),
             "rationale": "Explicit GraphQL query supplied, using GraphQL API access",
         }
+    elif preferred_engine == "scrapling":
+        strategy = {
+            "mode": "browser" if needs_browser else "http",
+            "engine": "scrapling",
+            "extraction_method": "scrapling_runtime",
+            "selectors": inferred_selectors or fallback_selectors,
+            "pagination": {
+                "type": "scroll" if needs_browser else dom_structure.get("pagination_type", "none"),
+                "param": "page",
+                "scroll_count": 5 if needs_browser else 0,
+            },
+            "headers": {},
+            "max_items": constraints.get("max_items", 0),
+            "wait_selector": (inferred_selectors or fallback_selectors).get("item_container", ""),
+            "wait_until": "networkidle" if needs_browser else "domcontentloaded",
+            "rationale": "User requested Scrapling-first runtime backend",
+        }
     elif (
         preferred_engine == "fnspider"
         and task_type == "product_list"
@@ -426,7 +443,7 @@ def _dedupe_strings(values: Any, *, limit: int) -> list[str]:
 
 
 _STRATEGY_ALLOWED_MODES = frozenset({"http", "browser", "api_intercept"})
-_STRATEGY_ALLOWED_ENGINES = frozenset({"", "fnspider"})
+_STRATEGY_ALLOWED_ENGINES = frozenset({"", "fnspider", "scrapling"})
 _STRATEGY_ALLOWED_WAIT_UNTIL = frozenset({"domcontentloaded", "load", "networkidle"})
 _STRATEGY_ALLOWED_FIELDS = frozenset({
     "mode", "engine", "selectors", "wait_selector", "wait_until",

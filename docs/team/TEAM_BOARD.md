@@ -1,16 +1,16 @@
 # Team Board
 
-Last updated: 2026-05-12
+Last updated: 2026-05-14
 
 ## Active Employees
 
 | Employee ID | Display Name | Current Project Role | Status | Current Assignment |
 |---|---|---|---|---|
-| LLM-2026-000 | Supervisor Codex | Project Supervisor | active | CAP-6.2 AntiBotReport completed; worker outputs accepted; ready for next assignment |
-| LLM-2026-001 | Worker Alpha | WebSocket Recon Worker | accepted | CAP-1.4 Real WebSocket Smoke accepted |
-| LLM-2026-002 | Worker Beta | Proxy Infrastructure Worker | accepted | CAP-3.3 Proxy Health Trace accepted |
+| LLM-2026-000 | Supervisor Codex | Project Supervisor | active | Scrapling capability absorption docs corrected; next: CLM-native backend absorption |
+| LLM-2026-001 | Worker Alpha | Runtime Adapter Worker | accepted work completed | Scrapling Static + Parser Adapter |
+| LLM-2026-002 | Worker Beta | Browser Runtime Infrastructure Worker | accepted work completed | Scrapling Browser + Session + Proxy Runtime Design |
 | LLM-2026-003 | Worker Gamma | Unassigned | standby | none |
-| LLM-2026-004 | Worker Delta | Capability Documentation Auditor | accepted | Advanced Diagnostics Runbook accepted |
+| LLM-2026-004 | Worker Delta | Runtime Documentation Auditor | accepted work completed | Scrapling Runtime Docs + Source Tracking Audit |
 
 ## Current Project Roles
 
@@ -32,6 +32,7 @@ Last updated: 2026-05-12
 | Real-Site Training Ladder | `docs/team/training/2026-05-08_REAL_SITE_TRAINING_LADDER.md` | active | Long-term training map for future assignments and acceptance records |
 | Top Crawler Capability Roadmap | `docs/plans/2026-05-12_TOP_CRAWLER_CAPABILITY_ROADMAP.md` | active | Converts expert crawler skill checklist into CLM product capability roadmap |
 | Capability Implementation Matrix | `docs/plans/2026-05-12_CAPABILITY_IMPLEMENTATION_MATRIX.md` | active | Maps CLM work directly to the top crawler capability checklist; future tasks must cite CAP IDs |
+| Scrapling Capability Absorption Plan | `docs/plans/2026-05-14_SCRAPLING_FIRST_RUNTIME_PLAN.md` | active | Near-term mainline to absorb Scrapling 0.4.8 capabilities into CLM-native crawler backend modules |
 
 ## Assignment Records
 
@@ -84,6 +85,13 @@ Last updated: 2026-05-12
 | CAP-1.4 WebSocket Observation MVP | LLM-2026-002 | ROLE-WEBSOCKET | accepted | `docs/team/acceptance/2026-05-12_cap_1_4_websocket_observation_ACCEPTED.md` |
 | Capability Matrix Refresh Audit | LLM-2026-004 | ROLE-CAPABILITY-DOC-AUDIT | accepted | `docs/team/acceptance/2026-05-12_capability_matrix_refresh_audit_ACCEPTED.md` |
 | CAP-4.2 Runtime Fingerprint Probe | LLM-2026-000 | ROLE-SUPERVISOR / ROLE-BROWSER-FINGERPRINT | accepted | `docs/team/acceptance/2026-05-12_cap_4_2_runtime_fingerprint_probe_ACCEPTED.md` |
+| CAP-5.1 Strategy and AntiBot Calibration | LLM-2026-001 | ROLE-STRATEGY-QA | accepted | `docs/team/acceptance/2026-05-14_cap_5_1_strategy_antibot_calibration_ACCEPTED.md` |
+| CAP-3.3 Proxy Trace Reporting Integration | LLM-2026-002 | ROLE-QA | accepted | `docs/team/acceptance/2026-05-14_cap_3_3_proxy_trace_reporting_ACCEPTED.md` |
+| CAP-6.2 / Docs Refresh | LLM-2026-004 | ROLE-DOCS | accepted | `docs/team/acceptance/2026-05-14_capability_docs_refresh_ACCEPTED.md` |
+| Scrapling Static + Parser Adapter | LLM-2026-001 | Runtime Adapter Worker | accepted | `docs/team/acceptance/2026-05-14_scrapling_static_parser_adapter_ACCEPTED.md` |
+| Scrapling Browser + Session + Proxy Runtime Design | LLM-2026-002 | Browser Runtime Infrastructure Worker | accepted | `docs/team/acceptance/2026-05-14_scrapling_browser_session_proxy_runtime_ACCEPTED.md` |
+| Scrapling Runtime Docs + Source Tracking Audit | LLM-2026-004 | Runtime Documentation Auditor | accepted | `docs/team/acceptance/2026-05-14_scrapling_runtime_docs_source_tracking_ACCEPTED.md` |
+| Scrapling Executor Routing | LLM-2026-000 | Supervisor mainline | accepted | `docs/team/acceptance/2026-05-14_scrapling_executor_routing_ACCEPTED.md` |
 
 ## Recent Accepted Work Log
 
@@ -166,18 +174,29 @@ Last updated: 2026-05-12
 | Real WebSocket Smoke | LLM-2026-001 | `docs/team/acceptance/2026-05-12_real_websocket_smoke_ACCEPTED.md` | local real-browser WebSocket smoke proves Playwright WS events, frame capture, truncation, and redaction |
 | Proxy Health Trace | LLM-2026-002 | `docs/team/acceptance/2026-05-12_proxy_health_trace_ACCEPTED.md` | redacted proxy trace and aggregate health evidence accepted |
 | Advanced Diagnostics Runbook | LLM-2026-004 | `docs/team/acceptance/2026-05-12_advanced_diagnostics_docs_ACCEPTED.md` | public-facing advanced diagnostics guide accepted without overclaiming |
+| Strategy and AntiBot Calibration | LLM-2026-001 | `docs/team/acceptance/2026-05-14_cap_5_1_strategy_antibot_calibration_ACCEPTED.md` | 82 targeted tests confirm conservative score/report boundaries |
+| Proxy Trace Reporting | LLM-2026-002 | `docs/team/acceptance/2026-05-14_cap_3_3_proxy_trace_reporting_ACCEPTED.md` | executor return paths now include credential-safe proxy trace |
+| Capability Docs Refresh | LLM-2026-004 | `docs/team/acceptance/2026-05-14_capability_docs_refresh_ACCEPTED.md` | README and advanced diagnostics docs updated for AntiBotReport |
+| Scrapling Runtime Static/Parser | LLM-2026-001 | `docs/team/acceptance/2026-05-14_scrapling_static_parser_adapter_ACCEPTED.md` | Scrapling static fetch and parser adapters behind CLM runtime protocols |
+| Scrapling Browser/Proxy Runtime | LLM-2026-002 | `docs/team/acceptance/2026-05-14_scrapling_browser_session_proxy_runtime_ACCEPTED.md` | Scrapling dynamic/protected browser adapter, session config, and proxy mapping |
+| Scrapling Runtime Docs | LLM-2026-004 | `docs/team/acceptance/2026-05-14_scrapling_runtime_docs_source_tracking_ACCEPTED.md` | Scrapling capability absorption runbook and source tracking plan |
+| Scrapling Executor Routing | LLM-2026-000 | `docs/team/acceptance/2026-05-14_scrapling_executor_routing_ACCEPTED.md` | `engine="scrapling"` routes through CLM runtime adapters; full suite green |
 
 ## Upcoming Candidate Tasks
 
-1. CAP-5.1: Calibrate StrategyScoringPolicy on real training cases and decide narrow cases where it may influence final mode.
-2. CAP-6.2: Calibrate AntiBotReport on controlled and real training cases, then expose compact report summaries in CLI/API outputs.
-3. CAP-3.3: Connect proxy trace evidence to fetch/runner reporting.
-4. CAP-1.4: Preserve real WebSocket smoke as a training fixture and design protocol-analysis follow-up tasks.
-5. CAP-5.2: VisualRecon/OCR MVP on persisted screenshots.
-6. CAP-4.2: Fingerprint profile pool and runtime/config comparison report for real browser training.
-7. CAP-1.2: HTTP/TLS transport diagnostics toward ALPN/JA3 evidence and impersonation-profile selection.
-8. CAP-3.1: Wrap LangGraph workflow as a `BatchRunner` processor.
-9. CAP-3.6: Add runtime site/crawl profile files for selectors, API hints, pagination, access config, and quality overrides.
+1. SCRAPLING-ABSORB-1: Convert static fetch and parser behavior from transition adapters into CLM-native `NativeFetchRuntime` and `NativeParserRuntime`.
+2. SCRAPLING-ABSORB-2: Run real static + SPA training through Scrapling transition adapters and CLM-native paths, then absorb browser/session/proxy/XHR behavior into the native backend.
+3. SCRAPLING-ABSORB-3: Integrate Scrapling spider scheduler/checkpoint/request/result/session/robots/link-extractor concepts into CLM BatchRunner and long-running crawl path.
+4. CAP-2.1 / CAP-2.2: Build JS AST + hook/sandbox MVP for signature-function localization.
+5. CAP-3.3: Carry proxy trace / aggregate proxy health into BatchRunner metrics and add real provider adapter template.
+6. CAP-5.2: VisualRecon/OCR MVP on persisted screenshots.
+7. CAP-5.1: Calibrate StrategyScoringPolicy on real training cases and decide narrow cases where it may influence final mode.
+8. CAP-6.2: Calibrate AntiBotReport on controlled and real training cases.
+9. CAP-1.4: Preserve real WebSocket smoke as a training fixture and design protocol-analysis follow-up tasks.
+10. CAP-4.2: Fingerprint profile pool and runtime/config comparison report for real browser training.
+11. CAP-1.2: HTTP/TLS transport diagnostics toward ALPN/JA3 evidence and impersonation-profile selection.
+12. CAP-3.1: Wrap LangGraph workflow as a `BatchRunner` processor.
+13. CAP-3.6: Add runtime site/crawl profile files for selectors, API hints, pagination, access config, and quality overrides.
 
 ## Supervisor Notes
 
@@ -193,3 +212,6 @@ Last updated: 2026-05-12
 - P1 should focus on crawl capability breadth before frontend work: access
   diagnostics, mode escalation, network observation, and product list/detail/
   variant task modeling.
+- Scrapling work must be treated as capability absorption into CLM-native
+  backend modules. Transition adapters are useful for tests and comparison, but
+  they are not the final product architecture.
