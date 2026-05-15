@@ -130,6 +130,7 @@ class RuntimeSelectorRequest:
     attribute: str = ""
     many: bool = True
     required: bool = False
+    signature: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "RuntimeSelectorRequest":
@@ -143,6 +144,7 @@ class RuntimeSelectorRequest:
             attribute=_clean_string(payload.get("attribute"), "", max_len=80),
             many=bool(payload.get("many", True)),
             required=bool(payload.get("required", False)),
+            signature=_safe_dict(payload.get("signature")),
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -153,6 +155,7 @@ class RuntimeSelectorRequest:
             "attribute": self.attribute,
             "many": self.many,
             "required": self.required,
+            "signature": _redact_mapping(self.signature),
         }
 
 

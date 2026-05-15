@@ -27,6 +27,7 @@ class ScraplingParserRuntime:
         selectors: list[RuntimeSelectorRequest],
         *,
         url: str = "",
+        selector_config: dict[str, object] | None = None,
     ) -> list[RuntimeSelectorResult]:
         if not _HAS_SCRAPLING:
             return [

@@ -22,10 +22,12 @@ browser-context configuration, and per-domain rate-limit/backoff rules.
 Scrapling capability absorption work started on 2026-05-14. The intent is not
 to leave CLM as a thin wrapper around the `scrapling` package. The intent is to
 use Scrapling 0.4.8 as a strong engineering reference, then absorb its useful
-capabilities into CLM-owned runtime/backend modules. CLM now has runtime
-protocol models, transition adapters for Scrapling static/parser/browser/proxy
-paths, and executor routing through `engine="scrapling"`. This is a bridge for
-training and comparison; it is not the final backend shape.
+capabilities into CLM-owned runtime/backend modules. The major Scrapling
+backend patterns now have accepted CLM-native baseline equivalents: static
+fetch, async fetch, parser/adaptive selectors, browser/session/profile/proxy,
+spider/checkpoint/link/robots/site profile, and evidence/visual reporting.
+Transition adapters remain as comparison oracles, not the final product
+architecture.
 
 ## Completed
 
@@ -106,6 +108,203 @@ training and comparison; it is not the final backend shape.
   - Follow-up goal: replace adapter-backed behavior with CLM-native
     fetch/parser/browser/spider/checkpoint implementations that absorb
     Scrapling's capabilities.
+- SCRAPLING-ABSORB-1 native runtime slice accepted on 2026-05-14:
+  - `NativeFetchRuntime` provides CLM-owned static fetching through `httpx`
+    with optional `curl_cffi`, normalized `RuntimeResponse`, runtime events,
+    proxy trace, and structured failures.
+  - `NativeParserRuntime` provides CLM-owned CSS/XPath/text/regex extraction
+    and selector-result normalization without importing Scrapling.
+  - Native-vs-transition parity suite compares native runtimes against
+    Scrapling transition adapters on local fixtures.
+  - Acceptance records:
+    `docs/team/acceptance/2026-05-14_native_fetch_runtime_ACCEPTED.md`,
+    `docs/team/acceptance/2026-05-14_native_parser_runtime_ACCEPTED.md`, and
+    `docs/team/acceptance/2026-05-14_native_runtime_parity_ACCEPTED.md`.
+- SCRAPLING-ABSORB-1B native executor routing accepted on 2026-05-14:
+  - Planner and Strategy accept explicit `engine="native"`.
+  - Executor static path routes through `NativeFetchRuntime` and
+    `NativeParserRuntime`.
+  - `engine_result.selector_results` now carries native parser evidence.
+  - `run_native_transition_comparison_2026_05_14.py` compares native and
+    transition static runtime outputs.
+  - `clm.py train --round native-vs-transition` prints the comparison command.
+  - Smoke evidence:
+    `dev_logs/training/2026-05-14_native_transition_comparison_smoke.json`.
+- SCRAPLING-ABSORB-1D native adaptive parser accepted on 2026-05-14:
+  - `adaptive_parser.py` adds CLM-native element signatures, structural
+    similarity scoring, selector-miss relocation, and same-depth similar-node
+    discovery.
+  - `NativeParserRuntime` can recover missed CSS/XPath selectors from
+    `selector_config.adaptive_signatures` or per-selector signatures.
+  - Executor now passes `RuntimeRequest.selector_config` into parser runtimes,
+    so adaptive parsing is reachable from real runtime execution paths.
+  - Focused and full verification passed:
+    `test_native_adaptive_parser`, `test_native_parser_runtime`,
+    `test_scrapling_executor_routing`, `test_native_runtime_parity`, and full
+    `unittest discover`.
+- SCRAPLING-ABSORB-1E native selector memory accepted on 2026-05-14:
+  - `SelectorMemoryStore` persists successful element signatures in SQLite.
+  - `NativeParserRuntime` can auto-save CSS/XPath signatures through
+    `selector_config.adaptive_auto_save` or `adaptive_memory_path`.
+  - On later selector miss, the runtime can load the stored signature and
+    recover the element through structural relocation.
+  - This moves adaptive parsing from one-off supplied signatures toward a
+    learned backend capability for long-running crawls.
+- SCRAPLING-ABSORB-2A native browser runtime shell accepted on 2026-05-14:
+  - `NativeBrowserRuntime` provides a CLM-owned Playwright browser backend
+    without importing Scrapling.
+  - Native browser execution supports BrowserContextConfig mapping, headers,
+    cookies, storage state, proxy config, wait selector/state, wait_until,
+    render delay, optional screenshots, blocked resource types, blocked
+    domains, init scripts, and XHR/JSON response preview capture.
+  - Executor now routes `engine="native"` + `mode="browser"` through
+    `NativeBrowserRuntime.render()` and preserves runtime events, artifacts,
+    selector evidence, captured XHR, and proxy trace in workflow state.
+  - Remaining ABSORB-2 work: real SPA/dynamic comparison training, session
+    reuse lifecycle, protected-profile/fingerprint tuning, and runtime failure
+    classification on harder sites.
+- SCRAPLING-ABSORB-2B dynamic comparison harness accepted on 2026-05-14:
+  - `run_native_transition_comparison_2026_05_14.py` supports
+    `--suite dynamic` and starts a deterministic local SPA/API training server.
+  - Dynamic smoke compares `NativeBrowserRuntime` against
+    `ScraplingBrowserRuntime` on rendered DOM selectors and captured XHR
+    evidence.
+  - Smoke evidence:
+    `dev_logs/training/2026-05-14_native_transition_dynamic_smoke.json`.
+  - Latest dynamic smoke: both engines executed with HTTP 200, HTML ratio 1.0,
+    selector deltas 0 for title/price/link, captured XHR count 1 each, review
+    false.
+- SCRAPLING-ABSORB-2B follow-up profile comparison accepted on 2026-05-14:
+  - `run_native_transition_comparison_2026_05_14.py` now supports
+    `--suite profile` and `--profile <json>` for reusable comparison targets.
+  - The default bundled profile includes three local targets: product-card
+    catalog, JSON-LD/script coexistence, and local SPA product list.
+  - Comparison summaries now record captured XHR preview, runtime event types,
+    artifact kinds, fingerprint risk, and expectation checks.
+  - `clm.py train --round native-vs-transition-profile` prints the profile
+    comparison command.
+  - Evidence:
+    `dev_logs/training/2026-05-14_native_transition_profile_comparison.json`.
+- SCRAPLING-ABSORB-2C session lifecycle slice accepted on 2026-05-14:
+  - `NativeBrowserRuntime` supports persistent browser context via
+    `browser_config.user_data_dir`.
+  - Runtime can export storage state through
+    `browser_config.storage_state_output_path` and returns a `storage_state`
+    runtime artifact.
+  - Runtime evidence now records `session_mode` as `ephemeral`,
+    `storage_state`, `persistent`, or `cdp`.
+  - This is the first native session lifecycle layer; cross-request pool reuse
+    and batch-managed context leasing remain future work.
+- SCRAPLING-ABSORB-2D protected profile evidence and browser failure
+  classification accepted on 2026-05-14:
+  - `NativeBrowserRuntime` now attaches `fingerprint_report` evidence to both
+    successful and failed browser responses.
+  - Protected mode applies a first native profile-tuning layer through
+    Playwright launch flags and a bounded init script.
+  - Browser failures are classified into `playwright_missing`,
+    `browser_install_or_launch`, `navigation_timeout`, `proxy_error`,
+    `http_blocked`, `challenge_like`, `unknown`, or `none`.
+  - HTTP block/challenge-like rendered pages are preserved as structured
+    runtime evidence instead of becoming opaque browser errors.
+- SCRAPLING-ABSORB-2F native browser session/profile pool accepted on
+  2026-05-14:
+  - `BrowserPoolManager` provides opt-in Playwright context leasing by
+    `browser_config.pool_id`.
+  - Pool fingerprints include session/profile-relevant browser context fields,
+    allowing controlled reuse while keeping site rules out of runtime code.
+  - `NativeBrowserRuntime(pool=...)` can reuse contexts across requests and
+    reports credential-safe pool evidence in `engine_result`.
+  - Supervisor cleanup fixed request-count double counting during lease reuse.
+- CAP-3.3 / SCRAPLING-ABSORB-1C proxy health and fetch diagnostics accepted on
+  2026-05-14:
+  - Proxy health lifecycle, cooldown/backoff, health-aware pool selection, and
+    redacted proxy trace behavior are covered by focused tests.
+  - `NativeFetchRuntime` exposes transport/proxy evidence through
+    `engine_result`, runtime events, and `RuntimeProxyTrace`.
+  - Remaining work is active orchestration: retry failed proxy requests with
+    alternative healthy proxies and carry metrics into long-running spider runs.
+- SCRAPLING-ABSORB-3A native spider request/result/event models accepted on
+  2026-05-14:
+  - `CrawlRequestEnvelope` provides deterministic request identity,
+    canonical URL handling, safe serialization, and conversion to
+    `RuntimeRequest`.
+  - `CrawlItemResult` bridges spider item processing back into the existing
+    `BatchRunner` `ItemProcessResult` contract.
+  - `SpiderRunSummary` records long-run counters, response status buckets,
+    failure buckets, and runtime events.
+  - This is the data-contract layer for future `CheckpointStore`,
+    LinkDiscovery, RobotsPolicy, and SpiderBatchRunner work.
+- SCRAPLING-ABSORB-3B native checkpoint store accepted on 2026-05-14:
+  - `CheckpointStore` persists spider runs, batch checkpoints, item records,
+    request events, and failure buckets in inspectable SQLite tables.
+  - Checkpoints are JSON-based rather than pickle-based, so paused and failed
+    runs can be inspected by CLM and future UI tools.
+  - Run lifecycle now supports `running`, `paused`, and `completed` markers.
+  - Failure buckets can be queried by run and bucket, with error/proxy
+    credential redaction preserved.
+- SCRAPLING-ABSORB-3C native spider runtime processor accepted on 2026-05-14:
+  - `SpiderRuntimeProcessor` connects `CrawlRequestEnvelope`,
+    `CrawlItemResult`, runtime backends, parser callbacks, discovered request
+    callbacks, and `CheckpointStore`.
+  - The processor is compositional around the existing `BatchRunner`; it does
+    not replace queue mechanics or introduce site-specific rules into core.
+  - Static and browser runtime modes are both supported through runtime
+    protocols.
+  - Runtime failures map to retryable `ItemProcessResult` values and
+    checkpointed failure buckets.
+- SCRAPLING-ABSORB-3D native link discovery and robots policy helpers accepted
+  on 2026-05-14:
+  - `LinkDiscoveryHelper` supports allow/deny regex rules, allow/deny domain
+    rules, CSS/XPath extraction scopes, ignored extensions, duplicate/offsite
+    drop counters, URL canonicalization, and profile-driven URL
+    classification.
+  - JSON API links are retained by default and can be classified as `api`.
+  - `RobotsPolicyHelper` supports `respect`, `record_only`, and `disabled`
+    modes, robots cache, `can_fetch`, crawl-delay, request-rate, prefetch, and
+    runtime events.
+- SCRAPLING-ABSORB-3E native spider pause/resume smoke accepted on 2026-05-14:
+  - `run_spider_runtime_smoke_2026_05_14.py` proves the local long-running
+    spider path without public network access.
+  - The smoke connects `URLFrontier`, `BatchRunner`, `SpiderRuntimeProcessor`,
+    `CheckpointStore`, `NativeParserRuntime`, and `LinkDiscoveryHelper`.
+  - First pass processes only the seeded list page, discovers two detail URLs,
+    records paused checkpoint state, and leaves the frontier resumable.
+  - Resume pass processes two detail records and one deterministic missing
+    fixture failure, then marks the run completed.
+  - Evidence is saved at
+    `dev_logs/smoke/2026-05-14_spider_runtime_smoke.json`.
+  - `clm.py smoke --kind native-spider` now runs this local smoke from Easy
+    Mode.
+- SCRAPLING-ABSORB-2H native browser profile rotation and real dynamic
+  training accepted on 2026-05-14:
+  - `BrowserProfile` and `BrowserProfileRotator` provide reusable browser
+    identity/profile selection.
+  - `NativeBrowserRuntime(rotator=...)` can apply rotating profiles while
+    keeping site rules outside runtime modules.
+  - Real dynamic training artifacts are preserved under `dev_logs/training/`.
+- SCRAPLING-ABSORB-1F native async fetch pool accepted on 2026-05-14:
+  - `NativeAsyncFetchRuntime` supports per-domain and global concurrency.
+  - Runtime events expose pool acquisition, release, backpressure, proxy retry,
+    and completion evidence.
+  - `AsyncFetchMetrics` summarizes status, proxy, domain, and backpressure
+    behavior for long-running fetch batches.
+- SCRAPLING-ABSORB-3G site profile and profile-driven ecommerce runner accepted
+  on 2026-05-14:
+  - `SiteProfile` centralizes selectors, access config, pagination/link hints,
+    and quality expectations.
+  - `profile_ecommerce.py` maps profiles into generic selector, record, and
+    link callbacks for `SpiderRuntimeProcessor`.
+  - Local smoke evidence:
+    `dev_logs/smoke/2026-05-14_profile_ecommerce_runner_smoke.json`.
+- CAP-5.2 VisualRecon Strategy/AntiBot integration accepted on 2026-05-14:
+  - Visual screenshot/OCR evidence now feeds Strategy evidence.
+  - Challenge-like visual findings become AntiBotReport challenge findings.
+  - OCR-only text remains low-risk diagnostic evidence.
+- Scrapling absorption baseline closeout accepted on 2026-05-14:
+  - major backend patterns have CLM-owned baseline modules or integration
+    points.
+  - next work is large-run proof, real-site hardening, and simpler operation,
+    not more wrapper work.
 - Supervisor/worker LLM team workspace added under `docs/team/`, including
   badges, assignments, acceptance protocol, accepted-work records, and new LLM
   onboarding.
@@ -486,16 +685,152 @@ training and comparison; it is not the final backend shape.
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 888 tests
-OK (skipped=4)
+Ran 1773 tests in 75.809s
+OK (skipped=5)
 ```
 
-Latest supervisor acceptance verification on 2026-05-12:
+Latest Scrapling absorption baseline closeout on 2026-05-15:
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 888 tests in 43.847s
-OK (skipped=4)
+Ran 1773 tests in 75.809s
+OK (skipped=5)
+
+python -m compileall autonomous_crawler clm.py run_profile_ecommerce_runner_smoke_2026_05_14.py run_profile_rotation_smoke_2026_05_14.py run_real_dynamic_training_2026_05_14.py run_spider_runtime_smoke_2026_05_14.py
+OK
+```
+
+Latest SCRAPLING-ABSORB-1 native runtime verification on 2026-05-14:
+
+```text
+python -m unittest autonomous_crawler.tests.test_native_static_runtime -v
+Ran 9 tests
+OK
+
+python -m unittest autonomous_crawler.tests.test_native_parser_runtime -v
+Ran 48 tests
+OK
+
+python -m unittest autonomous_crawler.tests.test_native_runtime_parity -v
+Ran 66 tests
+OK (skipped=1)
+
+python -m compileall autonomous_crawler run_skeleton.py run_baidu_hot_test.py run_results.py run_simple.py clm.py
+OK
+```
+
+Latest SCRAPLING-ABSORB-1B native executor routing verification on 2026-05-14:
+
+```text
+python -m unittest autonomous_crawler.tests.test_native_transition_comparison autonomous_crawler.tests.test_scrapling_executor_routing -v
+Ran 16 tests
+OK
+
+python run_native_transition_comparison_2026_05_14.py --scenario example_home_static --output dev_logs\training\2026-05-14_native_transition_comparison_smoke.json
+native=executed(200), transition=executed(200), html_ratio=1.0, review=False
+```
+
+Latest SCRAPLING-ABSORB-2A native browser runtime verification on 2026-05-14:
+
+```text
+python -m unittest autonomous_crawler.tests.test_native_browser_runtime autonomous_crawler.tests.test_scrapling_executor_routing -v
+Ran 20 tests
+OK
+```
+
+Latest SCRAPLING-ABSORB-2B dynamic comparison harness verification on 2026-05-14:
+
+```text
+python -m unittest autonomous_crawler.tests.test_native_transition_comparison -v
+Ran 8 tests
+OK
+
+python run_native_transition_comparison_2026_05_14.py --suite dynamic --output dev_logs\training\2026-05-14_native_transition_dynamic_smoke.json
+native=executed(200), transition=executed(200), html_ratio=1.0, review=False
+```
+
+Latest SCRAPLING-ABSORB-2C session lifecycle verification on 2026-05-14:
+
+```text
+python -m unittest autonomous_crawler.tests.test_native_browser_runtime -v
+Ran 8 tests
+OK
+```
+
+Latest SCRAPLING-ABSORB-2D protected/failure evidence verification on 2026-05-14:
+
+```text
+python -m unittest autonomous_crawler.tests.test_native_browser_runtime -v
+Ran 11 tests
+OK
+
+python -m unittest autonomous_crawler.tests.test_native_browser_runtime autonomous_crawler.tests.test_scrapling_executor_routing autonomous_crawler.tests.test_native_transition_comparison -v
+Ran 32 tests
+OK
+
+python -m compileall autonomous_crawler run_native_transition_comparison_2026_05_14.py clm.py
+OK
+```
+
+Latest SCRAPLING-ABSORB-3A spider model verification on 2026-05-14:
+
+```text
+python -m unittest autonomous_crawler.tests.test_spider_models -v
+Ran 9 tests
+OK
+
+python -m unittest autonomous_crawler.tests.test_spider_models autonomous_crawler.tests.test_batch_runner -v
+Ran 19 tests
+OK
+
+python -m unittest discover -s autonomous_crawler/tests
+Ran 1431 tests in 68.943s
+OK (skipped=5)
+```
+
+Latest SCRAPLING-ABSORB-3B checkpoint store verification on 2026-05-14:
+
+```text
+python -m unittest autonomous_crawler.tests.test_checkpoint_store autonomous_crawler.tests.test_spider_models autonomous_crawler.tests.test_batch_runner -v
+Ran 25 tests
+OK
+
+python -m unittest discover -s autonomous_crawler/tests
+Ran 1437 tests in 70.602s
+OK (skipped=5)
+
+python -m compileall autonomous_crawler run_native_transition_comparison_2026_05_14.py clm.py
+OK
+```
+
+Latest SCRAPLING-ABSORB-3C spider processor verification on 2026-05-14:
+
+```text
+python -m unittest autonomous_crawler.tests.test_spider_runner autonomous_crawler.tests.test_checkpoint_store autonomous_crawler.tests.test_spider_models autonomous_crawler.tests.test_batch_runner -v
+Ran 30 tests
+OK
+
+python -m unittest discover -s autonomous_crawler/tests
+Ran 1442 tests in 69.480s
+OK (skipped=5)
+
+python -m compileall autonomous_crawler run_native_transition_comparison_2026_05_14.py clm.py
+OK
+```
+
+Latest SCRAPLING-ABSORB-3D link/robots verification on 2026-05-14:
+
+```text
+python -m unittest autonomous_crawler.tests.test_link_discovery autonomous_crawler.tests.test_robots_policy autonomous_crawler.tests.test_spider_runner autonomous_crawler.tests.test_checkpoint_store -v
+Ran 22 tests
+OK
+
+python -m unittest discover -s autonomous_crawler/tests
+Ran 1453 tests in 70.401s
+OK (skipped=5)
+
+python -m compileall autonomous_crawler run_native_transition_comparison_2026_05_14.py clm.py
+OK
 ```
 
 Latest CAP-3.3/CAP-2.x capability verification on 2026-05-12:
@@ -653,11 +988,11 @@ OK
 - Planner and Strategy can use optional LLM advisors through CLI/config and now
   also through FastAPI request-level configuration. Deterministic fallback
   remains the default.
-- Scrapling absorption is in transition. CLM can route through Scrapling-backed
-  adapters today, but the full ability set has not yet been converted into
-  CLM-native backend modules. Missing absorption areas include async fetch,
-  adaptive parser internals, spider scheduler/checkpoint/request-result models,
-  robots/link extraction, and real protected-browser training.
+- Scrapling absorption is no longer only a transition-adapter track. The major
+  backend capability baseline is now CLM-native. Remaining work is production
+  hardening: 10k/30k native long-run proof, persistent async client pooling,
+  browser profile health scoring, richer run metrics, and more real-site
+  calibration.
 - Recon selector inference is heuristic and currently strongest for product
   cards and Baidu-style ranking lists.
 - `site_spec_draft` detail selectors are drafts when only a list page is known.
@@ -667,9 +1002,10 @@ OK
   loop support, cross-page deduplication, and richer provider-specific field
   mapping.
 - Dynamic/JS-heavy site coverage is proven for local SPA rendering, local
-  XHR-backed network observation smoke tests, and one public HN Algolia SPA
-  API-replay scenario. Cloudflare/CAPTCHA/login-required targets remain
-  diagnosis-only.
+  XHR-backed network observation smoke tests, profile-driven browser smokes,
+  real dynamic training, and one public HN Algolia SPA API-replay scenario.
+  Hard protected targets still need more real training and profile-health
+  calibration.
 - FastAPI background jobs use in-memory registry; jobs are lost on process
   restart. TTL cleanup limits stale completed/failed entries, but does not add
   durability.
@@ -707,20 +1043,20 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
 Current supervisor priority:
 
 ```text
-SCRAPLING-ABSORB: turn Scrapling 0.4.8 capabilities into CLM-native runtime/backend modules.
+SCRAPLING-HARDEN: prove the native backend baseline at scale and simplify operation.
 ```
 
 Immediate steps:
 
-1. Build CLM-native static fetch and parser runtimes that match the current
-   Scrapling transition adapters on focused tests.
-2. Use the Scrapling adapter path as an oracle/benchmark, then run real static
-   and SPA training against both paths.
-3. Absorb Scrapling spider scheduler/checkpoint/request/result/session/robots
-   concepts into CLM BatchRunner and URLFrontier.
-4. Convert dynamic/protected browser concepts into CLM-native browser runtime
-   behavior with runtime events, artifacts, XHR evidence, session continuity,
-   and proxy traces.
+1. Run 10k/30k native long-run stress through `SpiderRuntimeProcessor`,
+   `CheckpointStore`, async fetch, and profile-driven callbacks.
+2. Run real dynamic/ecommerce profile training with browser profile rotation,
+   visual evidence, and checkpointed product output.
+3. Carry async/proxy/browser-pool metrics into `SpiderRunSummary` and run
+   reports.
+4. Add persistent async client pooling, DNS reuse tuning, adaptive concurrency,
+   browser profile health scoring, and observed API pagination inside
+   profile-driven ecommerce runs.
 
 1. ~~Add error-path tests for HTTP failures, empty HTML, invalid selectors, and
    retry exhaustion.~~ Done 2026-05-06.

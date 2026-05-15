@@ -1,0 +1,97 @@
+{
+  "name": "fixture-ecommerce-profile",
+  "selectors": {
+    "list": {
+      "item_container": "#catalog .product-card",
+      "detail_link": "#catalog .product-link@href"
+    },
+    "detail": {
+      "title": {
+        "selector": "article.product h1",
+        "many": false,
+        "required": true
+      },
+      "highest_price": {
+        "selector": "article.product .price",
+        "many": false,
+        "required": true
+      },
+      "colors": {
+        "selector": "article.product .color",
+        "many": true
+      },
+      "sizes": {
+        "selector": "article.product .size",
+        "many": true
+      },
+      "description": {
+        "selector": "article.product .description",
+        "many": false
+      },
+      "image_urls": {
+        "selector": "article.product img.product-photo",
+        "attribute": "src",
+        "many": true
+      }
+    }
+  },
+  "target_fields": [
+    "title",
+    "highest_price",
+    "colors",
+    "sizes",
+    "description",
+    "image_urls"
+  ],
+  "api_hints": {},
+  "pagination_hints": {
+    "link_discovery": {
+      "allow": [
+        "/products/"
+      ],
+      "allow_domains": [
+        "profile-shop.local"
+      ],
+      "restrict_css": [
+        "#catalog"
+      ],
+      "classify": {
+        "detail": "/products/"
+      },
+      "default_kind": "detail",
+      "priority": 8,
+      "max_links": 10
+    }
+  },
+  "access_config": {
+    "mode": "static",
+    "login_required": false,
+    "captcha_bypass": false
+  },
+  "rate_limits": {
+    "default": {
+      "delay_seconds": 0
+    }
+  },
+  "quality_expectations": {
+    "min_items": 2,
+    "required_fields": [
+      "title",
+      "highest_price",
+      "image_urls"
+    ],
+    "currency": "USD",
+    "category": "training-shoes"
+  },
+  "training_notes": [
+    "Offline deterministic ecommerce profile for long-running runner smoke.",
+    "List page discovers detail URLs; detail pages produce ProductRecord rows."
+  ],
+  "constraints": {
+    "max_items": 10
+  },
+  "crawl_preferences": {
+    "runtime": "native_static",
+    "parser": "native_parser"
+  }
+}

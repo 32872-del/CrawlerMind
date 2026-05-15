@@ -117,7 +117,7 @@ _PLANNER_ALLOWED_FIELDS = frozenset({
 _PLANNER_ALLOWED_TASK_TYPES = frozenset({"product_list", "ranking_list"})
 _PLANNER_ALLOWED_TARGET_FIELDS = frozenset(FIELD_KEYWORDS.keys()) | {"link"}
 _PLANNER_ALLOWED_PREFERENCE_KEYS = frozenset({"engine"})
-_PLANNER_ALLOWED_ENGINES = frozenset({"fnspider", "scrapling"})
+_PLANNER_ALLOWED_ENGINES = frozenset({"fnspider", "scrapling", "native"})
 
 
 def make_planner_node(

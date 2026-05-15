@@ -68,6 +68,7 @@ def build_strategy_evidence_report(recon_report: dict[str, Any]) -> StrategyEvid
     signals.extend(_fingerprint_signals(fingerprint if isinstance(fingerprint, dict) else {}))
     signals.extend(_access_signals(access if isinstance(access, dict) else {}, anti_bot if isinstance(anti_bot, dict) else {}))
     signals.extend(_websocket_signals(websocket if isinstance(websocket, dict) else {}))
+    signals.extend(_visual_signals(_visual_recon_reports(recon)))
 
     for signal in signals:
         if signal.code in {
@@ -76,6 +77,7 @@ def build_strategy_evidence_report(recon_report: dict[str, Any]) -> StrategyEvid
             "transport_sensitive",
             "crypto_signature_flow",
             "crypto_encryption_flow",
+            "visual_challenge_evidence",
         }:
             warnings.append(signal.code)
 
@@ -379,6 +381,97 @@ def _websocket_signals(summary: dict[str, Any]) -> list[EvidenceSignal]:
             "message_kinds": list(summary.get("message_kinds") or [])[:10],
         },
     )]
+
+
+def _visual_signals(reports: list[dict[str, Any]]) -> list[EvidenceSignal]:
+    signals: list[EvidenceSignal] = []
+    for report in reports[:5]:
+        findings = [item for item in report.get("findings") or [] if isinstance(item, dict)]
+        finding_codes = [str(item.get("code") or "") for item in findings if item.get("code")]
+        ocr = report.get("ocr") if isinstance(report.get("ocr"), dict) else {}
+        text_preview = str(ocr.get("text_preview") or "")
+        challenge_text = _looks_like_visual_challenge(text_preview, finding_codes)
+        if challenge_text:
+            signals.append(EvidenceSignal(
+                code="visual_challenge_evidence",
+                source="visual",
+                confidence="medium",
+                score=58,
+                details={
+                    "status": report.get("status", ""),
+                    "image_kind": report.get("image_kind", ""),
+                    "finding_codes": finding_codes[:10],
+                    "ocr_provider": ocr.get("provider", ""),
+                    "text_chars": _safe_int(ocr.get("text_chars")),
+                },
+            ))
+        if report.get("status") in {"failed", "degraded"} or finding_codes:
+            high_findings = [
+                item for item in findings
+                if str(item.get("severity") or "") in {"high", "critical"}
+            ]
+            signals.append(EvidenceSignal(
+                code="visual_screenshot_degraded" if report.get("status") != "ok" else "visual_findings",
+                source="visual",
+                confidence="medium" if high_findings else "low",
+                score=48 if high_findings else 28,
+                details={
+                    "status": report.get("status", ""),
+                    "image_kind": report.get("image_kind", ""),
+                    "width": _safe_int(report.get("width")),
+                    "height": _safe_int(report.get("height")),
+                    "finding_codes": finding_codes[:10],
+                },
+            ))
+        if _safe_int(ocr.get("text_chars")) > 0:
+            signals.append(EvidenceSignal(
+                code="visual_ocr_text",
+                source="visual",
+                confidence="low",
+                score=32,
+                details={
+                    "provider": ocr.get("provider", ""),
+                    "text_chars": _safe_int(ocr.get("text_chars")),
+                    "text_truncated": bool(ocr.get("text_truncated")),
+                },
+            ))
+    return signals
+
+
+def _visual_recon_reports(recon: dict[str, Any]) -> list[dict[str, Any]]:
+    candidates: list[Any] = []
+    direct = recon.get("visual_recon")
+    if direct:
+        candidates.append(direct)
+    engine_result = recon.get("engine_result") if isinstance(recon.get("engine_result"), dict) else {}
+    details = engine_result.get("details") if isinstance(engine_result.get("details"), dict) else {}
+    for container in (engine_result, details):
+        value = container.get("visual_recon") if isinstance(container, dict) else None
+        if value:
+            candidates.append(value)
+
+    reports: list[dict[str, Any]] = []
+    for candidate in candidates:
+        if isinstance(candidate, dict):
+            reports.append(candidate)
+        elif isinstance(candidate, list):
+            reports.extend(item for item in candidate if isinstance(item, dict))
+    return reports
+
+
+def _looks_like_visual_challenge(text_preview: str, finding_codes: list[str]) -> bool:
+    lowered = text_preview.lower()
+    challenge_markers = (
+        "captcha",
+        "verify you are human",
+        "just a moment",
+        "cloudflare",
+        "security check",
+        "challenge",
+    )
+    if any(marker in lowered for marker in challenge_markers):
+        return True
+    return any("captcha" in code or "challenge" in code for code in finding_codes)
 
 
 def _crypto_items(js_evidence: dict[str, Any]) -> list[dict[str, Any]]:

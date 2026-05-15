@@ -49,6 +49,11 @@ class CLMEasyModeTests(unittest.TestCase):
 
         self.assertEqual(exit_code, 0)
 
+    def test_train_round_prints_profile_comparison_command(self) -> None:
+        exit_code = clm.main(["train", "--round", "native-vs-transition-profile"])
+
+        self.assertEqual(exit_code, 0)
+
     def test_crawl_rejects_conflicting_llm_flags(self) -> None:
         exit_code = clm.main([
             "crawl",

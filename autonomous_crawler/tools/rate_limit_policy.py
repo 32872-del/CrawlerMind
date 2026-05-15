@@ -32,6 +32,7 @@ class RateLimitDecision:
     max_retries: int
     should_retry: bool
     reason: str
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -40,6 +41,7 @@ class RateLimitDecision:
             "max_retries": self.max_retries,
             "should_retry": self.should_retry,
             "reason": self.reason,
+            "metadata": dict(self.metadata),
         }
 
 
@@ -79,17 +81,34 @@ class RateLimitPolicy:
         attempt: int = 0,
         status_code: int | None = None,
         error: str = "",
+        robots_directives: Any = None,
     ) -> RateLimitDecision:
         domain, rule = self.rule_for(url)
         retryable = bool(error) or bool(status_code in RETRYABLE_STATUS_CODES)
         should_retry = retryable and attempt < rule.max_retries
         delay = rule.delay_seconds
+        metadata: dict[str, Any] = {}
+        robots_delay = getattr(robots_directives, "crawl_delay_seconds", None)
+        if robots_delay is not None:
+            delay = max(delay, max(0.0, float(robots_delay)))
+            metadata["robots_crawl_delay_seconds"] = float(robots_delay)
+        request_rate = getattr(robots_directives, "request_rate", None)
+        if request_rate:
+            metadata["robots_request_rate"] = list(request_rate)
+        robots_source = getattr(robots_directives, "source_url", "")
+        if robots_source:
+            metadata["robots_source_url"] = str(robots_source)
+        robots_mode = getattr(robots_directives, "mode", "")
+        if robots_mode:
+            metadata["robots_mode"] = str(robots_mode)
         if should_retry and attempt > 0:
-            delay = rule.delay_seconds * (rule.backoff_factor ** attempt)
+            delay = delay * (rule.backoff_factor ** attempt)
         if status_code == 429:
             reason = "rate_limited"
         elif error:
             reason = "transport_error"
+        elif metadata:
+            reason = "robots_metadata"
         elif retryable:
             reason = f"retryable_status:{status_code}"
         else:
@@ -100,4 +119,5 @@ class RateLimitPolicy:
             max_retries=rule.max_retries,
             should_retry=should_retry,
             reason=reason,
+            metadata=metadata,
         )

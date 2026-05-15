@@ -1,16 +1,16 @@
 # Team Board
 
-Last updated: 2026-05-14
+Last updated: 2026-05-15
 
 ## Active Employees
 
 | Employee ID | Display Name | Current Project Role | Status | Current Assignment |
 |---|---|---|---|---|
-| LLM-2026-000 | Supervisor Codex | Project Supervisor | active | Scrapling capability absorption docs corrected; next: CLM-native backend absorption |
-| LLM-2026-001 | Worker Alpha | Runtime Adapter Worker | accepted work completed | Scrapling Static + Parser Adapter |
-| LLM-2026-002 | Worker Beta | Browser Runtime Infrastructure Worker | accepted work completed | Scrapling Browser + Session + Proxy Runtime Design |
+| LLM-2026-000 | Supervisor Codex | Project Supervisor | active | Scrapling absorption baseline accepted; next hardening/training planning |
+| LLM-2026-001 | Worker Alpha | Browser Runtime Worker | standby | Native browser profile rotation and real dynamic training accepted |
+| LLM-2026-002 | Worker Beta | Proxy / Transport Runtime Worker | standby | Native async fetch pool and long-run metrics accepted |
 | LLM-2026-003 | Worker Gamma | Unassigned | standby | none |
-| LLM-2026-004 | Worker Delta | Runtime Documentation Auditor | accepted work completed | Scrapling Runtime Docs + Source Tracking Audit |
+| LLM-2026-004 | Worker Delta | Spider Runtime Worker | standby | Site profile and profile ecommerce runner accepted |
 
 ## Current Project Roles
 
@@ -92,6 +92,32 @@ Last updated: 2026-05-14
 | Scrapling Browser + Session + Proxy Runtime Design | LLM-2026-002 | Browser Runtime Infrastructure Worker | accepted | `docs/team/acceptance/2026-05-14_scrapling_browser_session_proxy_runtime_ACCEPTED.md` |
 | Scrapling Runtime Docs + Source Tracking Audit | LLM-2026-004 | Runtime Documentation Auditor | accepted | `docs/team/acceptance/2026-05-14_scrapling_runtime_docs_source_tracking_ACCEPTED.md` |
 | Scrapling Executor Routing | LLM-2026-000 | Supervisor mainline | accepted | `docs/team/acceptance/2026-05-14_scrapling_executor_routing_ACCEPTED.md` |
+| NativeFetchRuntime | LLM-2026-000 | Supervisor mainline / Runtime Worker | accepted | `docs/team/acceptance/2026-05-14_native_fetch_runtime_ACCEPTED.md` |
+| NativeParserRuntime | LLM-2026-001 | Runtime Parser Worker | accepted | `docs/team/acceptance/2026-05-14_native_parser_runtime_ACCEPTED.md` |
+| Native Runtime Parity QA | LLM-2026-002 | Runtime QA Worker | accepted | `docs/team/acceptance/2026-05-14_native_runtime_parity_ACCEPTED.md` |
+| Spider / Checkpoint Native Design Prep | LLM-2026-004 | Runtime Design / Docs Worker | accepted | `docs/team/acceptance/2026-05-14_spider_checkpoint_design_ACCEPTED.md` |
+| Native Executor Routing And Runtime Comparison | LLM-2026-000 | Supervisor mainline / Runtime Worker | accepted | `docs/team/acceptance/2026-05-14_native_executor_routing_ACCEPTED.md` |
+| Native Browser Runtime Shell | LLM-2026-000 | Supervisor mainline / Browser Runtime Worker | accepted | `docs/team/acceptance/2026-05-14_native_browser_runtime_ACCEPTED.md` |
+| Native Dynamic Runtime Comparison Harness | LLM-2026-000 | Supervisor mainline / Runtime QA | accepted | `docs/team/acceptance/2026-05-14_native_dynamic_comparison_ACCEPTED.md` |
+| Native Browser Session Lifecycle Slice | LLM-2026-000 | Supervisor mainline / Browser Runtime Worker | accepted | `docs/team/acceptance/2026-05-14_native_browser_session_lifecycle_ACCEPTED.md` |
+| Native Browser Protected Evidence And Failure Classification | LLM-2026-000 | Supervisor mainline / Browser Runtime Worker | accepted | `docs/team/acceptance/2026-05-14_native_browser_protected_failure_evidence_ACCEPTED.md` |
+| Native Spider Request Result Event Models | LLM-2026-000 | Supervisor mainline / Spider Runtime Worker | accepted | `docs/team/acceptance/2026-05-14_native_spider_models_ACCEPTED.md` |
+| Native Spider CheckpointStore | LLM-2026-000 | Supervisor mainline / Storage Worker | accepted | `docs/team/acceptance/2026-05-14_native_checkpoint_store_ACCEPTED.md` |
+| Native SpiderRuntimeProcessor | LLM-2026-000 | Supervisor mainline / Spider Runtime Worker | accepted | `docs/team/acceptance/2026-05-14_native_spider_runtime_processor_ACCEPTED.md` |
+| Native LinkDiscovery And RobotsPolicy Helpers | LLM-2026-000 | Supervisor mainline / Spider Tooling Worker | accepted | `docs/team/acceptance/2026-05-14_native_link_robots_helpers_ACCEPTED.md` |
+| Native Spider Pause/Resume Smoke | LLM-2026-000 | Supervisor mainline / Spider Runtime QA | accepted | `docs/team/acceptance/2026-05-14_native_spider_pause_resume_smoke_ACCEPTED.md` |
+| Native Browser Session and Profile Pool | LLM-2026-001 | ROLE-BROWSER | accepted | `docs/team/acceptance/2026-05-14_native_browser_session_pool_ACCEPTED.md` |
+| Proxy Health and Fetch Diagnostics | LLM-2026-002 | ROLE-QA | accepted | `docs/team/acceptance/2026-05-14_proxy_health_fetch_diagnostics_ACCEPTED.md` |
+| Native Adaptive Parser | LLM-2026-000 | Supervisor mainline / Parser Runtime Worker | accepted | `docs/team/acceptance/2026-05-14_native_adaptive_parser_ACCEPTED.md` |
+| Native Selector Memory | LLM-2026-000 | Supervisor mainline / Parser Runtime Worker | accepted | `docs/team/acceptance/2026-05-14_native_selector_memory_ACCEPTED.md` |
+| Browser Pool Real Smoke And Batch Wiring | LLM-2026-001 | ROLE-BROWSER | accepted | `docs/team/acceptance/2026-05-14_browser_pool_real_smoke_batch_wiring_ACCEPTED.md` |
+| Proxy Retry Orchestration | LLM-2026-002 | ROLE-QA | accepted | `docs/team/acceptance/2026-05-14_proxy_retry_orchestration_ACCEPTED.md` |
+| Sitemap Robots Long-Run Integration | LLM-2026-004 | ROLE-DOCS | accepted | `docs/team/acceptance/2026-05-14_sitemap_robots_longrun_ACCEPTED.md` |
+| Native Browser Profile Rotation And Real Dynamic Training | LLM-2026-001 | ROLE-BROWSER | accepted | `docs/team/acceptance/2026-05-14_native_browser_profile_rotation_real_dynamic_ACCEPTED.md` |
+| Native Async Fetch Pool And Long-Run Stress Metrics | LLM-2026-002 | ROLE-QA | accepted | `docs/team/acceptance/2026-05-14_native_async_fetch_pool_stress_ACCEPTED.md` |
+| Site Profile And Profile-Driven Ecommerce Runner | LLM-2026-004 | ROLE-DOCS | accepted | `docs/team/acceptance/2026-05-14_profile_driven_ecommerce_runner_ACCEPTED.md` |
+| VisualRecon Strategy And AntiBot Integration | LLM-2026-000 | ROLE-SUPERVISOR | accepted | `docs/team/acceptance/2026-05-14_visual_recon_strategy_antibot_ACCEPTED.md` |
+| Scrapling Absorption Baseline Closeout | LLM-2026-000 | ROLE-SUPERVISOR | accepted | `docs/team/acceptance/2026-05-14_scrapling_absorption_baseline_ACCEPTED.md` |
 
 ## Recent Accepted Work Log
 
@@ -181,22 +207,32 @@ Last updated: 2026-05-14
 | Scrapling Browser/Proxy Runtime | LLM-2026-002 | `docs/team/acceptance/2026-05-14_scrapling_browser_session_proxy_runtime_ACCEPTED.md` | Scrapling dynamic/protected browser adapter, session config, and proxy mapping |
 | Scrapling Runtime Docs | LLM-2026-004 | `docs/team/acceptance/2026-05-14_scrapling_runtime_docs_source_tracking_ACCEPTED.md` | Scrapling capability absorption runbook and source tracking plan |
 | Scrapling Executor Routing | LLM-2026-000 | `docs/team/acceptance/2026-05-14_scrapling_executor_routing_ACCEPTED.md` | `engine="scrapling"` routes through CLM runtime adapters; full suite green |
+| NativeFetchRuntime | LLM-2026-000 | `docs/team/acceptance/2026-05-14_native_fetch_runtime_ACCEPTED.md` | CLM-native static fetch runtime with httpx/curl_cffi, proxy trace, runtime events, and structured failures |
+| NativeParserRuntime | LLM-2026-001 | `docs/team/acceptance/2026-05-14_native_parser_runtime_ACCEPTED.md` | CLM-native parser runtime with CSS/XPath/text/regex extraction and Scrapling-adapter parity |
+| Native Runtime Parity QA | LLM-2026-002 | `docs/team/acceptance/2026-05-14_native_runtime_parity_ACCEPTED.md` | 66-test parity suite comparing CLM-native runtimes against Scrapling transition adapters |
+| Spider / Checkpoint Native Design | LLM-2026-004 | `docs/team/acceptance/2026-05-14_spider_checkpoint_design_ACCEPTED.md` | Design path for CLM-native spider request/result/checkpoint/link/robots absorption |
+| Native Executor Routing | LLM-2026-000 | `docs/team/acceptance/2026-05-14_native_executor_routing_ACCEPTED.md` | `engine="native"` routes static execution through NativeFetchRuntime and NativeParserRuntime; comparison smoke passed |
+| Native Browser Runtime | LLM-2026-000 | `docs/team/acceptance/2026-05-14_native_browser_runtime_ACCEPTED.md` | `engine="native"` browser execution now routes through NativeBrowserRuntime with Playwright context/session/proxy/XHR evidence |
+| Native Dynamic Comparison | LLM-2026-000 | `docs/team/acceptance/2026-05-14_native_dynamic_comparison_ACCEPTED.md` | Local SPA/API comparison harness proves native_browser and scrapling_browser parity on rendered selectors and captured XHR |
+| Native Browser Session Lifecycle | LLM-2026-000 | `docs/team/acceptance/2026-05-14_native_browser_session_lifecycle_ACCEPTED.md` | NativeBrowserRuntime supports persistent user-data contexts and storage-state export artifacts |
+| Native Browser Protected Evidence | LLM-2026-000 | `docs/team/acceptance/2026-05-14_native_browser_protected_failure_evidence_ACCEPTED.md` | NativeBrowserRuntime attaches fingerprint reports, protected-mode profile hints, and browser failure classification evidence |
+| Native Spider Models | LLM-2026-000 | `docs/team/acceptance/2026-05-14_native_spider_models_ACCEPTED.md` | CLM-native `CrawlRequestEnvelope`, `CrawlItemResult`, and `SpiderRunSummary` contracts for long-running crawls |
+| Native CheckpointStore | LLM-2026-000 | `docs/team/acceptance/2026-05-14_native_checkpoint_store_ACCEPTED.md` | SQLite checkpoint store persists spider runs, batch checkpoints, item records, events, and failure buckets |
+| Native Spider Processor | LLM-2026-000 | `docs/team/acceptance/2026-05-14_native_spider_runtime_processor_ACCEPTED.md` | `SpiderRuntimeProcessor` connects runtime backends, parser callbacks, discovered requests, BatchRunner results, and CheckpointStore |
+| Native Link / Robots Helpers | LLM-2026-000 | `docs/team/acceptance/2026-05-14_native_link_robots_helpers_ACCEPTED.md` | `LinkDiscoveryHelper` and `RobotsPolicyHelper` add profile-driven link extraction, URL classification, robots directives, and evidence events |
+| Native Spider Pause/Resume Smoke | LLM-2026-000 | `docs/team/acceptance/2026-05-14_native_spider_pause_resume_smoke_ACCEPTED.md` | Local smoke proves URLFrontier + BatchRunner + SpiderRuntimeProcessor + CheckpointStore + LinkDiscoveryHelper pause/resume without public network |
 
 ## Upcoming Candidate Tasks
 
-1. SCRAPLING-ABSORB-1: Convert static fetch and parser behavior from transition adapters into CLM-native `NativeFetchRuntime` and `NativeParserRuntime`.
-2. SCRAPLING-ABSORB-2: Run real static + SPA training through Scrapling transition adapters and CLM-native paths, then absorb browser/session/proxy/XHR behavior into the native backend.
-3. SCRAPLING-ABSORB-3: Integrate Scrapling spider scheduler/checkpoint/request/result/session/robots/link-extractor concepts into CLM BatchRunner and long-running crawl path.
-4. CAP-2.1 / CAP-2.2: Build JS AST + hook/sandbox MVP for signature-function localization.
-5. CAP-3.3: Carry proxy trace / aggregate proxy health into BatchRunner metrics and add real provider adapter template.
-6. CAP-5.2: VisualRecon/OCR MVP on persisted screenshots.
-7. CAP-5.1: Calibrate StrategyScoringPolicy on real training cases and decide narrow cases where it may influence final mode.
-8. CAP-6.2: Calibrate AntiBotReport on controlled and real training cases.
-9. CAP-1.4: Preserve real WebSocket smoke as a training fixture and design protocol-analysis follow-up tasks.
-10. CAP-4.2: Fingerprint profile pool and runtime/config comparison report for real browser training.
-11. CAP-1.2: HTTP/TLS transport diagnostics toward ALPN/JA3 evidence and impersonation-profile selection.
-12. CAP-3.1: Wrap LangGraph workflow as a `BatchRunner` processor.
-13. CAP-3.6: Add runtime site/crawl profile files for selectors, API hints, pagination, access config, and quality overrides.
+1. SCRAPLING-HARDEN-1: Run 10k/30k native long-run stress tests through `SpiderRuntimeProcessor`, `CheckpointStore`, async fetch, and profile-driven callbacks.
+2. SCRAPLING-HARDEN-2: Run real dynamic/ecommerce profile training with native browser profile rotation, visual evidence, and checkpointed product output.
+3. SCRAPLING-HARDEN-3: Carry async/proxy/browser-pool metrics into `SpiderRunSummary` and run reports.
+4. SCRAPLING-HARDEN-4: Add persistent async client pooling, DNS reuse tuning, and adaptive concurrency.
+5. SCRAPLING-HARDEN-5: Add browser profile health scoring and domain-aware profile selection.
+6. SCRAPLING-HARDEN-6: Wire observed API pagination into profile-driven ecommerce runner.
+7. CAP-2.1 / CAP-2.2: Build JS hook/sandbox MVP for signature-function localization and replay planning.
+8. CAP-5.2: Add real OCR provider adapter and screenshot-to-DOM alignment.
+9. UX-P1: Simplify user onboarding around `clm.py`, FastAPI, and future UI config without weakening the native backend.
 
 ## Supervisor Notes
 
@@ -212,6 +248,7 @@ Last updated: 2026-05-14
 - P1 should focus on crawl capability breadth before frontend work: access
   diagnostics, mode escalation, network observation, and product list/detail/
   variant task modeling.
-- Scrapling work must be treated as capability absorption into CLM-native
-  backend modules. Transition adapters are useful for tests and comparison, but
-  they are not the final product architecture.
+- Scrapling work has reached a CLM-native baseline for the major backend
+  patterns. Transition adapters remain useful as comparison oracles, but the
+  product direction is now hardening, large-run proof, and easier operation on
+  top of CLM-owned modules.

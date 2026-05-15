@@ -1,0 +1,361 @@
+{
+  "run_at": "2026-05-14T15:53:58.196706",
+  "purpose": "SCRAPLING-ABSORB native-vs-transition profile runtime comparison",
+  "suite": "profile",
+  "results": [
+    {
+      "id": "profile_product_catalog",
+      "name": "Profile: Product Card Catalog",
+      "url": "http://127.0.0.1:49651/fixtures/product-catalog",
+      "risk": "local-profile-static",
+      "mode": "http",
+      "expect": {
+        "min_html_chars": 400,
+        "min_captured_xhr": 0,
+        "min_artifacts": 0,
+        "required_status": "executed",
+        "required_status_code": 200,
+        "min_selector_matches": {
+          "title": 3,
+          "price": 3,
+          "link": 3,
+          "image": 3,
+          "brand": 3
+        },
+        "allow_review": false
+      },
+      "native": {
+        "engine": "native",
+        "status": "executed",
+        "elapsed_seconds": 0.204,
+        "final_url": "http://127.0.0.1:49651/fixtures/product-catalog",
+        "status_code": 200,
+        "backend": "native_static",
+        "transport": "httpx",
+        "mode": "",
+        "html_chars": 1675,
+        "captured_xhr_count": 0,
+        "captured_xhr_preview": [],
+        "runtime_event_types": [
+          "fetch_start",
+          "fetch_complete"
+        ],
+        "artifact_count": 0,
+        "artifact_kinds": [],
+        "failure_classification": {},
+        "fingerprint_risk": "",
+        "selector_matches": {
+          "title": 3,
+          "price": 3,
+          "link": 3,
+          "image": 3,
+          "brand": 3
+        },
+        "selector_errors": [],
+        "error_code": "",
+        "error_log": [],
+        "messages": [
+          "[Executor] Engine=native native_static fetched http://127.0.0.1:49651/fixtures/product-catalog (200, 1675 chars)"
+        ]
+      },
+      "transition": {
+        "engine": "scrapling",
+        "status": "executed",
+        "elapsed_seconds": 0.002,
+        "final_url": "http://127.0.0.1:49651/fixtures/product-catalog",
+        "status_code": 200,
+        "backend": "scrapling_static",
+        "transport": "",
+        "mode": "",
+        "html_chars": 1675,
+        "captured_xhr_count": 0,
+        "captured_xhr_preview": [],
+        "runtime_event_types": [],
+        "artifact_count": 0,
+        "artifact_kinds": [],
+        "failure_classification": {},
+        "fingerprint_risk": "",
+        "selector_matches": {
+          "title": 3,
+          "price": 3,
+          "link": 3,
+          "image": 3,
+          "brand": 3
+        },
+        "selector_errors": [],
+        "error_code": "",
+        "error_log": [],
+        "messages": [
+          "[Executor] Engine=scrapling scrapling_static fetched http://127.0.0.1:49651/fixtures/product-catalog (200, 1675 chars)"
+        ]
+      },
+      "expectation_results": {
+        "native": {
+          "checked": true,
+          "passed": true,
+          "failures": []
+        },
+        "transition": {
+          "checked": true,
+          "passed": true,
+          "failures": []
+        }
+      },
+      "comparison": {
+        "same_status": true,
+        "same_status_code": true,
+        "html_char_ratio_native_over_transition": 1.0,
+        "captured_xhr_delta": 0,
+        "artifact_delta": 0,
+        "selector_match_delta": {
+          "brand": 0,
+          "image": 0,
+          "link": 0,
+          "price": 0,
+          "title": 0
+        },
+        "requires_review": false
+      }
+    },
+    {
+      "id": "profile_json_ld_script",
+      "name": "Profile: JSON-LD and Script Coexistence",
+      "url": "http://127.0.0.1:49651/fixtures/json-ld-script",
+      "risk": "local-profile-static",
+      "mode": "http",
+      "expect": {
+        "min_html_chars": 600,
+        "min_captured_xhr": 0,
+        "min_artifacts": 0,
+        "required_status": "executed",
+        "required_status_code": 200,
+        "min_selector_matches": {
+          "title": 2,
+          "price": 2,
+          "link": 2,
+          "image": 2
+        },
+        "allow_review": false
+      },
+      "native": {
+        "engine": "native",
+        "status": "executed",
+        "elapsed_seconds": 0.149,
+        "final_url": "http://127.0.0.1:49651/fixtures/json-ld-script",
+        "status_code": 200,
+        "backend": "native_static",
+        "transport": "httpx",
+        "mode": "",
+        "html_chars": 1335,
+        "captured_xhr_count": 0,
+        "captured_xhr_preview": [],
+        "runtime_event_types": [
+          "fetch_start",
+          "fetch_complete"
+        ],
+        "artifact_count": 0,
+        "artifact_kinds": [],
+        "failure_classification": {},
+        "fingerprint_risk": "",
+        "selector_matches": {
+          "title": 2,
+          "price": 2,
+          "link": 2,
+          "image": 2
+        },
+        "selector_errors": [],
+        "error_code": "",
+        "error_log": [],
+        "messages": [
+          "[Executor] Engine=native native_static fetched http://127.0.0.1:49651/fixtures/json-ld-script (200, 1335 chars)"
+        ]
+      },
+      "transition": {
+        "engine": "scrapling",
+        "status": "executed",
+        "elapsed_seconds": 0.002,
+        "final_url": "http://127.0.0.1:49651/fixtures/json-ld-script",
+        "status_code": 200,
+        "backend": "scrapling_static",
+        "transport": "",
+        "mode": "",
+        "html_chars": 1335,
+        "captured_xhr_count": 0,
+        "captured_xhr_preview": [],
+        "runtime_event_types": [],
+        "artifact_count": 0,
+        "artifact_kinds": [],
+        "failure_classification": {},
+        "fingerprint_risk": "",
+        "selector_matches": {
+          "title": 2,
+          "price": 2,
+          "link": 2,
+          "image": 2
+        },
+        "selector_errors": [],
+        "error_code": "",
+        "error_log": [],
+        "messages": [
+          "[Executor] Engine=scrapling scrapling_static fetched http://127.0.0.1:49651/fixtures/json-ld-script (200, 1335 chars)"
+        ]
+      },
+      "expectation_results": {
+        "native": {
+          "checked": true,
+          "passed": true,
+          "failures": []
+        },
+        "transition": {
+          "checked": true,
+          "passed": true,
+          "failures": []
+        }
+      },
+      "comparison": {
+        "same_status": true,
+        "same_status_code": true,
+        "html_char_ratio_native_over_transition": 1.0,
+        "captured_xhr_delta": 0,
+        "artifact_delta": 0,
+        "selector_match_delta": {
+          "image": 0,
+          "link": 0,
+          "price": 0,
+          "title": 0
+        },
+        "requires_review": false
+      }
+    },
+    {
+      "id": "profile_local_spa_products",
+      "name": "Profile: Local SPA Product List",
+      "url": "http://127.0.0.1:49651/spa",
+      "risk": "local-profile-dynamic",
+      "mode": "browser",
+      "expect": {
+        "min_html_chars": 150,
+        "min_captured_xhr": 1,
+        "min_artifacts": 0,
+        "required_status": "executed",
+        "required_status_code": 200,
+        "min_selector_matches": {
+          "title": 2,
+          "price": 2,
+          "link": 2
+        },
+        "allow_review": false
+      },
+      "native": {
+        "engine": "native",
+        "status": "executed",
+        "elapsed_seconds": 1.2,
+        "final_url": "http://127.0.0.1:49651/spa",
+        "status_code": 200,
+        "backend": "native_browser",
+        "transport": "",
+        "mode": "dynamic",
+        "html_chars": 1144,
+        "captured_xhr_count": 1,
+        "captured_xhr_preview": [
+          {
+            "url": "[redacted_url]",
+            "method": "GET",
+            "status_code": 200,
+            "content_type": "application/json; charset=utf-8",
+            "body_preview_chars": 167
+          }
+        ],
+        "runtime_event_types": [
+          "browser_render_start",
+          "browser_render_complete"
+        ],
+        "artifact_count": 1,
+        "artifact_kinds": [
+          "screenshot"
+        ],
+        "failure_classification": {
+          "category": "none",
+          "severity": "low",
+          "reason": "",
+          "status_code": 200,
+          "proxy_selected": false
+        },
+        "fingerprint_risk": "medium",
+        "selector_matches": {
+          "title": 2,
+          "price": 2,
+          "link": 2
+        },
+        "selector_errors": [],
+        "error_code": "",
+        "error_log": [],
+        "messages": [
+          "[Executor] Engine=native native_browser fetched http://127.0.0.1:49651/spa (200, 1144 chars)"
+        ]
+      },
+      "transition": {
+        "engine": "scrapling",
+        "status": "executed",
+        "elapsed_seconds": 1.73,
+        "final_url": "http://127.0.0.1:49651/spa",
+        "status_code": 200,
+        "backend": "scrapling_browser",
+        "transport": "",
+        "mode": "",
+        "html_chars": 1144,
+        "captured_xhr_count": 1,
+        "captured_xhr_preview": [
+          {
+            "url": "[redacted_url]",
+            "method": "",
+            "status_code": 200,
+            "content_type": "",
+            "body_preview_chars": 0
+          }
+        ],
+        "runtime_event_types": [],
+        "artifact_count": 0,
+        "artifact_kinds": [],
+        "failure_classification": {},
+        "fingerprint_risk": "",
+        "selector_matches": {
+          "title": 2,
+          "price": 2,
+          "link": 2
+        },
+        "selector_errors": [],
+        "error_code": "",
+        "error_log": [],
+        "messages": [
+          "[Executor] Engine=scrapling scrapling_browser fetched http://127.0.0.1:49651/spa (200, 1144 chars)"
+        ]
+      },
+      "expectation_results": {
+        "native": {
+          "checked": true,
+          "passed": true,
+          "failures": []
+        },
+        "transition": {
+          "checked": true,
+          "passed": true,
+          "failures": []
+        }
+      },
+      "comparison": {
+        "same_status": true,
+        "same_status_code": true,
+        "html_char_ratio_native_over_transition": 1.0,
+        "captured_xhr_delta": 0,
+        "artifact_delta": 1,
+        "selector_match_delta": {
+          "link": 0,
+          "price": 0,
+          "title": 0
+        },
+        "requires_review": false
+      }
+    }
+  ]
+}

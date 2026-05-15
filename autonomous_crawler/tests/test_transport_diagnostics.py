@@ -165,5 +165,86 @@ class TransportDiagnosticsTests(unittest.TestCase):
         self.assertTrue(any("Transport diagnostics" in msg for msg in state["messages"]))
 
 
+# ---------------------------------------------------------------------------
+# Native runtime transport evidence
+# ---------------------------------------------------------------------------
+
+class NativeTransportEvidenceTests(unittest.TestCase):
+    """NativeFetchRuntime transport evidence integrates with diagnostics."""
+
+    def test_native_transport_profile_label(self) -> None:
+        """Native httpx transport maps to 'httpx-default' profile label."""
+        from autonomous_crawler.tools.transport_diagnostics import _infer_transport_profile
+        from autonomous_crawler.tools.fetch_policy import FetchAttempt
+
+        attempt = FetchAttempt(mode="requests", url="https://example.com", html="<p>ok</p>", status_code=200)
+        profile = _infer_transport_profile(attempt)
+        self.assertEqual(profile, "httpx-default")
+
+    def test_curl_cffi_transport_profile_label(self) -> None:
+        """curl_cffi transport maps to 'curl_cffi:chrome124' profile label."""
+        from autonomous_crawler.tools.transport_diagnostics import _infer_transport_profile
+        from autonomous_crawler.tools.fetch_policy import FetchAttempt
+
+        attempt = FetchAttempt(mode="curl_cffi", url="https://example.com", html="<p>ok</p>", status_code=200)
+        profile = _infer_transport_profile(attempt)
+        self.assertEqual(profile, "curl_cffi:chrome124")
+
+    def test_header_redaction_in_diagnostics(self) -> None:
+        """Sensitive headers are redacted in transport diagnostics output."""
+        from autonomous_crawler.tools.transport_diagnostics import _safe_header_summary
+
+        headers = {
+            "content-type": "text/html",
+            "server": "nginx",
+            "set-cookie": "session=abc123; HttpOnly",
+            "authorization": "Bearer secret-token",
+            "x-api-key": "key-12345",
+        }
+        safe = _safe_header_summary(headers)
+
+        self.assertEqual(safe["content-type"], "text/html")
+        self.assertEqual(safe["server"], "nginx")
+        self.assertEqual(safe["set-cookie"], "[redacted]")
+        self.assertEqual(safe["authorization"], "[redacted]")
+        self.assertEqual(safe["x-api-key"], "[redacted]")
+
+    def test_error_mode_specific_finding(self) -> None:
+        """When one transport errors and another succeeds, finding is detected."""
+        from autonomous_crawler.tools.transport_diagnostics import _find_transport_differences
+        from autonomous_crawler.tools.transport_diagnostics import TransportModeReport
+
+        modes = [
+            TransportModeReport(mode="requests", url="https://example.com", error="TLS handshake failed"),
+            TransportModeReport(mode="curl_cffi", url="https://example.com", status_code=200, html_chars=100),
+        ]
+        findings = _find_transport_differences(modes)
+        self.assertIn("transport_errors_are_mode_specific", findings)
+
+    def test_native_fetch_engine_result_transport(self) -> None:
+        """NativeFetchRuntime engine_result contains transport field."""
+        from unittest.mock import MagicMock, patch
+        from autonomous_crawler.runtime.native_static import NativeFetchRuntime
+        from autonomous_crawler.runtime.models import RuntimeRequest
+
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.url = "https://example.com"
+        mock_resp.headers = {"Content-Type": "text/html", "server": "nginx"}
+        mock_resp.cookies = {}
+        mock_resp.content = b"<html>ok</html>"
+        mock_resp.text = "<html>ok</html>"
+        mock_resp.http_version = "HTTP/2"
+
+        with patch("autonomous_crawler.runtime.native_static.httpx.Client") as mock_cls:
+            client = mock_cls.return_value.__enter__.return_value
+            client.request.return_value = mock_resp
+            runtime = NativeFetchRuntime()
+            resp = runtime.fetch(RuntimeRequest(url="https://example.com"))
+
+        self.assertEqual(resp.engine_result["transport"], "httpx")
+        self.assertEqual(resp.engine_result["http_version"], "HTTP/2")
+
+
 if __name__ == "__main__":
     unittest.main()

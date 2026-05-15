@@ -1,0 +1,218 @@
+{
+  "run_at": "2026-05-14T10:22:35.408795+00:00",
+  "purpose": "SCRAPLING-ABSORB-2I real dynamic/protected training",
+  "use_profile_rotation": false,
+  "summary": {
+    "total": 4,
+    "ok": 3,
+    "failed": 1,
+    "failure_categories": [
+      "http_blocked"
+    ]
+  },
+  "results": [
+    {
+      "id": "js_rendered_quotes",
+      "name": "JS Rendered Quotes (quotes.toscrape.com/js/)",
+      "url": "https://quotes.toscrape.com/js/",
+      "risk": "low-public-training-site",
+      "status": "ok",
+      "elapsed_seconds": 11.427,
+      "final_url": "https://quotes.toscrape.com/js/",
+      "status_code": 200,
+      "html_chars": 8940,
+      "selector_matches": {
+        "quote": 10,
+        "text": 10,
+        "author": 10,
+        "tag": 30
+      },
+      "xhr_count": 0,
+      "resource_counts": {
+        "document": 1,
+        "stylesheet": 3,
+        "script": 1,
+        "font": 1
+      },
+      "failure_classification": {
+        "category": "none",
+        "severity": "low",
+        "reason": "",
+        "status_code": 200,
+        "proxy_selected": false
+      },
+      "profile_evidence": {
+        "profile_id": null,
+        "profile": null,
+        "pool_active": null,
+        "rotator": null
+      },
+      "engine": "native_browser",
+      "mode": "dynamic",
+      "session_mode": "ephemeral",
+      "error": "",
+      "ok": true,
+      "expected_checks": {
+        "min_html_chars": {
+          "expected": 5000,
+          "actual": 8940,
+          "pass": true
+        },
+        "min_selector_hits.quote": {
+          "expected": 1,
+          "actual": 10,
+          "pass": true
+        },
+        "min_selector_hits.text": {
+          "expected": 1,
+          "actual": 10,
+          "pass": true
+        }
+      }
+    },
+    {
+      "id": "js_rendered_scroll",
+      "name": "JS Rendered with Scroll Loading",
+      "url": "https://quotes.toscrape.com/js/",
+      "risk": "low-public-training-site",
+      "status": "ok",
+      "elapsed_seconds": 7.309,
+      "final_url": "https://quotes.toscrape.com/js/",
+      "status_code": 200,
+      "html_chars": 8940,
+      "selector_matches": {
+        "quote": 10,
+        "text": 10,
+        "author": 10
+      },
+      "xhr_count": 0,
+      "resource_counts": {
+        "document": 1,
+        "stylesheet": 3,
+        "script": 1,
+        "font": 1
+      },
+      "failure_classification": {
+        "category": "none",
+        "severity": "low",
+        "reason": "",
+        "status_code": 200,
+        "proxy_selected": false
+      },
+      "profile_evidence": {
+        "profile_id": null,
+        "profile": null,
+        "pool_active": null,
+        "rotator": null
+      },
+      "engine": "native_browser",
+      "mode": "dynamic",
+      "session_mode": "ephemeral",
+      "error": "",
+      "ok": true,
+      "expected_checks": {
+        "min_html_chars": {
+          "expected": 5000,
+          "actual": 8940,
+          "pass": true
+        },
+        "min_selector_hits.quote": {
+          "expected": 1,
+          "actual": 10,
+          "pass": true
+        }
+      }
+    },
+    {
+      "id": "protected_challenge_like",
+      "name": "Protected/Challenge-Like Page",
+      "url": "https://httpbin.org/status/403",
+      "risk": "medium-expected-failure",
+      "status": "failed",
+      "elapsed_seconds": 2.928,
+      "final_url": "https://httpbin.org/status/403",
+      "status_code": 403,
+      "html_chars": 39,
+      "selector_matches": {
+        "body": 1
+      },
+      "xhr_count": 0,
+      "resource_counts": {
+        "document": 1
+      },
+      "failure_classification": {
+        "category": "http_blocked",
+        "severity": "high",
+        "reason": "status:403",
+        "status_code": 403,
+        "proxy_selected": false
+      },
+      "profile_evidence": {
+        "profile_id": null,
+        "profile": null,
+        "pool_active": null,
+        "rotator": null
+      },
+      "engine": "native_browser",
+      "mode": "dynamic",
+      "session_mode": "ephemeral",
+      "error": "",
+      "ok": false,
+      "expected_checks": {
+        "failure_category": {
+          "expected": "http_blocked",
+          "actual": "http_blocked",
+          "pass": true
+        },
+        "status_code": {
+          "expected": 403,
+          "actual": 403,
+          "pass": true
+        }
+      }
+    },
+    {
+      "id": "dynamic_with_headers",
+      "name": "Dynamic Page with Custom Headers",
+      "url": "https://httpbin.org/headers",
+      "risk": "low-public-api",
+      "status": "ok",
+      "elapsed_seconds": 6.709,
+      "final_url": "https://httpbin.org/headers",
+      "status_code": 200,
+      "html_chars": 1118,
+      "selector_matches": {
+        "body": 1
+      },
+      "xhr_count": 1,
+      "resource_counts": {
+        "document": 1
+      },
+      "failure_classification": {
+        "category": "none",
+        "severity": "low",
+        "reason": "",
+        "status_code": 200,
+        "proxy_selected": false
+      },
+      "profile_evidence": {
+        "profile_id": null,
+        "profile": null,
+        "pool_active": null,
+        "rotator": null
+      },
+      "engine": "native_browser",
+      "mode": "dynamic",
+      "session_mode": "ephemeral",
+      "error": "",
+      "ok": true,
+      "expected_checks": {
+        "min_html_chars": {
+          "expected": 100,
+          "actual": 1118,
+          "pass": true
+        }
+      }
+    }
+  ]
+}

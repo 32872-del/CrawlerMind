@@ -45,6 +45,7 @@ class ParserRuntime(Protocol):
         selectors: list[RuntimeSelectorRequest],
         *,
         url: str = "",
+        selector_config: dict[str, object] | None = None,
     ) -> list[RuntimeSelectorResult]:
         """Extract selector results from HTML."""
         ...

@@ -1,0 +1,177 @@
+{
+  "run_id": "native-spider-smoke-2026-05-14",
+  "config": {
+    "keep_db": false,
+    "network": "none",
+    "fixture_count": 3
+  },
+  "frontier_add": {
+    "list": {
+      "added": 1,
+      "skipped": 0,
+      "invalid": 0
+    },
+    "failure_seed": {
+      "added": 1,
+      "skipped": 0,
+      "invalid": 0
+    }
+  },
+  "first_pass": {
+    "run_id": "native-spider-smoke-2026-05-14",
+    "batches": 1,
+    "claimed": 1,
+    "succeeded": 1,
+    "failed": 0,
+    "retried": 0,
+    "records_saved": 0,
+    "discovered_urls": 2,
+    "checkpoint_errors": 0,
+    "item_errors": [],
+    "frontier_stats": {
+      "done": 1,
+      "queued": 3
+    }
+  },
+  "first_frontier_stats": {
+    "done": 1,
+    "queued": 3
+  },
+  "resume_pass": {
+    "run_id": "native-spider-smoke-2026-05-14",
+    "batches": 2,
+    "claimed": 3,
+    "succeeded": 2,
+    "failed": 1,
+    "retried": 0,
+    "records_saved": 0,
+    "discovered_urls": 0,
+    "checkpoint_errors": 0,
+    "item_errors": [
+      {
+        "id": 2,
+        "url": "https://spider-smoke.local/products/missing",
+        "error": "fixture not found"
+      }
+    ],
+    "frontier_stats": {
+      "done": 3,
+      "failed": 1
+    }
+  },
+  "final_frontier_stats": {
+    "done": 3,
+    "failed": 1
+  },
+  "checkpoint_latest": {
+    "run": {
+      "run_id": "native-spider-smoke-2026-05-14",
+      "status": "completed",
+      "config": {
+        "goal": "pause_resume_spider_smoke",
+        "mode": "local_fixture"
+      },
+      "pause_reason": "first bounded pass completed",
+      "started_at": "2026-05-14T07:07:29.972933+00:00",
+      "updated_at": "2026-05-14T07:07:30.376455+00:00",
+      "completed_at": "2026-05-14T07:07:30.376455+00:00"
+    },
+    "latest_checkpoint": {
+      "id": 2,
+      "run_id": "native-spider-smoke-2026-05-14",
+      "batch_id": "resume",
+      "summary": {
+        "batches": 2,
+        "blocked_requests": 0,
+        "checkpoint_errors": 0,
+        "checkpoint_writes": 0,
+        "claimed": 3,
+        "discovered_urls": 0,
+        "events": [],
+        "failed": 1,
+        "failure_buckets": {},
+        "frontier_stats": {
+          "done": 3,
+          "failed": 1
+        },
+        "offsite_dropped": 0,
+        "records_saved": 0,
+        "response_status_count": {},
+        "retried": 0,
+        "robots_disallowed": 0,
+        "run_id": "native-spider-smoke-2026-05-14",
+        "skipped": 0,
+        "status": "completed",
+        "succeeded": 2
+      },
+      "frontier_items": [],
+      "events": [
+        {
+          "data": {
+            "batch_id": "resume",
+            "claimed": 3
+          },
+          "message": "spider runtime smoke checkpoint saved",
+          "type": "spider.checkpoint_saved"
+        }
+      ],
+      "created_at": "2026-05-14T07:07:30.334175+00:00"
+    },
+    "item_count": 2,
+    "failure_count": 1
+  },
+  "items": [
+    {
+      "id": 1,
+      "run_id": "native-spider-smoke-2026-05-14",
+      "request_id": "daeecbb8a66dc5c9",
+      "record_type": "product",
+      "record": {
+        "canonical_url": "https://spider-smoke.local/products/alpha",
+        "color": "Black",
+        "dedupe_key": "daeecbb8a66dc5c906742433e92258891a7b8cfe5852aabfe827993b96a86921",
+        "highest_price": "19.90",
+        "record_type": "product",
+        "size": "42",
+        "source": "native_spider_smoke",
+        "title": "Alpha Runner",
+        "url": "https://spider-smoke.local/products/alpha"
+      },
+      "dedupe_key": "daeecbb8a66dc5c906742433e92258891a7b8cfe5852aabfe827993b96a86921",
+      "created_at": "2026-05-14T07:07:30.190848+00:00"
+    },
+    {
+      "id": 2,
+      "run_id": "native-spider-smoke-2026-05-14",
+      "request_id": "4b228da31b0d976b",
+      "record_type": "product",
+      "record": {
+        "canonical_url": "https://spider-smoke.local/products/beta?ref=list",
+        "color": "Blue",
+        "dedupe_key": "4b228da31b0d976b294bb1745c7ba08c284a5796ff7ff356eaf5b06e6e39e058",
+        "highest_price": "29.50",
+        "record_type": "product",
+        "size": "43",
+        "source": "native_spider_smoke",
+        "title": "Beta Trail",
+        "url": "https://spider-smoke.local/products/beta?ref=list"
+      },
+      "dedupe_key": "4b228da31b0d976b294bb1745c7ba08c284a5796ff7ff356eaf5b06e6e39e058",
+      "created_at": "2026-05-14T07:07:30.228947+00:00"
+    }
+  ],
+  "failures": [
+    {
+      "id": 1,
+      "run_id": "native-spider-smoke-2026-05-14",
+      "request_id": "bebb36af99fdd3d7",
+      "url": "https://spider-smoke.local/products/missing",
+      "bucket": "runtime_error",
+      "error": "fixture not found",
+      "retryable": false,
+      "attempts": 1,
+      "created_at": "2026-05-14T07:07:30.294476+00:00"
+    }
+  ],
+  "accepted": true
+}

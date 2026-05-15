@@ -173,6 +173,51 @@ class StrategyEvidenceReportTests(unittest.TestCase):
         self.assertIn("fingerprint_runtime_risk", codes)
         self.assertIn("websocket_activity", codes)
 
+    def test_visual_recon_signals_are_reported_from_engine_result(self) -> None:
+        report = build_strategy_evidence_report({
+            "engine_result": {
+                "details": {
+                    "visual_recon": [{
+                        "status": "degraded",
+                        "image_kind": "png",
+                        "width": 1280,
+                        "height": 720,
+                        "findings": [
+                            {"code": "tiny_screenshot", "severity": "medium"},
+                        ],
+                        "ocr": {
+                            "status": "ok",
+                            "provider": "fake",
+                            "text_preview": "Product title",
+                            "text_chars": 13,
+                        },
+                    }],
+                },
+            },
+        })
+        codes = {signal["code"] for signal in report.to_dict()["signals"]}
+
+        self.assertIn("visual_screenshot_degraded", codes)
+        self.assertIn("visual_ocr_text", codes)
+        self.assertIn("visual", report.dominant_sources)
+
+    def test_visual_challenge_signal_is_warning(self) -> None:
+        report = build_strategy_evidence_report({
+            "visual_recon": [{
+                "status": "ok",
+                "findings": [],
+                "ocr": {
+                    "status": "ok",
+                    "provider": "fake",
+                    "text_preview": "Just a moment... verify you are human",
+                    "text_chars": 39,
+                },
+            }],
+        })
+
+        self.assertIn("visual_challenge_evidence", {signal.code for signal in report.signals})
+        self.assertIn("visual_challenge_evidence", report.warnings)
+
     def test_malformed_recon_does_not_crash(self) -> None:
         report = build_strategy_evidence_report({
             "dom_structure": "bad",

@@ -1,0 +1,70 @@
+{
+  "run_at": "2026-05-14T13:46:33.433730",
+  "purpose": "SCRAPLING-ABSORB native-vs-transition dynamic runtime comparison",
+  "suite": "dynamic",
+  "results": [
+    {
+      "id": "local_spa_products",
+      "name": "Local SPA product list",
+      "url": "http://127.0.0.1:62122/spa",
+      "risk": "local-deterministic-spa",
+      "native": {
+        "engine": "native",
+        "status": "executed",
+        "elapsed_seconds": 1.301,
+        "final_url": "http://127.0.0.1:62122/spa",
+        "status_code": 200,
+        "backend": "native_browser",
+        "transport": "",
+        "mode": "dynamic",
+        "html_chars": 1144,
+        "captured_xhr_count": 1,
+        "selector_matches": {
+          "title": 2,
+          "price": 2,
+          "link": 2
+        },
+        "selector_errors": [],
+        "error_code": "",
+        "error_log": [],
+        "messages": [
+          "[Executor] Engine=native native_browser fetched http://127.0.0.1:62122/spa (200, 1144 chars)"
+        ]
+      },
+      "transition": {
+        "engine": "scrapling",
+        "status": "executed",
+        "elapsed_seconds": 2.614,
+        "final_url": "http://127.0.0.1:62122/spa",
+        "status_code": 200,
+        "backend": "scrapling_browser",
+        "transport": "",
+        "mode": "",
+        "html_chars": 1144,
+        "captured_xhr_count": 1,
+        "selector_matches": {
+          "title": 2,
+          "price": 2,
+          "link": 2
+        },
+        "selector_errors": [],
+        "error_code": "",
+        "error_log": [],
+        "messages": [
+          "[Executor] Engine=scrapling scrapling_browser fetched http://127.0.0.1:62122/spa (200, 1144 chars)"
+        ]
+      },
+      "comparison": {
+        "same_status": true,
+        "same_status_code": true,
+        "html_char_ratio_native_over_transition": 1.0,
+        "selector_match_delta": {
+          "link": 0,
+          "price": 0,
+          "title": 0
+        },
+        "requires_review": false
+      }
+    }
+  ]
+}

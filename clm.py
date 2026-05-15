@@ -64,9 +64,9 @@ def build_parser() -> argparse.ArgumentParser:
     smoke_parser = subparsers.add_parser("smoke", help="run a small smoke test")
     smoke_parser.add_argument(
         "--kind",
-        choices=("runner", "baidu"),
+        choices=("runner", "baidu", "native-spider"),
         default="runner",
-        help="runner is local-only; baidu uses the public Baidu hot-list page",
+        help="runner/native-spider are local-only; baidu uses the public Baidu hot-list page",
     )
     smoke_parser.add_argument(
         "--plan",
@@ -76,7 +76,14 @@ def build_parser() -> argparse.ArgumentParser:
     smoke_parser.set_defaults(func=cmd_smoke)
 
     train_parser = subparsers.add_parser("train", help="show developer training commands")
-    train_parser.add_argument("--round", choices=("1", "2", "3", "4", "ecommerce", "real-2026-05-11"))
+    train_parser.add_argument(
+        "--round",
+        choices=(
+            "1", "2", "3", "4", "ecommerce", "real-2026-05-11",
+            "native-vs-transition", "native-vs-transition-dynamic",
+            "native-vs-transition-profile", "native-spider-smoke",
+        ),
+    )
     train_parser.set_defaults(func=cmd_train)
     return parser
 
@@ -182,6 +189,7 @@ def cmd_smoke(args: argparse.Namespace) -> int:
     command = {
         "runner": "python run_batch_runner_smoke.py",
         "baidu": "python run_baidu_hot_test.py",
+        "native-spider": "python run_spider_runtime_smoke_2026_05_14.py",
     }[args.kind]
     if args.plan:
         print(command)
@@ -198,6 +206,13 @@ def cmd_smoke(args: argparse.Namespace) -> int:
         )
         print(json_module.dumps(summary, ensure_ascii=True, indent=2))
         return 0 if summary.get("accepted") else 1
+    if args.kind == "native-spider":
+        import json as json_module
+        from run_spider_runtime_smoke_2026_05_14 import run as run_native_spider_smoke
+
+        summary = run_native_spider_smoke(keep_db=False)
+        print(json_module.dumps(summary, ensure_ascii=True, indent=2))
+        return 0 if summary.get("accepted") else 1
     from run_baidu_hot_test import main as baidu_smoke_main
 
     return int(baidu_smoke_main() or 0)
@@ -211,6 +226,10 @@ def cmd_train(args: argparse.Namespace) -> int:
         "4": "python run_training_round4.py",
         "ecommerce": "python run_ecommerce_training_2026_05_09.py",
         "real-2026-05-11": "python run_real_training_2026_05_11.py",
+        "native-vs-transition": "python run_native_transition_comparison_2026_05_14.py",
+        "native-vs-transition-dynamic": "python run_native_transition_comparison_2026_05_14.py --suite dynamic",
+        "native-vs-transition-profile": "python run_native_transition_comparison_2026_05_14.py --suite profile --profile autonomous_crawler/tests/fixtures/native_transition_profile.json",
+        "native-spider-smoke": "python run_spider_runtime_smoke_2026_05_14.py",
     }
     if args.round:
         print(commands[args.round])

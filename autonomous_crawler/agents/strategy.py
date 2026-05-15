@@ -88,11 +88,16 @@ def strategy_node(state: dict[str, Any]) -> dict[str, Any]:
             "max_items": constraints.get("max_items", 0),
             "rationale": "Explicit GraphQL query supplied, using GraphQL API access",
         }
-    elif preferred_engine == "scrapling":
+    elif preferred_engine in {"scrapling", "native"}:
+        extraction_method = (
+            "scrapling_runtime"
+            if preferred_engine == "scrapling"
+            else "native_runtime"
+        )
         strategy = {
             "mode": "browser" if needs_browser else "http",
-            "engine": "scrapling",
-            "extraction_method": "scrapling_runtime",
+            "engine": preferred_engine,
+            "extraction_method": extraction_method,
             "selectors": inferred_selectors or fallback_selectors,
             "pagination": {
                 "type": "scroll" if needs_browser else dom_structure.get("pagination_type", "none"),
@@ -103,7 +108,11 @@ def strategy_node(state: dict[str, Any]) -> dict[str, Any]:
             "max_items": constraints.get("max_items", 0),
             "wait_selector": (inferred_selectors or fallback_selectors).get("item_container", ""),
             "wait_until": "networkidle" if needs_browser else "domcontentloaded",
-            "rationale": "User requested Scrapling-first runtime backend",
+            "rationale": (
+                "User requested Scrapling-first runtime backend"
+                if preferred_engine == "scrapling"
+                else "User requested CLM-native runtime backend"
+            ),
         }
     elif (
         preferred_engine == "fnspider"
@@ -443,7 +452,7 @@ def _dedupe_strings(values: Any, *, limit: int) -> list[str]:
 
 
 _STRATEGY_ALLOWED_MODES = frozenset({"http", "browser", "api_intercept"})
-_STRATEGY_ALLOWED_ENGINES = frozenset({"", "fnspider", "scrapling"})
+_STRATEGY_ALLOWED_ENGINES = frozenset({"", "fnspider", "scrapling", "native"})
 _STRATEGY_ALLOWED_WAIT_UNTIL = frozenset({"domcontentloaded", "load", "networkidle"})
 _STRATEGY_ALLOWED_FIELDS = frozenset({
     "mode", "engine", "selectors", "wait_selector", "wait_until",

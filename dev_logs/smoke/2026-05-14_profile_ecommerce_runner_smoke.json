@@ -1,0 +1,249 @@
+{
+  "run_id": "profile-ecommerce-runner-2026-05-14",
+  "profile_path": "autonomous_crawler\\tests\\fixtures\\ecommerce_site_profile.json",
+  "profile_schema_example": {
+    "name": "fixture-ecommerce-profile",
+    "selectors": {
+      "list": {
+        "item_container": "#catalog .product-card",
+        "detail_link": "#catalog .product-link@href"
+      },
+      "detail": {
+        "title": {
+          "selector": "article.product h1",
+          "many": false,
+          "required": true
+        },
+        "highest_price": {
+          "selector": "article.product .price",
+          "many": false,
+          "required": true
+        },
+        "colors": {
+          "selector": "article.product .color",
+          "many": true
+        },
+        "sizes": {
+          "selector": "article.product .size",
+          "many": true
+        },
+        "description": {
+          "selector": "article.product .description",
+          "many": false
+        },
+        "image_urls": {
+          "selector": "article.product img.product-photo",
+          "attribute": "src",
+          "many": true
+        }
+      }
+    },
+    "target_fields": [
+      "title",
+      "highest_price",
+      "colors",
+      "sizes",
+      "description",
+      "image_urls"
+    ],
+    "api_hints": {},
+    "pagination_hints": {
+      "link_discovery": {
+        "allow": [
+          "/products/"
+        ],
+        "allow_domains": [
+          "profile-shop.local"
+        ],
+        "restrict_css": [
+          "#catalog"
+        ],
+        "classify": {
+          "detail": "/products/"
+        },
+        "default_kind": "detail",
+        "priority": 8,
+        "max_links": 10
+      }
+    },
+    "access_config": {
+      "mode": "static",
+      "login_required": false,
+      "captcha_bypass": false
+    },
+    "rate_limits": {
+      "default": {
+        "delay_seconds": 0
+      }
+    },
+    "quality_expectations": {
+      "min_items": 2,
+      "required_fields": [
+        "title",
+        "highest_price",
+        "image_urls"
+      ],
+      "currency": "USD",
+      "category": "training-shoes"
+    },
+    "training_notes": [
+      "Offline deterministic ecommerce profile for long-running runner smoke.",
+      "List page discovers detail URLs; detail pages produce ProductRecord rows."
+    ],
+    "constraints": {
+      "max_items": 10
+    },
+    "crawl_preferences": {
+      "runtime": "native_static",
+      "parser": "native_parser"
+    }
+  },
+  "first_pass": {
+    "run_id": "profile-ecommerce-runner-2026-05-14",
+    "batches": 1,
+    "claimed": 1,
+    "succeeded": 1,
+    "failed": 0,
+    "retried": 0,
+    "records_saved": 0,
+    "discovered_urls": 2,
+    "checkpoint_errors": 0,
+    "item_errors": [],
+    "frontier_stats": {
+      "done": 1,
+      "queued": 2
+    }
+  },
+  "after_first_frontier_stats": {
+    "done": 1,
+    "queued": 2
+  },
+  "resume_pass": {
+    "run_id": "profile-ecommerce-runner-2026-05-14",
+    "batches": 1,
+    "claimed": 2,
+    "succeeded": 2,
+    "failed": 0,
+    "retried": 0,
+    "records_saved": 2,
+    "discovered_urls": 0,
+    "checkpoint_errors": 0,
+    "item_errors": [],
+    "frontier_stats": {
+      "done": 3
+    }
+  },
+  "final_frontier_stats": {
+    "done": 3
+  },
+  "collected_record_count": 2,
+  "records": [
+    {
+      "title": "Alpha Runner",
+      "price": 19.9,
+      "currency": "USD",
+      "colors": [
+        "Black",
+        "White"
+      ],
+      "sizes": [
+        "42",
+        "43"
+      ],
+      "image_urls": [
+        "https://profile-shop.local/images/alpha.jpg"
+      ],
+      "category": "training-shoes",
+      "dedupe_key": "271a453cafd5ca3d95826ffc9b7b166f"
+    },
+    {
+      "title": "Beta Trail",
+      "price": 29.5,
+      "currency": "USD",
+      "colors": [
+        "Blue"
+      ],
+      "sizes": [
+        "41",
+        "44"
+      ],
+      "image_urls": [
+        "https://profile-shop.local/images/beta.jpg"
+      ],
+      "category": "training-shoes",
+      "dedupe_key": "2db226115e56749084937b6c2a73c2f4"
+    }
+  ],
+  "product_store_stats": {
+    "run_id": "profile-ecommerce-runner-2026-05-14",
+    "total": 2,
+    "by_status": {
+      "ok": 2
+    },
+    "by_site": {
+      "fixture-ecommerce-profile": 2
+    },
+    "price_min": 19.9,
+    "price_max": 29.5,
+    "price_avg": 24.7
+  },
+  "checkpoint_latest": {
+    "run": {
+      "run_id": "profile-ecommerce-runner-2026-05-14",
+      "status": "completed",
+      "config": {
+        "profile": "fixture-ecommerce-profile",
+        "profile_path": "autonomous_crawler\\tests\\fixtures\\ecommerce_site_profile.json"
+      },
+      "pause_reason": "profile smoke bounded first pass",
+      "started_at": "2026-05-14T10:24:25.575074+00:00",
+      "updated_at": "2026-05-14T10:24:25.778804+00:00",
+      "completed_at": "2026-05-14T10:24:25.778804+00:00"
+    },
+    "latest_checkpoint": {
+      "id": 2,
+      "run_id": "profile-ecommerce-runner-2026-05-14",
+      "batch_id": "resume",
+      "summary": {
+        "batches": 1,
+        "blocked_requests": 0,
+        "checkpoint_errors": 0,
+        "checkpoint_writes": 0,
+        "claimed": 2,
+        "discovered_urls": 0,
+        "events": [],
+        "failed": 0,
+        "failure_buckets": {},
+        "frontier_stats": {
+          "done": 3
+        },
+        "offsite_dropped": 0,
+        "records_saved": 2,
+        "response_status_count": {},
+        "retried": 0,
+        "robots_disallowed": 0,
+        "run_id": "profile-ecommerce-runner-2026-05-14",
+        "skipped": 0,
+        "status": "completed",
+        "succeeded": 2
+      },
+      "frontier_items": [],
+      "events": [
+        {
+          "data": {
+            "batch_id": "resume",
+            "claimed": 2,
+            "records_saved": 2
+          },
+          "message": "profile ecommerce runner checkpoint saved",
+          "type": "spider.checkpoint_saved"
+        }
+      ],
+      "created_at": "2026-05-14T10:24:25.764064+00:00"
+    },
+    "item_count": 2,
+    "failure_count": 0
+  },
+  "accepted": true,
+  "known_gap": "Fixture proves profile-driven selectors/link discovery/checkpointing; real ecommerce still needs dynamic rendering fallback, API pagination, anti-bot access decisions, and larger catalog regression runs."
+}

@@ -1,0 +1,62 @@
+{
+  "run_at": "2026-05-14T13:20:50.146283",
+  "purpose": "SCRAPLING-ABSORB-1B native-vs-transition static runtime comparison",
+  "results": [
+    {
+      "id": "example_home_static",
+      "name": "Example.com home page",
+      "url": "https://example.com/",
+      "risk": "low-public-static",
+      "native": {
+        "engine": "native",
+        "status": "executed",
+        "elapsed_seconds": 1.27,
+        "final_url": "https://example.com/",
+        "status_code": 200,
+        "backend": "native_static",
+        "transport": "httpx",
+        "html_chars": 528,
+        "selector_matches": {
+          "title": 1,
+          "link": 1
+        },
+        "selector_errors": [],
+        "error_code": "",
+        "error_log": [],
+        "messages": [
+          "[Executor] Engine=native native_static fetched https://example.com/ (200, 528 chars)"
+        ]
+      },
+      "transition": {
+        "engine": "scrapling",
+        "status": "executed",
+        "elapsed_seconds": 0.818,
+        "final_url": "https://example.com/",
+        "status_code": 200,
+        "backend": "scrapling_static",
+        "transport": "",
+        "html_chars": 528,
+        "selector_matches": {
+          "title": 1,
+          "link": 1
+        },
+        "selector_errors": [],
+        "error_code": "",
+        "error_log": [],
+        "messages": [
+          "[Executor] Engine=scrapling scrapling_static fetched https://example.com/ (200, 528 chars)"
+        ]
+      },
+      "comparison": {
+        "same_status": true,
+        "same_status_code": true,
+        "html_char_ratio_native_over_transition": 1.0,
+        "selector_match_delta": {
+          "link": 0,
+          "title": 0
+        },
+        "requires_review": false
+      }
+    }
+  ]
+}

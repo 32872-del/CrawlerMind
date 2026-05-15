@@ -1,0 +1,92 @@
+{
+  "scenarios": [
+    {
+      "id": "profile_product_catalog",
+      "name": "Profile: Product Card Catalog",
+      "url": "{base_url}/fixtures/product-catalog",
+      "mode": "http",
+      "selectors": {
+        "item_container": ".product-card",
+        "title": ".product-name",
+        "price": ".product-price",
+        "link": ".product-link@href",
+        "image": ".product-photo@src",
+        "brand": ".product-brand"
+      },
+      "target_fields": ["title", "price", "link", "image", "brand"],
+      "risk": "local-profile-static",
+      "expect": {
+        "required_status": "executed",
+        "required_status_code": 200,
+        "min_html_chars": 400,
+        "min_selector_matches": {
+          "title": 3,
+          "price": 3,
+          "link": 3,
+          "image": 3,
+          "brand": 3
+        }
+      }
+    },
+    {
+      "id": "profile_json_ld_script",
+      "name": "Profile: JSON-LD and Script Coexistence",
+      "url": "{base_url}/fixtures/json-ld-script",
+      "mode": "http",
+      "selectors": {
+        "item_container": ".product",
+        "title": ".product-title",
+        "price": ".product-price",
+        "link": ".product-url@href",
+        "image": ".product-img@src"
+      },
+      "target_fields": ["title", "price", "link", "image"],
+      "risk": "local-profile-static",
+      "expect": {
+        "required_status": "executed",
+        "required_status_code": 200,
+        "min_html_chars": 600,
+        "min_selector_matches": {
+          "title": 2,
+          "price": 2,
+          "link": 2,
+          "image": 2
+        }
+      }
+    },
+    {
+      "id": "profile_local_spa_products",
+      "name": "Profile: Local SPA Product List",
+      "url": "{base_url}/spa",
+      "mode": "browser",
+      "selectors": {
+        "item_container": ".product-card",
+        "title": ".product-title",
+        "price": ".product-price",
+        "link": ".product-link@href"
+      },
+      "wait_selector": ".product-card",
+      "wait_until": "networkidle",
+      "capture_xhr": "/api/products",
+      "browser_config": {
+        "headless": true,
+        "capture_api": true,
+        "max_body_preview_chars": 2000,
+        "screenshot": true
+      },
+      "target_fields": ["title", "price", "link"],
+      "risk": "local-profile-dynamic",
+      "expect": {
+        "required_status": "executed",
+        "required_status_code": 200,
+        "min_html_chars": 150,
+        "min_captured_xhr": 1,
+        "min_selector_matches": {
+          "title": 2,
+          "price": 2,
+          "link": 2
+        }
+      }
+    }
+  ]
+}

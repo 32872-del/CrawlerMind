@@ -14,14 +14,33 @@ from .models import (
     RuntimeSelectorRequest,
     RuntimeSelectorResult,
 )
+from .adaptive_parser import AdaptiveMatch, ElementSignature, build_element_signature, find_similar, relocate, similarity_score
+from .browser_pool import BrowserContextLease, BrowserPoolConfig, BrowserPoolManager, BrowserProfile, BrowserProfileRotator
+from .native_async import AsyncFetchMetrics, DomainConcurrencyPool, NativeAsyncFetchRuntime
+from .native_browser import NativeBrowserRuntime
+from .native_static import NativeFetchRuntime
 from .protocols import BrowserRuntime, FetchRuntime, ParserRuntime, ProxyRuntime, SessionRuntime, SpiderRuntime
+from .native_parser import NativeParserRuntime
 from .scrapling_browser import ScraplingBrowserRuntime
 from .scrapling_parser import ScraplingParserRuntime
 from .scrapling_static import ScraplingStaticRuntime
 
 __all__ = [
+    "AsyncFetchMetrics",
+    "BrowserContextLease",
+    "BrowserPoolConfig",
+    "BrowserPoolManager",
+    "BrowserProfile",
+    "BrowserProfileRotator",
     "BrowserRuntime",
+    "AdaptiveMatch",
+    "DomainConcurrencyPool",
+    "ElementSignature",
     "FetchRuntime",
+    "NativeAsyncFetchRuntime",
+    "NativeBrowserRuntime",
+    "NativeFetchRuntime",
+    "NativeParserRuntime",
     "ParserRuntime",
     "ProxyRuntime",
     "RuntimeArtifact",
@@ -36,4 +55,8 @@ __all__ = [
     "ScraplingStaticRuntime",
     "SessionRuntime",
     "SpiderRuntime",
+    "build_element_signature",
+    "find_similar",
+    "relocate",
+    "similarity_score",
 ]

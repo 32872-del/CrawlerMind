@@ -123,6 +123,7 @@ def build_anti_bot_report(
     _extend_js_crypto_findings(findings, recon)
     _extend_websocket_findings(findings, recon)
     _extend_proxy_findings(findings, recon)
+    _extend_visual_findings(findings, recon)
     _extend_strategy_findings(findings, strategy_evidence)
 
     findings = _dedupe_findings(findings)
@@ -390,6 +391,67 @@ def _extend_proxy_findings(findings: list[AntiBotFinding], recon: dict[str, Any]
             ))
 
 
+def _extend_visual_findings(findings: list[AntiBotFinding], recon: dict[str, Any]) -> None:
+    for report in _visual_recon_reports(recon)[:5]:
+        report_status = str(report.get("status") or "")
+        ocr = report.get("ocr") if isinstance(report.get("ocr"), dict) else {}
+        text_preview = str(ocr.get("text_preview") or "")
+        raw_findings = [item for item in report.get("findings") or [] if isinstance(item, dict)]
+        finding_codes = [str(item.get("code") or "") for item in raw_findings if item.get("code")]
+        challenge_like = _looks_like_visual_challenge(text_preview, finding_codes)
+        if challenge_like:
+            findings.append(AntiBotFinding(
+                code="visual_challenge_or_captcha_evidence",
+                category="challenge",
+                severity="high",
+                source="visual_recon",
+                summary="Screenshot/OCR evidence looks like a challenge or CAPTCHA page.",
+                evidence={
+                    "status": report_status,
+                    "image_kind": report.get("image_kind", ""),
+                    "finding_codes": finding_codes[:10],
+                    "ocr_provider": ocr.get("provider", ""),
+                    "text_chars": _safe_int(ocr.get("text_chars")),
+                    "text_preview": text_preview[:160],
+                },
+            ))
+            continue
+
+        high_or_medium = [
+            item for item in raw_findings
+            if str(item.get("severity") or "") in {"medium", "high", "critical"}
+        ]
+        if report_status in {"failed", "degraded"} or high_or_medium:
+            severity = "high" if any(str(item.get("severity") or "") in {"high", "critical"} for item in raw_findings) else "medium"
+            findings.append(AntiBotFinding(
+                code="visual_recon_degraded",
+                category="visual",
+                severity=severity,
+                source="visual_recon",
+                summary="Screenshot visual recon reported degraded visual evidence.",
+                evidence={
+                    "status": report_status,
+                    "image_kind": report.get("image_kind", ""),
+                    "width": _safe_int(report.get("width")),
+                    "height": _safe_int(report.get("height")),
+                    "finding_codes": finding_codes[:10],
+                },
+            ))
+        elif _safe_int(ocr.get("text_chars")) > 0:
+            findings.append(AntiBotFinding(
+                code="visual_ocr_text_present",
+                category="visual",
+                severity="low",
+                source="visual_recon",
+                summary="OCR text evidence is available for visual diagnostics.",
+                evidence={
+                    "ocr_provider": ocr.get("provider", ""),
+                    "text_chars": _safe_int(ocr.get("text_chars")),
+                    "text_truncated": bool(ocr.get("text_truncated")),
+                },
+            ))
+
+
 def _extend_strategy_findings(
     findings: list[AntiBotFinding],
     strategy_evidence: StrategyEvidenceReport | None,
@@ -456,6 +518,8 @@ def _next_steps(findings: list[AntiBotFinding], recommended_action: str) -> list
         steps.append("Capture WebSocket protocol samples before designing extraction logic.")
     if "proxy" in categories:
         steps.append("Rotate away from unhealthy proxies and keep credential-safe health evidence.")
+    if "visual" in categories:
+        steps.append("Review screenshot/OCR evidence and compare it with DOM/API extraction results.")
     if not steps and recommended_action == "standard_http":
         steps.append("Continue with standard HTTP/DOM strategy.")
     return _dedupe(steps)
@@ -529,6 +593,42 @@ def _safe_payload(value: Any) -> Any:
     if isinstance(value, str):
         return redact_error_message(value)[:500]
     return value
+
+
+def _visual_recon_reports(recon: dict[str, Any]) -> list[dict[str, Any]]:
+    candidates: list[Any] = []
+    direct = recon.get("visual_recon")
+    if direct:
+        candidates.append(direct)
+    engine_result = recon.get("engine_result") if isinstance(recon.get("engine_result"), dict) else {}
+    details = engine_result.get("details") if isinstance(engine_result.get("details"), dict) else {}
+    for container in (engine_result, details):
+        value = container.get("visual_recon") if isinstance(container, dict) else None
+        if value:
+            candidates.append(value)
+
+    reports: list[dict[str, Any]] = []
+    for candidate in candidates:
+        if isinstance(candidate, dict):
+            reports.append(candidate)
+        elif isinstance(candidate, list):
+            reports.extend(item for item in candidate if isinstance(item, dict))
+    return reports
+
+
+def _looks_like_visual_challenge(text_preview: str, finding_codes: list[str]) -> bool:
+    lowered = text_preview.lower()
+    challenge_markers = (
+        "captcha",
+        "verify you are human",
+        "just a moment",
+        "cloudflare",
+        "security check",
+        "challenge",
+    )
+    if any(marker in lowered for marker in challenge_markers):
+        return True
+    return any("captcha" in code or "challenge" in code for code in finding_codes)
 
 
 def _valid_severity(value: str, *, fallback: str) -> str:

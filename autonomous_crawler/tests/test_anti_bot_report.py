@@ -161,6 +161,64 @@ class AntiBotReportTests(unittest.TestCase):
         self.assertEqual(report["recommended_action"], "standard_http")
         self.assertIn("diagnostic_only_no_bypass", report["guardrails"])
 
+    def test_visual_recon_degraded_is_reported_without_overriding_action(self) -> None:
+        report = build_anti_bot_report({
+            "engine_result": {
+                "details": {
+                    "visual_recon": [{
+                        "status": "degraded",
+                        "image_kind": "png",
+                        "width": 1,
+                        "height": 1,
+                        "findings": [
+                            {"code": "tiny_screenshot", "severity": "medium"},
+                        ],
+                        "ocr": {"status": "unavailable", "text_chars": 0},
+                    }],
+                },
+            },
+        }).to_dict()
+
+        self.assertTrue(report["detected"])
+        self.assertIn("visual", report["categories"])
+        self.assertEqual(report["recommended_action"], "standard_http")
+
+    def test_visual_recon_ocr_text_present_is_low_risk(self) -> None:
+        report = build_anti_bot_report({
+            "visual_recon": [{
+                "status": "ok",
+                "findings": [],
+                "ocr": {
+                    "status": "ok",
+                    "provider": "fake",
+                    "text_preview": "Product title",
+                    "text_chars": 13,
+                },
+            }],
+        }).to_dict()
+
+        self.assertIn("visual", report["categories"])
+        self.assertEqual(report["risk_level"], "low")
+
+    def test_visual_challenge_evidence_recommends_manual_handoff(self) -> None:
+        report = build_anti_bot_report({
+            "visual_recon": [{
+                "status": "ok",
+                "findings": [
+                    {"code": "challenge_like_visual", "severity": "high"},
+                ],
+                "ocr": {
+                    "status": "ok",
+                    "provider": "fake",
+                    "text_preview": "Cloudflare captcha security check",
+                    "text_chars": 34,
+                },
+            }],
+        }).to_dict()
+
+        self.assertIn("challenge", report["categories"])
+        self.assertEqual(report["recommended_action"], "manual_handoff")
+
 
 # ---------------------------------------------------------------------------
 # CAP-5.1 calibration tests

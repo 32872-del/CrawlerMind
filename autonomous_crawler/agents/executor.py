@@ -35,6 +35,9 @@ from ..tools.api_candidates import (
     PaginationSpec,
 )
 from ..runtime import (
+    NativeBrowserRuntime,
+    NativeFetchRuntime,
+    NativeParserRuntime,
     RuntimeRequest,
     RuntimeResponse,
     RuntimeSelectorRequest,
@@ -199,13 +202,14 @@ def executor_node(state: dict[str, Any]) -> dict[str, Any]:
             ],
         }
 
-    if engine == "scrapling" and mode != "api_intercept":
-        return _execute_scrapling_runtime(
+    if engine in {"scrapling", "native"} and mode != "api_intercept":
+        return _execute_runtime_backend(
             state=state,
             target_url=target_url,
             strategy=strategy,
             access_config=_access_config,
             proxy_trace=_trace_dict,
+            engine=engine,
         )
 
     if mode == "browser":
@@ -409,6 +413,48 @@ def executor_node(state: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _execute_runtime_backend(
+    *,
+    state: dict[str, Any],
+    target_url: str,
+    strategy: dict[str, Any],
+    access_config: Any,
+    proxy_trace: dict[str, Any],
+    engine: str,
+) -> dict[str, Any]:
+    """Execute a CLM runtime backend path."""
+    if engine == "scrapling":
+        return _execute_scrapling_runtime(
+            state=state,
+            target_url=target_url,
+            strategy=strategy,
+            access_config=access_config,
+            proxy_trace=proxy_trace,
+        )
+    if engine == "native":
+        return _execute_native_runtime(
+            state=state,
+            target_url=target_url,
+            strategy=strategy,
+            access_config=access_config,
+            proxy_trace=proxy_trace,
+        )
+    return {
+        "status": "failed",
+        "visited_urls": [target_url],
+        "raw_html": {},
+        "api_responses": [],
+        "error_code": FETCH_HTTP_ERROR,
+        "error_log": state.get("error_log", []) + [
+            format_error_entry(FETCH_HTTP_ERROR, f"Unsupported runtime engine: {engine}")
+        ],
+        "proxy_trace": proxy_trace,
+        "messages": state.get("messages", []) + [
+            f"[Executor] Unsupported runtime engine: {engine}"
+        ],
+    }
+
+
 def _execute_scrapling_runtime(
     *,
     state: dict[str, Any],
@@ -445,6 +491,7 @@ def _execute_scrapling_runtime(
             html,
             request.selectors,
             url=response.final_url or target_url,
+            selector_config=request.selector_config,
         )
 
     engine_result = _scrapling_engine_result(response, selector_results)
@@ -490,6 +537,148 @@ def _execute_scrapling_runtime(
     }
 
 
+def _execute_native_runtime(
+    *,
+    state: dict[str, Any],
+    target_url: str,
+    strategy: dict[str, Any],
+    access_config: Any,
+    proxy_trace: dict[str, Any],
+) -> dict[str, Any]:
+    """Execute the CLM-native runtime path."""
+    mode = str(strategy.get("mode", "http") or "http")
+    if mode == "browser":
+        runtime_mode = (
+            "protected"
+            if strategy.get("protected") or strategy.get("access_warning") == "challenge_detected"
+            else "dynamic"
+        )
+        request = _build_native_request(
+            target_url=target_url,
+            strategy=strategy,
+            access_config=access_config,
+            runtime_mode=runtime_mode,
+        )
+        runtime = NativeBrowserRuntime()
+        response = runtime.render(request)
+        return _runtime_execution_result(
+            state=state,
+            target_url=target_url,
+            response=response,
+            selector_requests=request.selectors,
+            parser_cls=NativeParserRuntime,
+            engine="native",
+            runtime_name=runtime.name,
+            failure_code=BROWSER_RENDER_FAILED,
+            failure_prefix="Native runtime failed",
+            success_prefix="Engine=native",
+            proxy_trace=proxy_trace,
+            selector_config=request.selector_config,
+        )
+
+    request = _build_native_request(
+        target_url=target_url,
+        strategy=strategy,
+        access_config=access_config,
+        runtime_mode="static",
+    )
+    runtime = NativeFetchRuntime()
+    response = runtime.fetch(request)
+
+    return _runtime_execution_result(
+        state=state,
+        target_url=target_url,
+        response=response,
+        selector_requests=request.selectors,
+        parser_cls=NativeParserRuntime,
+        engine="native",
+        runtime_name=runtime.name,
+        failure_code=FETCH_HTTP_ERROR,
+        failure_prefix="Native runtime failed",
+        success_prefix="Engine=native",
+        proxy_trace=proxy_trace,
+        selector_config=request.selector_config,
+    )
+
+
+def _runtime_execution_result(
+    *,
+    state: dict[str, Any],
+    target_url: str,
+    response: RuntimeResponse,
+    selector_requests: list[RuntimeSelectorRequest],
+    parser_cls: Any,
+    engine: str,
+    runtime_name: str,
+    failure_code: str,
+    failure_prefix: str,
+    success_prefix: str,
+    proxy_trace: dict[str, Any],
+    selector_config: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    selector_results = []
+    html = response.html or response.text
+    if html:
+        parser = parser_cls()
+        selector_results = parser.parse(
+            html,
+            selector_requests,
+            url=response.final_url or target_url,
+            selector_config=selector_config or {},
+        )
+
+    engine_result = (
+        _scrapling_engine_result(response, selector_results)
+        if engine == "scrapling"
+        else _native_engine_result(response, selector_results)
+    )
+    selected_proxy_trace = (
+        response.proxy_trace.to_dict()
+        if response.proxy_trace.selected or response.proxy_trace.source != "none"
+        else proxy_trace
+    )
+
+    if not response.ok:
+        return {
+            "status": "failed",
+            "visited_urls": [response.final_url or target_url],
+            "raw_html": {},
+            "api_responses": [],
+            "engine_result": engine_result,
+            "runtime_events": [event.to_dict() for event in response.runtime_events],
+            "error_code": failure_code,
+            "error_log": state.get("error_log", []) + [
+                format_error_entry(
+                    failure_code,
+                    f"{failure_prefix}: {response.error or response.status_code}",
+                )
+            ],
+            "proxy_trace": selected_proxy_trace,
+            "messages": state.get("messages", []) + [
+                f"[Executor] Engine={engine} {runtime_name} failed: {response.error or response.status_code}"
+            ],
+        }
+
+    final_url = response.final_url or target_url
+    result: dict[str, Any] = {
+        "status": "executed",
+        "visited_urls": [final_url],
+        "raw_html": {final_url: html},
+        "api_responses": [],
+        "engine_result": engine_result,
+        "runtime_events": [event.to_dict() for event in response.runtime_events],
+        "proxy_trace": selected_proxy_trace,
+        "messages": state.get("messages", []) + [
+            f"[Executor] {success_prefix} {runtime_name} fetched {final_url} ({response.status_code}, {len(html)} chars)"
+        ],
+    }
+    if response.captured_xhr:
+        result["api_responses"] = response.captured_xhr
+    if response.artifacts:
+        result["runtime_artifacts"] = [artifact.to_dict() for artifact in response.artifacts]
+    return result
+
+
 def _build_scrapling_request(
     *,
     target_url: str,
@@ -508,6 +697,7 @@ def _build_scrapling_request(
         else {}
     )
     proxy_url = access_config.proxy_for(target_url)
+    selector_config = strategy.get("selector_config") or {}
     browser_config = _browser_config_for_scrapling(access_config, strategy)
     session_profile = {
         "headers": access_config.session_profile.headers_for(target_url),
@@ -521,6 +711,7 @@ def _build_scrapling_request(
         headers=headers,
         cookies=cookies,
         selectors=_runtime_selectors(strategy.get("selectors", {})),
+        selector_config=selector_config if isinstance(selector_config, dict) else {},
         browser_config=browser_config,
         session_profile=session_profile,
         proxy_config={"proxy": proxy_url} if proxy_url else {},
@@ -530,6 +721,60 @@ def _build_scrapling_request(
         timeout_ms=int(strategy.get("timeout_ms", 30000) or 30000),
         max_items=int(strategy.get("max_items", 0) or 0),
         meta={"engine": "scrapling", "strategy_mode": strategy.get("mode", "")},
+    )
+
+
+def _build_native_request(
+    *,
+    target_url: str,
+    strategy: dict[str, Any],
+    access_config: Any,
+    runtime_mode: str = "static",
+) -> RuntimeRequest:
+    headers = {
+        **DEFAULT_HEADERS,
+        **strategy.get("headers", {}),
+        **access_config.session_profile.headers_for(target_url),
+    }
+    cookies = (
+        dict(access_config.session_profile.cookies)
+        if access_config.session_profile.applies_to(target_url)
+        else {}
+    )
+    proxy_url = access_config.proxy_for(target_url)
+    selector_config = strategy.get("selector_config") or {}
+    meta = {
+        "engine": "native",
+        "strategy_mode": strategy.get("mode", ""),
+    }
+    transport = strategy.get("transport") or strategy.get("static_transport")
+    if transport:
+        meta["transport"] = transport
+    if strategy.get("screenshot"):
+        meta["screenshot"] = bool(strategy.get("screenshot"))
+    browser_config = _browser_config_for_native(access_config, strategy)
+    session_profile = {
+        "headers": access_config.session_profile.headers_for(target_url),
+        "cookies": cookies,
+        "storage_state_path": access_config.session_profile.storage_state_path,
+    }
+    return RuntimeRequest(
+        url=target_url,
+        method=str(strategy.get("method") or "GET").upper(),
+        mode=runtime_mode,
+        headers=headers,
+        cookies=cookies,
+        selectors=_runtime_selectors(strategy.get("selectors", {})),
+        selector_config=selector_config if isinstance(selector_config, dict) else {},
+        browser_config=browser_config,
+        session_profile=session_profile,
+        proxy_config={"proxy": proxy_url} if proxy_url else {},
+        capture_xhr=str(strategy.get("capture_xhr", "")),
+        wait_selector=str(strategy.get("wait_selector", "")),
+        wait_until=str(strategy.get("wait_until", "domcontentloaded")),
+        timeout_ms=int(strategy.get("timeout_ms", 30000) or 30000),
+        max_items=int(strategy.get("max_items", 0) or 0),
+        meta=meta,
     )
 
 
@@ -546,6 +791,29 @@ def _browser_config_for_scrapling(access_config: Any, strategy: dict[str, Any]) 
     overrides = strategy.get("browser_config") or {}
     if isinstance(overrides, dict):
         browser_config.update(overrides)
+    return browser_config
+
+
+def _browser_config_for_native(access_config: Any, strategy: dict[str, Any]) -> dict[str, Any]:
+    context = access_config.browser_context
+    browser_config = {
+        "headless": context.headless,
+        "user_agent": context.user_agent,
+        "viewport": context.viewport.to_dict(),
+        "locale": context.locale,
+        "timezone_id": context.timezone_id,
+        "extra_http_headers": context.extra_http_headers,
+        "storage_state_path": context.storage_state_path,
+        "proxy_url": context.proxy_url,
+        "java_script_enabled": context.java_script_enabled,
+        "ignore_https_errors": context.ignore_https_errors,
+        "color_scheme": context.color_scheme,
+    }
+    overrides = strategy.get("browser_config") or {}
+    if isinstance(overrides, dict):
+        browser_config.update(overrides)
+    if strategy.get("screenshot"):
+        browser_config["screenshot"] = bool(strategy.get("screenshot"))
     return browser_config
 
 
@@ -594,5 +862,26 @@ def _scrapling_engine_result(
         "captured_xhr": response.to_dict().get("captured_xhr", []),
         "runtime_events": [event.to_dict() for event in response.runtime_events],
         "artifacts": [artifact.to_dict() for artifact in response.artifacts],
+        "error": response.error,
+    }
+
+
+def _native_engine_result(
+    response: RuntimeResponse,
+    selector_results: list[Any],
+) -> dict[str, Any]:
+    return {
+        "engine": "native",
+        "backend": response.engine_result.get("engine", "native_static"),
+        "transport": response.engine_result.get("transport", ""),
+        "mode": response.engine_result.get("mode", ""),
+        "ok": response.ok,
+        "final_url": response.final_url,
+        "status_code": response.status_code,
+        "selector_results": [result.to_dict() for result in selector_results],
+        "captured_xhr": response.to_dict().get("captured_xhr", []),
+        "runtime_events": [event.to_dict() for event in response.runtime_events],
+        "artifacts": [artifact.to_dict() for artifact in response.artifacts],
+        "details": response.engine_result,
         "error": response.error,
     }
