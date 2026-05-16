@@ -1,0 +1,693 @@
+{
+  "run_at": "2026-05-15T08:54:46.035379+00:00",
+  "purpose": "PROFILE-AUTO-1 profile draft training smoke",
+  "source_evidence": "dev_logs\\training\\2026-05-15_real_harden4_dynamic_list_training.json",
+  "summary": {
+    "total": 10,
+    "loadable_as_site_profile": 10,
+    "runner_compatible": 10,
+    "total_initial_requests": 10
+  },
+  "results": [
+    {
+      "id": "infinite_scroll_fixture",
+      "name": "Infinite Scroll — Local Fixture",
+      "source_url": "",
+      "source_stop_reason": "completed",
+      "source_rendered_items": 50,
+      "draft": {
+        "profile_name": "127-0-0-1:53899",
+        "selector_count": 3,
+        "target_field_count": 2,
+        "has_api_hints": false,
+        "has_pagination_hints": true,
+        "training_notes_count": 1
+      },
+      "verification": {
+        "loadable": true,
+        "errors": [],
+        "profile_name": "127-0-0-1:53899",
+        "selector_count": 3,
+        "target_field_count": 2,
+        "has_api_hints": false,
+        "has_pagination_hints": true,
+        "has_quality_expectations": true
+      },
+      "runner_integration": {
+        "runner_compatible": true,
+        "initial_requests_generated": 1,
+        "errors": [],
+        "seed_urls": [
+          "http://127.0.0.1:53899/infinite_scroll.html"
+        ],
+        "has_selector_builder": true,
+        "has_record_builder": true,
+        "has_link_builder": true
+      },
+      "profile_json": {
+        "name": "127-0-0-1:53899",
+        "selectors": {
+          "item": ".item",
+          "item_title": ".item_title",
+          "category": ".category"
+        },
+        "target_fields": [
+          "item_title",
+          "category"
+        ],
+        "api_hints": {},
+        "pagination_hints": {
+          "type": "infinite_scroll",
+          "scroll_event_count": 10
+        },
+        "quality_expectations": {
+          "min_items_expected": 50,
+          "item_count_observed": 50,
+          "html_size_observed": 5391
+        },
+        "training_notes": [
+          "Scroll training produced 10 events"
+        ],
+        "access_config": {},
+        "rate_limits": {},
+        "constraints": {},
+        "crawl_preferences": {
+          "seed_urls": [
+            "http://127.0.0.1:53899/infinite_scroll.html"
+          ],
+          "seed_kind": "list"
+        }
+      }
+    },
+    {
+      "id": "virtualized_list_fixture",
+      "name": "Virtualized List — Local Fixture",
+      "source_url": "",
+      "source_stop_reason": "completed",
+      "source_rendered_items": 18,
+      "draft": {
+        "profile_name": "127-0-0-1:53899",
+        "selector_count": 2,
+        "target_field_count": 1,
+        "has_api_hints": false,
+        "has_pagination_hints": true,
+        "training_notes_count": 1
+      },
+      "verification": {
+        "loadable": true,
+        "errors": [],
+        "profile_name": "127-0-0-1:53899",
+        "selector_count": 2,
+        "target_field_count": 1,
+        "has_api_hints": false,
+        "has_pagination_hints": true,
+        "has_quality_expectations": true
+      },
+      "runner_integration": {
+        "runner_compatible": true,
+        "initial_requests_generated": 1,
+        "errors": [],
+        "seed_urls": [
+          "http://127.0.0.1:53899/virtualized_list.html"
+        ],
+        "has_selector_builder": true,
+        "has_record_builder": true,
+        "has_link_builder": true
+      },
+      "profile_json": {
+        "name": "127-0-0-1:53899",
+        "selectors": {
+          "virtual_item": ".virtual_item",
+          "item_price": ".item_price"
+        },
+        "target_fields": [
+          "item_price"
+        ],
+        "api_hints": {},
+        "pagination_hints": {
+          "type": "infinite_scroll",
+          "scroll_event_count": 16
+        },
+        "quality_expectations": {
+          "min_items_expected": 18,
+          "item_count_observed": 18,
+          "html_size_observed": 7006,
+          "category": "listing"
+        },
+        "training_notes": [
+          "Scroll training produced 16 events"
+        ],
+        "access_config": {},
+        "rate_limits": {},
+        "constraints": {},
+        "crawl_preferences": {
+          "seed_urls": [
+            "http://127.0.0.1:53899/virtualized_list.html"
+          ],
+          "seed_kind": "list"
+        }
+      }
+    },
+    {
+      "id": "mobile_viewport_fixture",
+      "name": "Mobile Viewport — Local Fixture",
+      "source_url": "",
+      "source_stop_reason": "completed",
+      "source_rendered_items": 8,
+      "draft": {
+        "profile_name": "127-0-0-1:53899",
+        "selector_count": 3,
+        "target_field_count": 1,
+        "has_api_hints": false,
+        "has_pagination_hints": false,
+        "training_notes_count": 0
+      },
+      "verification": {
+        "loadable": true,
+        "errors": [],
+        "profile_name": "127-0-0-1:53899",
+        "selector_count": 3,
+        "target_field_count": 1,
+        "has_api_hints": false,
+        "has_pagination_hints": false,
+        "has_quality_expectations": true
+      },
+      "runner_integration": {
+        "runner_compatible": true,
+        "initial_requests_generated": 1,
+        "errors": [],
+        "seed_urls": [
+          "http://127.0.0.1:53899/mobile_viewport.html"
+        ],
+        "has_selector_builder": true,
+        "has_record_builder": true,
+        "has_link_builder": true
+      },
+      "profile_json": {
+        "name": "127-0-0-1:53899",
+        "selectors": {
+          "card": ".card",
+          "card_title": ".card_title",
+          "nav_item": ".nav_item"
+        },
+        "target_fields": [
+          "card_title"
+        ],
+        "api_hints": {},
+        "pagination_hints": {},
+        "quality_expectations": {
+          "min_items_expected": 8,
+          "item_count_observed": 8,
+          "html_size_observed": 10140
+        },
+        "training_notes": [],
+        "access_config": {},
+        "rate_limits": {},
+        "constraints": {},
+        "crawl_preferences": {
+          "seed_urls": [
+            "http://127.0.0.1:53899/mobile_viewport.html"
+          ],
+          "seed_kind": "list"
+        }
+      }
+    },
+    {
+      "id": "react_virtuoso_demo",
+      "name": "React Virtuoso — Public Demo",
+      "source_url": "https://virtuoso.dev/infinite-scrolling/",
+      "source_stop_reason": "navigation_timeout",
+      "source_rendered_items": 0,
+      "draft": {
+        "profile_name": "virtuoso-dev",
+        "selector_count": 0,
+        "target_field_count": 0,
+        "has_api_hints": false,
+        "has_pagination_hints": false,
+        "training_notes_count": 3
+      },
+      "verification": {
+        "loadable": true,
+        "errors": [],
+        "profile_name": "virtuoso-dev",
+        "selector_count": 0,
+        "target_field_count": 0,
+        "has_api_hints": false,
+        "has_pagination_hints": false,
+        "has_quality_expectations": false
+      },
+      "runner_integration": {
+        "runner_compatible": true,
+        "initial_requests_generated": 1,
+        "errors": [],
+        "seed_urls": [
+          "https://virtuoso.dev/infinite-scrolling/"
+        ],
+        "has_selector_builder": true,
+        "has_record_builder": true,
+        "has_link_builder": true
+      },
+      "profile_json": {
+        "name": "virtuoso-dev",
+        "selectors": {},
+        "target_fields": [],
+        "api_hints": {},
+        "pagination_hints": {},
+        "quality_expectations": {},
+        "training_notes": [
+          "Training stopped: navigation_timeout",
+          "Failure category: navigation_timeout",
+          "No items rendered — selectors may need manual review"
+        ],
+        "access_config": {},
+        "rate_limits": {},
+        "constraints": {},
+        "crawl_preferences": {
+          "seed_urls": [
+            "https://virtuoso.dev/infinite-scrolling/"
+          ],
+          "seed_kind": "list"
+        }
+      }
+    },
+    {
+      "id": "vue_examples_spa",
+      "name": "Vue.js Examples — SPA Doc Site",
+      "source_url": "https://vuejs.org/examples/",
+      "source_stop_reason": "completed",
+      "source_rendered_items": 57,
+      "draft": {
+        "profile_name": "vuejs-org",
+        "selector_count": 2,
+        "target_field_count": 1,
+        "has_api_hints": false,
+        "has_pagination_hints": false,
+        "training_notes_count": 0
+      },
+      "verification": {
+        "loadable": true,
+        "errors": [],
+        "profile_name": "vuejs-org",
+        "selector_count": 2,
+        "target_field_count": 1,
+        "has_api_hints": false,
+        "has_pagination_hints": false,
+        "has_quality_expectations": true
+      },
+      "runner_integration": {
+        "runner_compatible": true,
+        "initial_requests_generated": 1,
+        "errors": [],
+        "seed_urls": [
+          "https://vuejs.org/examples/"
+        ],
+        "has_selector_builder": true,
+        "has_record_builder": true,
+        "has_link_builder": true
+      },
+      "profile_json": {
+        "name": "vuejs-org",
+        "selectors": {
+          "example_link": ".example_link",
+          "sidebar_group": ".sidebar_group"
+        },
+        "target_fields": [
+          "example_link"
+        ],
+        "api_hints": {},
+        "pagination_hints": {},
+        "quality_expectations": {
+          "min_items_expected": 57,
+          "item_count_observed": 57,
+          "html_size_observed": 103744
+        },
+        "training_notes": [],
+        "access_config": {},
+        "rate_limits": {},
+        "constraints": {},
+        "crawl_preferences": {
+          "seed_urls": [
+            "https://vuejs.org/examples/"
+          ],
+          "seed_kind": "list"
+        }
+      }
+    },
+    {
+      "id": "react_learn_spa",
+      "name": "React.dev Learn — SPA Doc Site",
+      "source_url": "https://react.dev/learn",
+      "source_stop_reason": "completed",
+      "source_rendered_items": 51,
+      "draft": {
+        "profile_name": "react-dev",
+        "selector_count": 2,
+        "target_field_count": 1,
+        "has_api_hints": true,
+        "has_pagination_hints": false,
+        "training_notes_count": 1
+      },
+      "verification": {
+        "loadable": true,
+        "errors": [],
+        "profile_name": "react-dev",
+        "selector_count": 2,
+        "target_field_count": 1,
+        "has_api_hints": true,
+        "has_pagination_hints": false,
+        "has_quality_expectations": true
+      },
+      "runner_integration": {
+        "runner_compatible": true,
+        "initial_requests_generated": 1,
+        "errors": [],
+        "seed_urls": [
+          "https://react.dev/learn"
+        ],
+        "has_selector_builder": true,
+        "has_record_builder": true,
+        "has_link_builder": true
+      },
+      "profile_json": {
+        "name": "react-dev",
+        "selectors": {
+          "nav_link": ".nav_link",
+          "article": ".article"
+        },
+        "target_fields": [
+          "nav_link"
+        ],
+        "api_hints": {
+          "endpoint": "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/versions.json?markdownPath=versions",
+          "format": "json",
+          "all_endpoints": [
+            "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/versions.json?markdownPath=versions",
+            "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/index.json",
+            "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/reference/react.json?markdownPath=reference&markdownPath=react",
+            "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/blog.json?markdownPath=blog",
+            "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/community.json?markdownPath=community",
+            "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/community/translations.json?markdownPath=community&markdownPath=translations",
+            "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/learn.json?markdownPath=learn",
+            "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/learn/setup.json?markdownPath=learn&markdownPath=setup",
+            "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/learn/installation.json?markdownPath=learn&markdownPath=installation",
+            "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/learn/thinking-in-react.json?markdownPath=learn&markdownPath=thinking-in-react"
+          ],
+          "xhr_count": 23
+        },
+        "pagination_hints": {},
+        "quality_expectations": {
+          "min_items_expected": 51,
+          "item_count_observed": 51,
+          "html_size_observed": 283638
+        },
+        "training_notes": [
+          "Observed 23 XHR/fetch requests — API hints may be available"
+        ],
+        "access_config": {},
+        "rate_limits": {},
+        "constraints": {},
+        "crawl_preferences": {
+          "seed_urls": [
+            "https://react.dev/learn"
+          ],
+          "seed_kind": "list",
+          "include_seed_urls_with_api": false
+        }
+      }
+    },
+    {
+      "id": "tanstack_virtual_docs",
+      "name": "TanStack Virtual — SPA Doc Site",
+      "source_url": "https://tanstack.com/virtual/latest/docs/introduction",
+      "source_stop_reason": "completed",
+      "source_rendered_items": 2,
+      "draft": {
+        "profile_name": "tanstack-com",
+        "selector_count": 1,
+        "target_field_count": 0,
+        "has_api_hints": true,
+        "has_pagination_hints": false,
+        "training_notes_count": 2
+      },
+      "verification": {
+        "loadable": true,
+        "errors": [],
+        "profile_name": "tanstack-com",
+        "selector_count": 1,
+        "target_field_count": 0,
+        "has_api_hints": true,
+        "has_pagination_hints": false,
+        "has_quality_expectations": true
+      },
+      "runner_integration": {
+        "runner_compatible": true,
+        "initial_requests_generated": 1,
+        "errors": [],
+        "seed_urls": [
+          "https://tanstack.com/virtual/latest/docs/introduction"
+        ],
+        "has_selector_builder": true,
+        "has_record_builder": true,
+        "has_link_builder": true
+      },
+      "profile_json": {
+        "name": "tanstack-com",
+        "selectors": {
+          "code_block": ".code_block"
+        },
+        "target_fields": [],
+        "api_hints": {
+          "endpoint": "https://tanstack.com/_serverFn/b9ec6ebffe71881613f7d1e66d9126b4f7a9390f5be2d567f1ebaf09da5cfc18",
+          "format": "json",
+          "all_endpoints": [
+            "https://tanstack.com/_serverFn/b9ec6ebffe71881613f7d1e66d9126b4f7a9390f5be2d567f1ebaf09da5cfc18",
+            "https://tanstack.com/_serverFn/293006cecb96430e3d9ee8503b84e3f2e4e3b621a17f605748ed66a33b053ca8",
+            "https://tanstack.com/_serverFn/a863101af06a412e026a82c0775180d21ebf50344227a050d177f793fe63fa41"
+          ],
+          "xhr_count": 6
+        },
+        "pagination_hints": {},
+        "quality_expectations": {
+          "min_items_expected": 2,
+          "item_count_observed": 2,
+          "html_size_observed": 256399,
+          "category": "documentation"
+        },
+        "training_notes": [
+          "Only 2 items rendered — check pagination or scroll",
+          "Observed 6 XHR/fetch requests — API hints may be available"
+        ],
+        "access_config": {},
+        "rate_limits": {},
+        "constraints": {},
+        "crawl_preferences": {
+          "seed_urls": [
+            "https://tanstack.com/virtual/latest/docs/introduction"
+          ],
+          "seed_kind": "list",
+          "include_seed_urls_with_api": false
+        }
+      }
+    },
+    {
+      "id": "scrapethissite_ajax",
+      "name": "ScrapeThisSite — AJAX Dynamic List",
+      "source_url": "https://scrapethissite.com/pages/ajax-javascript/",
+      "source_stop_reason": "completed",
+      "source_rendered_items": 6,
+      "draft": {
+        "profile_name": "scrapethissite-com",
+        "selector_count": 1,
+        "target_field_count": 1,
+        "has_api_hints": true,
+        "has_pagination_hints": false,
+        "training_notes_count": 1
+      },
+      "verification": {
+        "loadable": true,
+        "errors": [],
+        "profile_name": "scrapethissite-com",
+        "selector_count": 1,
+        "target_field_count": 1,
+        "has_api_hints": true,
+        "has_pagination_hints": false,
+        "has_quality_expectations": true
+      },
+      "runner_integration": {
+        "runner_compatible": true,
+        "initial_requests_generated": 1,
+        "errors": [],
+        "seed_urls": [
+          "https://scrapethissite.com/pages/ajax-javascript/"
+        ],
+        "has_selector_builder": true,
+        "has_record_builder": true,
+        "has_link_builder": true
+      },
+      "profile_json": {
+        "name": "scrapethissite-com",
+        "selectors": {
+          "year_link": ".year_link"
+        },
+        "target_fields": [
+          "year_link"
+        ],
+        "api_hints": {
+          "xhr_count": 3
+        },
+        "pagination_hints": {},
+        "quality_expectations": {
+          "min_items_expected": 6,
+          "item_count_observed": 6,
+          "html_size_observed": 15378
+        },
+        "training_notes": [
+          "Observed 3 XHR/fetch requests — API hints may be available"
+        ],
+        "access_config": {},
+        "rate_limits": {},
+        "constraints": {},
+        "crawl_preferences": {
+          "seed_urls": [
+            "https://scrapethissite.com/pages/ajax-javascript/"
+          ],
+          "seed_kind": "list"
+        }
+      }
+    },
+    {
+      "id": "dummyjson_products_ssr",
+      "name": "DummyJSON Products — Server-Rendered List",
+      "source_url": "https://dummyjson.com/products",
+      "source_stop_reason": "no_items_matched",
+      "source_rendered_items": 0,
+      "draft": {
+        "profile_name": "dummyjson-com",
+        "selector_count": 0,
+        "target_field_count": 0,
+        "has_api_hints": true,
+        "has_pagination_hints": false,
+        "training_notes_count": 3
+      },
+      "verification": {
+        "loadable": true,
+        "errors": [],
+        "profile_name": "dummyjson-com",
+        "selector_count": 0,
+        "target_field_count": 0,
+        "has_api_hints": true,
+        "has_pagination_hints": false,
+        "has_quality_expectations": true
+      },
+      "runner_integration": {
+        "runner_compatible": true,
+        "initial_requests_generated": 1,
+        "errors": [],
+        "seed_urls": [
+          "https://dummyjson.com/products"
+        ],
+        "has_selector_builder": true,
+        "has_record_builder": true,
+        "has_link_builder": true
+      },
+      "profile_json": {
+        "name": "dummyjson-com",
+        "selectors": {},
+        "target_fields": [],
+        "api_hints": {
+          "endpoint": "https://dummyjson.com/products",
+          "format": "json",
+          "xhr_count": 1
+        },
+        "pagination_hints": {},
+        "quality_expectations": {
+          "html_size_observed": 44260,
+          "category": "product"
+        },
+        "training_notes": [
+          "Training stopped: no_items_matched",
+          "No items rendered — selectors may need manual review",
+          "Observed 1 XHR/fetch requests — API hints may be available"
+        ],
+        "access_config": {},
+        "rate_limits": {},
+        "constraints": {},
+        "crawl_preferences": {
+          "seed_urls": [
+            "https://dummyjson.com/products"
+          ],
+          "seed_kind": "list",
+          "include_seed_urls_with_api": false
+        }
+      }
+    },
+    {
+      "id": "scrapethissite_countries",
+      "name": "ScrapeThisSite Countries — AJAX Pagination",
+      "source_url": "https://scrapethissite.com/pages/simple/",
+      "source_stop_reason": "completed",
+      "source_rendered_items": 250,
+      "draft": {
+        "profile_name": "scrapethissite-com",
+        "selector_count": 3,
+        "target_field_count": 1,
+        "has_api_hints": true,
+        "has_pagination_hints": false,
+        "training_notes_count": 1
+      },
+      "verification": {
+        "loadable": true,
+        "errors": [],
+        "profile_name": "scrapethissite-com",
+        "selector_count": 3,
+        "target_field_count": 1,
+        "has_api_hints": true,
+        "has_pagination_hints": false,
+        "has_quality_expectations": true
+      },
+      "runner_integration": {
+        "runner_compatible": true,
+        "initial_requests_generated": 1,
+        "errors": [],
+        "seed_urls": [
+          "https://scrapethissite.com/pages/simple/"
+        ],
+        "has_selector_builder": true,
+        "has_record_builder": true,
+        "has_link_builder": true
+      },
+      "profile_json": {
+        "name": "scrapethissite-com",
+        "selectors": {
+          "country": ".country",
+          "country_name": ".country_name",
+          "country_capital": ".country_capital"
+        },
+        "target_fields": [
+          "country_name"
+        ],
+        "api_hints": {
+          "xhr_count": 3
+        },
+        "pagination_hints": {},
+        "quality_expectations": {
+          "min_items_expected": 250,
+          "item_count_observed": 250,
+          "html_size_observed": 205480
+        },
+        "training_notes": [
+          "Observed 3 XHR/fetch requests — API hints may be available"
+        ],
+        "access_config": {},
+        "rate_limits": {},
+        "constraints": {},
+        "crawl_preferences": {
+          "seed_urls": [
+            "https://scrapethissite.com/pages/simple/"
+          ],
+          "seed_kind": "list"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,269 @@
+{
+  "task": "REVERSE-HARDEN-2",
+  "worker": "LLM-2026-002",
+  "timestamp": "2026-05-15T16:26:05",
+  "elapsed_seconds": 0.0,
+  "results": [
+    {
+      "scenario": "signed_url_mock",
+      "description": "API with x-sign + timestamp + nonce query params",
+      "plan": {
+        "risk_level": "medium",
+        "hook_targets": 1,
+        "sandbox_targets": 0,
+        "dynamic_inputs": 2,
+        "replay_steps": 5,
+        "blockers": [
+          "signature_flow_requires_runtime_key_or_hook",
+          "dynamic_inputs_required: timestamp, nonce"
+        ]
+      },
+      "replay": {
+        "success": true,
+        "steps_run": 5,
+        "steps_ok": 5,
+        "steps_error": 0,
+        "generated_inputs": [
+          "timestamp",
+          "nonce"
+        ],
+        "hook_outputs": [
+          "api_request_signature"
+        ],
+        "sandbox_outputs": [],
+        "blockers_remaining": [],
+        "credential_leak_detected": false
+      }
+    },
+    {
+      "scenario": "signed_header_mock",
+      "description": "API with authorization + x-signature headers",
+      "plan": {
+        "risk_level": "medium",
+        "hook_targets": 1,
+        "sandbox_targets": 0,
+        "dynamic_inputs": 0,
+        "replay_steps": 3,
+        "blockers": [
+          "signature_flow_requires_runtime_key_or_hook"
+        ]
+      },
+      "replay": {
+        "success": true,
+        "steps_run": 3,
+        "steps_ok": 3,
+        "steps_error": 0,
+        "generated_inputs": [],
+        "hook_outputs": [
+          "api_request_signature"
+        ],
+        "sandbox_outputs": [],
+        "blockers_remaining": [],
+        "credential_leak_detected": false
+      }
+    },
+    {
+      "scenario": "timestamp_nonce_query",
+      "description": "API with timestamp/nonce query params (no signature)",
+      "plan": {
+        "risk_level": "low",
+        "hook_targets": 0,
+        "sandbox_targets": 0,
+        "dynamic_inputs": 2,
+        "replay_steps": 4,
+        "blockers": [
+          "dynamic_inputs_required: ts, nonce"
+        ]
+      },
+      "replay": {
+        "success": true,
+        "steps_run": 4,
+        "steps_ok": 4,
+        "steps_error": 0,
+        "generated_inputs": [
+          "ts",
+          "nonce"
+        ],
+        "hook_outputs": [],
+        "sandbox_outputs": [],
+        "blockers_remaining": [],
+        "credential_leak_detected": false
+      }
+    },
+    {
+      "scenario": "graphql_auth_evidence",
+      "description": "GraphQL with auth headers and nested complexity",
+      "plan": {
+        "risk_level": "medium",
+        "hook_targets": 1,
+        "sandbox_targets": 0,
+        "dynamic_inputs": 0,
+        "replay_steps": 3,
+        "blockers": [
+          "signature_flow_requires_runtime_key_or_hook"
+        ]
+      },
+      "replay": {
+        "success": true,
+        "steps_run": 3,
+        "steps_ok": 3,
+        "steps_error": 0,
+        "generated_inputs": [],
+        "hook_outputs": [
+          "api_request_signature"
+        ],
+        "sandbox_outputs": [],
+        "blockers_remaining": [],
+        "credential_leak_detected": false
+      }
+    },
+    {
+      "scenario": "graphql_rate_limit",
+      "description": "GraphQL rate-limited (429) with retry-after",
+      "plan": {
+        "risk_level": "none",
+        "hook_targets": 0,
+        "sandbox_targets": 0,
+        "dynamic_inputs": 0,
+        "replay_steps": 2,
+        "blockers": []
+      },
+      "replay": {
+        "success": true,
+        "steps_run": 2,
+        "steps_ok": 2,
+        "steps_error": 0,
+        "generated_inputs": [],
+        "hook_outputs": [],
+        "sandbox_outputs": [],
+        "blockers_remaining": [],
+        "credential_leak_detected": false
+      }
+    },
+    {
+      "scenario": "js_sign_hmac_flow",
+      "description": "JS HMAC-SHA256 signature flow with timestamp + nonce",
+      "plan": {
+        "risk_level": "medium",
+        "hook_targets": 2,
+        "sandbox_targets": 0,
+        "dynamic_inputs": 2,
+        "replay_steps": 6,
+        "blockers": [
+          "signature_flow_requires_runtime_key_or_hook",
+          "dynamic_inputs_required: timestamp, nonce"
+        ]
+      },
+      "replay": {
+        "success": true,
+        "steps_run": 6,
+        "steps_ok": 6,
+        "steps_error": 0,
+        "generated_inputs": [
+          "timestamp",
+          "nonce"
+        ],
+        "hook_outputs": [
+          "hmacSHA256",
+          "signRequest"
+        ],
+        "sandbox_outputs": [],
+        "blockers_remaining": [],
+        "credential_leak_detected": false
+      }
+    },
+    {
+      "scenario": "js_encrypt_aes_flow",
+      "description": "JS AES encryption with CryptoJS",
+      "plan": {
+        "risk_level": "medium",
+        "hook_targets": 0,
+        "sandbox_targets": 2,
+        "dynamic_inputs": 0,
+        "replay_steps": 4,
+        "blockers": [
+          "encryption_requires_runtime_execution"
+        ]
+      },
+      "replay": {
+        "success": true,
+        "steps_run": 4,
+        "steps_ok": 4,
+        "steps_error": 0,
+        "generated_inputs": [],
+        "hook_outputs": [],
+        "sandbox_outputs": [
+          "cryptojs",
+          "encrypt"
+        ],
+        "blockers_remaining": [],
+        "credential_leak_detected": false
+      }
+    },
+    {
+      "scenario": "combined_sign_encrypt_dynamic",
+      "description": "Combined: JS sign + encrypt + timestamp + nonce + API signed URL",
+      "plan": {
+        "risk_level": "high",
+        "hook_targets": 2,
+        "sandbox_targets": 2,
+        "dynamic_inputs": 2,
+        "replay_steps": 8,
+        "blockers": [
+          "signature_flow_requires_runtime_key_or_hook",
+          "encryption_requires_runtime_execution",
+          "dynamic_inputs_required: timestamp, nonce"
+        ]
+      },
+      "replay": {
+        "success": true,
+        "steps_run": 8,
+        "steps_ok": 8,
+        "steps_error": 0,
+        "generated_inputs": [
+          "timestamp",
+          "nonce"
+        ],
+        "hook_outputs": [
+          "hmacSHA256",
+          "api_request_signature"
+        ],
+        "sandbox_outputs": [
+          "aes",
+          "api_payload_encryption"
+        ],
+        "blockers_remaining": [],
+        "credential_leak_detected": false
+      }
+    },
+    {
+      "scenario": "clean_no_crypto",
+      "description": "Clean API with no crypto/signature/timestamp evidence",
+      "plan": {
+        "risk_level": "none",
+        "hook_targets": 0,
+        "sandbox_targets": 0,
+        "dynamic_inputs": 0,
+        "replay_steps": 2,
+        "blockers": []
+      },
+      "replay": {
+        "success": true,
+        "steps_run": 2,
+        "steps_ok": 2,
+        "steps_error": 0,
+        "generated_inputs": [],
+        "hook_outputs": [],
+        "sandbox_outputs": [],
+        "blockers_remaining": [],
+        "credential_leak_detected": false
+      }
+    }
+  ],
+  "summary": {
+    "total": 9,
+    "passed": 9,
+    "partial": 0,
+    "failed": 0
+  }
+}

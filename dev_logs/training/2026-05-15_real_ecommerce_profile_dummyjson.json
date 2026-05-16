@@ -1,0 +1,418 @@
+{
+  "task": "REAL-HARDEN-3",
+  "profile_path": "autonomous_crawler\\tests\\fixtures\\ecommerce_real_dummyjson_profile.json",
+  "target": "https://dummyjson.com/products",
+  "real_result": {
+    "label": "real",
+    "accepted": true,
+    "record_count": 75,
+    "runner": {
+      "run_id": "real-ecommerce-profile-dummyjson-2026-05-15",
+      "batches": 3,
+      "claimed": 3,
+      "succeeded": 3,
+      "failed": 0,
+      "retried": 0,
+      "records_saved": 75,
+      "discovered_urls": 2,
+      "checkpoint_errors": 0,
+      "item_errors": [],
+      "frontier_stats": {
+        "done": 3
+      }
+    },
+    "frontier_stats": {
+      "done": 3
+    },
+    "quality_summary": {
+      "total_records": 75,
+      "min_items": 50,
+      "meets_min_items": true,
+      "field_completeness": {
+        "title": 1.0,
+        "price": 1.0,
+        "highest_price": 1.0,
+        "category": 1.0,
+        "description": 1.0,
+        "image_urls": 1.0,
+        "colors": 1.0,
+        "sizes": 1.0
+      },
+      "duplicate_count": 0,
+      "duplicate_rate": 0.0,
+      "duplicate_key_strategy": {
+        "field": "dedupe_key",
+        "source": "ProductRecord",
+        "strategy": "sha256(source_site | category | canonical_url_or_source_url_or_title)[:32]",
+        "category_aware": true,
+        "notes": [
+          "The runner compares generated ProductRecord.dedupe_key values.",
+          "Duplicate rate quality depends on profile canonical URL mapping quality."
+        ]
+      },
+      "failed_urls": [],
+      "failed_url_count": 0,
+      "pagination_stop_reason": "offset_max_pages",
+      "frontier_stats": {
+        "done": 3
+      },
+      "quality_policy": {
+        "mode": "warn",
+        "min_items": 50,
+        "field_thresholds": {
+          "title": 0.95,
+          "price": 0.95,
+          "category": 0.95,
+          "description": 0.8,
+          "image_urls": 0.8
+        },
+        "max_duplicate_rate": 0.05,
+        "max_failed_url_count": 0
+      },
+      "quality_gate": {
+        "mode": "warn",
+        "passed": true,
+        "should_fail": false,
+        "severity": "pass",
+        "checks": [
+          {
+            "name": "min_items",
+            "passed": true,
+            "expected": 50,
+            "actual": 75,
+            "severity": "pass"
+          },
+          {
+            "name": "duplicate_rate",
+            "passed": true,
+            "expected": 0.05,
+            "actual": 0.0,
+            "severity": "pass"
+          },
+          {
+            "name": "failed_url_count",
+            "passed": true,
+            "expected": 0,
+            "actual": 0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:category",
+            "field": "category",
+            "passed": true,
+            "expected": 0.95,
+            "actual": 1.0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:description",
+            "field": "description",
+            "passed": true,
+            "expected": 0.8,
+            "actual": 1.0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:image_urls",
+            "field": "image_urls",
+            "passed": true,
+            "expected": 0.8,
+            "actual": 1.0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:price",
+            "field": "price",
+            "passed": true,
+            "expected": 0.95,
+            "actual": 1.0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:title",
+            "field": "title",
+            "passed": true,
+            "expected": 0.95,
+            "actual": 1.0,
+            "severity": "pass"
+          }
+        ]
+      }
+    },
+    "report": {
+      "schema_version": "profile-run-report/v1",
+      "generated_at": "2026-05-15T08:36:29.134917+00:00",
+      "profile": {
+        "name": "real-dummyjson-products",
+        "path": "autonomous_crawler\\tests\\fixtures\\ecommerce_real_dummyjson_profile.json",
+        "target": "https://dummyjson.com/products"
+      },
+      "run": {
+        "run_id": "real-ecommerce-profile-dummyjson-2026-05-15",
+        "runtime_backend": "native_static",
+        "parser_backend": "json_profile",
+        "runner_summary": {
+          "run_id": "real-ecommerce-profile-dummyjson-2026-05-15",
+          "batches": 3,
+          "claimed": 3,
+          "succeeded": 3,
+          "failed": 0,
+          "retried": 0,
+          "records_saved": 75,
+          "discovered_urls": 2,
+          "checkpoint_errors": 0,
+          "item_errors": [],
+          "frontier_stats": {
+            "done": 3
+          }
+        },
+        "stop_reason": "offset_max_pages"
+      },
+      "metrics": {
+        "record_count": 75,
+        "field_completeness": {
+          "title": 1.0,
+          "price": 1.0,
+          "highest_price": 1.0,
+          "category": 1.0,
+          "description": 1.0,
+          "image_urls": 1.0,
+          "colors": 1.0,
+          "sizes": 1.0
+        },
+        "duplicate_rate": 0.0,
+        "duplicate_count": 0,
+        "failed_url_count": 0,
+        "failed_urls": [],
+        "frontier_stats": {
+          "done": 3
+        }
+      },
+      "quality_gate": {
+        "mode": "warn",
+        "passed": true,
+        "should_fail": false,
+        "severity": "pass",
+        "checks": [
+          {
+            "name": "min_items",
+            "passed": true,
+            "expected": 50,
+            "actual": 75,
+            "severity": "pass"
+          },
+          {
+            "name": "duplicate_rate",
+            "passed": true,
+            "expected": 0.05,
+            "actual": 0.0,
+            "severity": "pass"
+          },
+          {
+            "name": "failed_url_count",
+            "passed": true,
+            "expected": 0,
+            "actual": 0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:category",
+            "field": "category",
+            "passed": true,
+            "expected": 0.95,
+            "actual": 1.0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:description",
+            "field": "description",
+            "passed": true,
+            "expected": 0.8,
+            "actual": 1.0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:image_urls",
+            "field": "image_urls",
+            "passed": true,
+            "expected": 0.8,
+            "actual": 1.0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:price",
+            "field": "price",
+            "passed": true,
+            "expected": 0.95,
+            "actual": 1.0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:title",
+            "field": "title",
+            "passed": true,
+            "expected": 0.95,
+            "actual": 1.0,
+            "severity": "pass"
+          }
+        ]
+      },
+      "quality_policy": {
+        "mode": "warn",
+        "min_items": 50,
+        "field_thresholds": {
+          "title": 0.95,
+          "price": 0.95,
+          "category": 0.95,
+          "description": 0.8,
+          "image_urls": 0.8
+        },
+        "max_duplicate_rate": 0.05,
+        "max_failed_url_count": 0
+      },
+      "duplicate_key_strategy": {
+        "field": "dedupe_key",
+        "source": "ProductRecord",
+        "strategy": "sha256(source_site | category | canonical_url_or_source_url_or_title)[:32]",
+        "category_aware": true,
+        "notes": [
+          "The runner compares generated ProductRecord.dedupe_key values.",
+          "Duplicate rate quality depends on profile canonical URL mapping quality."
+        ]
+      },
+      "samples": [
+        {
+          "title": "Essence Mascara Lash Princess",
+          "price": 9.99,
+          "category": "catalog",
+          "description": "The Essence Mascara Lash Princess is a popular mascara known for its volumizing and lengthening effects. Achieve dramatic lashes with this long-lasting and cruelty-free formula.",
+          "image_urls": [
+            "https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/thumbnail.webp",
+            "https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/1.webp"
+          ],
+          "canonical_url": "https://dummyjson.com/1"
+        },
+        {
+          "title": "Eyeshadow Palette with Mirror",
+          "price": 19.99,
+          "category": "catalog",
+          "description": "The Eyeshadow Palette with Mirror offers a versatile range of eyeshadow shades for creating stunning eye looks. With a built-in mirror, it's convenient for on-the-go makeup application.",
+          "image_urls": [
+            "https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/thumbnail.webp",
+            "https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/1.webp"
+          ],
+          "canonical_url": "https://dummyjson.com/2"
+        },
+        {
+          "title": "Powder Canister",
+          "price": 14.99,
+          "category": "catalog",
+          "description": "The Powder Canister is a finely milled setting powder designed to set makeup and control shine. With a lightweight and translucent formula, it provides a smooth and matte finish.",
+          "image_urls": [
+            "https://cdn.dummyjson.com/product-images/beauty/powder-canister/thumbnail.webp",
+            "https://cdn.dummyjson.com/product-images/beauty/powder-canister/1.webp"
+          ],
+          "canonical_url": "https://dummyjson.com/3"
+        },
+        {
+          "title": "Red Lipstick",
+          "price": 12.99,
+          "category": "catalog",
+          "description": "The Red Lipstick is a classic and bold choice for adding a pop of color to your lips. With a creamy and pigmented formula, it provides a vibrant and long-lasting finish.",
+          "image_urls": [
+            "https://cdn.dummyjson.com/product-images/beauty/red-lipstick/thumbnail.webp",
+            "https://cdn.dummyjson.com/product-images/beauty/red-lipstick/1.webp"
+          ],
+          "canonical_url": "https://dummyjson.com/4"
+        },
+        {
+          "title": "Red Nail Polish",
+          "price": 8.99,
+          "category": "catalog",
+          "description": "The Red Nail Polish offers a rich and glossy red hue for vibrant and polished nails. With a quick-drying formula, it provides a salon-quality finish at home.",
+          "image_urls": [
+            "https://cdn.dummyjson.com/product-images/beauty/red-nail-polish/thumbnail.webp",
+            "https://cdn.dummyjson.com/product-images/beauty/red-nail-polish/1.webp"
+          ],
+          "canonical_url": "https://dummyjson.com/5"
+        }
+      ],
+      "failures": [],
+      "next_actions": [
+        "No immediate quality gate action required; continue broader real-site regression."
+      ],
+      "notes": [
+        "REAL-HARDEN-3 public ecommerce-like product API training profile.",
+        "Uses DummyJSON products endpoint with offset pagination.",
+        "No auth, cookies, private headers, proxy, or runtime site rules."
+      ],
+      "accepted": true
+    },
+    "failures": [],
+    "sample_records": [
+      {
+        "title": "Essence Mascara Lash Princess",
+        "price": 9.99,
+        "category": "catalog",
+        "description": "The Essence Mascara Lash Princess is a popular mascara known for its volumizing and lengthening effects. Achieve dramatic lashes with this long-lasting and cruelty-free formula.",
+        "image_urls": [
+          "https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/thumbnail.webp",
+          "https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/1.webp"
+        ],
+        "canonical_url": "https://dummyjson.com/1"
+      },
+      {
+        "title": "Eyeshadow Palette with Mirror",
+        "price": 19.99,
+        "category": "catalog",
+        "description": "The Eyeshadow Palette with Mirror offers a versatile range of eyeshadow shades for creating stunning eye looks. With a built-in mirror, it's convenient for on-the-go makeup application.",
+        "image_urls": [
+          "https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/thumbnail.webp",
+          "https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/1.webp"
+        ],
+        "canonical_url": "https://dummyjson.com/2"
+      },
+      {
+        "title": "Powder Canister",
+        "price": 14.99,
+        "category": "catalog",
+        "description": "The Powder Canister is a finely milled setting powder designed to set makeup and control shine. With a lightweight and translucent formula, it provides a smooth and matte finish.",
+        "image_urls": [
+          "https://cdn.dummyjson.com/product-images/beauty/powder-canister/thumbnail.webp",
+          "https://cdn.dummyjson.com/product-images/beauty/powder-canister/1.webp"
+        ],
+        "canonical_url": "https://dummyjson.com/3"
+      },
+      {
+        "title": "Red Lipstick",
+        "price": 12.99,
+        "category": "catalog",
+        "description": "The Red Lipstick is a classic and bold choice for adding a pop of color to your lips. With a creamy and pigmented formula, it provides a vibrant and long-lasting finish.",
+        "image_urls": [
+          "https://cdn.dummyjson.com/product-images/beauty/red-lipstick/thumbnail.webp",
+          "https://cdn.dummyjson.com/product-images/beauty/red-lipstick/1.webp"
+        ],
+        "canonical_url": "https://dummyjson.com/4"
+      },
+      {
+        "title": "Red Nail Polish",
+        "price": 8.99,
+        "category": "catalog",
+        "description": "The Red Nail Polish offers a rich and glossy red hue for vibrant and polished nails. With a quick-drying formula, it provides a salon-quality finish at home.",
+        "image_urls": [
+          "https://cdn.dummyjson.com/product-images/beauty/red-nail-polish/thumbnail.webp",
+          "https://cdn.dummyjson.com/product-images/beauty/red-nail-polish/1.webp"
+        ],
+        "canonical_url": "https://dummyjson.com/5"
+      }
+    ],
+    "runtime_name": "native_static"
+  },
+  "fixture_regression": null,
+  "accepted": true,
+  "fallback_used": false,
+  "notes": [
+    "Training uses profile data, not runtime site rules.",
+    "DummyJSON is a public product-like API; it is not a protected ecommerce site."
+  ]
+}

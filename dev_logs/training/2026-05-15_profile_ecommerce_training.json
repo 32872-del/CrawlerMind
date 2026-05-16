@@ -1,0 +1,1081 @@
+{
+  "training_round": "SCRAPLING-HARDEN-6B",
+  "profiles": [
+    {
+      "profile": "fixture-ecommerce-profile",
+      "profile_path": "autonomous_crawler\\tests\\fixtures\\ecommerce_site_profile.json",
+      "record_count": 10,
+      "min_items": 2,
+      "runner": {
+        "run_id": "profile-training-dom-2026-05-15",
+        "batches": 3,
+        "claimed": 11,
+        "succeeded": 11,
+        "failed": 0,
+        "retried": 0,
+        "records_saved": 10,
+        "discovered_urls": 10,
+        "checkpoint_errors": 0,
+        "item_errors": [],
+        "frontier_stats": {
+          "done": 11
+        }
+      },
+      "frontier_stats": {
+        "done": 11
+      },
+      "quality_summary": {
+        "total_records": 10,
+        "min_items": 2,
+        "meets_min_items": true,
+        "field_completeness": {
+          "title": 1.0,
+          "price": 1.0,
+          "highest_price": 1.0,
+          "category": 1.0,
+          "description": 1.0,
+          "image_urls": 1.0,
+          "colors": 1.0,
+          "sizes": 1.0
+        },
+        "duplicate_count": 0,
+        "duplicate_rate": 0.0,
+        "duplicate_key_strategy": {
+          "field": "dedupe_key",
+          "source": "ProductRecord",
+          "strategy": "sha256(source_site | category | canonical_url_or_source_url_or_title)[:32]",
+          "category_aware": true,
+          "notes": [
+            "The runner compares generated ProductRecord.dedupe_key values.",
+            "Duplicate rate quality depends on profile canonical URL mapping quality."
+          ]
+        },
+        "failed_urls": [],
+        "failed_url_count": 0,
+        "pagination_stop_reason": "dom_link_frontier_exhausted",
+        "frontier_stats": {
+          "done": 11
+        },
+        "quality_policy": {
+          "mode": "warn",
+          "min_items": 2,
+          "field_thresholds": {
+            "title": 1.0,
+            "price": 1.0,
+            "image_urls": 1.0
+          },
+          "max_duplicate_rate": 0.0,
+          "max_failed_url_count": 0
+        },
+        "quality_gate": {
+          "mode": "warn",
+          "passed": true,
+          "should_fail": false,
+          "severity": "pass",
+          "checks": [
+            {
+              "name": "min_items",
+              "passed": true,
+              "expected": 2,
+              "actual": 10,
+              "severity": "pass"
+            },
+            {
+              "name": "duplicate_rate",
+              "passed": true,
+              "expected": 0.0,
+              "actual": 0.0,
+              "severity": "pass"
+            },
+            {
+              "name": "failed_url_count",
+              "passed": true,
+              "expected": 0,
+              "actual": 0,
+              "severity": "pass"
+            },
+            {
+              "name": "field:image_urls",
+              "field": "image_urls",
+              "passed": true,
+              "expected": 1.0,
+              "actual": 1.0,
+              "severity": "pass"
+            },
+            {
+              "name": "field:price",
+              "field": "price",
+              "passed": true,
+              "expected": 1.0,
+              "actual": 1.0,
+              "severity": "pass"
+            },
+            {
+              "name": "field:title",
+              "field": "title",
+              "passed": true,
+              "expected": 1.0,
+              "actual": 1.0,
+              "severity": "pass"
+            }
+          ]
+        }
+      },
+      "report": {
+        "schema_version": "profile-run-report/v1",
+        "generated_at": "2026-05-15T08:36:23.625522+00:00",
+        "profile": {
+          "name": "fixture-ecommerce-profile",
+          "path": "autonomous_crawler\\tests\\fixtures\\ecommerce_site_profile.json",
+          "target": "https://profile-shop.local/collections/running"
+        },
+        "run": {
+          "run_id": "profile-training-dom-2026-05-15",
+          "runtime_backend": "profile_training_fixture_fetch",
+          "parser_backend": "native_parser",
+          "runner_summary": {
+            "run_id": "profile-training-dom-2026-05-15",
+            "batches": 3,
+            "claimed": 11,
+            "succeeded": 11,
+            "failed": 0,
+            "retried": 0,
+            "records_saved": 10,
+            "discovered_urls": 10,
+            "checkpoint_errors": 0,
+            "item_errors": [],
+            "frontier_stats": {
+              "done": 11
+            }
+          },
+          "stop_reason": "dom_link_frontier_exhausted"
+        },
+        "metrics": {
+          "record_count": 10,
+          "field_completeness": {
+            "title": 1.0,
+            "price": 1.0,
+            "highest_price": 1.0,
+            "category": 1.0,
+            "description": 1.0,
+            "image_urls": 1.0,
+            "colors": 1.0,
+            "sizes": 1.0
+          },
+          "duplicate_rate": 0.0,
+          "duplicate_count": 0,
+          "failed_url_count": 0,
+          "failed_urls": [],
+          "frontier_stats": {
+            "done": 11
+          }
+        },
+        "quality_gate": {
+          "mode": "warn",
+          "passed": true,
+          "should_fail": false,
+          "severity": "pass",
+          "checks": [
+            {
+              "name": "min_items",
+              "passed": true,
+              "expected": 2,
+              "actual": 10,
+              "severity": "pass"
+            },
+            {
+              "name": "duplicate_rate",
+              "passed": true,
+              "expected": 0.0,
+              "actual": 0.0,
+              "severity": "pass"
+            },
+            {
+              "name": "failed_url_count",
+              "passed": true,
+              "expected": 0,
+              "actual": 0,
+              "severity": "pass"
+            },
+            {
+              "name": "field:image_urls",
+              "field": "image_urls",
+              "passed": true,
+              "expected": 1.0,
+              "actual": 1.0,
+              "severity": "pass"
+            },
+            {
+              "name": "field:price",
+              "field": "price",
+              "passed": true,
+              "expected": 1.0,
+              "actual": 1.0,
+              "severity": "pass"
+            },
+            {
+              "name": "field:title",
+              "field": "title",
+              "passed": true,
+              "expected": 1.0,
+              "actual": 1.0,
+              "severity": "pass"
+            }
+          ]
+        },
+        "quality_policy": {
+          "mode": "warn",
+          "min_items": 2,
+          "field_thresholds": {
+            "title": 1.0,
+            "price": 1.0,
+            "image_urls": 1.0
+          },
+          "max_duplicate_rate": 0.0,
+          "max_failed_url_count": 0
+        },
+        "duplicate_key_strategy": {
+          "field": "dedupe_key",
+          "source": "ProductRecord",
+          "strategy": "sha256(source_site | category | canonical_url_or_source_url_or_title)[:32]",
+          "category_aware": true,
+          "notes": [
+            "The runner compares generated ProductRecord.dedupe_key values.",
+            "Duplicate rate quality depends on profile canonical URL mapping quality."
+          ]
+        },
+        "samples": [
+          {
+            "title": "DOM Product 00",
+            "price": 20.0,
+            "category": "training-shoes",
+            "description": "DOM fixture product 00",
+            "image_urls": [
+              "https://profile-shop.local/images/dom-00.jpg"
+            ]
+          },
+          {
+            "title": "DOM Product 01",
+            "price": 20.1,
+            "category": "training-shoes",
+            "description": "DOM fixture product 01",
+            "image_urls": [
+              "https://profile-shop.local/images/dom-01.jpg"
+            ]
+          },
+          {
+            "title": "DOM Product 02",
+            "price": 20.2,
+            "category": "training-shoes",
+            "description": "DOM fixture product 02",
+            "image_urls": [
+              "https://profile-shop.local/images/dom-02.jpg"
+            ]
+          },
+          {
+            "title": "DOM Product 03",
+            "price": 20.3,
+            "category": "training-shoes",
+            "description": "DOM fixture product 03",
+            "image_urls": [
+              "https://profile-shop.local/images/dom-03.jpg"
+            ]
+          },
+          {
+            "title": "DOM Product 04",
+            "price": 20.4,
+            "category": "training-shoes",
+            "description": "DOM fixture product 04",
+            "image_urls": [
+              "https://profile-shop.local/images/dom-04.jpg"
+            ]
+          }
+        ],
+        "failures": [],
+        "next_actions": [
+          "No immediate quality gate action required; continue broader real-site regression."
+        ],
+        "notes": [
+          "Offline deterministic ecommerce profile for long-running runner smoke.",
+          "List page discovers detail URLs; detail pages produce ProductRecord rows."
+        ],
+        "accepted": true
+      },
+      "sample_records": [
+        {
+          "title": "DOM Product 00",
+          "price": 20.0,
+          "category": "training-shoes",
+          "description": "DOM fixture product 00",
+          "image_urls": [
+            "https://profile-shop.local/images/dom-00.jpg"
+          ]
+        },
+        {
+          "title": "DOM Product 01",
+          "price": 20.1,
+          "category": "training-shoes",
+          "description": "DOM fixture product 01",
+          "image_urls": [
+            "https://profile-shop.local/images/dom-01.jpg"
+          ]
+        },
+        {
+          "title": "DOM Product 02",
+          "price": 20.2,
+          "category": "training-shoes",
+          "description": "DOM fixture product 02",
+          "image_urls": [
+            "https://profile-shop.local/images/dom-02.jpg"
+          ]
+        },
+        {
+          "title": "DOM Product 03",
+          "price": 20.3,
+          "category": "training-shoes",
+          "description": "DOM fixture product 03",
+          "image_urls": [
+            "https://profile-shop.local/images/dom-03.jpg"
+          ]
+        },
+        {
+          "title": "DOM Product 04",
+          "price": 20.4,
+          "category": "training-shoes",
+          "description": "DOM fixture product 04",
+          "image_urls": [
+            "https://profile-shop.local/images/dom-04.jpg"
+          ]
+        }
+      ],
+      "record_modes": [
+        "profile-driven"
+      ]
+    },
+    {
+      "profile": "fixture-ecommerce-api-pagination",
+      "profile_path": "autonomous_crawler\\tests\\fixtures\\ecommerce_api_pagination_profile.json",
+      "record_count": 55,
+      "min_items": 50,
+      "runner": {
+        "run_id": "profile-training-api-2026-05-15",
+        "batches": 3,
+        "claimed": 3,
+        "succeeded": 3,
+        "failed": 0,
+        "retried": 0,
+        "records_saved": 55,
+        "discovered_urls": 2,
+        "checkpoint_errors": 0,
+        "item_errors": [],
+        "frontier_stats": {
+          "done": 3
+        }
+      },
+      "frontier_stats": {
+        "done": 3
+      },
+      "quality_summary": {
+        "total_records": 55,
+        "min_items": 50,
+        "meets_min_items": true,
+        "field_completeness": {
+          "title": 1.0,
+          "price": 1.0,
+          "highest_price": 1.0,
+          "category": 1.0,
+          "description": 1.0,
+          "image_urls": 1.0,
+          "colors": 1.0,
+          "sizes": 1.0
+        },
+        "duplicate_count": 0,
+        "duplicate_rate": 0.0,
+        "duplicate_key_strategy": {
+          "field": "dedupe_key",
+          "source": "ProductRecord",
+          "strategy": "sha256(source_site | category | canonical_url_or_source_url_or_title)[:32]",
+          "category_aware": true,
+          "notes": [
+            "The runner compares generated ProductRecord.dedupe_key values.",
+            "Duplicate rate quality depends on profile canonical URL mapping quality."
+          ]
+        },
+        "failed_urls": [],
+        "failed_url_count": 0,
+        "pagination_stop_reason": "max_pages",
+        "frontier_stats": {
+          "done": 3
+        },
+        "quality_policy": {
+          "mode": "warn",
+          "min_items": 50,
+          "field_thresholds": {
+            "title": 1.0,
+            "price": 1.0,
+            "image_urls": 1.0
+          },
+          "max_duplicate_rate": 0.0,
+          "max_failed_url_count": 0
+        },
+        "quality_gate": {
+          "mode": "warn",
+          "passed": true,
+          "should_fail": false,
+          "severity": "pass",
+          "checks": [
+            {
+              "name": "min_items",
+              "passed": true,
+              "expected": 50,
+              "actual": 55,
+              "severity": "pass"
+            },
+            {
+              "name": "duplicate_rate",
+              "passed": true,
+              "expected": 0.0,
+              "actual": 0.0,
+              "severity": "pass"
+            },
+            {
+              "name": "failed_url_count",
+              "passed": true,
+              "expected": 0,
+              "actual": 0,
+              "severity": "pass"
+            },
+            {
+              "name": "field:image_urls",
+              "field": "image_urls",
+              "passed": true,
+              "expected": 1.0,
+              "actual": 1.0,
+              "severity": "pass"
+            },
+            {
+              "name": "field:price",
+              "field": "price",
+              "passed": true,
+              "expected": 1.0,
+              "actual": 1.0,
+              "severity": "pass"
+            },
+            {
+              "name": "field:title",
+              "field": "title",
+              "passed": true,
+              "expected": 1.0,
+              "actual": 1.0,
+              "severity": "pass"
+            }
+          ]
+        }
+      },
+      "report": {
+        "schema_version": "profile-run-report/v1",
+        "generated_at": "2026-05-15T08:36:24.056181+00:00",
+        "profile": {
+          "name": "fixture-ecommerce-api-pagination",
+          "path": "autonomous_crawler\\tests\\fixtures\\ecommerce_api_pagination_profile.json",
+          "target": "https://api-profile-shop.local/v1/products"
+        },
+        "run": {
+          "run_id": "profile-training-api-2026-05-15",
+          "runtime_backend": "profile_training_fixture_fetch",
+          "parser_backend": "json_profile",
+          "runner_summary": {
+            "run_id": "profile-training-api-2026-05-15",
+            "batches": 3,
+            "claimed": 3,
+            "succeeded": 3,
+            "failed": 0,
+            "retried": 0,
+            "records_saved": 55,
+            "discovered_urls": 2,
+            "checkpoint_errors": 0,
+            "item_errors": [],
+            "frontier_stats": {
+              "done": 3
+            }
+          },
+          "stop_reason": "max_pages"
+        },
+        "metrics": {
+          "record_count": 55,
+          "field_completeness": {
+            "title": 1.0,
+            "price": 1.0,
+            "highest_price": 1.0,
+            "category": 1.0,
+            "description": 1.0,
+            "image_urls": 1.0,
+            "colors": 1.0,
+            "sizes": 1.0
+          },
+          "duplicate_rate": 0.0,
+          "duplicate_count": 0,
+          "failed_url_count": 0,
+          "failed_urls": [],
+          "frontier_stats": {
+            "done": 3
+          }
+        },
+        "quality_gate": {
+          "mode": "warn",
+          "passed": true,
+          "should_fail": false,
+          "severity": "pass",
+          "checks": [
+            {
+              "name": "min_items",
+              "passed": true,
+              "expected": 50,
+              "actual": 55,
+              "severity": "pass"
+            },
+            {
+              "name": "duplicate_rate",
+              "passed": true,
+              "expected": 0.0,
+              "actual": 0.0,
+              "severity": "pass"
+            },
+            {
+              "name": "failed_url_count",
+              "passed": true,
+              "expected": 0,
+              "actual": 0,
+              "severity": "pass"
+            },
+            {
+              "name": "field:image_urls",
+              "field": "image_urls",
+              "passed": true,
+              "expected": 1.0,
+              "actual": 1.0,
+              "severity": "pass"
+            },
+            {
+              "name": "field:price",
+              "field": "price",
+              "passed": true,
+              "expected": 1.0,
+              "actual": 1.0,
+              "severity": "pass"
+            },
+            {
+              "name": "field:title",
+              "field": "title",
+              "passed": true,
+              "expected": 1.0,
+              "actual": 1.0,
+              "severity": "pass"
+            }
+          ]
+        },
+        "quality_policy": {
+          "mode": "warn",
+          "min_items": 50,
+          "field_thresholds": {
+            "title": 1.0,
+            "price": 1.0,
+            "image_urls": 1.0
+          },
+          "max_duplicate_rate": 0.0,
+          "max_failed_url_count": 0
+        },
+        "duplicate_key_strategy": {
+          "field": "dedupe_key",
+          "source": "ProductRecord",
+          "strategy": "sha256(source_site | category | canonical_url_or_source_url_or_title)[:32]",
+          "category_aware": true,
+          "notes": [
+            "The runner compares generated ProductRecord.dedupe_key values.",
+            "Duplicate rate quality depends on profile canonical URL mapping quality."
+          ]
+        },
+        "samples": [
+          {
+            "title": "API Product 00",
+            "price": 10.0,
+            "category": "training-shoes",
+            "description": "API fixture product 00",
+            "image_urls": [
+              "https://api-profile-shop.local/images/api-product-00.jpg"
+            ]
+          },
+          {
+            "title": "API Product 01",
+            "price": 10.1,
+            "category": "training-shoes",
+            "description": "API fixture product 01",
+            "image_urls": [
+              "https://api-profile-shop.local/images/api-product-01.jpg"
+            ]
+          },
+          {
+            "title": "API Product 02",
+            "price": 10.2,
+            "category": "training-shoes",
+            "description": "API fixture product 02",
+            "image_urls": [
+              "https://api-profile-shop.local/images/api-product-02.jpg"
+            ]
+          },
+          {
+            "title": "API Product 03",
+            "price": 10.3,
+            "category": "training-shoes",
+            "description": "API fixture product 03",
+            "image_urls": [
+              "https://api-profile-shop.local/images/api-product-03.jpg"
+            ]
+          },
+          {
+            "title": "API Product 04",
+            "price": 10.4,
+            "category": "training-shoes",
+            "description": "API fixture product 04",
+            "image_urls": [
+              "https://api-profile-shop.local/images/api-product-04.jpg"
+            ]
+          }
+        ],
+        "failures": [],
+        "next_actions": [
+          "No immediate quality gate action required; continue broader real-site regression."
+        ],
+        "notes": [
+          "Offline observed API pagination fixture.",
+          "Uses page/limit query parameters and JSON field mapping to create ProductRecord rows.",
+          "No auth, cookie, captcha, proxy, or site-specific code is required."
+        ],
+        "accepted": true
+      },
+      "sample_records": [
+        {
+          "title": "API Product 00",
+          "price": 10.0,
+          "category": "training-shoes",
+          "description": "API fixture product 00",
+          "image_urls": [
+            "https://api-profile-shop.local/images/api-product-00.jpg"
+          ]
+        },
+        {
+          "title": "API Product 01",
+          "price": 10.1,
+          "category": "training-shoes",
+          "description": "API fixture product 01",
+          "image_urls": [
+            "https://api-profile-shop.local/images/api-product-01.jpg"
+          ]
+        },
+        {
+          "title": "API Product 02",
+          "price": 10.2,
+          "category": "training-shoes",
+          "description": "API fixture product 02",
+          "image_urls": [
+            "https://api-profile-shop.local/images/api-product-02.jpg"
+          ]
+        },
+        {
+          "title": "API Product 03",
+          "price": 10.3,
+          "category": "training-shoes",
+          "description": "API fixture product 03",
+          "image_urls": [
+            "https://api-profile-shop.local/images/api-product-03.jpg"
+          ]
+        },
+        {
+          "title": "API Product 04",
+          "price": 10.4,
+          "category": "training-shoes",
+          "description": "API fixture product 04",
+          "image_urls": [
+            "https://api-profile-shop.local/images/api-product-04.jpg"
+          ]
+        }
+      ],
+      "record_modes": [
+        "profile-api-pagination"
+      ]
+    },
+    {
+      "profile": "fixture-ecommerce-mixed-hydration",
+      "profile_path": "autonomous_crawler\\tests\\fixtures\\ecommerce_mixed_hydration_profile.json",
+      "record_count": 70,
+      "min_items": 50,
+      "runner": {
+        "run_id": "profile-training-mixed-2026-05-15",
+        "batches": 4,
+        "claimed": 14,
+        "succeeded": 14,
+        "failed": 0,
+        "retried": 0,
+        "records_saved": 70,
+        "discovered_urls": 12,
+        "checkpoint_errors": 0,
+        "item_errors": [],
+        "frontier_stats": {
+          "done": 14
+        }
+      },
+      "frontier_stats": {
+        "done": 14
+      },
+      "quality_summary": {
+        "total_records": 70,
+        "min_items": 50,
+        "meets_min_items": true,
+        "field_completeness": {
+          "title": 1.0,
+          "price": 1.0,
+          "highest_price": 1.0,
+          "category": 1.0,
+          "description": 1.0,
+          "image_urls": 1.0,
+          "colors": 1.0,
+          "sizes": 1.0
+        },
+        "duplicate_count": 0,
+        "duplicate_rate": 0.0,
+        "duplicate_key_strategy": {
+          "field": "dedupe_key",
+          "source": "ProductRecord",
+          "strategy": "sha256(source_site | category | canonical_url_or_source_url_or_title)[:32]",
+          "category_aware": true,
+          "notes": [
+            "The runner compares generated ProductRecord.dedupe_key values.",
+            "Duplicate rate quality depends on profile canonical URL mapping quality."
+          ]
+        },
+        "failed_urls": [],
+        "failed_url_count": 0,
+        "pagination_stop_reason": "no_next_cursor",
+        "frontier_stats": {
+          "done": 14
+        },
+        "quality_policy": {
+          "mode": "warn",
+          "min_items": 50,
+          "field_thresholds": {
+            "title": 1.0,
+            "price": 1.0,
+            "category": 1.0,
+            "image_urls": 1.0
+          },
+          "max_duplicate_rate": 0.0,
+          "max_failed_url_count": 0
+        },
+        "quality_gate": {
+          "mode": "warn",
+          "passed": true,
+          "should_fail": false,
+          "severity": "pass",
+          "checks": [
+            {
+              "name": "min_items",
+              "passed": true,
+              "expected": 50,
+              "actual": 70,
+              "severity": "pass"
+            },
+            {
+              "name": "duplicate_rate",
+              "passed": true,
+              "expected": 0.0,
+              "actual": 0.0,
+              "severity": "pass"
+            },
+            {
+              "name": "failed_url_count",
+              "passed": true,
+              "expected": 0,
+              "actual": 0,
+              "severity": "pass"
+            },
+            {
+              "name": "field:category",
+              "field": "category",
+              "passed": true,
+              "expected": 1.0,
+              "actual": 1.0,
+              "severity": "pass"
+            },
+            {
+              "name": "field:image_urls",
+              "field": "image_urls",
+              "passed": true,
+              "expected": 1.0,
+              "actual": 1.0,
+              "severity": "pass"
+            },
+            {
+              "name": "field:price",
+              "field": "price",
+              "passed": true,
+              "expected": 1.0,
+              "actual": 1.0,
+              "severity": "pass"
+            },
+            {
+              "name": "field:title",
+              "field": "title",
+              "passed": true,
+              "expected": 1.0,
+              "actual": 1.0,
+              "severity": "pass"
+            }
+          ]
+        }
+      },
+      "report": {
+        "schema_version": "profile-run-report/v1",
+        "generated_at": "2026-05-15T08:36:24.948058+00:00",
+        "profile": {
+          "name": "fixture-ecommerce-mixed-hydration",
+          "path": "autonomous_crawler\\tests\\fixtures\\ecommerce_mixed_hydration_profile.json",
+          "target": "https://mixed-profile-shop.local/api/products"
+        },
+        "run": {
+          "run_id": "profile-training-mixed-2026-05-15",
+          "runtime_backend": "profile_training_fixture_fetch",
+          "parser_backend": "native_parser",
+          "runner_summary": {
+            "run_id": "profile-training-mixed-2026-05-15",
+            "batches": 4,
+            "claimed": 14,
+            "succeeded": 14,
+            "failed": 0,
+            "retried": 0,
+            "records_saved": 70,
+            "discovered_urls": 12,
+            "checkpoint_errors": 0,
+            "item_errors": [],
+            "frontier_stats": {
+              "done": 14
+            }
+          },
+          "stop_reason": "no_next_cursor"
+        },
+        "metrics": {
+          "record_count": 70,
+          "field_completeness": {
+            "title": 1.0,
+            "price": 1.0,
+            "highest_price": 1.0,
+            "category": 1.0,
+            "description": 1.0,
+            "image_urls": 1.0,
+            "colors": 1.0,
+            "sizes": 1.0
+          },
+          "duplicate_rate": 0.0,
+          "duplicate_count": 0,
+          "failed_url_count": 0,
+          "failed_urls": [],
+          "frontier_stats": {
+            "done": 14
+          }
+        },
+        "quality_gate": {
+          "mode": "warn",
+          "passed": true,
+          "should_fail": false,
+          "severity": "pass",
+          "checks": [
+            {
+              "name": "min_items",
+              "passed": true,
+              "expected": 50,
+              "actual": 70,
+              "severity": "pass"
+            },
+            {
+              "name": "duplicate_rate",
+              "passed": true,
+              "expected": 0.0,
+              "actual": 0.0,
+              "severity": "pass"
+            },
+            {
+              "name": "failed_url_count",
+              "passed": true,
+              "expected": 0,
+              "actual": 0,
+              "severity": "pass"
+            },
+            {
+              "name": "field:category",
+              "field": "category",
+              "passed": true,
+              "expected": 1.0,
+              "actual": 1.0,
+              "severity": "pass"
+            },
+            {
+              "name": "field:image_urls",
+              "field": "image_urls",
+              "passed": true,
+              "expected": 1.0,
+              "actual": 1.0,
+              "severity": "pass"
+            },
+            {
+              "name": "field:price",
+              "field": "price",
+              "passed": true,
+              "expected": 1.0,
+              "actual": 1.0,
+              "severity": "pass"
+            },
+            {
+              "name": "field:title",
+              "field": "title",
+              "passed": true,
+              "expected": 1.0,
+              "actual": 1.0,
+              "severity": "pass"
+            }
+          ]
+        },
+        "quality_policy": {
+          "mode": "warn",
+          "min_items": 50,
+          "field_thresholds": {
+            "title": 1.0,
+            "price": 1.0,
+            "category": 1.0,
+            "image_urls": 1.0
+          },
+          "max_duplicate_rate": 0.0,
+          "max_failed_url_count": 0
+        },
+        "duplicate_key_strategy": {
+          "field": "dedupe_key",
+          "source": "ProductRecord",
+          "strategy": "sha256(source_site | category | canonical_url_or_source_url_or_title)[:32]",
+          "category_aware": true,
+          "notes": [
+            "The runner compares generated ProductRecord.dedupe_key values.",
+            "Duplicate rate quality depends on profile canonical URL mapping quality."
+          ]
+        },
+        "samples": [
+          {
+            "title": "Mixed API Product 00",
+            "price": 30.0,
+            "category": "hydrated-training",
+            "description": "Hydration API fixture product 00",
+            "image_urls": [
+              "https://mixed-profile-shop.local/images/mixed-api-00.jpg"
+            ]
+          },
+          {
+            "title": "Mixed API Product 01",
+            "price": 30.1,
+            "category": "hydrated-training",
+            "description": "Hydration API fixture product 01",
+            "image_urls": [
+              "https://mixed-profile-shop.local/images/mixed-api-01.jpg"
+            ]
+          },
+          {
+            "title": "Mixed API Product 02",
+            "price": 30.2,
+            "category": "hydrated-training",
+            "description": "Hydration API fixture product 02",
+            "image_urls": [
+              "https://mixed-profile-shop.local/images/mixed-api-02.jpg"
+            ]
+          },
+          {
+            "title": "Mixed API Product 03",
+            "price": 30.3,
+            "category": "hydrated-training",
+            "description": "Hydration API fixture product 03",
+            "image_urls": [
+              "https://mixed-profile-shop.local/images/mixed-api-03.jpg"
+            ]
+          },
+          {
+            "title": "Mixed API Product 04",
+            "price": 30.4,
+            "category": "hydrated-training",
+            "description": "Hydration API fixture product 04",
+            "image_urls": [
+              "https://mixed-profile-shop.local/images/mixed-api-04.jpg"
+            ]
+          }
+        ],
+        "failures": [],
+        "next_actions": [
+          "No immediate quality gate action required; continue broader real-site regression."
+        ],
+        "notes": [
+          "Mixed SSR + hydration profile example.",
+          "DOM list/detail selectors document SSR fallback.",
+          "Cursor API hints document observed hydration API replay when available."
+        ],
+        "accepted": true
+      },
+      "sample_records": [
+        {
+          "title": "Mixed API Product 00",
+          "price": 30.0,
+          "category": "hydrated-training",
+          "description": "Hydration API fixture product 00",
+          "image_urls": [
+            "https://mixed-profile-shop.local/images/mixed-api-00.jpg"
+          ]
+        },
+        {
+          "title": "Mixed API Product 01",
+          "price": 30.1,
+          "category": "hydrated-training",
+          "description": "Hydration API fixture product 01",
+          "image_urls": [
+            "https://mixed-profile-shop.local/images/mixed-api-01.jpg"
+          ]
+        },
+        {
+          "title": "Mixed API Product 02",
+          "price": 30.2,
+          "category": "hydrated-training",
+          "description": "Hydration API fixture product 02",
+          "image_urls": [
+            "https://mixed-profile-shop.local/images/mixed-api-02.jpg"
+          ]
+        },
+        {
+          "title": "Mixed API Product 03",
+          "price": 30.3,
+          "category": "hydrated-training",
+          "description": "Hydration API fixture product 03",
+          "image_urls": [
+            "https://mixed-profile-shop.local/images/mixed-api-03.jpg"
+          ]
+        },
+        {
+          "title": "Mixed API Product 04",
+          "price": 30.4,
+          "category": "hydrated-training",
+          "description": "Hydration API fixture product 04",
+          "image_urls": [
+            "https://mixed-profile-shop.local/images/mixed-api-04.jpg"
+          ]
+        }
+      ],
+      "record_modes": [
+        "profile-api-pagination",
+        "profile-driven"
+      ]
+    }
+  ],
+  "total_records": 135,
+  "accepted": true
+}

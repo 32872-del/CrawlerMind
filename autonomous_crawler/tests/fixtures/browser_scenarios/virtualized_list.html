@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtualized List Fixture</title>
+<style>
+  body { font-family: sans-serif; margin: 0; padding: 20px; background: #f0f0f0; }
+  h1 { margin: 0 0 16px; }
+  #virtual-viewport {
+    height: 400px;
+    overflow-y: auto;
+    border: 2px solid #333;
+    border-radius: 8px;
+    background: #fff;
+    position: relative;
+  }
+  .virtual-spacer { position: relative; width: 100%; }
+  .virtual-item {
+    position: absolute;
+    left: 0; right: 0;
+    height: 50px;
+    padding: 8px 16px;
+    box-sizing: border-box;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+  }
+  .virtual-item:hover { background: #f9f9f9; }
+  .virtual-item .item-id { color: #999; width: 60px; font-size: 12px; }
+  .virtual-item .item-title { flex: 1; font-weight: 500; }
+  .virtual-item .item-price { color: #2a9d2a; font-weight: 600; }
+  #info { margin-top: 12px; color: #666; font-size: 14px; }
+</style>
+</head>
+<body>
+<h1>Virtualized List Training Fixture</h1>
+<div id="virtual-viewport">
+  <div id="virtual-spacer" class="virtual-spacer"></div>
+</div>
+<div id="info">Total: <span id="total-count">0</span> | Visible: <span id="visible-count">0</span> | Scroll: <span id="scroll-pos">0</span></div>
+<pre id="__training_state" style="display:none"></pre>
+
+<script>
+(function() {
+  var TOTAL_ITEMS = 10000;
+  var ITEM_HEIGHT = 50;
+  var BUFFER = 5;
+
+  var viewport = document.getElementById('virtual-viewport');
+  var spacer = document.getElementById('virtual-spacer');
+  var totalCountEl = document.getElementById('total-count');
+  var visibleCountEl = document.getElementById('visible-count');
+  var scrollPosEl = document.getElementById('scroll-pos');
+
+  spacer.style.height = (TOTAL_ITEMS * ITEM_HEIGHT) + 'px';
+  totalCountEl.textContent = TOTAL_ITEMS;
+
+  // Expose tracking
+  window.__scroll_events = [];
+  window.__rendered_count = 0;
+  window.__visible_range = { start: 0, end: 0 };
+  window.__total_items = TOTAL_ITEMS;
+
+  function generateItem(index) {
+    var categories = ['electronics', 'books', 'clothing', 'home', 'sports'];
+    return {
+      id: index,
+      title: 'Product #' + index + ' — ' + categories[index % categories.length],
+      price: (9.99 + (index % 100) * 1.5).toFixed(2),
+      category: categories[index % categories.length],
+    };
+  }
+
+  function render() {
+    var scrollTop = viewport.scrollTop;
+    var viewportHeight = viewport.clientHeight;
+    var startIdx = Math.max(0, Math.floor(scrollTop / ITEM_HEIGHT) - BUFFER);
+    var endIdx = Math.min(TOTAL_ITEMS, Math.ceil((scrollTop + viewportHeight) / ITEM_HEIGHT) + BUFFER);
+
+    // Only re-render if range changed
+    if (startIdx === window.__visible_range.start && endIdx === window.__visible_range.end) return;
+
+    window.__visible_range = { start: startIdx, end: endIdx };
+    window.__scroll_events.push({ type: 'render', start: startIdx, end: endIdx, scrollTop: scrollTop, timestamp: Date.now() });
+
+    // Clear and rebuild
+    while (spacer.firstChild) spacer.removeChild(spacer.firstChild);
+
+    for (var i = startIdx; i < endIdx; i++) {
+      var item = generateItem(i);
+      var div = document.createElement('div');
+      div.className = 'virtual-item';
+      div.style.top = (i * ITEM_HEIGHT) + 'px';
+      div.setAttribute('data-item-index', i);
+      div.innerHTML = '<span class="item-id">#' + item.id + '</span>' +
+                      '<span class="item-title">' + item.title + '</span>' +
+                      '<span class="item-price">$' + item.price + '</span>';
+      spacer.appendChild(div);
+    }
+
+    window.__rendered_count = endIdx - startIdx;
+    visibleCountEl.textContent = window.__rendered_count;
+    scrollPosEl.textContent = Math.round(scrollTop);
+
+    // Sync to DOM for training harness extraction
+    var stateEl = document.getElementById('__training_state');
+    if (stateEl) {
+      stateEl.textContent = JSON.stringify({
+        scroll_events: window.__scroll_events,
+        rendered_count: window.__rendered_count,
+        visible_range: window.__visible_range,
+        total_items: window.__total_items
+      });
+    }
+  }
+
+  viewport.addEventListener('scroll', render);
+  render();
+})();
+</script>
+</body>
+</html>

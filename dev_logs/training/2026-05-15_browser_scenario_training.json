@@ -1,0 +1,374 @@
+{
+  "run_at": "2026-05-15T08:40:06.529777+00:00",
+  "purpose": "SCRAPLING-HARDEN-2B browser scenario training",
+  "use_profile_rotation": false,
+  "summary": {
+    "total": 3,
+    "ok": 3,
+    "failed": 0,
+    "checks_total": 5,
+    "checks_passed": 5
+  },
+  "results": [
+    {
+      "id": "infinite_scroll_fixture",
+      "name": "Infinite Scroll — Local Fixture",
+      "url": "",
+      "risk": "low",
+      "status": "ok",
+      "ok": true,
+      "elapsed_seconds": 0.815,
+      "final_url": "http://127.0.0.1:52407/infinite_scroll.html",
+      "status_code": 200,
+      "html_chars": 5391,
+      "selector_matches": {
+        "item": 10,
+        "item_title": 10,
+        "category": 10
+      },
+      "rendered_item_count": 50,
+      "total_items_in_dataset": 0,
+      "scroll_events": [
+        {
+          "type": "sentinel_visible",
+          "page": 0,
+          "timestamp": 1778834396059
+        },
+        {
+          "type": "page_loaded",
+          "page": 1,
+          "timestamp": 1778834396155
+        },
+        {
+          "type": "sentinel_visible",
+          "page": 1,
+          "timestamp": 1778834396256
+        },
+        {
+          "type": "page_loaded",
+          "page": 2,
+          "timestamp": 1778834396370
+        },
+        {
+          "type": "sentinel_visible",
+          "page": 2,
+          "timestamp": 1778834396664
+        },
+        {
+          "type": "page_loaded",
+          "page": 3,
+          "timestamp": 1778834396771
+        },
+        {
+          "type": "sentinel_visible",
+          "page": 3,
+          "timestamp": 1778834397067
+        },
+        {
+          "type": "page_loaded",
+          "page": 4,
+          "timestamp": 1778834397175
+        },
+        {
+          "type": "sentinel_visible",
+          "page": 4,
+          "timestamp": 1778834397486
+        },
+        {
+          "type": "page_loaded",
+          "page": 5,
+          "timestamp": 1778834397594
+        }
+      ],
+      "scroll_result": {
+        "scrolls": 8,
+        "reason": "completed"
+      },
+      "network_candidates": {
+        "resource_counts": {
+          "document": 1
+        },
+        "xhr_count": 0,
+        "captured_xhr": []
+      },
+      "viewport_info": null,
+      "ua_info": null,
+      "visible_range": null,
+      "profile_health": null,
+      "failure_classification": {
+        "category": "none",
+        "severity": "low",
+        "reason": "",
+        "status_code": 200,
+        "proxy_selected": false
+      },
+      "profile_evidence": {
+        "profile_id": null,
+        "profile": null
+      },
+      "engine": "native_browser",
+      "mode": "dynamic",
+      "session_mode": "ephemeral",
+      "error": "",
+      "stop_reason": "completed",
+      "expected_checks": {
+        "min_rendered_items": {
+          "expected": 20,
+          "actual": 50,
+          "pass": true
+        },
+        "min_scroll_events": {
+          "expected": 2,
+          "actual": 10,
+          "pass": true
+        }
+      }
+    },
+    {
+      "id": "virtualized_list_fixture",
+      "name": "Virtualized List — Local Fixture",
+      "url": "",
+      "risk": "low",
+      "status": "ok",
+      "ok": true,
+      "elapsed_seconds": 0.604,
+      "final_url": "http://127.0.0.1:52407/virtualized_list.html",
+      "status_code": 200,
+      "html_chars": 7006,
+      "selector_matches": {
+        "virtual_item": 13,
+        "item_price": 13
+      },
+      "rendered_item_count": 18,
+      "total_items_in_dataset": 10000,
+      "scroll_events": [
+        {
+          "type": "render",
+          "start": 0,
+          "end": 13,
+          "scrollTop": 0,
+          "timestamp": 1778834401073
+        },
+        {
+          "type": "render",
+          "start": 1,
+          "end": 20,
+          "scrollTop": 320,
+          "timestamp": 1778834401083
+        },
+        {
+          "type": "render",
+          "start": 7,
+          "end": 26,
+          "scrollTop": 640,
+          "timestamp": 1778834401244
+        },
+        {
+          "type": "render",
+          "start": 14,
+          "end": 33,
+          "scrollTop": 960,
+          "timestamp": 1778834401399
+        },
+        {
+          "type": "render",
+          "start": 20,
+          "end": 39,
+          "scrollTop": 1280,
+          "timestamp": 1778834401551
+        },
+        {
+          "type": "render",
+          "start": 27,
+          "end": 45,
+          "scrollTop": 1600,
+          "timestamp": 1778834401711
+        },
+        {
+          "type": "render",
+          "start": 33,
+          "end": 52,
+          "scrollTop": 1920,
+          "timestamp": 1778834401865
+        },
+        {
+          "type": "render",
+          "start": 39,
+          "end": 58,
+          "scrollTop": 2240,
+          "timestamp": 1778834402017
+        },
+        {
+          "type": "render",
+          "start": 46,
+          "end": 65,
+          "scrollTop": 2560,
+          "timestamp": 1778834402174
+        },
+        {
+          "type": "render",
+          "start": 52,
+          "end": 71,
+          "scrollTop": 2880,
+          "timestamp": 1778834402325
+        },
+        {
+          "type": "render",
+          "start": 59,
+          "end": 77,
+          "scrollTop": 3200,
+          "timestamp": 1778834402476
+        },
+        {
+          "type": "render",
+          "start": 65,
+          "end": 84,
+          "scrollTop": 3520,
+          "timestamp": 1778834402638
+        },
+        {
+          "type": "render",
+          "start": 71,
+          "end": 90,
+          "scrollTop": 3840,
+          "timestamp": 1778834402789
+        },
+        {
+          "type": "render",
+          "start": 78,
+          "end": 97,
+          "scrollTop": 4160,
+          "timestamp": 1778834402941
+        },
+        {
+          "type": "render",
+          "start": 84,
+          "end": 103,
+          "scrollTop": 4480,
+          "timestamp": 1778834403091
+        },
+        {
+          "type": "render",
+          "start": 91,
+          "end": 109,
+          "scrollTop": 4800,
+          "timestamp": 1778834403243
+        }
+      ],
+      "scroll_result": {
+        "scrolls": 15,
+        "reason": "completed"
+      },
+      "network_candidates": {
+        "resource_counts": {
+          "document": 1
+        },
+        "xhr_count": 0,
+        "captured_xhr": []
+      },
+      "viewport_info": null,
+      "ua_info": null,
+      "visible_range": {
+        "start": 0,
+        "end": 13
+      },
+      "profile_health": null,
+      "failure_classification": {
+        "category": "none",
+        "severity": "low",
+        "reason": "",
+        "status_code": 200,
+        "proxy_selected": false
+      },
+      "profile_evidence": {
+        "profile_id": null,
+        "profile": null
+      },
+      "engine": "native_browser",
+      "mode": "dynamic",
+      "session_mode": "ephemeral",
+      "error": "",
+      "stop_reason": "completed",
+      "expected_checks": {
+        "min_rendered_items": {
+          "expected": 5,
+          "actual": 18,
+          "pass": true
+        },
+        "min_scroll_events": {
+          "expected": 3,
+          "actual": 16,
+          "pass": true
+        }
+      }
+    },
+    {
+      "id": "mobile_viewport_fixture",
+      "name": "Mobile Viewport — Local Fixture",
+      "url": "",
+      "risk": "low",
+      "status": "ok",
+      "ok": true,
+      "elapsed_seconds": 0.606,
+      "final_url": "http://127.0.0.1:52407/mobile_viewport.html",
+      "status_code": 200,
+      "html_chars": 10140,
+      "selector_matches": {
+        "card": 8,
+        "card_title": 8,
+        "nav_item": 5
+      },
+      "rendered_item_count": 8,
+      "total_items_in_dataset": 0,
+      "scroll_events": [],
+      "scroll_result": null,
+      "network_candidates": {
+        "resource_counts": {
+          "document": 1
+        },
+        "xhr_count": 0,
+        "captured_xhr": []
+      },
+      "viewport_info": {
+        "width": 375,
+        "height": 812,
+        "devicePixelRatio": 1,
+        "orientation": "landscape-primary",
+        "touchSupport": false,
+        "maxTouchPoints": 0
+      },
+      "ua_info": {
+        "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+        "isMobile": true,
+        "isIOS": true,
+        "isAndroid": false,
+        "platform": "iPhone"
+      },
+      "visible_range": null,
+      "profile_health": null,
+      "failure_classification": {
+        "category": "none",
+        "severity": "low",
+        "reason": "",
+        "status_code": 200,
+        "proxy_selected": false
+      },
+      "profile_evidence": {
+        "profile_id": null,
+        "profile": null
+      },
+      "engine": "native_browser",
+      "mode": "dynamic",
+      "session_mode": "ephemeral",
+      "error": "",
+      "stop_reason": "completed",
+      "expected_checks": {
+        "min_rendered_items": {
+          "expected": 4,
+          "actual": 8,
+          "pass": true
+        }
+      }
+    }
+  ]
+}

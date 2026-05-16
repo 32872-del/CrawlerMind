@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1a73e8">
+<title>Mobile Viewport Fixture</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background: #fafafa; }
+  .header { background: #1a73e8; color: #fff; padding: 16px; position: sticky; top: 0; z-index: 10; }
+  .header h1 { margin: 0; font-size: 18px; }
+  .nav { display: flex; overflow-x: auto; background: #fff; border-bottom: 1px solid #ddd; -webkit-overflow-scrolling: touch; }
+  .nav-item { flex-shrink: 0; padding: 12px 20px; font-size: 14px; color: #555; cursor: pointer; border-bottom: 2px solid transparent; }
+  .nav-item.active { color: #1a73e8; border-bottom-color: #1a73e8; font-weight: 600; }
+  .card-list { padding: 12px; }
+  .card { background: #fff; border-radius: 12px; margin-bottom: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .card-img { width: 100%; height: 180px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 24px; }
+  .card-body { padding: 14px; }
+  .card-title { font-size: 16px; font-weight: 600; margin: 0 0 6px; }
+  .card-desc { font-size: 13px; color: #666; margin: 0 0 8px; line-height: 1.4; }
+  .card-meta { display: flex; justify-content: space-between; align-items: center; }
+  .card-price { font-size: 18px; font-weight: 700; color: #e53935; }
+  .card-rating { font-size: 13px; color: #f5a623; }
+  .touch-target { min-height: 44px; min-width: 44px; display: flex; align-items: center; justify-content: center; }
+  @media (max-width: 480px) {
+    .card-img { height: 150px; }
+    .card-body { padding: 12px; }
+  }
+  @media (min-width: 768px) {
+    .card-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .card { margin-bottom: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Mobile Training Fixture</h1>
+</div>
+<nav class="nav" id="nav">
+  <div class="nav-item active" data-tab="all">All</div>
+  <div class="nav-item" data-tab="featured">Featured</div>
+  <div class="nav-item" data-tab="popular">Popular</div>
+  <div class="nav-item" data-tab="new">New</div>
+  <div class="nav-item" data-tab="sale">Sale</div>
+</nav>
+<div class="card-list" id="card-list"></div>
+<pre id="__training_state" style="display:none"></pre>
+
+<script>
+(function() {
+  var cardList = document.getElementById('card-list');
+
+  // Expose tracking
+  window.__viewport_info = {};
+  window.__touch_events = [];
+  window.__rendered_count = 0;
+  window.__ua_info = {};
+
+  function detectViewport() {
+    window.__viewport_info = {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      devicePixelRatio: window.devicePixelRatio || 1,
+      orientation: screen.orientation ? screen.orientation.type : 'unknown',
+      touchSupport: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
+      maxTouchPoints: navigator.maxTouchPoints || 0,
+    };
+  }
+
+  function detectUA() {
+    var ua = navigator.userAgent;
+    window.__ua_info = {
+      userAgent: ua,
+      isMobile: /Mobi|Android|iPhone|iPad/i.test(ua),
+      isIOS: /iPhone|iPad|iPod/i.test(ua),
+      isAndroid: /Android/i.test(ua),
+      platform: navigator.platform || 'unknown',
+    };
+  }
+
+  function generateCards(count) {
+    var products = [
+      { name: 'Wireless Earbuds', desc: 'Bluetooth 5.3, noise cancelling, 30h battery', price: 49.99, rating: 4.5 },
+      { name: 'Phone Case', desc: 'Shockproof TPU, clear back, MagSafe compatible', price: 19.99, rating: 4.2 },
+      { name: 'USB-C Hub', desc: '7-in-1 adapter, 4K HDMI, SD card reader', price: 35.99, rating: 4.7 },
+      { name: 'Screen Protector', desc: 'Tempered glass, anti-fingerprint, easy install', price: 12.99, rating: 4.0 },
+      { name: 'Portable Charger', desc: '10000mAh, PD 20W, dual USB-C', price: 29.99, rating: 4.6 },
+      { name: 'Smart Watch Band', desc: 'Silicone sport band, adjustable, breathable', price: 14.99, rating: 4.3 },
+      { name: 'Car Mount', desc: 'Magnetic dashboard mount, 360° rotation', price: 22.99, rating: 4.1 },
+      { name: 'Bluetooth Speaker', desc: 'Waterproof IPX7, 12h playtime, deep bass', price: 39.99, rating: 4.4 },
+    ];
+    var cards = [];
+    for (var i = 0; i < count; i++) {
+      var p = products[i % products.length];
+      cards.push({
+        id: i,
+        title: p.name + ' #' + (i + 1),
+        description: p.desc,
+        price: (p.price + (i * 0.5)).toFixed(2),
+        rating: (p.rating - (i % 3) * 0.1).toFixed(1),
+        category: i % 4 === 0 ? 'featured' : (i % 3 === 0 ? 'popular' : 'standard'),
+      });
+    }
+    return cards;
+  }
+
+  function renderCards(cards) {
+    cards.forEach(function(card) {
+      var div = document.createElement('div');
+      div.className = 'card';
+      div.setAttribute('data-card-id', card.id);
+      div.setAttribute('data-category', card.category);
+      div.innerHTML =
+        '<div class="card-img">Image ' + card.id + '</div>' +
+        '<div class="card-body">' +
+        '<h2 class="card-title">' + card.title + '</h2>' +
+        '<p class="card-desc">' + card.description + '</p>' +
+        '<div class="card-meta">' +
+        '<span class="card-price">$' + card.price + '</span>' +
+        '<span class="card-rating">&#9733; ' + card.rating + '</span>' +
+        '</div></div>';
+      cardList.appendChild(div);
+    });
+    window.__rendered_count = cardList.children.length;
+    // Sync to DOM for training harness extraction
+    var stateEl = document.getElementById('__training_state');
+    if (stateEl) {
+      stateEl.textContent = JSON.stringify({
+        rendered_count: window.__rendered_count,
+        viewport_info: window.__viewport_info,
+        ua_info: window.__ua_info,
+        touch_events: window.__touch_events
+      });
+    }
+  }
+
+  // Nav interaction tracking
+  document.getElementById('nav').addEventListener('click', function(e) {
+    var item = e.target.closest('.nav-item');
+    if (!item) return;
+    document.querySelectorAll('.nav-item').forEach(function(el) { el.classList.remove('active'); });
+    item.classList.add('active');
+    window.__touch_events.push({ type: 'nav_click', tab: item.getAttribute('data-tab'), timestamp: Date.now() });
+  });
+
+  // Touch event tracking
+  ['touchstart', 'touchmove', 'touchend'].forEach(function(evtName) {
+    document.addEventListener(evtName, function(e) {
+      window.__touch_events.push({ type: evtName, touches: e.touches.length, timestamp: Date.now() });
+    });
+  });
+
+  detectViewport();
+  detectUA();
+  renderCards(generateCards(8));
+
+  // Re-detect on resize
+  window.addEventListener('resize', function() {
+    detectViewport();
+    window.__touch_events.push({ type: 'resize', width: window.innerWidth, height: window.innerHeight, timestamp: Date.now() });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+{
+  "name": "real-fakestoreapi-products",
+  "selectors": {},
+  "target_fields": [
+    "title",
+    "highest_price",
+    "category",
+    "description",
+    "image_urls"
+  ],
+  "api_hints": {
+    "endpoint": "https://fakestoreapi.com/products",
+    "method": "GET",
+    "kind": "api",
+    "priority": 10,
+    "items_path": "",
+    "field_mapping": {
+      "title": "title",
+      "highest_price": "price",
+      "canonical_url": "id",
+      "category": "category",
+      "description": "description",
+      "image_urls": "image"
+    },
+    "params": {}
+  },
+  "pagination_hints": {
+    "type": "page",
+    "page_param": "page",
+    "start_page": 1,
+    "page_size_param": "limit",
+    "page_size": 50,
+    "max_pages": 1
+  },
+  "access_config": {
+    "mode": "public_api",
+    "login_required": false,
+    "captcha_bypass": false,
+    "headers_required": false
+  },
+  "rate_limits": {
+    "default": {
+      "delay_seconds": 0
+    }
+  },
+  "quality_expectations": {
+    "mode": "warn",
+    "min_items": 50,
+    "required_fields": {
+      "title": 0.95,
+      "highest_price": 0.95,
+      "category": 0.95,
+      "description": 0.8,
+      "image_urls": 0.8
+    },
+    "max_duplicate_rate": 0.05,
+    "max_failed_url_count": 0,
+    "currency": "USD",
+    "category": "catalog"
+  },
+  "training_notes": [
+    "Public product-like API profile with a small catalog.",
+    "Included to prove quality reports explain min_items gaps instead of hiding them.",
+    "No auth, cookies, private headers, proxy, or runtime site rules."
+  ],
+  "constraints": {
+    "max_items": 50
+  },
+  "crawl_preferences": {
+    "runtime": "native_static",
+    "parser": "json_profile",
+    "training_target": "real_public_api"
+  }
+}

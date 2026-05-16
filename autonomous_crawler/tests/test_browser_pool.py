@@ -17,7 +17,9 @@ from autonomous_crawler.runtime.browser_pool import (
     BrowserPoolConfig,
     BrowserPoolManager,
     BrowserProfile,
+    BrowserProfileHealth,
     BrowserProfileRotator,
+    WindowedHealthRecord,
 )
 
 
@@ -1170,6 +1172,645 @@ class NativeBrowserRuntimeProfileTests(unittest.TestCase):
         # Verify the context was created with the custom user agent
         call_args = mock_browser.new_context.call_args
         self.assertEqual(call_args[1]["user_agent"], "CustomBot/1.0")
+
+
+# ---------------------------------------------------------------------------
+# BrowserProfileHealth (SCRAPLING-HARDEN-2)
+# ---------------------------------------------------------------------------
+
+
+class BrowserProfileHealthTests(unittest.TestCase):
+    def test_defaults(self) -> None:
+        health = BrowserProfileHealth(profile_id="p1")
+        self.assertEqual(health.total_requests, 0)
+        self.assertEqual(health.success_count, 0)
+        self.assertEqual(health.failure_count, 0)
+        self.assertEqual(health.health_score, 1.0)  # unknown → healthy
+        self.assertEqual(health.success_rate, 1.0)
+
+    def test_record_success(self) -> None:
+        health = BrowserProfileHealth(profile_id="p1")
+        health.record(ok=True, elapsed_seconds=1.5)
+        self.assertEqual(health.total_requests, 1)
+        self.assertEqual(health.success_count, 1)
+        self.assertEqual(health.failure_count, 0)
+        self.assertEqual(health.health_score, 1.0)
+        self.assertAlmostEqual(health.avg_elapsed_seconds, 1.5)
+
+    def test_record_failure(self) -> None:
+        health = BrowserProfileHealth(profile_id="p1")
+        health.record(ok=False, elapsed_seconds=2.0, failure_category="http_blocked")
+        self.assertEqual(health.total_requests, 1)
+        self.assertEqual(health.success_count, 0)
+        self.assertEqual(health.failure_count, 1)
+        self.assertEqual(health.http_blocked_count, 1)
+        self.assertEqual(health.last_failure_category, "http_blocked")
+        self.assertLess(health.health_score, 1.0)
+
+    def test_record_timeout(self) -> None:
+        health = BrowserProfileHealth(profile_id="p1")
+        health.record(ok=False, elapsed_seconds=30.0, failure_category="navigation_timeout")
+        self.assertEqual(health.timeout_count, 1)
+        self.assertLess(health.health_score, 1.0)
+
+    def test_record_challenge(self) -> None:
+        health = BrowserProfileHealth(profile_id="p1")
+        health.record(ok=False, elapsed_seconds=5.0, failure_category="challenge_like")
+        self.assertEqual(health.challenge_count, 1)
+        self.assertLess(health.health_score, 1.0)
+
+    def test_health_score_penalties(self) -> None:
+        health = BrowserProfileHealth(profile_id="p1")
+        # 1 success, 1 timeout → success_rate=0.5, timeout_penalty=0.1
+        health.record(ok=True, elapsed_seconds=1.0)
+        health.record(ok=False, elapsed_seconds=30.0, failure_category="navigation_timeout")
+        score = health.health_score
+        self.assertAlmostEqual(health.success_rate, 0.5)
+        self.assertAlmostEqual(score, 0.5 - 0.1, places=2)
+
+    def test_health_score_penalty_cap(self) -> None:
+        health = BrowserProfileHealth(profile_id="p1")
+        # Many timeouts → penalty capped at 0.3
+        for _ in range(10):
+            health.record(ok=False, elapsed_seconds=30.0, failure_category="navigation_timeout")
+        # success_rate=0, timeout_penalty=1.0*0.1=1.0, but capped at 0.3
+        self.assertEqual(health.health_score, max(0.0, 0.0 - 0.3))
+
+    def test_avg_elapsed(self) -> None:
+        health = BrowserProfileHealth(profile_id="p1")
+        health.record(ok=True, elapsed_seconds=1.0)
+        health.record(ok=True, elapsed_seconds=3.0)
+        self.assertAlmostEqual(health.avg_elapsed_seconds, 2.0)
+
+    def test_to_dict(self) -> None:
+        health = BrowserProfileHealth(profile_id="p1")
+        health.record(ok=True, elapsed_seconds=1.0)
+        d = health.to_dict()
+        self.assertEqual(d["profile_id"], "p1")
+        self.assertEqual(d["total_requests"], 1)
+        self.assertEqual(d["success_count"], 1)
+        self.assertIn("health_score", d)
+        self.assertIn("success_rate", d)
+        self.assertIn("avg_elapsed_seconds", d)
+
+    def test_mixed_outcomes(self) -> None:
+        health = BrowserProfileHealth(profile_id="p1")
+        health.record(ok=True, elapsed_seconds=1.0)
+        health.record(ok=True, elapsed_seconds=1.0)
+        health.record(ok=False, elapsed_seconds=5.0, failure_category="challenge_like")
+        health.record(ok=True, elapsed_seconds=1.0)
+        self.assertEqual(health.total_requests, 4)
+        self.assertEqual(health.success_count, 3)
+        self.assertEqual(health.challenge_count, 1)
+        self.assertAlmostEqual(health.success_rate, 0.75)
+
+
+# ---------------------------------------------------------------------------
+# BrowserProfileRotator - health-aware selection (SCRAPLING-HARDEN-2)
+# ---------------------------------------------------------------------------
+
+
+class BrowserProfileRotatorHealthTests(unittest.TestCase):
+    def test_update_health_tracks_outcomes(self) -> None:
+        rotator = BrowserProfileRotator([
+            BrowserProfile(profile_id="p1"),
+            BrowserProfile(profile_id="p2"),
+        ])
+        rotator.update_health("p1", ok=True, elapsed_seconds=1.0)
+        rotator.update_health("p1", ok=False, elapsed_seconds=5.0, failure_category="http_blocked")
+        health = rotator.get_health("p1")
+        self.assertEqual(health.total_requests, 2)
+        self.assertEqual(health.success_count, 1)
+        self.assertEqual(health.http_blocked_count, 1)
+
+    def test_healthiest_strategy_picks_best(self) -> None:
+        rotator = BrowserProfileRotator([
+            BrowserProfile(profile_id="weak"),
+            BrowserProfile(profile_id="strong"),
+        ])
+        # Make "weak" unhealthy
+        for _ in range(5):
+            rotator.update_health("weak", ok=False, elapsed_seconds=30.0, failure_category="navigation_timeout")
+        # "strong" stays healthy (no updates → default 1.0)
+        best = rotator.next_profile(strategy="healthiest")
+        self.assertEqual(best.profile_id, "strong")
+
+    def test_healthiest_strategy_all_healthy_picks_first(self) -> None:
+        p1 = BrowserProfile(profile_id="p1")
+        p2 = BrowserProfile(profile_id="p2")
+        rotator = BrowserProfileRotator([p1, p2])
+        # Both at default 1.0 → picks first
+        best = rotator.next_profile(strategy="healthiest")
+        self.assertEqual(best.profile_id, "p1")
+
+    def test_healthiest_after_recovery(self) -> None:
+        rotator = BrowserProfileRotator([
+            BrowserProfile(profile_id="p1"),
+            BrowserProfile(profile_id="p2"),
+        ])
+        # p1 starts bad, p2 also gets failures (challenges hurt more)
+        rotator.update_health("p1", ok=False, elapsed_seconds=30.0, failure_category="navigation_timeout")
+        rotator.update_health("p2", ok=False, elapsed_seconds=5.0, failure_category="challenge_like")
+        rotator.update_health("p2", ok=False, elapsed_seconds=5.0, failure_category="challenge_like")
+        # p2 is worse (challenge penalty > timeout penalty)
+        best = rotator.next_profile(strategy="healthiest")
+        self.assertEqual(best.profile_id, "p1")
+        # p2 recovers
+        for _ in range(10):
+            rotator.update_health("p2", ok=True, elapsed_seconds=1.0)
+        best = rotator.next_profile(strategy="healthiest")
+        self.assertEqual(best.profile_id, "p2")
+
+    def test_to_safe_dict_includes_health(self) -> None:
+        rotator = BrowserProfileRotator([
+            BrowserProfile(profile_id="p1"),
+        ])
+        rotator.update_health("p1", ok=True, elapsed_seconds=1.0)
+        safe = rotator.to_safe_dict()
+        self.assertIn("health", safe)
+        self.assertIn("p1", safe["health"])
+        self.assertEqual(safe["health"]["p1"]["total_requests"], 1)
+
+    def test_get_health_creates_on_demand(self) -> None:
+        rotator = BrowserProfileRotator([BrowserProfile(profile_id="p1")])
+        health = rotator.get_health("p1")
+        self.assertEqual(health.total_requests, 0)
+        self.assertEqual(health.health_score, 1.0)
+
+    def test_default_strategy_is_round_robin(self) -> None:
+        rotator = BrowserProfileRotator([
+            BrowserProfile(profile_id="p1"),
+            BrowserProfile(profile_id="p2"),
+        ])
+        self.assertEqual(rotator.next_profile().profile_id, "p1")
+        self.assertEqual(rotator.next_profile().profile_id, "p2")
+        self.assertEqual(rotator.next_profile().profile_id, "p1")  # wraps
+
+
+# ---------------------------------------------------------------------------
+# NativeBrowserRuntime profile health in engine_result (SCRAPLING-HARDEN-2)
+# ---------------------------------------------------------------------------
+
+
+class NativeBrowserRuntimeProfileHealthTests(unittest.TestCase):
+    @patch("autonomous_crawler.runtime.native_browser.sync_playwright")
+    def test_health_update_on_success(self, mock_pw_cls: MagicMock) -> None:
+        from autonomous_crawler.runtime.native_browser import NativeBrowserRuntime
+        from autonomous_crawler.runtime.models import RuntimeRequest
+
+        mock_page = MagicMock()
+        mock_page.url = "https://example.com"
+        mock_page.content.return_value = "<html>ok</html>"
+        mock_nav = MagicMock()
+        mock_nav.status = 200
+        mock_nav.headers = {"content-type": "text/html"}
+        mock_page.goto.return_value = mock_nav
+
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
+        mock_context.cookies.return_value = []
+        mock_browser = MagicMock()
+        mock_browser.new_context.return_value = mock_context
+        mock_pw = MagicMock()
+        mock_pw.chromium.launch.return_value = mock_browser
+        mock_pw_cls.return_value.__enter__ = MagicMock(return_value=mock_pw)
+        mock_pw_cls.return_value.__exit__ = MagicMock(return_value=False)
+
+        rotator = BrowserProfileRotator([
+            BrowserProfile(profile_id="p1"),
+        ])
+        runtime = NativeBrowserRuntime(rotator=rotator)
+        request = RuntimeRequest.from_dict({"url": "https://example.com"})
+        response = runtime.render(request)
+
+        self.assertTrue(response.ok)
+        hu = response.engine_result["profile_health_update"]
+        self.assertIsNotNone(hu)
+        self.assertEqual(hu["profile_id"], "p1")
+        self.assertEqual(hu["total_requests"], 1)
+        self.assertEqual(hu["success_count"], 1)
+        self.assertEqual(hu["health_score"], 1.0)
+
+    @patch("autonomous_crawler.runtime.native_browser.sync_playwright")
+    def test_health_update_on_failure(self, mock_pw_cls: MagicMock) -> None:
+        from autonomous_crawler.runtime.native_browser import NativeBrowserRuntime
+        from autonomous_crawler.runtime.models import RuntimeRequest
+
+        mock_page = MagicMock()
+        mock_page.goto.side_effect = TimeoutError("navigation timeout")
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
+        mock_browser = MagicMock()
+        mock_browser.new_context.return_value = mock_context
+        mock_pw = MagicMock()
+        mock_pw.chromium.launch.return_value = mock_browser
+        mock_pw_cls.return_value.__enter__ = MagicMock(return_value=mock_pw)
+        mock_pw_cls.return_value.__exit__ = MagicMock(return_value=False)
+
+        rotator = BrowserProfileRotator([
+            BrowserProfile(profile_id="p1"),
+        ])
+        runtime = NativeBrowserRuntime(rotator=rotator)
+        request = RuntimeRequest.from_dict({"url": "https://example.com"})
+        response = runtime.render(request)
+
+        self.assertFalse(response.ok)
+        hu = response.engine_result["profile_health_update"]
+        self.assertIsNotNone(hu)
+        self.assertEqual(hu["profile_id"], "p1")
+        self.assertEqual(hu["total_requests"], 1)
+        self.assertEqual(hu["failure_count"], 1)
+        self.assertEqual(hu["timeout_count"], 1)
+        self.assertLess(hu["health_score"], 1.0)
+
+    @patch("autonomous_crawler.runtime.native_browser.sync_playwright")
+    def test_health_accumulates_across_requests(self, mock_pw_cls: MagicMock) -> None:
+        from autonomous_crawler.runtime.native_browser import NativeBrowserRuntime
+        from autonomous_crawler.runtime.models import RuntimeRequest
+
+        mock_page = MagicMock()
+        mock_page.url = "https://example.com"
+        mock_page.content.return_value = "<html>ok</html>"
+        mock_nav = MagicMock()
+        mock_nav.status = 200
+        mock_nav.headers = {"content-type": "text/html"}
+        mock_page.goto.return_value = mock_nav
+
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
+        mock_context.cookies.return_value = []
+        mock_browser = MagicMock()
+        mock_browser.new_context.return_value = mock_context
+        mock_pw = MagicMock()
+        mock_pw.chromium.launch.return_value = mock_browser
+        mock_pw_cls.return_value.__enter__ = MagicMock(return_value=mock_pw)
+        mock_pw_cls.return_value.__exit__ = MagicMock(return_value=False)
+
+        rotator = BrowserProfileRotator([
+            BrowserProfile(profile_id="p1"),
+        ])
+        runtime = NativeBrowserRuntime(rotator=rotator)
+        request = RuntimeRequest.from_dict({"url": "https://example.com"})
+
+        r1 = runtime.render(request)
+        r2 = runtime.render(request)
+
+        hu = r2.engine_result["profile_health_update"]
+        self.assertEqual(hu["total_requests"], 2)
+        self.assertEqual(hu["success_count"], 2)
+
+    @patch("autonomous_crawler.runtime.native_browser.sync_playwright")
+    def test_no_rotator_no_health_update(self, mock_pw_cls: MagicMock) -> None:
+        from autonomous_crawler.runtime.native_browser import NativeBrowserRuntime
+        from autonomous_crawler.runtime.models import RuntimeRequest
+
+        mock_page = MagicMock()
+        mock_page.url = "https://example.com"
+        mock_page.content.return_value = "<html>ok</html>"
+        mock_nav = MagicMock()
+        mock_nav.status = 200
+        mock_nav.headers = {"content-type": "text/html"}
+        mock_page.goto.return_value = mock_nav
+
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
+        mock_context.cookies.return_value = []
+        mock_browser = MagicMock()
+        mock_browser.new_context.return_value = mock_context
+        mock_pw = MagicMock()
+        mock_pw.chromium.launch.return_value = mock_browser
+        mock_pw_cls.return_value.__enter__ = MagicMock(return_value=mock_pw)
+        mock_pw_cls.return_value.__exit__ = MagicMock(return_value=False)
+
+        runtime = NativeBrowserRuntime()
+        request = RuntimeRequest.from_dict({"url": "https://example.com"})
+        response = runtime.render(request)
+
+        self.assertTrue(response.ok)
+        self.assertIsNone(response.engine_result["profile_health_update"])
+
+    @patch("autonomous_crawler.runtime.native_browser.sync_playwright")
+    def test_health_update_emits_runtime_event(self, mock_pw_cls: MagicMock) -> None:
+        from autonomous_crawler.runtime.native_browser import NativeBrowserRuntime
+        from autonomous_crawler.runtime.models import RuntimeRequest
+
+        mock_page = MagicMock()
+        mock_page.url = "https://example.com"
+        mock_page.content.return_value = "<html>ok</html>"
+        mock_nav = MagicMock()
+        mock_nav.status = 200
+        mock_nav.headers = {"content-type": "text/html"}
+        mock_page.goto.return_value = mock_nav
+
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
+        mock_context.cookies.return_value = []
+        mock_browser = MagicMock()
+        mock_browser.new_context.return_value = mock_context
+        mock_pw = MagicMock()
+        mock_pw.chromium.launch.return_value = mock_browser
+        mock_pw_cls.return_value.__enter__ = MagicMock(return_value=mock_pw)
+        mock_pw_cls.return_value.__exit__ = MagicMock(return_value=False)
+
+        rotator = BrowserProfileRotator([BrowserProfile(profile_id="p1")])
+        runtime = NativeBrowserRuntime(rotator=rotator)
+        request = RuntimeRequest.from_dict({"url": "https://example.com"})
+        response = runtime.render(request)
+
+        health_events = [e for e in response.runtime_events if e.type == "profile_health_update"]
+        self.assertEqual(len(health_events), 1)
+        self.assertEqual(health_events[0].data["profile_id"], "p1")
+
+    @patch("autonomous_crawler.runtime.native_browser.sync_playwright")
+    def test_rotator_to_safe_dict_includes_health(self, mock_pw_cls: MagicMock) -> None:
+        from autonomous_crawler.runtime.native_browser import NativeBrowserRuntime
+        from autonomous_crawler.runtime.models import RuntimeRequest
+
+        mock_page = MagicMock()
+        mock_page.url = "https://example.com"
+        mock_page.content.return_value = "<html>ok</html>"
+        mock_nav = MagicMock()
+        mock_nav.status = 200
+        mock_nav.headers = {"content-type": "text/html"}
+        mock_page.goto.return_value = mock_nav
+
+        mock_context = MagicMock()
+        mock_context.new_page.return_value = mock_page
+        mock_context.cookies.return_value = []
+        mock_browser = MagicMock()
+        mock_browser.new_context.return_value = mock_context
+        mock_pw = MagicMock()
+        mock_pw.chromium.launch.return_value = mock_browser
+        mock_pw_cls.return_value.__enter__ = MagicMock(return_value=mock_pw)
+        mock_pw_cls.return_value.__exit__ = MagicMock(return_value=False)
+
+        rotator = BrowserProfileRotator([BrowserProfile(profile_id="p1")])
+        runtime = NativeBrowserRuntime(rotator=rotator)
+        request = RuntimeRequest.from_dict({"url": "https://example.com"})
+        response = runtime.render(request)
+
+        rotator_dict = response.engine_result["rotator"]
+        self.assertIn("health", rotator_dict)
+        self.assertIn("p1", rotator_dict["health"])
+        self.assertEqual(rotator_dict["health"]["p1"]["total_requests"], 1)
+
+
+# ---------------------------------------------------------------------------
+# Windowed / Decay scoring (BROWSER-HARDEN-2)
+# ---------------------------------------------------------------------------
+
+
+class WindowedHealthScoringTests(unittest.TestCase):
+    """Tests for windowed/decay health scoring."""
+
+    def test_windowed_score_uses_recent_records(self) -> None:
+        health = BrowserProfileHealth(profile_id="p1", window_seconds=10.0)
+        # Record some outcomes
+        health.record(ok=True, elapsed_seconds=1.0)
+        health.record(ok=True, elapsed_seconds=1.0)
+        health.record(ok=False, elapsed_seconds=30.0, failure_category="navigation_timeout")
+        # All records are recent → windowed score uses all 3
+        self.assertEqual(health.windowed_request_count, 3)
+        self.assertEqual(health.total_requests, 3)
+        # Score should reflect the 1 timeout out of 3
+        self.assertLess(health.health_score, 1.0)
+
+    def test_windowed_score_ignores_old_records(self) -> None:
+        import time
+        health = BrowserProfileHealth(profile_id="p1", window_seconds=1.0)
+        # Manually insert old records
+        health._records.append(WindowedHealthRecord(
+            timestamp=time.time() - 10.0, ok=False, elapsed_seconds=30.0,
+            failure_category="navigation_timeout",
+        ))
+        health._records.append(WindowedHealthRecord(
+            timestamp=time.time() - 10.0, ok=False, elapsed_seconds=5.0,
+            failure_category="challenge_like",
+        ))
+        # Old records are outside window → windowed score should be 1.0
+        self.assertEqual(health.windowed_request_count, 0)
+        self.assertEqual(health.health_score, 1.0)
+
+    def test_decay_allows_recovery(self) -> None:
+        import time
+        health = BrowserProfileHealth(profile_id="p1", window_seconds=1.0)
+        # Old failures
+        for _ in range(5):
+            health._records.append(WindowedHealthRecord(
+                timestamp=time.time() - 10.0, ok=False, elapsed_seconds=30.0,
+                failure_category="navigation_timeout",
+            ))
+        # New successes
+        for _ in range(3):
+            health.record(ok=True, elapsed_seconds=1.0)
+        # Only the 3 new successes count in windowed score
+        self.assertEqual(health.windowed_request_count, 3)
+        self.assertEqual(health.health_score, 1.0)
+
+    def test_cumulative_counters_unaffected_by_window(self) -> None:
+        import time
+        health = BrowserProfileHealth(profile_id="p1", window_seconds=1.0)
+        health._records.append(WindowedHealthRecord(
+            timestamp=time.time() - 10.0, ok=False, elapsed_seconds=30.0,
+            failure_category="navigation_timeout",
+        ))
+        health.record(ok=True, elapsed_seconds=1.0)
+        # Cumulative counts all records (via record() calls)
+        self.assertEqual(health.total_requests, 1)  # only 1 via record()
+        self.assertEqual(health.success_count, 1)
+
+    def test_to_dict_includes_window_fields(self) -> None:
+        health = BrowserProfileHealth(profile_id="p1", window_seconds=600.0)
+        health.record(ok=True, elapsed_seconds=1.0)
+        d = health.to_dict()
+        self.assertIn("window_seconds", d)
+        self.assertIn("windowed_request_count", d)
+        self.assertEqual(d["window_seconds"], 600.0)
+        self.assertEqual(d["windowed_request_count"], 1)
+
+    def test_windowed_score_with_mixed_failures(self) -> None:
+        health = BrowserProfileHealth(profile_id="p1", window_seconds=300.0)
+        health.record(ok=True, elapsed_seconds=1.0)
+        health.record(ok=True, elapsed_seconds=1.0)
+        health.record(ok=False, elapsed_seconds=30.0, failure_category="navigation_timeout")
+        health.record(ok=False, elapsed_seconds=5.0, failure_category="challenge_like")
+        health.record(ok=False, elapsed_seconds=2.0, failure_category="http_blocked")
+        # 2 success / 5 total = 0.4 base
+        # timeout_penalty = 0.1, challenge_penalty = 0.15, blocked_penalty = 0.05
+        # score = 0.4 - 0.1 - 0.15 - 0.05 = 0.1
+        self.assertAlmostEqual(health.health_score, 0.1, places=2)
+
+
+# ---------------------------------------------------------------------------
+# Health Summary (BROWSER-HARDEN-2)
+# ---------------------------------------------------------------------------
+
+
+class HealthSummaryTests(unittest.TestCase):
+    """Tests for health_summary() output."""
+
+    def test_summary_structure(self) -> None:
+        health = BrowserProfileHealth(profile_id="p1", window_seconds=300.0)
+        health.record(ok=True, elapsed_seconds=1.0)
+        health.record(ok=False, elapsed_seconds=30.0, failure_category="navigation_timeout")
+        summary = health.health_summary()
+        self.assertEqual(summary["profile_id"], "p1")
+        self.assertIn("health_score", summary)
+        self.assertIn("cumulative", summary)
+        self.assertIn("windowed", summary)
+        self.assertEqual(summary["cumulative"]["total_requests"], 2)
+        self.assertEqual(summary["windowed"]["request_count"], 2)
+        self.assertEqual(summary["windowed"]["success_count"], 1)
+        self.assertIn("navigation_timeout", summary["windowed"]["failure_breakdown"])
+
+    def test_summary_empty_health(self) -> None:
+        health = BrowserProfileHealth(profile_id="p1")
+        summary = health.health_summary()
+        self.assertEqual(summary["health_score"], 1.0)
+        self.assertEqual(summary["cumulative"]["total_requests"], 0)
+        self.assertEqual(summary["windowed"]["request_count"], 0)
+        self.assertEqual(summary["windowed"]["failure_breakdown"], {})
+
+    def test_summary_failure_breakdown(self) -> None:
+        health = BrowserProfileHealth(profile_id="p1", window_seconds=300.0)
+        health.record(ok=False, elapsed_seconds=30.0, failure_category="navigation_timeout")
+        health.record(ok=False, elapsed_seconds=30.0, failure_category="navigation_timeout")
+        health.record(ok=False, elapsed_seconds=5.0, failure_category="challenge_like")
+        summary = health.health_summary()
+        breakdown = summary["windowed"]["failure_breakdown"]
+        self.assertEqual(breakdown["navigation_timeout"], 2)
+        self.assertEqual(breakdown["challenge_like"], 1)
+
+
+# ---------------------------------------------------------------------------
+# Rotator health_summaries (BROWSER-HARDEN-2)
+# ---------------------------------------------------------------------------
+
+
+class RotatorHealthSummaryTests(unittest.TestCase):
+    """Tests for BrowserProfileRotator.health_summaries()."""
+
+    def test_health_summaries_returns_all_profiles(self) -> None:
+        rotator = BrowserProfileRotator([
+            BrowserProfile(profile_id="p1"),
+            BrowserProfile(profile_id="p2"),
+        ])
+        rotator.update_health("p1", ok=True, elapsed_seconds=1.0)
+        rotator.update_health("p2", ok=False, elapsed_seconds=30.0, failure_category="navigation_timeout")
+        summaries = rotator.health_summaries()
+        self.assertIn("p1", summaries)
+        self.assertIn("p2", summaries)
+        self.assertEqual(summaries["p1"]["profile_id"], "p1")
+        self.assertEqual(summaries["p2"]["profile_id"], "p2")
+
+    def test_health_summaries_in_to_safe_dict(self) -> None:
+        rotator = BrowserProfileRotator([BrowserProfile(profile_id="p1")])
+        rotator.update_health("p1", ok=True, elapsed_seconds=1.0)
+        d = rotator.to_safe_dict()
+        self.assertIn("health_summaries", d)
+        self.assertIn("p1", d["health_summaries"])
+
+
+# ---------------------------------------------------------------------------
+# Persistence adapter (BROWSER-HARDEN-2)
+# ---------------------------------------------------------------------------
+
+
+class HealthStoreTests(unittest.TestCase):
+    """Tests for BrowserProfileHealthStore persistence."""
+
+    def test_save_and_load(self) -> None:
+        import tempfile
+        from autonomous_crawler.runtime.browser_pool import BrowserProfileHealthStore
+        with tempfile.TemporaryDirectory() as tmpdir:
+            store = BrowserProfileHealthStore(tmpdir)
+            health = BrowserProfileHealth(profile_id="p1", window_seconds=300.0)
+            health.record(ok=True, elapsed_seconds=1.0)
+            health.record(ok=False, elapsed_seconds=30.0, failure_category="navigation_timeout")
+            store.save(health)
+
+            loaded = store.load("p1")
+            self.assertIsNotNone(loaded)
+            self.assertEqual(loaded.profile_id, "p1")
+            self.assertEqual(loaded.total_requests, 2)
+            self.assertEqual(loaded.success_count, 1)
+            self.assertEqual(loaded.window_seconds, 300.0)
+
+    def test_load_restores_windowed_records(self) -> None:
+        import tempfile
+        from autonomous_crawler.runtime.browser_pool import BrowserProfileHealthStore
+        with tempfile.TemporaryDirectory() as tmpdir:
+            store = BrowserProfileHealthStore(tmpdir)
+            health = BrowserProfileHealth(profile_id="p1", window_seconds=300.0)
+            health.record(ok=True, elapsed_seconds=1.0)
+            health.record(ok=False, elapsed_seconds=5.0, failure_category="challenge_like")
+            store.save(health)
+
+            loaded = store.load("p1")
+            self.assertEqual(loaded.windowed_request_count, 2)
+            self.assertEqual(loaded.health_score, health.health_score)
+
+    def test_load_nonexistent_returns_none(self) -> None:
+        import tempfile
+        from autonomous_crawler.runtime.browser_pool import BrowserProfileHealthStore
+        with tempfile.TemporaryDirectory() as tmpdir:
+            store = BrowserProfileHealthStore(tmpdir)
+            self.assertIsNone(store.load("nonexistent"))
+
+    def test_save_all_load_all(self) -> None:
+        import tempfile
+        from autonomous_crawler.runtime.browser_pool import BrowserProfileHealthStore
+        with tempfile.TemporaryDirectory() as tmpdir:
+            store = BrowserProfileHealthStore(tmpdir)
+            h1 = BrowserProfileHealth(profile_id="p1")
+            h1.record(ok=True, elapsed_seconds=1.0)
+            h2 = BrowserProfileHealth(profile_id="p2")
+            h2.record(ok=False, elapsed_seconds=30.0, failure_category="navigation_timeout")
+            store.save_all({"p1": h1, "p2": h2})
+
+            loaded = store.load_all()
+            self.assertEqual(len(loaded), 2)
+            self.assertIn("p1", loaded)
+            self.assertIn("p2", loaded)
+
+    def test_roundtrip_preserves_health_score(self) -> None:
+        import tempfile
+        from autonomous_crawler.runtime.browser_pool import BrowserProfileHealthStore
+        with tempfile.TemporaryDirectory() as tmpdir:
+            store = BrowserProfileHealthStore(tmpdir)
+            health = BrowserProfileHealth(profile_id="p1", window_seconds=600.0)
+            for _ in range(3):
+                health.record(ok=True, elapsed_seconds=1.0)
+            health.record(ok=False, elapsed_seconds=5.0, failure_category="challenge_like")
+            original_score = health.health_score
+
+            store.save(health)
+            loaded = store.load("p1")
+            self.assertAlmostEqual(loaded.health_score, original_score, places=3)
+
+    def test_from_persistable_dict(self) -> None:
+        from autonomous_crawler.runtime.browser_pool import BrowserProfileHealth
+        data = {
+            "profile_id": "test",
+            "total_requests": 5,
+            "success_count": 3,
+            "failure_count": 2,
+            "timeout_count": 1,
+            "challenge_count": 1,
+            "http_blocked_count": 0,
+            "total_elapsed_seconds": 50.0,
+            "last_failure_category": "challenge_like",
+            "window_seconds": 600.0,
+            "_records": [
+                {"t": 1000.0, "ok": True, "e": 1.0, "f": "none"},
+                {"t": 1001.0, "ok": False, "e": 5.0, "f": "challenge_like"},
+            ],
+        }
+        health = BrowserProfileHealth.from_persistable_dict(data)
+        self.assertEqual(health.profile_id, "test")
+        self.assertEqual(health.total_requests, 5)
+        self.assertEqual(health.window_seconds, 600.0)
+        self.assertEqual(len(health._records), 2)
 
 
 if __name__ == "__main__":

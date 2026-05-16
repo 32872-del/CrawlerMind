@@ -11,6 +11,156 @@ import httpx
 from .site_zoo import API_LIST_JSON
 
 
+# ---------------------------------------------------------------------------
+# GraphQL mock fixtures (training / testing)
+# ---------------------------------------------------------------------------
+
+_GRAPHQL_COUNTRIES: dict[str, Any] = {
+    "data": {
+        "countries": [
+            {"code": "CN", "name": "China", "capital": "Beijing", "continent": {"name": "Asia", "code": "AS"}},
+            {"code": "US", "name": "United States", "capital": "Washington D.C.", "continent": {"name": "North America", "code": "NA"}},
+            {"code": "GB", "name": "United Kingdom", "capital": "London", "continent": {"name": "Europe", "code": "EU"}},
+        ]
+    }
+}
+
+_GRAPHQL_CHARACTERS_PAGE: dict[str, list[dict[str, Any]]] = {
+    "": [
+        {
+            "id": "1",
+            "name": "Character Alpha",
+            "status": "Alive",
+            "species": "Human",
+            "origin": {"name": "Earth", "dimension": "C-137"},
+            "episode": [
+                {"id": "e1", "name": "Pilot", "episode": "S01E01"},
+                {"id": "e2", "name": "Lawnmower Dog", "episode": "S01E02"},
+            ],
+        },
+        {
+            "id": "2",
+            "name": "Character Beta",
+            "status": "Dead",
+            "species": "Alien",
+            "origin": {"name": "Gazorpazorp", "dimension": "C-35"},
+            "episode": [
+                {"id": "e3", "name": "Anatomy Park", "episode": "S01E03"},
+            ],
+        },
+    ],
+    "cursor_page2": [
+        {
+            "id": "3",
+            "name": "Character Gamma",
+            "status": "Alive",
+            "species": "Robot",
+            "origin": {"name": "Earth", "dimension": "C-137"},
+            "episode": [
+                {"id": "e4", "name": "M. Night Shaym-Aliens!", "episode": "S01E04"},
+                {"id": "e5", "name": "Meeseeks and Destroy", "episode": "S01E05"},
+                {"id": "e6", "name": "Rick Potion #9", "episode": "S01E06"},
+            ],
+        },
+        {
+            "id": "4",
+            "name": "Character Delta",
+            "status": "Alive",
+            "species": "Human",
+            "origin": {"name": "Dimension C-500A", "dimension": "C-500A"},
+            "episode": [],
+        },
+    ],
+}
+
+_GRAPHQL_CHARACTERS_PAGE_INFO: dict[str, dict[str, Any]] = {
+    "": {"hasNextPage": True, "endCursor": "cursor_page2"},
+    "cursor_page2": {"hasNextPage": False, "endCursor": None},
+}
+
+_GRAPHQL_ERROR_RESPONSE: dict[str, Any] = {
+    "errors": [
+        {
+            "message": "Cannot query field 'nonexistent' on type 'Query'.",
+            "locations": [{"line": 1, "column": 9}],
+            "path": ["nonexistent"],
+            "extensions": {"code": "GRAPHQL_VALIDATION_FAILED"},
+        }
+    ]
+}
+
+_GRAPHQL_RATE_LIMIT_RESPONSE: dict[str, Any] = {
+    "data": None,
+    "errors": [
+        {
+            "message": "API rate limit exceeded. Please wait before retrying.",
+            "extensions": {
+                "code": "RATE_LIMITED",
+                "retryAfter": 30,
+                "limit": 100,
+                "remaining": 0,
+            },
+        }
+    ],
+}
+
+
+def build_graphql_nested_fields_query() -> str:
+    """Return a sample GraphQL query with nested fields (training fixture)."""
+    return """
+    query GetCharacters($page: Int) {
+        characters(page: $page) {
+            results {
+                id
+                name
+                status
+                species
+                origin {
+                    name
+                    dimension
+                }
+                episode {
+                    id
+                    name
+                    episode
+                }
+            }
+        }
+    }
+    """
+
+
+def build_graphql_cursor_query() -> str:
+    """Return a sample Relay-style cursor pagination query (training fixture)."""
+    return """
+    query GetCharactersCursor($after: String) {
+        characters(after: $after, first: 2) {
+            pageInfo {
+                hasNextPage
+                endCursor
+            }
+            edges {
+                node {
+                    id
+                    name
+                    status
+                    species
+                    origin {
+                        name
+                        dimension
+                    }
+                    episode {
+                        id
+                        name
+                        episode
+                    }
+                }
+            }
+        }
+    }
+    """
+
+
 _TRACKING_URL_PATTERNS = (
     "google-analytics", "googletagmanager", "analytics.google",
     "telemetry", "/collect", "/pixel", "/beacon", "/metrics",
@@ -138,20 +288,10 @@ def fetch_graphql_api(
     headers: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     """POST a GraphQL query and return the decoded JSON response."""
-    if url == "mock://api/graphql-countries":
-        return {
-            "ok": True,
-            "url": url,
-            "data": {
-                "data": {
-                    "countries": [
-                        {"code": "CN", "name": "China", "capital": "Beijing"},
-                        {"code": "US", "name": "United States", "capital": "Washington D.C."},
-                    ]
-                }
-            },
-            "status_code": 200,
-        }
+    # Mock GraphQL endpoints for training
+    mock_result = _mock_graphql_response(url, query, variables)
+    if mock_result is not None:
+        return mock_result
 
     merged_headers = {
         "Accept": "application/json",
@@ -172,6 +312,59 @@ def fetch_graphql_api(
             "data": response.json(),
             "status_code": response.status_code,
         }
+
+
+def _mock_graphql_response(
+    url: str,
+    query: str,
+    variables: dict[str, Any] | None = None,
+) -> dict[str, Any] | None:
+    """Return a deterministic mock GraphQL response, or None if not a mock URL."""
+    variables = variables or {}
+
+    # Countries (nested fields, simple)
+    if url == "mock://api/graphql-countries":
+        return {"ok": True, "url": url, "data": _GRAPHQL_COUNTRIES, "status_code": 200}
+
+    # Characters with nested fields + episodes
+    if url == "mock://api/graphql-nested":
+        return {"ok": True, "url": url, "data": {"data": {"characters": {"results": [
+            {
+                "id": "1", "name": "Nested Alpha", "status": "Alive", "species": "Human",
+                "origin": {"name": "Earth", "dimension": "C-137"},
+                "episode": [
+                    {"id": "e1", "name": "Pilot", "episode": "S01E01"},
+                    {"id": "e2", "name": "Lawnmower Dog", "episode": "S01E02"},
+                ],
+            },
+            {
+                "id": "2", "name": "Nested Beta", "status": "Dead", "species": "Alien",
+                "origin": {"name": "Gazorpazorp", "dimension": "C-35"},
+                "episode": [{"id": "e3", "name": "Anatomy Park", "episode": "S01E03"}],
+            },
+        ]}}}, "status_code": 200}
+
+    # Cursor-paginated GraphQL (Relay-style)
+    if url == "mock://api/graphql-paginated":
+        cursor = variables.get("after") or ""
+        page_items = _GRAPHQL_CHARACTERS_PAGE.get(cursor, [])
+        page_info = _GRAPHQL_CHARACTERS_PAGE_INFO.get(cursor, {"hasNextPage": False, "endCursor": None})
+        edges = [{"node": item} for item in page_items]
+        return {
+            "ok": True, "url": url,
+            "data": {"data": {"characters": {"pageInfo": page_info, "edges": edges}}},
+            "status_code": 200,
+        }
+
+    # Error response
+    if url == "mock://api/graphql-error":
+        return {"ok": True, "url": url, "data": _GRAPHQL_ERROR_RESPONSE, "status_code": 200}
+
+    # Rate-limited response (simulates 429)
+    if url == "mock://api/graphql-rate-limited":
+        return {"ok": False, "url": url, "data": _GRAPHQL_RATE_LIMIT_RESPONSE, "status_code": 429}
+
+    return None
 
 
 def extract_records_from_json(data: Any) -> list[dict[str, Any]]:
@@ -395,6 +588,86 @@ _EMPTY_AFTER_FIRST: dict[int, list[dict[str, Any]]] = {
     1: [{"title": "First Only", "id": "f1"}],
 }
 
+# ---------------------------------------------------------------------------
+# 50+ record pagination fixtures (training / stress)
+# ---------------------------------------------------------------------------
+
+_ITEM_NAMES = [
+    "Laptop", "Phone", "Tablet", "Monitor", "Keyboard", "Mouse", "Headset",
+    "Speaker", "Webcam", "Printer", "Scanner", "Router", "Switch", "Hub",
+    "Cable", "Adapter", "Charger", "Battery", "Case", "Stand", "Dock",
+    "Drive", "SSD", "RAM", "GPU", "CPU", "Motherboard", "PSU", "Fan",
+    "Cooler", "Microphone", "Amplifier", "Receiver", "Antenna", "Remote",
+    "Sensor", "Camera", "Lens", "Tripod", "Flash", "Filter", "Bag",
+    "Strap", "Mount", "Arm", "Light", "Panel", "Board", "Chip", "Module",
+    "Connector", "Relay", "Fuse", "Wire", "Plug",
+]
+
+_GQL_NAMES = [
+    "Rick", "Morty", "Summer", "Beth", "Jerry", "Birdperson", "Squanchy",
+    "Mr. Meeseeks", "Evil Morty", "Unity", "Tammy", "Abradolf Lincler",
+    "Krombopulos Michael", "Scary Terry", "Noob Noob", "Gearhead",
+    "Revolver Ocelot", "Phoenixperson", "Supernova", "Crocubot",
+    "Arthricia", "Frank Palicky", "Scroopy Noopers", "King Jellybean",
+    "Photography Raptor", "Pencilvester", "Tinkles", "Sleepy Gary",
+    "Hamurai", "Amish Cyborg", "Reverse Giraffe", "Mr. Poopybutthole",
+    "Gene Vagina", "Principal Vagina", "Dr. Xenon Bloom", "Revolio Clockberg",
+    "Squanch", "Brad", "Nancy", "Joyce", "Ethan", "Logan",
+    "Counselor Rick", "Doofus Rick", "Cop Rick", "Cowboy Rick",
+    "Tiny Rick", "Pickle Rick", "Toxic Rick", "Cool Rick",
+    "Theta Rick", "Morty Jr.", "Gazorpazorpfield", "Roy",
+]
+
+
+def _generate_page_products(page: int, page_size: int = 10) -> list[dict[str, Any]]:
+    """Generate a page of products (0-indexed page)."""
+    start = page * page_size
+    return [
+        {"id": f"p{start + i}", "title": f"{_ITEM_NAMES[(start + i) % len(_ITEM_NAMES)]} {start + i}", "price": round(9.99 + (start + i) * 3.14, 2)}
+        for i in range(page_size)
+        if start + i < len(_ITEM_NAMES)
+    ]
+
+
+def _generate_offset_products(offset: int, limit: int) -> list[dict[str, Any]]:
+    """Generate a slice of products for offset pagination."""
+    return [
+        {"id": f"o{offset + i}", "title": f"{_ITEM_NAMES[(offset + i) % len(_ITEM_NAMES)]} v2 #{offset + i}", "price": round(19.99 + (offset + i) * 2.71, 2)}
+        for i in range(limit)
+        if offset + i < len(_ITEM_NAMES)
+    ]
+
+
+def _generate_cursor_products(cursor: str) -> tuple[list[dict[str, Any]], str | None]:
+    """Generate items for cursor pagination. Returns (items, next_cursor)."""
+    page_map = {
+        "": 0, "ckpt_10": 1, "ckpt_20": 2, "ckpt_30": 3, "ckpt_40": 4,
+    }
+    next_map: dict[str, str | None] = {
+        "": "ckpt_10", "ckpt_10": "ckpt_20", "ckpt_20": "ckpt_30",
+        "ckpt_30": "ckpt_40", "ckpt_40": None,
+    }
+    page_idx = page_map.get(cursor, 0)
+    start = page_idx * 10
+    items = [
+        {"id": f"c{start + i}", "title": f"{_GQL_NAMES[(start + i) % len(_GQL_NAMES)]} #{start + i}", "score": (start + i) * 10}
+        for i in range(10)
+        if start + i < len(_GQL_NAMES)
+    ]
+    return items, next_map.get(cursor)
+
+
+# 50+ page-based data: 6 pages of 10 = 60 items (last page has 4)
+_PAGED_PRODUCTS_50: dict[int, list[dict[str, Any]]] = {
+    p: _generate_page_products(p) for p in range(6)
+}
+
+# 50+ offset-based data: 60 items total
+_OFFSET_PRODUCTS_50: list[dict[str, Any]] = [
+    {"id": f"o{i}", "title": f"{_ITEM_NAMES[i % len(_ITEM_NAMES)]} v2 #{i}", "price": round(19.99 + i * 2.71, 2)}
+    for i in range(min(60, len(_ITEM_NAMES)))
+]
+
 
 def _mock_paged_response(url: str) -> dict[str, Any] | None:
     """Return a deterministic mock paginated response, or None if not a mock URL."""
@@ -485,6 +758,42 @@ def _mock_paged_response(url: str) -> dict[str, Any] | None:
         data = {"items": items, "page": page, "total_pages": total_pages}
         if next_page is not None:
             data["next_page"] = next_page
+        return {"ok": True, "url": url, "data": data, "status_code": 200}
+
+    # 50+ page-based: mock://api/paged-products-50?page=N (60 items, 6 pages)
+    if host == "api" and path == "/paged-products-50":
+        page = int(_param("page", "1"))
+        zero_idx = page - 1
+        items = _PAGED_PRODUCTS_50.get(zero_idx, [])
+        total_pages = len(_PAGED_PRODUCTS_50)
+        next_page = page + 1 if page < total_pages else None
+        total = sum(len(v) for v in _PAGED_PRODUCTS_50.values())
+        data = {"items": items, "page": page, "total_pages": total_pages, "total": total}
+        if next_page is not None:
+            data["next_page"] = next_page
+        return {"ok": True, "url": url, "data": data, "status_code": 200}
+
+    # 50+ offset-based: mock://api/offset-products-50?offset=N&limit=10
+    if host == "api" and path == "/offset-products-50":
+        offset = int(_param("offset", "0"))
+        limit = int(_param("limit", "10"))
+        sliced = _OFFSET_PRODUCTS_50[offset: offset + limit]
+        total = len(_OFFSET_PRODUCTS_50)
+        next_offset = offset + limit if offset + limit < total else None
+        data = {"items": sliced, "offset": offset, "limit": limit, "total": total}
+        if next_offset is not None:
+            data["next_offset"] = next_offset
+        return {"ok": True, "url": url, "data": data, "status_code": 200}
+
+    # 50+ cursor-based: mock://api/cursor-products-50?cursor=X (60 items, 5 pages)
+    if host == "api" and path == "/cursor-products-50":
+        cursor = _param("cursor", "")
+        items, next_cursor = _generate_cursor_products(cursor)
+        data: dict[str, Any] = {"items": items}
+        if next_cursor is not None:
+            data["next_cursor"] = next_cursor
+        if cursor:
+            data["cursor"] = cursor
         return {"ok": True, "url": url, "data": data, "status_code": 200}
 
     return None

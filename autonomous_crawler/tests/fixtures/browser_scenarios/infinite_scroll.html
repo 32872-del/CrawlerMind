@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Infinite Scroll Fixture</title>
+<style>
+  body { font-family: sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+  .item { background: #fff; margin: 10px 0; padding: 16px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .item h3 { margin: 0 0 8px; }
+  .item p { margin: 0; color: #666; }
+  .sentinel { height: 1px; }
+  #status { text-align: center; padding: 20px; color: #999; }
+</style>
+</head>
+<body>
+<h1>Infinite Scroll Training Fixture</h1>
+<div id="item-container"></div>
+<div id="sentinel" class="sentinel"></div>
+<div id="status">Loading...</div>
+<pre id="__training_state" style="display:none"></pre>
+
+<script>
+(function() {
+  const container = document.getElementById('item-container');
+  const sentinel = document.getElementById('sentinel');
+  const status = document.getElementById('status');
+  let page = 0;
+  const PAGE_SIZE = 10;
+  const MAX_PAGES = 5;
+  let loading = false;
+
+  // Expose scroll event tracking
+  window.__scroll_events = [];
+  window.__rendered_count = 0;
+  window.__total_pages = 0;
+
+  function generateItems(pageNum) {
+    const items = [];
+    for (let i = 0; i < PAGE_SIZE; i++) {
+      const idx = pageNum * PAGE_SIZE + i;
+      items.push({
+        id: idx,
+        title: 'Item ' + idx,
+        description: 'Auto-generated item for scroll training, batch ' + pageNum,
+        category: idx % 3 === 0 ? 'featured' : 'standard',
+      });
+    }
+    return items;
+  }
+
+  function syncState() {
+    var el = document.getElementById('__training_state');
+    if (el) {
+      el.textContent = JSON.stringify({
+        scroll_events: window.__scroll_events,
+        rendered_count: window.__rendered_count,
+        total_pages: window.__total_pages
+      });
+    }
+  }
+
+  function renderItems(items) {
+    items.forEach(function(item) {
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.setAttribute('data-item-id', item.id);
+      div.innerHTML = '<h3>' + item.title + '</h3><p>' + item.description + '</p><span class="category">' + item.category + '</span>';
+      container.appendChild(div);
+    });
+    window.__rendered_count = container.children.length;
+    window.__total_pages = page;
+    syncState();
+  }
+
+  function loadNext() {
+    if (loading || page >= MAX_PAGES) return;
+    loading = true;
+    status.textContent = 'Loading page ' + (page + 1) + '...';
+
+    // Simulate async load
+    setTimeout(function() {
+      var items = generateItems(page);
+      renderItems(items);
+      page++;
+      loading = false;
+      window.__scroll_events.push({ type: 'page_loaded', page: page, timestamp: Date.now() });
+      if (page >= MAX_PAGES) {
+        status.textContent = 'All ' + (PAGE_SIZE * MAX_PAGES) + ' items loaded.';
+      } else {
+        status.textContent = 'Scroll for more...';
+      }
+    }, 100);
+  }
+
+  // IntersectionObserver for sentinel
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          window.__scroll_events.push({ type: 'sentinel_visible', page: page, timestamp: Date.now() });
+          loadNext();
+        }
+      });
+    }, { rootMargin: '200px' });
+    observer.observe(sentinel);
+  } else {
+    // Fallback: scroll event
+    window.addEventListener('scroll', function() {
+      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
+        window.__scroll_events.push({ type: 'scroll_bottom', page: page, timestamp: Date.now() });
+        loadNext();
+      }
+    });
+  }
+
+  // Initial load
+  loadNext();
+})();
+</script>
+</body>
+</html>

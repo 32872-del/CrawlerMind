@@ -7,6 +7,7 @@ runtime backend owned by CLM. It does not import or call Scrapling.
 from __future__ import annotations
 
 import re
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -23,7 +24,7 @@ from autonomous_crawler.tools.proxy_trace import redact_error_message
 from autonomous_crawler.tools.session_profile import redact_storage_state_path
 from autonomous_crawler.tools.visual_recon import analyze_runtime_artifacts
 
-from .browser_pool import BrowserContextLease, BrowserPoolManager, BrowserProfile, BrowserProfileRotator
+from .browser_pool import BrowserContextLease, BrowserPoolManager, BrowserProfile, BrowserProfileHealth, BrowserProfileRotator
 from .models import (
     RuntimeArtifact,
     RuntimeEvent,
@@ -130,6 +131,8 @@ class NativeBrowserRuntime:
             self._pw_cm = None
 
     def render(self, request: RuntimeRequest) -> RuntimeResponse:
+        start_time = time.time()
+
         # Apply profile rotation if configured
         active_profile: BrowserProfile | None = None
         if self._rotator is not None:
@@ -361,12 +364,35 @@ class NativeBrowserRuntime:
                 if not use_pool:
                     cm.__exit__(None, None, None)
         except Exception as exc:
+            elapsed = time.time() - start_time
             if pool_lease is not None and self._pool:
                 self._pool.mark_failed(pool_id, error=str(exc))
                 events.append(RuntimeEvent(
                     type="pool_mark_failed",
                     message=f"marked pool context failed for {pool_id}",
                     data={"pool_id": pool_id, "error": str(exc)[:200]},
+                ))
+            # Update profile health on error
+            health_update: dict[str, Any] | None = None
+            if self._rotator is not None and active_profile is not None:
+                failure = _classify_browser_failure(
+                    error=f"{type(exc).__name__}: {exc}",
+                    status_code=0,
+                    html="",
+                    headers={},
+                    proxy_selected=proxy_trace.selected,
+                )
+                self._rotator.update_health(
+                    active_profile.profile_id,
+                    ok=False,
+                    elapsed_seconds=elapsed,
+                    failure_category=failure.get("category", "unknown"),
+                )
+                health_update = self._rotator.get_health(active_profile.profile_id).to_dict()
+                events.append(RuntimeEvent(
+                    type="profile_health_update",
+                    message=f"health updated for {active_profile.profile_id} (error)",
+                    data=health_update,
                 ))
             failure = _classify_browser_failure(
                 error=f"{type(exc).__name__}: {exc}",
@@ -395,8 +421,10 @@ class NativeBrowserRuntime:
                 failure_classification=failure,
                 events=events,
                 proxy_trace=proxy_trace,
+                profile_health_update=health_update,
             )
 
+        elapsed = time.time() - start_time
         failure_classification = _classify_browser_failure(
             error="",
             status_code=status_code,
@@ -404,6 +432,24 @@ class NativeBrowserRuntime:
             headers=headers,
             proxy_selected=proxy_trace.selected,
         )
+
+        # Update profile health if rotator is active
+        health_update: dict[str, Any] | None = None
+        if self._rotator is not None and active_profile is not None:
+            render_ok = (status_code == 0 or 200 <= status_code < 400) and failure_classification["category"] == "none"
+            self._rotator.update_health(
+                active_profile.profile_id,
+                ok=render_ok,
+                elapsed_seconds=elapsed,
+                failure_category=failure_classification.get("category", "none"),
+            )
+            health_update = self._rotator.get_health(active_profile.profile_id).to_dict()
+            events.append(RuntimeEvent(
+                type="profile_health_update",
+                message=f"health updated for {active_profile.profile_id}",
+                data=health_update,
+            ))
+
         events.append(RuntimeEvent(
             type="browser_render_complete",
             message="native browser render completed",
@@ -450,6 +496,7 @@ class NativeBrowserRuntime:
                 "profile": active_profile.to_safe_dict() if active_profile else None,
                 "profile_id": active_profile.profile_id if active_profile else None,
                 "rotator": self._rotator.to_safe_dict() if self._rotator else None,
+                "profile_health_update": health_update,
             },
         )
 
@@ -823,6 +870,7 @@ def _browser_failure_response(
     failure_classification: dict[str, Any],
     events: list[RuntimeEvent],
     proxy_trace: RuntimeProxyTrace,
+    profile_health_update: dict[str, Any] | None = None,
 ) -> RuntimeResponse:
     return RuntimeResponse(
         ok=False,
@@ -838,6 +886,7 @@ def _browser_failure_response(
             "config": config.to_safe_dict(),
             "fingerprint_report": fingerprint_report,
             "failure_classification": failure_classification,
+            "profile_health_update": profile_health_update,
         },
     )
 

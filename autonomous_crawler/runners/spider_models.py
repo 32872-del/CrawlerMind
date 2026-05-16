@@ -342,6 +342,18 @@ class SpiderRunSummary:
     frontier_stats: dict[str, int] = field(default_factory=dict)
     events: list[RuntimeEvent] = field(default_factory=list)
 
+    # Async/proxy/backpressure metrics (backward compatible — all default to 0)
+    proxy_attempts_total: int = 0
+    proxy_failures: int = 0
+    proxy_successes: int = 0
+    proxy_retries: int = 0
+    backpressure_events: int = 0
+    pool_acquired_events: int = 0
+    pool_released_events: int = 0
+    async_fetch_ok: int = 0
+    async_fetch_fail: int = 0
+    max_concurrency_per_domain: dict[str, int] = field(default_factory=dict)
+
     def __post_init__(self) -> None:
         if not str(self.run_id or "").strip():
             raise ValueError("run_id is required")
@@ -363,9 +375,71 @@ class SpiderRunSummary:
         if result.failure_bucket:
             self.failure_buckets[result.failure_bucket] = self.failure_buckets.get(result.failure_bucket, 0) + 1
         self.events.extend(result.runtime_events)
+        # Aggregate async/proxy/backpressure metrics from runtime events
+        self._aggregate_events(result.runtime_events, ok=result.ok)
 
     def add_event(self, event_type: str, message: str = "", **data: Any) -> None:
         self.events.append(RuntimeEvent(type=event_type, message=message, data=dict(data)))
+
+    def _aggregate_events(self, events: list[RuntimeEvent], *, ok: bool) -> None:
+        """Update async/proxy/backpressure counters from a list of events."""
+        for event in events:
+            if event.type == "proxy_attempt":
+                self.proxy_attempts_total += 1
+            elif event.type == "proxy_failure_recorded":
+                self.proxy_failures += 1
+            elif event.type == "proxy_success_recorded":
+                self.proxy_successes += 1
+            elif event.type == "proxy_retry":
+                self.proxy_retries += 1
+            elif event.type == "pool_backpressure":
+                self.backpressure_events += 1
+            elif event.type == "pool_acquired":
+                self.pool_acquired_events += 1
+                domain = event.data.get("domain", "")
+                if domain:
+                    active = event.data.get("active_per_domain", 0)
+                    self.max_concurrency_per_domain[domain] = max(
+                        self.max_concurrency_per_domain.get(domain, 0), active
+                    )
+            elif event.type == "pool_released":
+                self.pool_released_events += 1
+        if ok:
+            self.async_fetch_ok += 1
+        else:
+            self.async_fetch_fail += 1
+
+    def aggregate_async_metrics(self, responses: list[Any]) -> None:
+        """Aggregate async/proxy/backpressure metrics from RuntimeResponse objects."""
+        for resp in responses:
+            events = getattr(resp, "runtime_events", []) or []
+            for event in events:
+                if event.type == "proxy_attempt":
+                    self.proxy_attempts_total += 1
+                elif event.type == "proxy_failure_recorded":
+                    self.proxy_failures += 1
+                elif event.type == "proxy_success_recorded":
+                    self.proxy_successes += 1
+                elif event.type == "proxy_retry":
+                    self.proxy_retries += 1
+                elif event.type == "pool_backpressure":
+                    self.backpressure_events += 1
+                elif event.type == "pool_acquired":
+                    self.pool_acquired_events += 1
+                    domain = event.data.get("domain", "")
+                    if domain:
+                        active = event.data.get("active_per_domain", 0)
+                        self.max_concurrency_per_domain[domain] = max(
+                            self.max_concurrency_per_domain.get(domain, 0), active
+                        )
+                elif event.type == "pool_released":
+                    self.pool_released_events += 1
+
+            ok = getattr(resp, "ok", False)
+            if ok:
+                self.async_fetch_ok += 1
+            else:
+                self.async_fetch_fail += 1
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -388,6 +462,16 @@ class SpiderRunSummary:
             "failure_buckets": dict(self.failure_buckets),
             "frontier_stats": dict(self.frontier_stats),
             "events": [event.to_dict() for event in self.events],
+            "proxy_attempts_total": self.proxy_attempts_total,
+            "proxy_failures": self.proxy_failures,
+            "proxy_successes": self.proxy_successes,
+            "proxy_retries": self.proxy_retries,
+            "backpressure_events": self.backpressure_events,
+            "pool_acquired_events": self.pool_acquired_events,
+            "pool_released_events": self.pool_released_events,
+            "async_fetch_ok": self.async_fetch_ok,
+            "async_fetch_fail": self.async_fetch_fail,
+            "max_concurrency_per_domain": dict(self.max_concurrency_per_domain),
         }
 
 

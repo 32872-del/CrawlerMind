@@ -73,6 +73,27 @@ class SiteProfile:
             "crawl_preferences": dict(self.crawl_preferences),
         }
 
+    def pagination_type(self) -> str:
+        """Return the declared pagination mode, if any.
+
+        Supported profile values are intentionally data-only: `dom_links`,
+        `page`, `offset`, and `cursor`. Unknown values are passed through so
+        callers can decide whether to ignore or reject them.
+        """
+        return str(self.pagination_hints.get("type") or self.pagination_hints.get("mode") or "").strip().lower()
+
+    def api_items_path(self) -> str:
+        return str(
+            self.api_hints.get("items_path")
+            or self.api_hints.get("records_path")
+            or self.api_hints.get("data_path")
+            or ""
+        ).strip()
+
+    def api_field_mapping(self) -> dict[str, Any]:
+        mapping = self.api_hints.get("field_mapping") or self.api_hints.get("fields") or {}
+        return dict(mapping) if isinstance(mapping, dict) else {}
+
     def apply_to_state(self, state: dict[str, Any]) -> dict[str, Any]:
         recon = dict(state.get("recon_report") or {})
         constraints = dict(recon.get("constraints") or {})
@@ -114,4 +135,3 @@ def load_site_profile(path: str | Path) -> SiteProfile:
 
 def _safe_dict(value: Any) -> dict[str, Any]:
     return dict(value) if isinstance(value, dict) else {}
-

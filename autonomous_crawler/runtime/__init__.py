@@ -15,7 +15,7 @@ from .models import (
     RuntimeSelectorResult,
 )
 from .adaptive_parser import AdaptiveMatch, ElementSignature, build_element_signature, find_similar, relocate, similarity_score
-from .browser_pool import BrowserContextLease, BrowserPoolConfig, BrowserPoolManager, BrowserProfile, BrowserProfileRotator
+from .browser_pool import BrowserContextLease, BrowserPoolConfig, BrowserPoolManager, BrowserProfile, BrowserProfileHealth, BrowserProfileHealthStore, BrowserProfileRotator
 from .native_async import AsyncFetchMetrics, DomainConcurrencyPool, NativeAsyncFetchRuntime
 from .native_browser import NativeBrowserRuntime
 from .native_static import NativeFetchRuntime
@@ -31,6 +31,8 @@ __all__ = [
     "BrowserPoolConfig",
     "BrowserPoolManager",
     "BrowserProfile",
+    "BrowserProfileHealth",
+    "BrowserProfileHealthStore",
     "BrowserProfileRotator",
     "BrowserRuntime",
     "AdaptiveMatch",

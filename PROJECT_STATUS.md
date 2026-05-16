@@ -305,6 +305,62 @@ architecture.
     points.
   - next work is large-run proof, real-site hardening, and simpler operation,
     not more wrapper work.
+- SCRAPLING-HARDEN round 1/2 accepted on 2026-05-15:
+  - Browser profile health scoring and browser scenario training are accepted.
+    Deterministic fixtures now cover infinite scroll, virtualized lists, and
+    mobile viewport behavior.
+  - API/GraphQL training is accepted. Fixture coverage includes nested
+    GraphQL, cursor pagination, error/rate-limit responses, page/offset/cursor
+    API pagination with 50+ records, and reverse replay-risk evidence.
+  - Native long-run metrics are accepted. `SpiderRunSummary` now carries
+    async/proxy/backpressure/concurrency counters, and 1,000 URL stress plus
+    checkpoint roundtrip passed.
+  - Profile ecommerce training is accepted. DOM, API pagination, and mixed
+    SSR/hydration profiles produced 135 deterministic product records with
+    quality summaries.
+  - Real-site scenario matrix is preserved at
+    `docs/team/training/2026-05-15_REAL_SITE_SCENARIO_MATRIX.md`.
+- REAL/SCALE/REVERSE/PROFILE hardening closeout accepted on 2026-05-15:
+  - Real public dynamic browser training produced usable evidence for Vue.js
+    examples, React.dev Learn, and TanStack Virtual. One React Virtuoso target
+    failed because the URL returned 404; the failure is preserved as evidence,
+    not hidden.
+  - Browser profile health now supports windowed decay/recovery, per-profile
+    summaries, and JSON persistence through `BrowserProfileHealthStore`.
+  - Native scale stress passed 10,000 URLs in 4.522 seconds with 10,000
+    successes, 0 failures, proxy retry metrics, checkpoint roundtrip, and no
+    credential leak in the smoke output. Earlier 1,000 and 30,000 smoke
+    artifacts are preserved under `dev_logs/smoke/`.
+  - JS hook/sandbox planning is now a CLM-native advisory capability. It
+    identifies signature/token/encryption/timestamp/nonce clues, hook targets,
+    sandbox targets, dynamic inputs, replay steps, risk levels, and blockers.
+  - Profile ecommerce training now has report-first quality gates for
+    `min_items`, required fields, duplicate rate, and failed URL count.
+  - Real public product-like profile training against DummyJSON collected 75
+    records with `quality_gate.passed=true`; deterministic profile fixtures
+    collected 135 records across DOM, API pagination, and mixed SSR/hydration
+    profiles.
+- BACKEND EXECUTION AUTOMATION hardening accepted on 2026-05-15:
+  - `profile_draft.py` converts browser/API/recon evidence into reusable
+    `SiteProfile` drafts. Generated drafts now preserve observed seed URLs in
+    `crawl_preferences.seed_urls`, so they are not just loadable but can
+    produce executable initial requests.
+  - `replay_executor.py` executes deterministic replay fixtures from
+    `HookSandboxPlan` outputs, including dynamic inputs, hook outputs, sandbox
+    stubs, final request previews, step results, and credential redaction.
+  - `profile_report.py` emits stable `profile-run-report/v1` payloads with run
+    metrics, quality gate state, samples, failures, and next-action hints.
+  - 30k pause/resume checkpoint restart evidence now merges phase-1 and
+    phase-2 summaries into the final checkpoint instead of reporting only the
+    resumed phase.
+  - Profile draft smoke: 10/10 loadable, 10/10 runner compatible,
+    `total_initial_requests=10`.
+  - Replay executor training: 9/9 scenarios passed with no credential leak.
+  - Scale resume smoke: 30,000 processed, 30,000 unique URLs, 0 duplicates,
+    0 failed, `final_ckpt_succeeded=30000`.
+  - Real profile batch: 168 product-like records across DummyJSON, Platzi Fake
+    Store API, and FakeStoreAPI; two targets passed and one warn-mode target
+    was accepted.
 - Supervisor/worker LLM team workspace added under `docs/team/`, including
   badges, assignments, acceptance protocol, accepted-work records, and new LLM
   onboarding.
@@ -685,8 +741,31 @@ architecture.
 
 ```text
 python -m unittest discover -s autonomous_crawler/tests
-Ran 1773 tests in 75.809s
+Ran 2062 tests in 84.067s
 OK (skipped=5)
+```
+
+Latest backend execution automation hardening closeout on 2026-05-15:
+
+```text
+python -m unittest discover -s autonomous_crawler/tests
+Ran 2062 tests in 84.067s
+OK (skipped=5)
+
+python run_profile_draft_training_2026_05_15.py
+Loadable: 10/10, runner compatible: 10/10, total_initial_requests: 10
+
+python run_replay_executor_training_2026_05_15.py
+9 scenarios, 9 passed, credential leak none
+
+python run_scale_resume_2026_05_15.py --count 30000
+Total processed: 30000, Unique URLs: 30000, Duplicates: 0, Failed: 0, final_ckpt_succeeded: 30000
+
+python run_profile_real_batch_2026_05_15.py
+accepted=true, total_real_records=168
+
+python -m compileall autonomous_crawler clm.py run_simple.py run_browser_scenario_training_2026_05_15.py run_native_longrun_stress_2026_05_15.py run_profile_training_2026_05_15.py run_real_ecommerce_profile_training_2026_05_15.py run_api_graphql_training_2026_05_15.py run_browser_profile_health_smoke_2026_05_15.py run_profile_draft_training_2026_05_15.py run_replay_executor_training_2026_05_15.py run_scale_resume_2026_05_15.py run_profile_real_batch_2026_05_15.py -q
+OK
 ```
 
 Latest Scrapling absorption baseline closeout on 2026-05-15:
@@ -991,8 +1070,8 @@ OK
 - Scrapling absorption is no longer only a transition-adapter track. The major
   backend capability baseline is now CLM-native. Remaining work is production
   hardening: 10k/30k native long-run proof, persistent async client pooling,
-  browser profile health scoring, richer run metrics, and more real-site
-  calibration.
+  browser profile health persistence/decay, adaptive concurrency, and more
+  real-site calibration.
 - Recon selector inference is heuristic and currently strongest for product
   cards and Baidu-style ranking lists.
 - `site_spec_draft` detail selectors are drafts when only a list page is known.
@@ -1043,20 +1122,24 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
 Current supervisor priority:
 
 ```text
-SCRAPLING-HARDEN: prove the native backend baseline at scale and simplify operation.
+EXECUTION-HARDEN: connect profile drafts, replay execution, and checkpoint restart to real long-running crawl execution.
 ```
 
 Immediate steps:
 
-1. Run 10k/30k native long-run stress through `SpiderRuntimeProcessor`,
-   `CheckpointStore`, async fetch, and profile-driven callbacks.
-2. Run real dynamic/ecommerce profile training with browser profile rotation,
-   visual evidence, and checkpointed product output.
-3. Carry async/proxy/browser-pool metrics into `SpiderRunSummary` and run
-   reports.
-4. Add persistent async client pooling, DNS reuse tuning, adaptive concurrency,
-   browser profile health scoring, and observed API pagination inside
-   profile-driven ecommerce runs.
+1. Add `REPLAY-RUNTIME-1`: real JS/WebCrypto sandbox execution behind the
+   accepted deterministic replay result contract.
+2. Add `PROFILE-AUTO-2`: advisor-assisted profile refinement, selector repair,
+   and missing-field explanation on top of generated `SiteProfile` drafts.
+3. Add `SCALE-RUNTIME-1`: connect resumable checkpoints to real
+   `URLFrontier`, `SpiderRuntimeProcessor`, and `ProductStore` long-running
+   jobs.
+4. Run `REAL-ECOM-2`: 600+ records through profile runner on public
+   ecommerce/API targets with profile-run reports.
+5. Continue runtime hardening: persistent async client pooling, DNS reuse,
+   adaptive concurrency, and profile health metrics in spider summaries.
+6. Continue visual hardening: real OCR provider adapter and screenshot-to-DOM
+   alignment.
 
 1. ~~Add error-path tests for HTTP failures, empty HTML, invalid selectors, and
    retry exhaustion.~~ Done 2026-05-06.

@@ -1,0 +1,74 @@
+{
+  "name": "real-platzi-fake-store-products",
+  "selectors": {},
+  "target_fields": [
+    "title",
+    "highest_price",
+    "category",
+    "description",
+    "image_urls"
+  ],
+  "api_hints": {
+    "endpoint": "https://api.escuelajs.co/api/v1/products",
+    "method": "GET",
+    "kind": "api",
+    "priority": 10,
+    "items_path": "",
+    "field_mapping": {
+      "title": "title",
+      "highest_price": "price",
+      "canonical_url": "id",
+      "category": "category.name",
+      "description": "description",
+      "image_urls": "images"
+    },
+    "params": {}
+  },
+  "pagination_hints": {
+    "type": "offset",
+    "offset_param": "offset",
+    "start_offset": 0,
+    "page_size_param": "limit",
+    "page_size": 50,
+    "max_pages": 2
+  },
+  "access_config": {
+    "mode": "public_api",
+    "login_required": false,
+    "captcha_bypass": false,
+    "headers_required": false
+  },
+  "rate_limits": {
+    "default": {
+      "delay_seconds": 0
+    }
+  },
+  "quality_expectations": {
+    "mode": "warn",
+    "min_items": 50,
+    "required_fields": {
+      "title": 0.95,
+      "highest_price": 0.95,
+      "category": 0.95,
+      "description": 0.8,
+      "image_urls": 0.8
+    },
+    "max_duplicate_rate": 0.05,
+    "max_failed_url_count": 0,
+    "currency": "USD",
+    "category": "catalog"
+  },
+  "training_notes": [
+    "Public product-like API profile for profile real batch training.",
+    "Uses offset/limit pagination and profile field mapping only.",
+    "No auth, cookies, private headers, proxy, or runtime site rules."
+  ],
+  "constraints": {
+    "max_items": 100
+  },
+  "crawl_preferences": {
+    "runtime": "native_static",
+    "parser": "json_profile",
+    "training_target": "real_public_api"
+  }
+}

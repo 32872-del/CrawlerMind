@@ -1,0 +1,871 @@
+{
+  "run_at": "2026-05-15T02:50:42.112624+00:00",
+  "purpose": "SCRAPLING-HARDEN-2B browser scenario training",
+  "use_profile_rotation": false,
+  "summary": {
+    "total": 7,
+    "ok": 6,
+    "failed": 1,
+    "checks_total": 12,
+    "checks_passed": 11
+  },
+  "results": [
+    {
+      "id": "infinite_scroll_fixture",
+      "name": "Infinite Scroll — Local Fixture",
+      "url": "",
+      "risk": "low",
+      "status": "ok",
+      "ok": true,
+      "elapsed_seconds": 0.715,
+      "final_url": "http://127.0.0.1:58005/infinite_scroll.html",
+      "status_code": 200,
+      "html_chars": 5391,
+      "selector_matches": {
+        "item": 10,
+        "item_title": 10,
+        "category": 10
+      },
+      "rendered_item_count": 50,
+      "total_items_in_dataset": 0,
+      "scroll_events": [
+        {
+          "type": "sentinel_visible",
+          "page": 0,
+          "timestamp": 1778813354553
+        },
+        {
+          "type": "page_loaded",
+          "page": 1,
+          "timestamp": 1778813354659
+        },
+        {
+          "type": "sentinel_visible",
+          "page": 1,
+          "timestamp": 1778813354754
+        },
+        {
+          "type": "page_loaded",
+          "page": 2,
+          "timestamp": 1778813354864
+        },
+        {
+          "type": "sentinel_visible",
+          "page": 2,
+          "timestamp": 1778813355156
+        },
+        {
+          "type": "page_loaded",
+          "page": 3,
+          "timestamp": 1778813355257
+        },
+        {
+          "type": "sentinel_visible",
+          "page": 3,
+          "timestamp": 1778813355558
+        },
+        {
+          "type": "page_loaded",
+          "page": 4,
+          "timestamp": 1778813355667
+        },
+        {
+          "type": "sentinel_visible",
+          "page": 4,
+          "timestamp": 1778813355965
+        },
+        {
+          "type": "page_loaded",
+          "page": 5,
+          "timestamp": 1778813356074
+        }
+      ],
+      "scroll_result": {
+        "scrolls": 8,
+        "reason": "completed"
+      },
+      "network_candidates": {
+        "resource_counts": {
+          "document": 1
+        },
+        "xhr_count": 0,
+        "captured_xhr": []
+      },
+      "viewport_info": null,
+      "ua_info": null,
+      "visible_range": null,
+      "profile_health": null,
+      "failure_classification": {
+        "category": "none",
+        "severity": "low",
+        "reason": "",
+        "status_code": 200,
+        "proxy_selected": false
+      },
+      "profile_evidence": {
+        "profile_id": null,
+        "profile": null
+      },
+      "engine": "native_browser",
+      "mode": "dynamic",
+      "session_mode": "ephemeral",
+      "error": "",
+      "expected_checks": {
+        "min_rendered_items": {
+          "expected": 20,
+          "actual": 50,
+          "pass": true
+        },
+        "min_scroll_events": {
+          "expected": 2,
+          "actual": 10,
+          "pass": true
+        }
+      }
+    },
+    {
+      "id": "virtualized_list_fixture",
+      "name": "Virtualized List — Local Fixture",
+      "url": "",
+      "risk": "low",
+      "status": "ok",
+      "ok": true,
+      "elapsed_seconds": 0.625,
+      "final_url": "http://127.0.0.1:58005/virtualized_list.html",
+      "status_code": 200,
+      "html_chars": 7006,
+      "selector_matches": {
+        "virtual_item": 13,
+        "item_price": 13
+      },
+      "rendered_item_count": 18,
+      "total_items_in_dataset": 10000,
+      "scroll_events": [
+        {
+          "type": "render",
+          "start": 0,
+          "end": 13,
+          "scrollTop": 0,
+          "timestamp": 1778813359545
+        },
+        {
+          "type": "render",
+          "start": 1,
+          "end": 20,
+          "scrollTop": 320,
+          "timestamp": 1778813359554
+        },
+        {
+          "type": "render",
+          "start": 7,
+          "end": 26,
+          "scrollTop": 640,
+          "timestamp": 1778813359719
+        },
+        {
+          "type": "render",
+          "start": 14,
+          "end": 33,
+          "scrollTop": 960,
+          "timestamp": 1778813359870
+        },
+        {
+          "type": "render",
+          "start": 20,
+          "end": 39,
+          "scrollTop": 1280,
+          "timestamp": 1778813360020
+        },
+        {
+          "type": "render",
+          "start": 27,
+          "end": 45,
+          "scrollTop": 1600,
+          "timestamp": 1778813360175
+        },
+        {
+          "type": "render",
+          "start": 33,
+          "end": 52,
+          "scrollTop": 1920,
+          "timestamp": 1778813360327
+        },
+        {
+          "type": "render",
+          "start": 39,
+          "end": 58,
+          "scrollTop": 2240,
+          "timestamp": 1778813360478
+        },
+        {
+          "type": "render",
+          "start": 46,
+          "end": 65,
+          "scrollTop": 2560,
+          "timestamp": 1778813360635
+        },
+        {
+          "type": "render",
+          "start": 52,
+          "end": 71,
+          "scrollTop": 2880,
+          "timestamp": 1778813360786
+        },
+        {
+          "type": "render",
+          "start": 59,
+          "end": 77,
+          "scrollTop": 3200,
+          "timestamp": 1778813360937
+        },
+        {
+          "type": "render",
+          "start": 65,
+          "end": 84,
+          "scrollTop": 3520,
+          "timestamp": 1778813361088
+        },
+        {
+          "type": "render",
+          "start": 71,
+          "end": 90,
+          "scrollTop": 3840,
+          "timestamp": 1778813361240
+        },
+        {
+          "type": "render",
+          "start": 78,
+          "end": 97,
+          "scrollTop": 4160,
+          "timestamp": 1778813361404
+        },
+        {
+          "type": "render",
+          "start": 84,
+          "end": 103,
+          "scrollTop": 4480,
+          "timestamp": 1778813361555
+        },
+        {
+          "type": "render",
+          "start": 91,
+          "end": 109,
+          "scrollTop": 4800,
+          "timestamp": 1778813361713
+        }
+      ],
+      "scroll_result": {
+        "scrolls": 15,
+        "reason": "completed"
+      },
+      "network_candidates": {
+        "resource_counts": {
+          "document": 1
+        },
+        "xhr_count": 0,
+        "captured_xhr": []
+      },
+      "viewport_info": null,
+      "ua_info": null,
+      "visible_range": {
+        "start": 0,
+        "end": 13
+      },
+      "profile_health": null,
+      "failure_classification": {
+        "category": "none",
+        "severity": "low",
+        "reason": "",
+        "status_code": 200,
+        "proxy_selected": false
+      },
+      "profile_evidence": {
+        "profile_id": null,
+        "profile": null
+      },
+      "engine": "native_browser",
+      "mode": "dynamic",
+      "session_mode": "ephemeral",
+      "error": "",
+      "expected_checks": {
+        "min_rendered_items": {
+          "expected": 5,
+          "actual": 18,
+          "pass": true
+        },
+        "min_scroll_events": {
+          "expected": 3,
+          "actual": 16,
+          "pass": true
+        }
+      }
+    },
+    {
+      "id": "mobile_viewport_fixture",
+      "name": "Mobile Viewport — Local Fixture",
+      "url": "",
+      "risk": "low",
+      "status": "ok",
+      "ok": true,
+      "elapsed_seconds": 0.562,
+      "final_url": "http://127.0.0.1:58005/mobile_viewport.html",
+      "status_code": 200,
+      "html_chars": 10140,
+      "selector_matches": {
+        "card": 8,
+        "card_title": 8,
+        "nav_item": 5
+      },
+      "rendered_item_count": 8,
+      "total_items_in_dataset": 0,
+      "scroll_events": [],
+      "scroll_result": null,
+      "network_candidates": {
+        "resource_counts": {
+          "document": 1
+        },
+        "xhr_count": 0,
+        "captured_xhr": []
+      },
+      "viewport_info": {
+        "width": 375,
+        "height": 812,
+        "devicePixelRatio": 1,
+        "orientation": "landscape-primary",
+        "touchSupport": false,
+        "maxTouchPoints": 0
+      },
+      "ua_info": {
+        "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+        "isMobile": true,
+        "isIOS": true,
+        "isAndroid": false,
+        "platform": "iPhone"
+      },
+      "visible_range": null,
+      "profile_health": null,
+      "failure_classification": {
+        "category": "none",
+        "severity": "low",
+        "reason": "",
+        "status_code": 200,
+        "proxy_selected": false
+      },
+      "profile_evidence": {
+        "profile_id": null,
+        "profile": null
+      },
+      "engine": "native_browser",
+      "mode": "dynamic",
+      "session_mode": "ephemeral",
+      "error": "",
+      "expected_checks": {
+        "min_rendered_items": {
+          "expected": 4,
+          "actual": 8,
+          "pass": true
+        }
+      }
+    },
+    {
+      "id": "react_virtuoso_demo",
+      "name": "React Virtuoso — Public Demo",
+      "url": "https://virtuoso.dev/infinite-scrolling/",
+      "risk": "low-public-demo",
+      "status": "failed",
+      "ok": false,
+      "elapsed_seconds": 38.008,
+      "final_url": "https://virtuoso.dev/infinite-scrolling/",
+      "status_code": 0,
+      "html_chars": 0,
+      "selector_matches": {},
+      "rendered_item_count": 0,
+      "total_items_in_dataset": 0,
+      "scroll_events": [],
+      "scroll_result": null,
+      "network_candidates": {
+        "resource_counts": {},
+        "xhr_count": 0,
+        "captured_xhr": []
+      },
+      "viewport_info": null,
+      "ua_info": null,
+      "visible_range": null,
+      "profile_health": null,
+      "failure_classification": {
+        "category": "navigation_timeout",
+        "severity": "medium",
+        "reason": "TimeoutError: Page.wait_for_selector: Timeout 30000ms exceeded.",
+        "status_code": 0,
+        "proxy_selected": false
+      },
+      "profile_evidence": {
+        "profile_id": null,
+        "profile": null
+      },
+      "engine": "native_browser",
+      "mode": "dynamic",
+      "session_mode": "ephemeral",
+      "error": "TimeoutError: Page.wait_for_selector: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-index]\")\n",
+      "expected_checks": {
+        "min_rendered_items": {
+          "expected": 3,
+          "actual": 0,
+          "pass": false
+        }
+      }
+    },
+    {
+      "id": "vue_examples_spa",
+      "name": "Vue.js Examples — SPA Doc Site",
+      "url": "https://vuejs.org/examples/",
+      "risk": "low-public-demo",
+      "status": "ok",
+      "ok": true,
+      "elapsed_seconds": 12.721,
+      "final_url": "https://vuejs.org/examples/#hello-world",
+      "status_code": 200,
+      "html_chars": 103744,
+      "selector_matches": {
+        "example_link": 57,
+        "sidebar_group": 3
+      },
+      "rendered_item_count": 57,
+      "total_items_in_dataset": 0,
+      "scroll_events": [],
+      "scroll_result": null,
+      "network_candidates": {
+        "resource_counts": {
+          "document": 1,
+          "stylesheet": 3,
+          "script": 21,
+          "font": 3,
+          "other": 18,
+          "image": 1
+        },
+        "xhr_count": 0,
+        "captured_xhr": []
+      },
+      "viewport_info": null,
+      "ua_info": null,
+      "visible_range": null,
+      "profile_health": null,
+      "failure_classification": {
+        "category": "none",
+        "severity": "low",
+        "reason": "",
+        "status_code": 200,
+        "proxy_selected": false
+      },
+      "profile_evidence": {
+        "profile_id": null,
+        "profile": null
+      },
+      "engine": "native_browser",
+      "mode": "dynamic",
+      "session_mode": "ephemeral",
+      "error": "",
+      "expected_checks": {
+        "min_rendered_items": {
+          "expected": 5,
+          "actual": 57,
+          "pass": true
+        },
+        "min_html_chars": {
+          "expected": 5000,
+          "actual": 103744,
+          "pass": true
+        }
+      }
+    },
+    {
+      "id": "react_learn_spa",
+      "name": "React.dev Learn — SPA Doc Site",
+      "url": "https://react.dev/learn",
+      "risk": "low-public-demo",
+      "status": "ok",
+      "ok": true,
+      "elapsed_seconds": 15.187,
+      "final_url": "https://react.dev/learn",
+      "status_code": 200,
+      "html_chars": 283638,
+      "selector_matches": {
+        "nav_link": 51,
+        "article": 1
+      },
+      "rendered_item_count": 51,
+      "total_items_in_dataset": 0,
+      "scroll_events": [],
+      "scroll_result": null,
+      "network_candidates": {
+        "resource_counts": {
+          "document": 2,
+          "script": 22,
+          "font": 9,
+          "stylesheet": 1,
+          "image": 1,
+          "fetch": 23,
+          "other": 4
+        },
+        "xhr_count": 23,
+        "captured_xhr": [
+          {
+            "url": "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/index.json",
+            "method": "GET",
+            "status_code": 200,
+            "content_type": "application/json",
+            "resource_type": "fetch",
+            "body_preview": "{\"pageProps\":{\"toc\":\"[]\",\"content\":\"[]\",\"meta\":{\"id\":\"home\",\"title\":\"React\",\"permalink\":\"index.html\"},\"languages\":null},\"__N_SSG\":true}",
+            "body_truncated": false,
+            "size_bytes": 135
+          },
+          {
+            "url": "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/versions.json?markdownPath=versions",
+            "method": "GET",
+            "status_code": 200,
+            "content_type": "application/json",
+            "resource_type": "fetch",
+            "body_preview": "{\"pageProps\":{\"toc\":\"[{\\\"url\\\":\\\"#\\\",\\\"text\\\":\\\"Overview\\\",\\\"depth\\\":2},{\\\"url\\\":\\\"#latest-version\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Latest version: 19.2 \\\"},{\\\"url\\\":\\\"#previous-versions\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Previous versions \\\"},{\\\"url\\\":\\\"#changelog\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Changelog \\\"},{\\\"url\\\":\\\"#react-19\\\",\\\"depth\\\":3,\\\"text\\\":\\\"React 19 \\\"},{\\\"url\\\":\\\"#react-18\\\",\\\"depth\\\":3,\\\"text\\\":\\\"React 18 \\\"},{\\\"url\\\":\\\"#react-17\\\",\\\"depth\\\":3,\\\"text\\\":\\\"React 17 \\\"},{\\\"url\\\":\\\"#react-16\\\",\\\"depth\\\":3,\\\"text\\\":\\\"React 16 \\\"},{\\\"url\\\":\\\"#react-15\\\",\\\"depth\\\":3,\\\"text\\\":\\\"React 15 \\\"},{\\\"url\\\":\\\"#react-14\\\",\\\"depth\\\":3,\\\"text\\\":\\\"React 0.14 \\\"},{\\\"url\\\":\\\"#react-13\\\",\\\"depth\\\":3,\\\"text\\\":\\\"React 0.13 \\\"},{\\\"url\\\":\\\"#react-12\\\",\\\"depth\\\":3,\\\"text\\\":\\\"React 0.12 \\\"},{\\\"url\\\":\\\"#react-11\\\",\\\"depth\\\":3,\\\"text\\\":\\\"React 0.11 \\\"},{\\\"url\\\":\\\"#react-10-and-below\\\",\\\"depth\\\":3,\\\"text\\\":\\\"React 0.10 and below \\\"},{\\\"url\\\":\\\"#initial-commit\\\",\\\"depth\\\":3,\\\"text\\\":\\\"Initial Commit \\\"}]\",\"content\":\"[[\\\"$r\\\",\\\"MaxWidth\\\",\\\"last\\\",{\\\"children\\\":[[\\\"$r\\\",\\\"Intro\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":[\\\"The React docs at \\\",[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"https://react.dev\\\",\\\"target\\\":\\\"_blank\\\",\\\"rel\\\":\\\"nofollow noopener noreferrer\\\",\\\"children\\\":\\\"react.dev\\\"}],\\\" provide documentation for the latest version of React.\\\"]}]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":[\\\"We aim to keep the docs updated within major versions, and do not publish versions for each minor or patch version. When a new major is released, we archive the docs for the previous version as \\\",[\\\"$r\\\",\\\"code\\\",null,{\\\"children\\\":\\\"x.react.dev\\\"}],\\\". See our \\\",[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"/community/versioning-policy\\\",\\\"children\\\":\\\"versioning policy\\\"}],\\\" for more info.\\\"]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":\\\"You can find an archive of previous major versions below.\\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"h2\\\",null,{\\\"id\\\":\\\"latest-version\\\",\\\"children\\\":\\\"Latest version: 19.2 \\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"ul\\\",null,",
+            "body_truncated": true,
+            "size_bytes": 59994
+          },
+          {
+            "url": "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/reference/react.json?markdownPath=reference&markdownPath=react",
+            "method": "GET",
+            "status_code": 200,
+            "content_type": "application/json",
+            "resource_type": "fetch",
+            "body_preview": "{\"pageProps\":{\"toc\":\"[{\\\"url\\\":\\\"#\\\",\\\"text\\\":\\\"Overview\\\",\\\"depth\\\":2},{\\\"url\\\":\\\"#react\\\",\\\"depth\\\":2,\\\"text\\\":\\\"React \\\"},{\\\"url\\\":\\\"#react-dom\\\",\\\"depth\\\":2,\\\"text\\\":\\\"React DOM \\\"},{\\\"url\\\":\\\"#react-compiler\\\",\\\"depth\\\":2,\\\"text\\\":\\\"React Compiler \\\"},{\\\"url\\\":\\\"#eslint-plugin-react-hooks\\\",\\\"depth\\\":2,\\\"text\\\":\\\"ESLint Plugin React Hooks \\\"},{\\\"url\\\":\\\"#rules-of-react\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Rules of React \\\"},{\\\"url\\\":\\\"#legacy-apis\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Legacy APIs \\\"}]\",\"content\":\"[[\\\"$r\\\",\\\"MaxWidth\\\",\\\"last\\\",{\\\"children\\\":[[\\\"$r\\\",\\\"Intro\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":[\\\"This section provides detailed reference documentation for working with React. For an introduction to React, please visit the \\\",[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"/learn\\\",\\\"children\\\":\\\"Learn\\\"}],\\\" section.\\\"]}]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":\\\"The React reference documentation is broken down into functional subsections:\\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"h2\\\",null,{\\\"id\\\":\\\"react\\\",\\\"children\\\":\\\"React \\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":\\\"Programmatic React features:\\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"ul\\\",null,{\\\"children\\\":[\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":[[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"/reference/react/hooks\\\",\\\"children\\\":\\\"Hooks\\\"}],\\\" - Use different React features from your components.\\\"]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":[[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"/reference/react/components\\\",\\\"children\\\":\\\"Components\\\"}],\\\" - Built-in components that you can use in your JSX.\\\"]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":[[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"/reference/react/apis\\\",\\\"children\\\":\\\"APIs\\\"}],\\\" - APIs that are useful for defining components.\\\"]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":[[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"/reference/rsc/directives\\\",\\\"children\\\":\\\"Directives\\\"}],\\\" - Provide instructions to bundlers compatible with React Server Components.\\\"]}],\\\"\\\\n\\\"]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"h2\\\",null,{\\\"id\\\":\\\"react-dom\\\",\\\"children\\\":\\\"Reac",
+            "body_truncated": true,
+            "size_bytes": 7021
+          },
+          {
+            "url": "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/community.json?markdownPath=community",
+            "method": "GET",
+            "status_code": 200,
+            "content_type": "application/json",
+            "resource_type": "fetch",
+            "body_preview": "{\"pageProps\":{\"toc\":\"[{\\\"url\\\":\\\"#\\\",\\\"text\\\":\\\"Overview\\\",\\\"depth\\\":2},{\\\"url\\\":\\\"#code-of-conduct\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Code of Conduct \\\"},{\\\"url\\\":\\\"#stack-overflow\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Stack Overflow \\\"},{\\\"url\\\":\\\"#popular-discussion-forums\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Popular Discussion Forums \\\"},{\\\"url\\\":\\\"#news\\\",\\\"depth\\\":2,\\\"text\\\":\\\"News \\\"}]\",\"content\":\"[[\\\"$r\\\",\\\"MaxWidth\\\",\\\"last\\\",{\\\"children\\\":[[\\\"$r\\\",\\\"Intro\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":\\\"React has a community of millions of developers. On this page we’ve listed some React-related communities that you can be a part of; see the other pages in this section for additional online and in-person learning materials.\\\"}]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"h2\\\",null,{\\\"id\\\":\\\"code-of-conduct\\\",\\\"children\\\":\\\"Code of Conduct \\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":[\\\"Before participating in React’s communities, \\\",[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"https://github.com/facebook/react/blob/main/CODE_OF_CONDUCT.md\\\",\\\"target\\\":\\\"_blank\\\",\\\"rel\\\":\\\"nofollow noopener noreferrer\\\",\\\"children\\\":\\\"please read our Code of Conduct.\\\"}],\\\" We have adopted the \\\",[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"https://www.contributor-covenant.org/\\\",\\\"target\\\":\\\"_blank\\\",\\\"rel\\\":\\\"nofollow noopener noreferrer\\\",\\\"children\\\":\\\"Contributor Covenant\\\"}],\\\" and we expect that all community members adhere to the guidelines within.\\\"]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"h2\\\",null,{\\\"id\\\":\\\"stack-overflow\\\",\\\"children\\\":\\\"Stack Overflow \\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":[\\\"Stack Overflow is a popular forum to ask code-level questions or if you’re stuck with a specific error. Read through the \\\",[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"https://stackoverflow.com/questions/tagged/reactjs\\\",\\\"target\\\":\\\"_blank\\\",\\\"rel\\\":\\\"nofollow noopener noreferrer\\\",\\\"children\\\":\\\"existing questions\\\"}],\\\" tagged with \\\",[\\\"$r\\\",\\\"strong\\\",null,{\\\"children\\\":\\\"reactjs\\\"}],\\\" or \\\",[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"https://stackoverflow.com/questions/ask?tags=rea",
+            "body_truncated": true,
+            "size_bytes": 4318
+          },
+          {
+            "url": "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/community/translations.json?markdownPath=community&markdownPath=translations",
+            "method": "GET",
+            "status_code": 200,
+            "content_type": "application/json",
+            "resource_type": "fetch",
+            "body_preview": "{\"pageProps\":{\"toc\":\"[{\\\"url\\\":\\\"#\\\",\\\"text\\\":\\\"Overview\\\",\\\"depth\\\":2},{\\\"url\\\":\\\"#main-site\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Source site \\\"},{\\\"url\\\":\\\"#full-translations\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Full translations \\\"},{\\\"url\\\":\\\"#in-progress-translations\\\",\\\"depth\\\":2,\\\"text\\\":\\\"In-progress translations \\\"},{\\\"url\\\":\\\"#how-to-contribute\\\",\\\"depth\\\":2,\\\"text\\\":\\\"How to contribute \\\"}]\",\"content\":\"[[\\\"$r\\\",\\\"MaxWidth\\\",\\\"last\\\",{\\\"children\\\":[[\\\"$r\\\",\\\"Intro\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":\\\"React docs are translated by the global community into many languages all over the world.\\\"}]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"h2\\\",null,{\\\"id\\\":\\\"main-site\\\",\\\"children\\\":\\\"Source site \\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":\\\"All translations are provided from the canonical source docs:\\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"ul\\\",null,{\\\"children\\\":[\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":[[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"https://react.dev/\\\",\\\"target\\\":\\\"_blank\\\",\\\"rel\\\":\\\"nofollow noopener noreferrer\\\",\\\"children\\\":\\\"English\\\"}],\\\" — \\\",[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"https://github.com/reactjs/react.dev/\\\",\\\"target\\\":\\\"_blank\\\",\\\"rel\\\":\\\"nofollow noopener noreferrer\\\",\\\"children\\\":\\\"Contribute\\\"}]]}],\\\"\\\\n\\\"]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"h2\\\",null,{\\\"id\\\":\\\"full-translations\\\",\\\"children\\\":\\\"Full translations \\\"}],\\\"\\\\n\\\",\\\"\\\\n\\\",[\\\"$r\\\",\\\"LanguageList\\\",null,{\\\"progress\\\":\\\"complete\\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"h2\\\",null,{\\\"id\\\":\\\"in-progress-translations\\\",\\\"children\\\":\\\"In-progress translations \\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":[\\\"For the progress of each translation, see: \\\",[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"https://translations.react.dev/\\\",\\\"target\\\":\\\"_blank\\\",\\\"rel\\\":\\\"nofollow noopener noreferrer\\\",\\\"children\\\":\\\"Is React Translated Yet?\\\"}]]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"LanguageList\\\",null,{\\\"progress\\\":\\\"in-progress\\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"h2\\\",null,{\\\"id\\\":\\\"how-to-contribute\\\",\\\"children\\\":\\\"How to contribute \\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":\\\"You can contribute to the transla",
+            "body_truncated": true,
+            "size_bytes": 4972
+          },
+          {
+            "url": "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/blog.json?markdownPath=blog",
+            "method": "GET",
+            "status_code": 200,
+            "content_type": "application/json",
+            "resource_type": "fetch",
+            "body_preview": "{\"pageProps\":{\"toc\":\"[{\\\"url\\\":\\\"#\\\",\\\"text\\\":\\\"Overview\\\",\\\"depth\\\":2},{\\\"url\\\":\\\"#all-release-notes\\\",\\\"depth\\\":3,\\\"text\\\":\\\"All release notes \\\"},{\\\"url\\\":\\\"#older-posts\\\",\\\"depth\\\":3,\\\"text\\\":\\\"Older posts \\\"}]\",\"content\":\"[[\\\"$r\\\",\\\"MaxWidth\\\",\\\"last\\\",{\\\"children\\\":[[\\\"$r\\\",\\\"Intro\\\",null,{\\\"children\\\":[[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":\\\"This blog is the official source for the updates from the React team. Anything important, including release notes or deprecation notices, will be posted here first.\\\"}],[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":[\\\"You can also follow the \\\",[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"https://bsky.app/profile/react.dev\\\",\\\"target\\\":\\\"_blank\\\",\\\"rel\\\":\\\"nofollow noopener noreferrer\\\",\\\"children\\\":\\\"@react.dev\\\"}],\\\" account on Bluesky, or \\\",[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"https://twitter.com/reactjs\\\",\\\"target\\\":\\\"_blank\\\",\\\"rel\\\":\\\"nofollow noopener noreferrer\\\",\\\"children\\\":\\\"@reactjs\\\"}],\\\" account on Twitter, but you won’t miss anything essential if you only read this blog.\\\"]}]]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"div\\\",null,{\\\"className\\\":\\\"sm:-mx-5 flex flex-col gap-5 mt-12\\\",\\\"children\\\":[[\\\"$r\\\",\\\"BlogCard\\\",null,{\\\"title\\\":\\\"The React Foundation: A New Home for React Hosted by the Linux Foundation\\\",\\\"date\\\":\\\"February 24, 2026\\\",\\\"url\\\":\\\"/blog/2026/02/24/the-react-foundation\\\",\\\"children\\\":[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":\\\"The React Foundation has officially launched under the Linux Foundation.\\\"}]}],[\\\"$r\\\",\\\"BlogCard\\\",null,{\\\"title\\\":\\\"Denial of Service and Source Code Exposure in React Server Components\\\",\\\"date\\\":\\\"December 11, 2025\\\",\\\"url\\\":\\\"/blog/2025/12/11/denial-of-service-and-source-code-exposure-in-react-server-components\\\",\\\"children\\\":[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":\\\"Security researchers have found and disclosed two additional vulnerabilities in React Server Components while attempting to exploit the patches in last week’s critical vulnerability…\\\"}]}],[\\\"$r\\\",\\\"BlogCard\\\",null,{\\\"title\\\":\\\"Critical Security Vulnerability in React Serve",
+            "body_truncated": true,
+            "size_bytes": 13067
+          },
+          {
+            "url": "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/learn.json?markdownPath=learn",
+            "method": "GET",
+            "status_code": 200,
+            "content_type": "application/json",
+            "resource_type": "fetch",
+            "body_preview": "{\"pageProps\":{\"toc\":\"[{\\\"url\\\":\\\"#\\\",\\\"text\\\":\\\"Overview\\\",\\\"depth\\\":2},{\\\"url\\\":\\\"#components\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Creating and nesting components \\\"},{\\\"url\\\":\\\"#writing-markup-with-jsx\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Writing markup with JSX \\\"},{\\\"url\\\":\\\"#adding-styles\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Adding styles \\\"},{\\\"url\\\":\\\"#displaying-data\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Displaying data \\\"},{\\\"url\\\":\\\"#conditional-rendering\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Conditional rendering \\\"},{\\\"url\\\":\\\"#rendering-lists\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Rendering lists \\\"},{\\\"url\\\":\\\"#responding-to-events\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Responding to events \\\"},{\\\"url\\\":\\\"#updating-the-screen\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Updating the screen \\\"},{\\\"url\\\":\\\"#using-hooks\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Using Hooks \\\"},{\\\"url\\\":\\\"#sharing-data-between-components\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Sharing data between components \\\"},{\\\"url\\\":\\\"#next-steps\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Next Steps \\\"}]\",\"content\":\"[[\\\"$r\\\",\\\"MaxWidth\\\",\\\"20\\\",{\\\"children\\\":[[\\\"$r\\\",\\\"Intro\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":\\\"Welcome to the React documentation! This page will give you an introduction to 80% of the React concepts that you will use on a daily basis.\\\"}]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"YouWillLearn\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"ul\\\",null,{\\\"children\\\":[\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":\\\"How to create and nest components\\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":\\\"How to add markup and styles\\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":\\\"How to display data\\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":\\\"How to render conditions and lists\\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":\\\"How to respond to events and update the screen\\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":\\\"How to share data between components\\\"}],\\\"\\\\n\\\"]}]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"h2\\\",null,{\\\"id\\\":\\\"components\\\",\\\"children\\\":\\\"Creating and nesting components \\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":[\\\"React apps are made out of \\\",[\\\"$r\\\",\\\"em\\\",",
+            "body_truncated": true,
+            "size_bytes": 30506
+          },
+          {
+            "url": "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/learn/thinking-in-react.json?markdownPath=learn&markdownPath=thinking-in-react",
+            "method": "GET",
+            "status_code": 200,
+            "content_type": "application/json",
+            "resource_type": "fetch",
+            "body_preview": "{\"pageProps\":{\"toc\":\"[{\\\"url\\\":\\\"#\\\",\\\"text\\\":\\\"Overview\\\",\\\"depth\\\":2},{\\\"url\\\":\\\"#start-with-the-mockup\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Start with the mockup \\\"},{\\\"url\\\":\\\"#step-1-break-the-ui-into-a-component-hierarchy\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Step 1: Break the UI into a component hierarchy \\\"},{\\\"url\\\":\\\"#step-2-build-a-static-version-in-react\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Step 2: Build a static version in React \\\"},{\\\"url\\\":\\\"#step-3-find-the-minimal-but-complete-representation-of-ui-state\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Step 3: Find the minimal but complete representation of UI state \\\"},{\\\"url\\\":\\\"#step-4-identify-where-your-state-should-live\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Step 4: Identify where your state should live \\\"},{\\\"url\\\":\\\"#step-5-add-inverse-data-flow\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Step 5: Add inverse data flow \\\"},{\\\"url\\\":\\\"#where-to-go-from-here\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Where to go from here \\\"}]\",\"content\":\"[[\\\"$r\\\",\\\"MaxWidth\\\",\\\"28\\\",{\\\"children\\\":[[\\\"$r\\\",\\\"Intro\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":[\\\"React can change how you think about the designs you look at and the apps you build. When you build a user interface with React, you will first break it apart into pieces called \\\",[\\\"$r\\\",\\\"em\\\",null,{\\\"children\\\":\\\"components\\\"}],\\\". Then, you will describe the different visual states for each of your components. Finally, you will connect your components together so that the data flows through them. In this tutorial, we’ll guide you through the thought process of building a searchable product data table with React.\\\"]}]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"h2\\\",null,{\\\"id\\\":\\\"start-with-the-mockup\\\",\\\"children\\\":\\\"Start with the mockup \\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":\\\"Imagine that you already have a JSON API and a mockup from a designer.\\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":\\\"The JSON API returns some data that looks like this:\\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"pre\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"code\\\",null,{\\\"className\\\":\\\"language-json\\\",\\\"children\\\":\\\"[\\\\n ",
+            "body_truncated": true,
+            "size_bytes": 36255
+          },
+          {
+            "url": "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/learn/installation.json?markdownPath=learn&markdownPath=installation",
+            "method": "GET",
+            "status_code": 200,
+            "content_type": "application/json",
+            "resource_type": "fetch",
+            "body_preview": "{\"pageProps\":{\"toc\":\"[{\\\"url\\\":\\\"#\\\",\\\"text\\\":\\\"Overview\\\",\\\"depth\\\":2},{\\\"url\\\":\\\"#try-react\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Try React \\\"},{\\\"url\\\":\\\"#creating-a-react-app\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Creating a React App \\\"},{\\\"url\\\":\\\"#build-a-react-app-from-scratch\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Build a React App from Scratch \\\"},{\\\"url\\\":\\\"#add-react-to-an-existing-project\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Add React to an existing project \\\"},{\\\"url\\\":\\\"#next-steps\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Next steps \\\"}]\",\"content\":\"[[\\\"$r\\\",\\\"MaxWidth\\\",\\\"6\\\",{\\\"children\\\":[[\\\"$r\\\",\\\"Intro\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":\\\"React has been designed from the start for gradual adoption. You can use as little or as much React as you need. Whether you want to get a taste of React, add some interactivity to an HTML page, or start a complex React-powered app, this section will help you get started.\\\"}]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"h2\\\",null,{\\\"id\\\":\\\"try-react\\\",\\\"children\\\":\\\"Try React \\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":\\\"You don’t need to install anything to play with React. Try editing this sandbox!\\\"}],\\\"\\\\n\\\"]}],[\\\"$r\\\",\\\"Sandpack\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"pre\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"code\\\",null,{\\\"className\\\":\\\"language-js\\\",\\\"children\\\":\\\"function Greeting({ name }) {\\\\n  return <h1>Hello, {name}</h1>;\\\\n}\\\\n\\\\nexport default function App() {\\\\n  return <Greeting name=\\\\\\\"world\\\\\\\" />\\\\n}\\\\n\\\"}]}]}],[\\\"$r\\\",\\\"MaxWidth\\\",\\\"last\\\",{\\\"children\\\":[\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":\\\"You can edit it directly or open it in a new tab by pressing the “Fork” button in the upper right corner.\\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":[\\\"Most pages in the React documentation contain sandboxes like this. Outside of the React documentation, there are many online sandboxes that support React: for example, \\\",[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"https://codesandbox.io/s/new\\\",\\\"target\\\":\\\"_blank\\\",\\\"rel\\\":\\\"nofollow noopener noreferrer\\\",\\\"children\\\":\\\"CodeSandbox\\\"}],\\\", \\\",[\\",
+            "body_truncated": true,
+            "size_bytes": 4684
+          },
+          {
+            "url": "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/learn/setup.json?markdownPath=learn&markdownPath=setup",
+            "method": "GET",
+            "status_code": 200,
+            "content_type": "application/json",
+            "resource_type": "fetch",
+            "body_preview": "{\"pageProps\":{\"toc\":\"[{\\\"url\\\":\\\"#\\\",\\\"text\\\":\\\"Overview\\\",\\\"depth\\\":2},{\\\"url\\\":\\\"#editor-setup\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Editor Setup \\\"},{\\\"url\\\":\\\"#using-typescript\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Using TypeScript \\\"},{\\\"url\\\":\\\"#react-developer-tools\\\",\\\"depth\\\":2,\\\"text\\\":\\\"React Developer Tools \\\"},{\\\"url\\\":\\\"#react-compiler\\\",\\\"depth\\\":2,\\\"text\\\":\\\"React Compiler \\\"},{\\\"url\\\":\\\"#next-steps\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Next steps \\\"}]\",\"content\":\"[[\\\"$r\\\",\\\"MaxWidth\\\",\\\"last\\\",{\\\"children\\\":[[\\\"$r\\\",\\\"Intro\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":\\\"React integrates with tools like editors, TypeScript, browser extensions, and compilers. This section will help you get your environment set up.\\\"}]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"h2\\\",null,{\\\"id\\\":\\\"editor-setup\\\",\\\"children\\\":\\\"Editor Setup \\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":[\\\"See our \\\",[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"/learn/editor-setup\\\",\\\"children\\\":\\\"recommended editors\\\"}],\\\" and learn how to set them up to work with React.\\\"]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"h2\\\",null,{\\\"id\\\":\\\"using-typescript\\\",\\\"children\\\":\\\"Using TypeScript \\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":[\\\"TypeScript is a popular way to add type definitions to JavaScript codebases. \\\",[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"/learn/typescript\\\",\\\"children\\\":\\\"Learn how to integrate TypeScript into your React projects\\\"}],\\\".\\\"]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"h2\\\",null,{\\\"id\\\":\\\"react-developer-tools\\\",\\\"children\\\":\\\"React Developer Tools \\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":[\\\"React Developer Tools is a browser extension that can inspect React components, edit props and state, and identify performance problems. Learn how to install it \\\",[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"learn/react-developer-tools\\\",\\\"children\\\":\\\"here\\\"}],\\\".\\\"]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"h2\\\",null,{\\\"id\\\":\\\"react-compiler\\\",\\\"children\\\":\\\"React Compiler \\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":[\\\"React Compiler is a tool that automatically optimizes your React app. \\\",[\\\"$r\\\",\\\"a\\\",null,{\\\"href",
+            "body_truncated": true,
+            "size_bytes": 2435
+          },
+          {
+            "url": "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/learn/describing-the-ui.json?markdownPath=learn&markdownPath=describing-the-ui",
+            "method": "GET",
+            "status_code": 200,
+            "content_type": "application/json",
+            "resource_type": "fetch",
+            "body_preview": "{\"pageProps\":{\"toc\":\"[{\\\"url\\\":\\\"#\\\",\\\"text\\\":\\\"Overview\\\",\\\"depth\\\":2},{\\\"url\\\":\\\"#your-first-component\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Your first component \\\"},{\\\"url\\\":\\\"#importing-and-exporting-components\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Importing and exporting components \\\"},{\\\"url\\\":\\\"#writing-markup-with-jsx\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Writing markup with JSX \\\"},{\\\"url\\\":\\\"#javascript-in-jsx-with-curly-braces\\\",\\\"depth\\\":2,\\\"text\\\":\\\"JavaScript in JSX with curly braces \\\"},{\\\"url\\\":\\\"#passing-props-to-a-component\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Passing props to a component \\\"},{\\\"url\\\":\\\"#conditional-rendering\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Conditional rendering \\\"},{\\\"url\\\":\\\"#rendering-lists\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Rendering lists \\\"},{\\\"url\\\":\\\"#keeping-components-pure\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Keeping components pure \\\"},{\\\"url\\\":\\\"#your-ui-as-a-tree\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Your UI as a tree \\\"},{\\\"url\\\":\\\"#whats-next\\\",\\\"depth\\\":2,\\\"text\\\":\\\"What’s next? \\\"}]\",\"content\":\"[[\\\"$r\\\",\\\"MaxWidth\\\",\\\"8\\\",{\\\"children\\\":[[\\\"$r\\\",\\\"Intro\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":[\\\"React is a JavaScript library for rendering user interfaces (UI). UI is built from small units like buttons, text, and images. React lets you combine them into reusable, nestable \\\",[\\\"$r\\\",\\\"em\\\",null,{\\\"children\\\":\\\"components.\\\"}],\\\" From web sites to phone apps, everything on the screen can be broken down into components. In this chapter, you’ll learn to create, customize, and conditionally display React components.\\\"]}]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"YouWillLearn\\\",null,{\\\"isChapter\\\":true,\\\"children\\\":[\\\"$r\\\",\\\"ul\\\",null,{\\\"children\\\":[\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"/learn/your-first-component\\\",\\\"children\\\":\\\"How to write your first React component\\\"}]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"/learn/importing-and-exporting-components\\\",\\\"children\\\":\\\"When and how to create multi-component files\\\"}]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"",
+            "body_truncated": true,
+            "size_bytes": 25323
+          },
+          {
+            "url": "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/learn/react-compiler.json?markdownPath=learn&markdownPath=react-compiler",
+            "method": "GET",
+            "status_code": 200,
+            "content_type": "application/json",
+            "resource_type": "fetch",
+            "body_preview": "{\"pageProps\":{\"toc\":\"[{\\\"url\\\":\\\"#\\\",\\\"text\\\":\\\"Overview\\\",\\\"depth\\\":2},{\\\"url\\\":\\\"#introduction\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Introduction \\\"},{\\\"url\\\":\\\"#installation\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Installation \\\"},{\\\"url\\\":\\\"#incremental-adoption\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Incremental Adoption \\\"},{\\\"url\\\":\\\"#debugging-and-troubleshooting\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Debugging and Troubleshooting \\\"},{\\\"url\\\":\\\"#configuration-and-reference\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Configuration and Reference \\\"},{\\\"url\\\":\\\"#additional-resources\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Additional resources \\\"}]\",\"content\":\"[[\\\"$r\\\",\\\"MaxWidth\\\",\\\"last\\\",{\\\"children\\\":[[\\\"$r\\\",\\\"h2\\\",null,{\\\"id\\\":\\\"introduction\\\",\\\"children\\\":\\\"Introduction \\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":[\\\"Learn \\\",[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"/learn/react-compiler/introduction\\\",\\\"children\\\":\\\"what React Compiler does\\\"}],\\\" and how it automatically optimizes your React application by handling memoization for you, eliminating the need for manual \\\",[\\\"$r\\\",\\\"code\\\",null,{\\\"children\\\":\\\"useMemo\\\"}],\\\", \\\",[\\\"$r\\\",\\\"code\\\",null,{\\\"children\\\":\\\"useCallback\\\"}],\\\", and \\\",[\\\"$r\\\",\\\"code\\\",null,{\\\"children\\\":\\\"React.memo\\\"}],\\\".\\\"]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"h2\\\",null,{\\\"id\\\":\\\"installation\\\",\\\"children\\\":\\\"Installation \\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":[\\\"Get started with \\\",[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"/learn/react-compiler/installation\\\",\\\"children\\\":\\\"installing React Compiler\\\"}],\\\" and learn how to configure it with your build tools.\\\"]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"h2\\\",null,{\\\"id\\\":\\\"incremental-adoption\\\",\\\"children\\\":\\\"Incremental Adoption \\\"}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":[\\\"Learn \\\",[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"/learn/react-compiler/incremental-adoption\\\",\\\"children\\\":\\\"strategies for gradually adopting React Compiler\\\"}],\\\" in your existing codebase if you’re not ready to enable it everywhere yet.\\\"]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"h2\\\",null,{\\\"id\\\":\\\"debugging-and-troubleshooting\\\",\\\"children\\\":\\\"Debugging and Troublesho",
+            "body_truncated": true,
+            "size_bytes": 3798
+          },
+          {
+            "url": "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/learn/adding-interactivity.json?markdownPath=learn&markdownPath=adding-interactivity",
+            "method": "GET",
+            "status_code": 200,
+            "content_type": "application/json",
+            "resource_type": "fetch",
+            "body_preview": "{\"pageProps\":{\"toc\":\"[{\\\"url\\\":\\\"#\\\",\\\"text\\\":\\\"Overview\\\",\\\"depth\\\":2},{\\\"url\\\":\\\"#responding-to-events\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Responding to events \\\"},{\\\"url\\\":\\\"#state-a-components-memory\\\",\\\"depth\\\":2,\\\"text\\\":\\\"State: a component’s memory \\\"},{\\\"url\\\":\\\"#render-and-commit\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Render and commit \\\"},{\\\"url\\\":\\\"#state-as-a-snapshot\\\",\\\"depth\\\":2,\\\"text\\\":\\\"State as a snapshot \\\"},{\\\"url\\\":\\\"#queueing-a-series-of-state-updates\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Queueing a series of state updates \\\"},{\\\"url\\\":\\\"#updating-objects-in-state\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Updating objects in state \\\"},{\\\"url\\\":\\\"#updating-arrays-in-state\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Updating arrays in state \\\"},{\\\"url\\\":\\\"#whats-next\\\",\\\"depth\\\":2,\\\"text\\\":\\\"What’s next? \\\"}]\",\"content\":\"[[\\\"$r\\\",\\\"MaxWidth\\\",\\\"10\\\",{\\\"children\\\":[[\\\"$r\\\",\\\"Intro\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":[\\\"Some things on the screen update in response to user input. For example, clicking an image gallery switches the active image. In React, data that changes over time is called \\\",[\\\"$r\\\",\\\"em\\\",null,{\\\"children\\\":\\\"state.\\\"}],\\\" You can add state to any component, and update it as needed. In this chapter, you’ll learn how to write components that handle interactions, update their state, and display different output over time.\\\"]}]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"YouWillLearn\\\",null,{\\\"isChapter\\\":true,\\\"children\\\":[\\\"$r\\\",\\\"ul\\\",null,{\\\"children\\\":[\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"/learn/responding-to-events\\\",\\\"children\\\":\\\"How to handle user-initiated events\\\"}]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"/learn/state-a-components-memory\\\",\\\"children\\\":\\\"How to make components “remember” information with state\\\"}]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"/learn/render-and-commit\\\",\\\"children\\\":\\\"How React updates the UI in two phases\\\"}]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"a\\\"",
+            "body_truncated": true,
+            "size_bytes": 34305
+          },
+          {
+            "url": "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/learn/managing-state.json?markdownPath=learn&markdownPath=managing-state",
+            "method": "GET",
+            "status_code": 200,
+            "content_type": "application/json",
+            "resource_type": "fetch",
+            "body_preview": "{\"pageProps\":{\"toc\":\"[{\\\"url\\\":\\\"#\\\",\\\"text\\\":\\\"Overview\\\",\\\"depth\\\":2},{\\\"url\\\":\\\"#reacting-to-input-with-state\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Reacting to input with state \\\"},{\\\"url\\\":\\\"#choosing-the-state-structure\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Choosing the state structure \\\"},{\\\"url\\\":\\\"#sharing-state-between-components\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Sharing state between components \\\"},{\\\"url\\\":\\\"#preserving-and-resetting-state\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Preserving and resetting state \\\"},{\\\"url\\\":\\\"#extracting-state-logic-into-a-reducer\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Extracting state logic into a reducer \\\"},{\\\"url\\\":\\\"#passing-data-deeply-with-context\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Passing data deeply with context \\\"},{\\\"url\\\":\\\"#scaling-up-with-reducer-and-context\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Scaling up with reducer and context \\\"},{\\\"url\\\":\\\"#whats-next\\\",\\\"depth\\\":2,\\\"text\\\":\\\"What’s next? \\\"}]\",\"content\":\"[[\\\"$r\\\",\\\"MaxWidth\\\",\\\"10\\\",{\\\"children\\\":[[\\\"$r\\\",\\\"Intro\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":\\\"As your application grows, it helps to be more intentional about how your state is organized and how the data flows between your components. Redundant or duplicate state is a common source of bugs. In this chapter, you’ll learn how to structure your state well, how to keep your state update logic maintainable, and how to share state between distant components.\\\"}]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"YouWillLearn\\\",null,{\\\"isChapter\\\":true,\\\"children\\\":[\\\"$r\\\",\\\"ul\\\",null,{\\\"children\\\":[\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"/learn/reacting-to-input-with-state\\\",\\\"children\\\":\\\"How to think about UI changes as state changes\\\"}]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"/learn/choosing-the-state-structure\\\",\\\"children\\\":\\\"How to structure state well\\\"}]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"/learn/sharing-state-between-components\\\",\\\"children\\\":\\\"How to “lift state up” to share it between co",
+            "body_truncated": true,
+            "size_bytes": 35744
+          },
+          {
+            "url": "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/learn/escape-hatches.json?markdownPath=learn&markdownPath=escape-hatches",
+            "method": "GET",
+            "status_code": 200,
+            "content_type": "application/json",
+            "resource_type": "fetch",
+            "body_preview": "{\"pageProps\":{\"toc\":\"[{\\\"url\\\":\\\"#\\\",\\\"text\\\":\\\"Overview\\\",\\\"depth\\\":2},{\\\"url\\\":\\\"#referencing-values-with-refs\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Referencing values with refs \\\"},{\\\"url\\\":\\\"#manipulating-the-dom-with-refs\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Manipulating the DOM with refs \\\"},{\\\"url\\\":\\\"#synchronizing-with-effects\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Synchronizing with Effects \\\"},{\\\"url\\\":\\\"#you-might-not-need-an-effect\\\",\\\"depth\\\":2,\\\"text\\\":\\\"You Might Not Need An Effect \\\"},{\\\"url\\\":\\\"#lifecycle-of-reactive-effects\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Lifecycle of reactive effects \\\"},{\\\"url\\\":\\\"#separating-events-from-effects\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Separating events from Effects \\\"},{\\\"url\\\":\\\"#removing-effect-dependencies\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Removing Effect dependencies \\\"},{\\\"url\\\":\\\"#reusing-logic-with-custom-hooks\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Reusing logic with custom Hooks \\\"},{\\\"url\\\":\\\"#whats-next\\\",\\\"depth\\\":2,\\\"text\\\":\\\"What’s next? \\\"}]\",\"content\":\"[[\\\"$r\\\",\\\"MaxWidth\\\",\\\"12\\\",{\\\"children\\\":[[\\\"$r\\\",\\\"Intro\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":\\\"Some of your components may need to control and synchronize with systems outside of React. For example, you might need to focus an input using the browser API, play and pause a video player implemented without React, or connect and listen to messages from a remote server. In this chapter, you’ll learn the escape hatches that let you “step outside” React and connect to external systems. Most of your application logic and data flow should not rely on these features.\\\"}]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"YouWillLearn\\\",null,{\\\"isChapter\\\":true,\\\"children\\\":[\\\"$r\\\",\\\"ul\\\",null,{\\\"children\\\":[\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"/learn/referencing-values-with-refs\\\",\\\"children\\\":\\\"How to “remember” information without re-rendering\\\"}]}],\\\"\\\\n\\\",[\\\"$r\\\",\\\"li\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"a\\\",null,{\\\"href\\\":\\\"/learn/manipulating-the-dom-with-refs\\\",\\\"children\\\":\\\"How to access DOM elements managed by ",
+            "body_truncated": true,
+            "size_bytes": 38047
+          },
+          {
+            "url": "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/learn/tutorial-tic-tac-toe.json?markdownPath=learn&markdownPath=tutorial-tic-tac-toe",
+            "method": "GET",
+            "status_code": 200,
+            "content_type": "application/json",
+            "resource_type": "fetch",
+            "body_preview": "{\"pageProps\":{\"toc\":\"[{\\\"url\\\":\\\"#\\\",\\\"text\\\":\\\"Overview\\\",\\\"depth\\\":2},{\\\"url\\\":\\\"#what-are-you-building\\\",\\\"depth\\\":3,\\\"text\\\":\\\"What are you building? \\\"},{\\\"url\\\":\\\"#setup-for-the-tutorial\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Setup for the tutorial \\\"},{\\\"url\\\":\\\"#overview\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Overview \\\"},{\\\"url\\\":\\\"#inspecting-the-starter-code\\\",\\\"depth\\\":3,\\\"text\\\":\\\"Inspecting the starter code \\\"},{\\\"url\\\":\\\"#building-the-board\\\",\\\"depth\\\":3,\\\"text\\\":\\\"Building the board \\\"},{\\\"url\\\":\\\"#passing-data-through-props\\\",\\\"depth\\\":3,\\\"text\\\":\\\"Passing data through props \\\"},{\\\"url\\\":\\\"#making-an-interactive-component\\\",\\\"depth\\\":3,\\\"text\\\":\\\"Making an interactive component \\\"},{\\\"url\\\":\\\"#react-developer-tools\\\",\\\"depth\\\":3,\\\"text\\\":\\\"React Developer Tools \\\"},{\\\"url\\\":\\\"#completing-the-game\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Completing the game \\\"},{\\\"url\\\":\\\"#lifting-state-up\\\",\\\"depth\\\":3,\\\"text\\\":\\\"Lifting state up \\\"},{\\\"url\\\":\\\"#why-immutability-is-important\\\",\\\"depth\\\":3,\\\"text\\\":\\\"Why immutability is important \\\"},{\\\"url\\\":\\\"#taking-turns\\\",\\\"depth\\\":3,\\\"text\\\":\\\"Taking turns \\\"},{\\\"url\\\":\\\"#declaring-a-winner\\\",\\\"depth\\\":3,\\\"text\\\":\\\"Declaring a winner \\\"},{\\\"url\\\":\\\"#adding-time-travel\\\",\\\"depth\\\":2,\\\"text\\\":\\\"Adding time travel \\\"},{\\\"url\\\":\\\"#storing-a-history-of-moves\\\",\\\"depth\\\":3,\\\"text\\\":\\\"Storing a history of moves \\\"},{\\\"url\\\":\\\"#lifting-state-up-again\\\",\\\"depth\\\":3,\\\"text\\\":\\\"Lifting state up, again \\\"},{\\\"url\\\":\\\"#showing-the-past-moves\\\",\\\"depth\\\":3,\\\"text\\\":\\\"Showing the past moves \\\"},{\\\"url\\\":\\\"#picking-a-key\\\",\\\"depth\\\":3,\\\"text\\\":\\\"Picking a key \\\"},{\\\"url\\\":\\\"#implementing-time-travel\\\",\\\"depth\\\":3,\\\"text\\\":\\\"Implementing time travel \\\"},{\\\"url\\\":\\\"#final-cleanup\\\",\\\"depth\\\":3,\\\"text\\\":\\\"Final cleanup \\\"},{\\\"url\\\":\\\"#wrapping-up\\\",\\\"depth\\\":3,\\\"text\\\":\\\"Wrapping up \\\"}]\",\"content\":\"[[\\\"$r\\\",\\\"MaxWidth\\\",\\\"14\\\",{\\\"children\\\":[[\\\"$r\\\",\\\"Intro\\\",null,{\\\"children\\\":[\\\"$r\\\",\\\"p\\\",null,{\\\"children\\\":\\\"You will build a small tic-tac-toe game during this tutorial",
+            "body_truncated": true,
+            "size_bytes": 141456
+          },
+          {
+            "url": "https://region1.google-analytics.com/g/collect?v=2&tid=G-B1E83PJ3RT&gtm=45je65d0v9119811439za200zd9119811439&_p=1778813419130&gcd=13l3lPl2l1l1&npa=1&dma_cps=a&dma=1&are=1&cid=1413896202.1778813421&frm=0&pscdl=noapi&rcb=5&sr=1365x768&uaa=x86&uab=64&uafvl=HeadlessChrome%3B147.0.7727.15%7CNot.A%252FBrand%3B8.0.0.0%7CChromium%3B147.0.7727.15&uam=&uamb=0&uap=Windows&uapv=10.0&uaw=0&ul=en-us&_s=1&tag_exp=0~115938466~115938468~119027223&sid=1778813420&sct=1&seg=0&dl=https%3A%2F%2Freact.dev%2Flearn&dt=Quick%20Start%20%E2%80%93%20React&en=page_view&_fv=1&_nsi=1&_ss=1&_ee=1&tfd=4864",
+            "method": "POST",
+            "status_code": 204,
+            "content_type": "text/plain",
+            "resource_type": "fetch",
+            "body_preview": "",
+            "body_truncated": false,
+            "size_bytes": 0
+          },
+          {
+            "url": "https://sandpack-cdn-staging.blazingly.io/dep_tree/NSh7ImNvcmUtanMiOiIzLjIyLjciLCJyZWFjdCI6Il4xOS4yLjEiLCJyZWFjdC1kb20iOiJeMTkuMi4xIiwicmVhY3QtcmVmcmVzaCI6Il4wLjExLjAifSk=",
+            "method": "GET",
+            "status_code": 200,
+            "content_type": "application/javascript",
+            "resource_type": "fetch",
+            "body_preview": "���n�core-js�v�3.22.7�d\u0000��n�react�v�19.3.0-canary-fef12a01-20260413�d\u0000��n�react-refresh�v�0.11.0�d\u0000��n�react-dom�v�19.3.0-canary-fef12a01-20260413�d\u0000��n�scheduler�v�0.28.0-canary-fef12a01-20260413�d\u0001",
+            "body_truncated": false,
+            "size_bytes": 261
+          },
+          {
+            "url": "https://sandpack-cdn-staging.blazingly.io/package/NShjb3JlLWpzQDMuMjIuNyk=",
+            "method": "GET",
+            "status_code": 200,
+            "content_type": "application/javascript",
+            "resource_type": "fetch",
+            "body_preview": "��f�\u000b��!features/instance/reduce-right.js>�features/math/umulh.js3�internals/regexp-flags.js��c�\u0001�'use strict';var anObject=require('../internals/an-object');// `RegExp.prototype.flags` getter implementation\n// https://tc39.es/ecma262/#sec-get-regexp.prototype.flags\nmodule.exports=function(){var that=anObject(this);var result='';if(that.hasIndices)result+='d';if(that.global)result+='g';if(that.ignoreCase)result+='i';if(that.multiline)result+='m';if(that.dotAll)result+='s';if(that.unicode)result+='u';if(that.sticky)result+='y';return result;};�d��../internals/an-object�tõfeatures/set/index.js,�modules/es.object.seal.js��c�\u0002T\"use strict\";var $=require('../internals/export');var isObject=require('../internals/is-object');var onFreeze=require('../internals/internal-metadata').onFreeze;var FREEZING=require('../internals/freezing');var fails=require('../internals/fails');// eslint-disable-next-line es-x/no-object-seal -- safe\nvar $seal=Object.seal;var FAILS_ON_PRIMITIVES=fails(function(){$seal(1);});// `Object.seal` method\n// https://tc39.es/ecma262/#sec-object.seal\n$({target:'Object',stat:true,forced:FAILS_ON_PRIMITIVES,sham:!FREEZING},{seal:function seal(it){return $seal&&isObject(it)?$seal(onFreeze(it)):it;}});�d��../internals/is-object�../internals/export�../internals/internal-metadata�../internals/fails�../internals/freezing�tÿinternals/is-data-descriptor.js��c��\"use strict\";var hasOwn=require('../internals/has-own-property');module.exports=function(descriptor){return descriptor!==undefined&&(hasOwn(descriptor,'value')||hasOwn(descriptor,'writable'));};�d��../internals/has-own-property�túfeatures/map/map-values.js7�web/url-search-params.js~�'modules/es.typed-array.last-index-of.js��c�\u0002�'use strict';var ArrayBufferViewCore=require('../internals/array-buffer-view-core');var apply=require('../internals/function-apply');var $lastIndexOf=require('../internals/array-last-index-of');var aTypedArray=ArrayBufferViewCore.aTypedArray;var exportTypedArrayMethod=ArrayBufferViewCo",
+            "body_truncated": true,
+            "size_bytes": 792381
+          },
+          {
+            "url": "https://sandpack-cdn-staging.blazingly.io/package/NShyZWFjdEAxOS4zLjAtY2FuYXJ5LWZlZjEyYTAxLTIwMjYwNDEzKQ==",
+            "method": "GET",
+            "status_code": 200,
+            "content_type": "application/javascript",
+            "resource_type": "fetch",
+            "body_preview": "��f�\u0000\u001b�react.react-server.js�ԩREADME.md�\u0004��%cjs/react.react-server.development.js�{��(cjs/react-compiler-runtime.production.js�\u0001Ϸcjs/react.production.js�F��$cjs/react.react-server.production.js�6\n�index.js��c�B'use strict';module.exports=require('./cjs/react.development.js');�d��./cjs/react.development.js�tÿjsx-dev-runtime.react-server.js���package.json��c�\u0004�{\n  \"name\": \"react\",\n  \"description\": \"React is a JavaScript library for building user interfaces.\",\n  \"keywords\": [\n    \"react\"\n  ],\n  \"version\": \"19.3.0-canary-fef12a01-20260413\",\n  \"homepage\": \"https://react.dev/\",\n  \"bugs\": \"https://github.com/facebook/react/issues\",\n  \"license\": \"MIT\",\n  \"files\": [\n    \"LICENSE\",\n    \"README.md\",\n    \"index.js\",\n    \"cjs/\",\n    \"compiler-runtime.js\",\n    \"jsx-runtime.js\",\n    \"jsx-runtime.react-server.js\",\n    \"jsx-dev-runtime.js\",\n    \"jsx-dev-runtime.react-server.js\",\n    \"react.react-server.js\"\n  ],\n  \"main\": \"index.js\",\n  \"exports\": {\n    \".\": {\n      \"react-server\": \"./react.react-server.js\",\n      \"default\": \"./index.js\"\n    },\n    \"./package.json\": \"./package.json\",\n    \"./jsx-runtime\": {\n      \"react-server\": \"./jsx-runtime.react-server.js\",\n      \"default\": \"./jsx-runtime.js\"\n    },\n    \"./jsx-dev-runtime\": {\n      \"react-server\": \"./jsx-dev-runtime.react-server.js\",\n      \"default\": \"./jsx-dev-runtime.js\"\n    },\n    \"./compiler-runtime\": {\n      \"react-server\": \"./compiler-runtime.js\",\n      \"default\": \"./compiler-runtime.js\"\n    }\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"https://github.com/facebook/react.git\",\n    \"directory\": \"packages/react\"\n  },\n  \"engines\": {\n    \"node\": \">=0.10.0\"\n  }\n}�d��t��$cjs/react-jsx-runtime.development.js��c�$�/**\n * @license React\n * react-jsx-runtime.development.js\n *\n * Copyright (c) Meta Platforms, Inc. and affiliates.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the root directory of this source tree.\n */ \"use strict\";(function(){function getComponentNameFromType(type){if(",
+            "body_truncated": true,
+            "size_bytes": 56187
+          }
+        ]
+      },
+      "viewport_info": null,
+      "ua_info": null,
+      "visible_range": null,
+      "profile_health": null,
+      "failure_classification": {
+        "category": "none",
+        "severity": "low",
+        "reason": "",
+        "status_code": 200,
+        "proxy_selected": false
+      },
+      "profile_evidence": {
+        "profile_id": null,
+        "profile": null
+      },
+      "engine": "native_browser",
+      "mode": "dynamic",
+      "session_mode": "ephemeral",
+      "error": "",
+      "expected_checks": {
+        "min_rendered_items": {
+          "expected": 10,
+          "actual": 51,
+          "pass": true
+        },
+        "min_html_chars": {
+          "expected": 5000,
+          "actual": 283638,
+          "pass": true
+        }
+      }
+    },
+    {
+      "id": "tanstack_virtual_docs",
+      "name": "TanStack Virtual — SPA Doc Site",
+      "url": "https://tanstack.com/virtual/latest/docs/introduction",
+      "risk": "low-public-demo",
+      "status": "ok",
+      "ok": true,
+      "elapsed_seconds": 11.427,
+      "final_url": "https://tanstack.com/virtual/latest/docs/introduction",
+      "status_code": 200,
+      "html_chars": 256454,
+      "selector_matches": {
+        "doc_content": 0,
+        "code_block": 2
+      },
+      "rendered_item_count": 2,
+      "total_items_in_dataset": 0,
+      "scroll_events": [],
+      "scroll_result": null,
+      "network_candidates": {
+        "resource_counts": {
+          "document": 1,
+          "script": 77,
+          "stylesheet": 1,
+          "font": 1,
+          "image": 15,
+          "fetch": 8
+        },
+        "xhr_count": 6,
+        "captured_xhr": [
+          {
+            "url": "https://tanstack.com/_a/g/collect?v=2&tid=G-JMT1Z50SPS&gtm=45je65d0v874742341za204zd874742341&_p=1778813434371&gcd=13l3l3l2l1l1&npa=1&dma_cps=a&dma=1&_eu=AAAAAAAC&_fplc=0&are=1&cid=1894085421.1778813435&frm=0&pscdl=noapi&rcb=8&sr=1365x768&uaa=x86&uab=64&uafvl=HeadlessChrome%3B147.0.7727.15%7CNot.A%252FBrand%3B8.0.0.0%7CChromium%3B147.0.7727.15&uam=&uamb=0&uap=Windows&uapv=10.0&uaw=0&ul=en-us&_s=1&tag_exp=0~115938466~115938469&sid=1778813435&sct=1&seg=0&dl=https%3A%2F%2Ftanstack.com%2Fvirtual%2Flatest%2Fdocs%2Fintroduction&dt=Introduction%20%7C%20TanStack%20Virtual%20Docs&_tu=BA&en=page_view&_fv=1&_nsi=1&_ss=1&_ee=1&tfd=4226",
+            "method": "POST",
+            "status_code": 204,
+            "content_type": "text/plain",
+            "resource_type": "fetch",
+            "body_preview": "",
+            "body_truncated": false,
+            "size_bytes": 0
+          },
+          {
+            "url": "https://tanstack.com/_a/g/collect?v=2&tid=G-JMT1Z50SPS&gtm=45je65d0v874742341za204zd874742341&_p=1778813434371&gcd=13l3l3l2l1l1&npa=1&dma_cps=a&dma=1&_eu=AAACAAQC&_fplc=0&are=1&cid=1894085421.1778813435&frm=0&pscdl=noapi&rcb=8&sr=1365x768&uaa=x86&uab=64&uafvl=HeadlessChrome%3B147.0.7727.15%7CNot.A%252FBrand%3B8.0.0.0%7CChromium%3B147.0.7727.15&uam=&uamb=0&uap=Windows&uapv=10.0&uaw=0&ul=en-us&_s=2&tag_exp=0~115938466~115938469&sid=1778813435&sct=1&seg=1&dl=https%3A%2F%2Ftanstack.com%2Fvirtual%2Flatest%2Fdocs%2Fintroduction&dt=Introduction%20%7C%20TanStack%20Virtual%20Docs&_tu=BA&en=page_view&_ee=1&_et=822&tfd=5127",
+            "method": "POST",
+            "status_code": 204,
+            "content_type": "text/plain",
+            "resource_type": "fetch",
+            "body_preview": "",
+            "body_truncated": false,
+            "size_bytes": 0
+          },
+          {
+            "url": "https://tanstack.com/_serverFn/b9ec6ebffe71881613f7d1e66d9126b4f7a9390f5be2d567f1ebaf09da5cfc18",
+            "method": "GET",
+            "status_code": 200,
+            "content_type": "application/json",
+            "resource_type": "fetch",
+            "body_preview": "{\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":2,\"s\":0},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+            "body_truncated": false,
+            "size_bytes": 134
+          },
+          {
+            "url": "https://tanstack.com/_serverFn/a863101af06a412e026a82c0775180d21ebf50344227a050d177f793fe63fa41",
+            "method": "POST",
+            "status_code": 200,
+            "content_type": "application/json",
+            "resource_type": "fetch",
+            "body_preview": "{\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":2,\"s\":0},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+            "body_truncated": false,
+            "size_bytes": 134
+          },
+          {
+            "url": "https://tanstack.com/_serverFn/293006cecb96430e3d9ee8503b84e3f2e4e3b621a17f605748ed66a33b053ca8",
+            "method": "POST",
+            "status_code": 200,
+            "content_type": "application/json",
+            "resource_type": "fetch",
+            "body_preview": "{\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":10,\"i\":1,\"p\":{\"k\":[\"userFeedback\",\"detachedFeedback\",\"isModerator\"],\"v\":[{\"t\":9,\"i\":2,\"a\":[],\"o\":0},{\"t\":9,\"i\":3,\"a\":[],\"o\":0},{\"t\":2,\"s\":3}]},\"o\":0},{\"t\":2,\"s\":1},{\"t\":11,\"i\":4,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}",
+            "body_truncated": false,
+            "size_bytes": 275
+          },
+          {
+            "url": "https://tanstack.com/_a/g/collect?v=2&tid=G-JMT1Z50SPS&gtm=45je65d0v874742341za204zd874742341&_p=1778813434371&gcd=13l3l3l2l1l1&npa=1&dma_cps=a&dma=1&_eu=AAAAAAQC&_fplc=0&are=1&cid=1894085421.1778813435&frm=0&pscdl=noapi&rcb=8&sr=1365x768&uaa=x86&uab=64&uafvl=HeadlessChrome%3B147.0.7727.15%7CNot.A%252FBrand%3B8.0.0.0%7CChromium%3B147.0.7727.15&uam=&uamb=0&uap=Windows&uapv=10.0&uaw=0&ul=en-us&tag_exp=0~115938466~115938469&dl=https%3A%2F%2Ftanstack.com%2Fvirtual%2Flatest%2Fdocs%2Fintroduction&dp=%2Fvirtual%2Flatest%2Fdocs%2Fintroduction&dt=Introduction%20%7C%20TanStack%20Virtual%20Docs&sid=1778813435&sct=1&seg=1&_tu=BA&_s=3&tfd=10132",
+            "method": "POST",
+            "status_code": 204,
+            "content_type": "text/plain",
+            "resource_type": "fetch",
+            "body_preview": "",
+            "body_truncated": false,
+            "size_bytes": 0
+          }
+        ]
+      },
+      "viewport_info": null,
+      "ua_info": null,
+      "visible_range": null,
+      "profile_health": null,
+      "failure_classification": {
+        "category": "none",
+        "severity": "low",
+        "reason": "",
+        "status_code": 200,
+        "proxy_selected": false
+      },
+      "profile_evidence": {
+        "profile_id": null,
+        "profile": null
+      },
+      "engine": "native_browser",
+      "mode": "dynamic",
+      "session_mode": "ephemeral",
+      "error": "",
+      "expected_checks": {
+        "min_rendered_items": {
+          "expected": 1,
+          "actual": 2,
+          "pass": true
+        },
+        "min_html_chars": {
+          "expected": 3000,
+          "actual": 256454,
+          "pass": true
+        }
+      }
+    }
+  ]
+}

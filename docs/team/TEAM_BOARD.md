@@ -6,11 +6,11 @@ Last updated: 2026-05-15
 
 | Employee ID | Display Name | Current Project Role | Status | Current Assignment |
 |---|---|---|---|---|
-| LLM-2026-000 | Supervisor Codex | Project Supervisor | active | Scrapling absorption baseline accepted; next hardening/training planning |
-| LLM-2026-001 | Worker Alpha | Browser Runtime Worker | standby | Native browser profile rotation and real dynamic training accepted |
-| LLM-2026-002 | Worker Beta | Proxy / Transport Runtime Worker | standby | Native async fetch pool and long-run metrics accepted |
+| LLM-2026-000 | Supervisor Codex | Project Supervisor | active | Backend execution automation hardening accepted; planning real runtime execution |
+| LLM-2026-001 | Worker Alpha | Browser Runtime Worker | standby | Profile draft generation and profile draft smoke accepted |
+| LLM-2026-002 | Worker Beta | Proxy / Transport Runtime Worker | standby | Replay executor and 30k resumable checkpoint restart accepted |
 | LLM-2026-003 | Worker Gamma | Unassigned | standby | none |
-| LLM-2026-004 | Worker Delta | Spider Runtime Worker | standby | Site profile and profile ecommerce runner accepted |
+| LLM-2026-004 | Worker Delta | Spider Runtime Worker | standby | Profile report export and real profile batch accepted |
 
 ## Current Project Roles
 
@@ -30,6 +30,7 @@ Last updated: 2026-05-15
 | Backlog Item | Source | Status | Notes |
 |---|---|---|---|
 | Real-Site Training Ladder | `docs/team/training/2026-05-08_REAL_SITE_TRAINING_LADDER.md` | active | Long-term training map for future assignments and acceptance records |
+| Real-Site Scenario Matrix | `docs/team/training/2026-05-15_REAL_SITE_SCENARIO_MATRIX.md` | active | Clean scenario matrix derived from the owner training list; current hardening round source |
 | Top Crawler Capability Roadmap | `docs/plans/2026-05-12_TOP_CRAWLER_CAPABILITY_ROADMAP.md` | active | Converts expert crawler skill checklist into CLM product capability roadmap |
 | Capability Implementation Matrix | `docs/plans/2026-05-12_CAPABILITY_IMPLEMENTATION_MATRIX.md` | active | Maps CLM work directly to the top crawler capability checklist; future tasks must cite CAP IDs |
 | Scrapling Capability Absorption Plan | `docs/plans/2026-05-14_SCRAPLING_FIRST_RUNTIME_PLAN.md` | active | Near-term mainline to absorb Scrapling 0.4.8 capabilities into CLM-native crawler backend modules |
@@ -118,6 +119,12 @@ Last updated: 2026-05-15
 | Site Profile And Profile-Driven Ecommerce Runner | LLM-2026-004 | ROLE-DOCS | accepted | `docs/team/acceptance/2026-05-14_profile_driven_ecommerce_runner_ACCEPTED.md` |
 | VisualRecon Strategy And AntiBot Integration | LLM-2026-000 | ROLE-SUPERVISOR | accepted | `docs/team/acceptance/2026-05-14_visual_recon_strategy_antibot_ACCEPTED.md` |
 | Scrapling Absorption Baseline Closeout | LLM-2026-000 | ROLE-SUPERVISOR | accepted | `docs/team/acceptance/2026-05-14_scrapling_absorption_baseline_ACCEPTED.md` |
+| Browser Profile Health And Scenario Training | LLM-2026-001 | ROLE-BROWSER | accepted | `docs/team/acceptance/2026-05-15_browser_profile_health_and_scenario_training_ACCEPTED.md` |
+| API GraphQL Training And Native Long-Run Metrics | LLM-2026-002 | ROLE-QA | accepted | `docs/team/acceptance/2026-05-15_api_graphql_longrun_metrics_ACCEPTED.md` |
+| Profile Library And Ecommerce Training | LLM-2026-004 | ROLE-DOCS | accepted | `docs/team/acceptance/2026-05-15_profile_library_ecommerce_training_ACCEPTED.md` |
+| Scrapling Harden Round 1 And 2 | LLM-2026-000 | ROLE-SUPERVISOR | accepted | `docs/team/acceptance/2026-05-15_scrapling_harden_round1_round2_ACCEPTED.md` |
+| Real Scale Reverse Profile Hardening | LLM-2026-000 | ROLE-SUPERVISOR | accepted | `docs/team/acceptance/2026-05-15_real_scale_reverse_profile_hardening_ACCEPTED.md` |
+| Backend Execution Automation Hardening | LLM-2026-000 | ROLE-SUPERVISOR | accepted | `docs/team/acceptance/2026-05-15_backend_execution_automation_hardening_ACCEPTED.md` |
 
 ## Recent Accepted Work Log
 
@@ -224,15 +231,14 @@ Last updated: 2026-05-15
 
 ## Upcoming Candidate Tasks
 
-1. SCRAPLING-HARDEN-1: Run 10k/30k native long-run stress tests through `SpiderRuntimeProcessor`, `CheckpointStore`, async fetch, and profile-driven callbacks.
-2. SCRAPLING-HARDEN-2: Run real dynamic/ecommerce profile training with native browser profile rotation, visual evidence, and checkpointed product output.
-3. SCRAPLING-HARDEN-3: Carry async/proxy/browser-pool metrics into `SpiderRunSummary` and run reports.
-4. SCRAPLING-HARDEN-4: Add persistent async client pooling, DNS reuse tuning, and adaptive concurrency.
-5. SCRAPLING-HARDEN-5: Add browser profile health scoring and domain-aware profile selection.
-6. SCRAPLING-HARDEN-6: Wire observed API pagination into profile-driven ecommerce runner.
-7. CAP-2.1 / CAP-2.2: Build JS hook/sandbox MVP for signature-function localization and replay planning.
-8. CAP-5.2: Add real OCR provider adapter and screenshot-to-DOM alignment.
-9. UX-P1: Simplify user onboarding around `clm.py`, FastAPI, and future UI config without weakening the native backend.
+1. REPLAY-RUNTIME-1: Add a real JS/WebCrypto sandbox execution path behind the accepted replay result contract.
+2. PROFILE-AUTO-2: Add advisor-assisted profile refinement, selector repair, and missing-field explanation on top of generated drafts.
+3. SCALE-RUNTIME-1: Connect resumable checkpoint logic to real `URLFrontier`, `SpiderRuntimeProcessor`, and `ProductStore` long-running jobs.
+4. REAL-ECOM-2: Run 600+ records through profile runner on public ecommerce/API targets with profile-run reports.
+5. RUNTIME-HARDEN-1: Add persistent async client pooling, DNS reuse tuning, and adaptive concurrency using the accepted scale metrics.
+6. REAL-HARDEN-5: Expand real dynamic training to harder virtualized/protected-profile targets from the scenario matrix.
+7. VISUAL-HARDEN-1: Add real OCR provider adapter and screenshot-to-DOM alignment.
+8. UX-P1: Simplify user onboarding around `clm.py`, FastAPI, and future UI config without weakening the native backend.
 
 ## Supervisor Notes
 
@@ -252,3 +258,13 @@ Last updated: 2026-05-15
   patterns. Transition adapters remain useful as comparison oracles, but the
   product direction is now hardening, large-run proof, and easier operation on
   top of CLM-owned modules.
+- The 2026-05-15 hardening closeout accepted real dynamic evidence, real
+  product-like API profile training, 10k native stress, 30k smoke artifact,
+  quality gates, and hook/sandbox planning. Next work should move from
+  diagnosis/planning into executable reverse replay and automatic profile
+  drafting.
+- The later 2026-05-15 execution automation closeout accepted deterministic
+  replay execution fixtures, generated runnable profile drafts, profile run
+  reports, and 30k pause/resume checkpoint restart evidence. Next work should
+  connect these pieces to real JS sandbox execution and real long-running
+  ecommerce runs.

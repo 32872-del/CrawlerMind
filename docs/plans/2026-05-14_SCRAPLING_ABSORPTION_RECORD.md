@@ -40,6 +40,12 @@ SCRAPLING-ABSORB-3G site profile and profile-driven ecommerce runner is accepted
 CAP-5.2 VisualRecon Strategy/AntiBot integration is accepted.
 Scrapling major backend capability absorption baseline is accepted.
 Remaining work is hardening, scale proof, real-site training, and UX simplification.
+SCRAPLING-HARDEN round 1/2 is accepted: browser profile health/scenario
+training, API/GraphQL/reverse evidence training, native long-run metrics, and
+profile ecommerce training now have deterministic tests and artifacts.
+BACKEND-EXECUTION-AUTOMATION is accepted: runnable profile drafts,
+deterministic replay execution fixtures, profile run reports, and 30k
+checkpoint restart evidence are now part of the CLM-native backend track.
 ```
 
 Already accepted:
@@ -82,6 +88,17 @@ Already accepted:
 - browser profile rotation and real dynamic training evidence
 - profile-driven ecommerce runner smoke evidence
 - visual strategy / AntiBotReport evidence integration
+- browser profile health and scenario training evidence
+- API/GraphQL/reverse evidence training
+- native long-run metrics stress evidence
+- profile ecommerce training with DOM/API/mixed profile families
+- `autonomous_crawler/runners/profile_draft.py`
+- `autonomous_crawler/tools/replay_executor.py`
+- `autonomous_crawler/runners/profile_report.py`
+- profile draft training evidence
+- replay executor training evidence
+- resumable 30k checkpoint restart evidence
+- real profile batch report evidence
 
 Transition adapters are still useful as bridges and benchmarks. They should not
 be treated as the final backend architecture.
@@ -214,9 +231,12 @@ Acceptance:
 - recoverable local spider smoke with first-pass pause and resume - accepted
 - failure buckets visible in checkpoint store - accepted in local smoke
 - profile-driven ecommerce smoke - accepted
-- 1,000 / 10,000 / 30,000 synthetic native scale checks - pending
-- at least one 600+ real ecommerce training regression through native profile
-  runner - pending
+- 1,000 / 10,000 / 30,000 synthetic native scale checks - accepted as smoke
+  evidence; 10,000 URL supervisor rerun passed with 0 failures
+- real public product-like ecommerce profile training - accepted on DummyJSON
+  with 75 records and passing quality gate
+- larger 600+ native profile ecommerce regression - still planned as a next
+  product-scale training milestone
 
 Acceptance records:
 
@@ -264,9 +284,66 @@ OK
 
 Current conclusion: the Scrapling-inspired backend absorption baseline is
 complete enough to stop treating Scrapling as a separate backend dependency in
-planning. CLM now owns the baseline capability modules. The next stage is
-evidence-driven hardening: larger runs, real dynamic/ecommerce training,
-profile health scoring, async pooling, and simpler operator experience.
+planning. CLM now owns the baseline capability modules. The next stage is to
+turn the accepted evidence and planning layers into operator-facing execution:
+automatic profile drafting, executable reverse replay fixtures, adaptive
+concurrency, and broader real dynamic/ecommerce training.
+
+Hardening round 1/2 update:
+
+```text
+python -m unittest discover -s autonomous_crawler/tests
+Ran 1903 tests in 82.387s
+OK (skipped=5)
+```
+
+Accepted hardening records:
+
+- `docs/team/acceptance/2026-05-15_browser_profile_health_and_scenario_training_ACCEPTED.md`
+- `docs/team/acceptance/2026-05-15_api_graphql_longrun_metrics_ACCEPTED.md`
+- `docs/team/acceptance/2026-05-15_profile_library_ecommerce_training_ACCEPTED.md`
+- `docs/team/acceptance/2026-05-15_scrapling_harden_round1_round2_ACCEPTED.md`
+- `docs/team/acceptance/2026-05-15_real_scale_reverse_profile_hardening_ACCEPTED.md`
+
+Final 2026-05-15 supervisor closeout:
+
+```text
+python run_native_longrun_stress_2026_05_15.py --count 10000
+Succeeded: 10000, Failed: 0, Throughput: 2211.2 URLs/s
+
+python run_real_ecommerce_profile_training_2026_05_15.py
+accepted=true, record_count=75, quality_gate.passed=true
+
+python -m unittest discover -s autonomous_crawler/tests
+Ran 1968 tests in 83.336s
+OK (skipped=5)
+```
+
+Backend execution automation closeout:
+
+```text
+python -m unittest discover -s autonomous_crawler/tests
+Ran 2062 tests in 84.067s
+OK (skipped=5)
+
+python run_profile_draft_training_2026_05_15.py
+Loadable: 10/10, runner compatible: 10/10, total_initial_requests: 10
+
+python run_replay_executor_training_2026_05_15.py
+9 scenarios, 9 passed, credential leak none
+
+python run_scale_resume_2026_05_15.py --count 30000
+Total processed: 30000, Unique URLs: 30000, Duplicates: 0, Failed: 0, final_ckpt_succeeded: 30000
+
+python run_profile_real_batch_2026_05_15.py
+accepted=true, total_real_records=168
+```
+
+Current next stage: CLM has absorbed the major Scrapling-inspired backend
+patterns into native modules. The priority is no longer proving that these
+pieces can exist independently; it is connecting them into real execution:
+real JS/WebCrypto replay runtime, advisor-assisted profile refinement, real
+long-running checkpointed ecommerce jobs, and broader dynamic-site training.
 
 ## Non-Goals
 

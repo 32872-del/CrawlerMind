@@ -1,0 +1,132 @@
+{
+  "name": "fixture-ecommerce-mixed-hydration",
+  "selectors": {
+    "list": {
+      "item_container": "#hydrated-catalog .product-card",
+      "detail_link": "#hydrated-catalog .product-link@href"
+    },
+    "detail": {
+      "title": {
+        "selector": "article.product h1",
+        "many": false,
+        "required": true
+      },
+      "highest_price": {
+        "selector": "article.product [data-price]",
+        "attribute": "data-price",
+        "many": false,
+        "required": true
+      },
+      "colors": {
+        "selector": "article.product .swatch",
+        "attribute": "data-color",
+        "many": true
+      },
+      "sizes": {
+        "selector": "article.product .size",
+        "many": true
+      },
+      "description": {
+        "selector": "article.product .description",
+        "many": false
+      },
+      "image_urls": {
+        "selector": "article.product img.product-photo",
+        "attribute": "src",
+        "many": true
+      }
+    }
+  },
+  "target_fields": [
+    "title",
+    "highest_price",
+    "colors",
+    "sizes",
+    "description",
+    "image_urls"
+  ],
+  "api_hints": {
+    "endpoint": "https://mixed-profile-shop.local/api/products",
+    "method": "GET",
+    "kind": "api",
+    "items_path": "payload.items",
+    "field_mapping": {
+      "title": "title",
+      "highest_price": "pricing.current",
+      "currency": "pricing.currency",
+      "canonical_url": "href",
+      "colors": "facets.colors",
+      "sizes": "facets.sizes",
+      "description": "summary",
+      "image_urls": "images"
+    },
+    "params": {
+      "collection": "hydrated-training"
+    }
+  },
+  "pagination_hints": {
+    "type": "cursor",
+    "cursor_param": "cursor",
+    "initial_cursor": "start",
+    "next_cursor_path": "payload.next_cursor",
+    "page_size_param": "limit",
+    "page_size": 25,
+    "link_discovery": {
+      "allow": [
+        "/products/"
+      ],
+      "allow_domains": [
+        "mixed-profile-shop.local"
+      ],
+      "restrict_css": [
+        "#hydrated-catalog"
+      ],
+      "classify": {
+        "detail": "/products/"
+      },
+      "default_kind": "detail",
+      "priority": 7,
+      "max_links": 20
+    }
+  },
+  "access_config": {
+    "mode": "mixed_static_api_fallback",
+    "login_required": false,
+    "captcha_bypass": false,
+    "hydration_expected": true,
+    "browser_fallback": "optional"
+  },
+  "rate_limits": {
+    "default": {
+      "delay_seconds": 0
+    }
+  },
+  "quality_expectations": {
+    "min_items": 50,
+    "required_fields": [
+      "title",
+      "highest_price",
+      "category",
+      "image_urls"
+    ],
+    "currency": "EUR",
+    "category": "hydrated-training"
+  },
+  "training_notes": [
+    "Mixed SSR + hydration profile example.",
+    "DOM list/detail selectors document SSR fallback.",
+    "Cursor API hints document observed hydration API replay when available."
+  ],
+  "constraints": {
+    "max_items": 75,
+    "seed_urls": [
+      "https://mixed-profile-shop.local/collections/hydrated-training"
+    ]
+  },
+  "crawl_preferences": {
+    "runtime": "native_static",
+    "parser": "native_parser",
+    "seed_kind": "list",
+    "include_seed_urls_with_api": true
+  }
+}

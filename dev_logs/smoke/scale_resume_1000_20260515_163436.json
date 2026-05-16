@@ -1,0 +1,30 @@
+{
+  "total_urls": 1000,
+  "processed_before_pause": 600,
+  "processed_after_resume": 400,
+  "total_processed": 1000,
+  "unique_urls": 1000,
+  "duplicate_count": 0,
+  "failed_count": 0,
+  "checkpoint_roundtrip": {
+    "status_ok": true,
+    "phase1_succeeded": 600,
+    "phase2_succeeded": 400,
+    "total_succeeded": 1000,
+    "final_ckpt_succeeded": 1000,
+    "final_ckpt_failed": 0,
+    "proxy_fields_ok": true,
+    "async_fields_ok": true
+  },
+  "timing": {
+    "phase1_seconds": 0.395,
+    "phase2_seconds": 0.257,
+    "total_seconds": 0.652,
+    "throughput_urls_per_sec": 1533.9
+  },
+  "pause_resume": {
+    "pause_at": 600,
+    "remaining_after_pause": 400,
+    "resume_completed": 400
+  }
+}

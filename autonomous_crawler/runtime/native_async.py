@@ -225,11 +225,14 @@ class NativeAsyncFetchRuntime:
         self,
         max_per_domain: int = 4,
         max_global: int = 16,
+        *,
+        shared_client: httpx.AsyncClient | None = None,
     ) -> None:
         self._pool = DomainConcurrencyPool(
             max_per_domain=max_per_domain,
             max_global=max_global,
         )
+        self._shared_client = shared_client
 
     @property
     def pool(self) -> DomainConcurrencyPool:
@@ -492,6 +495,18 @@ class NativeAsyncFetchRuntime:
     ) -> httpx.Response:
         if not proxy_url:
             proxy_url = _proxy_url_for(request) or ""
+
+        request_kwargs: dict[str, Any] = {
+            "method": request.method,
+            "url": request.url,
+            "params": request.params or None,
+            "content": request.data if request.json is None else None,
+            "json": request.json,
+        }
+
+        if self._shared_client is not None:
+            return await self._shared_client.request(**request_kwargs)
+
         timeout = max(request.timeout_ms / 1000, 1.0)
         client_kwargs: dict[str, Any] = {
             "follow_redirects": True,
@@ -503,13 +518,7 @@ class NativeAsyncFetchRuntime:
             client_kwargs["proxy"] = proxy_url
 
         async with httpx.AsyncClient(**client_kwargs) as client:
-            return await client.request(
-                request.method,
-                request.url,
-                params=request.params or None,
-                content=request.data if request.json is None else None,
-                json=request.json,
-            )
+            return await client.request(**request_kwargs)
 
     def _fetch_curl_cffi_sync(
         self, request: RuntimeRequest, proxy_url: str = ""

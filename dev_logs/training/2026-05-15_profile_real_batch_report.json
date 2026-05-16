@@ -1,0 +1,1233 @@
+{
+  "task": "PROFILE-HARDEN-3 real profile training batch",
+  "profiles": [
+    {
+      "profile": "real-dummyjson-products",
+      "profile_path": "autonomous_crawler\\tests\\fixtures\\ecommerce_real_dummyjson_profile.json",
+      "real_result": {
+        "label": "real",
+        "accepted": true,
+        "record_count": 75,
+        "runner": {
+          "run_id": "profile-real-batch-real-dummyjson-products",
+          "batches": 3,
+          "claimed": 3,
+          "succeeded": 3,
+          "failed": 0,
+          "retried": 0,
+          "records_saved": 75,
+          "discovered_urls": 2,
+          "checkpoint_errors": 0,
+          "item_errors": [],
+          "frontier_stats": {
+            "done": 3
+          }
+        },
+        "frontier_stats": {
+          "done": 3
+        },
+        "quality_summary": {
+          "total_records": 75,
+          "min_items": 50,
+          "meets_min_items": true,
+          "field_completeness": {
+            "title": 1.0,
+            "price": 1.0,
+            "highest_price": 1.0,
+            "category": 1.0,
+            "description": 1.0,
+            "image_urls": 1.0,
+            "colors": 1.0,
+            "sizes": 1.0
+          },
+          "duplicate_count": 0,
+          "duplicate_rate": 0.0,
+          "duplicate_key_strategy": {
+            "field": "dedupe_key",
+            "source": "ProductRecord",
+            "strategy": "sha256(source_site | category | canonical_url_or_source_url_or_title)[:32]",
+            "category_aware": true,
+            "notes": [
+              "The runner compares generated ProductRecord.dedupe_key values.",
+              "Duplicate rate quality depends on profile canonical URL mapping quality."
+            ]
+          },
+          "failed_urls": [],
+          "failed_url_count": 0,
+          "pagination_stop_reason": "offset_max_pages_or_empty_page",
+          "frontier_stats": {
+            "done": 3
+          },
+          "quality_policy": {
+            "mode": "warn",
+            "min_items": 50,
+            "field_thresholds": {
+              "title": 0.95,
+              "price": 0.95,
+              "category": 0.95,
+              "description": 0.8,
+              "image_urls": 0.8
+            },
+            "max_duplicate_rate": 0.05,
+            "max_failed_url_count": 0
+          },
+          "quality_gate": {
+            "mode": "warn",
+            "passed": true,
+            "should_fail": false,
+            "severity": "pass",
+            "checks": [
+              {
+                "name": "min_items",
+                "passed": true,
+                "expected": 50,
+                "actual": 75,
+                "severity": "pass"
+              },
+              {
+                "name": "duplicate_rate",
+                "passed": true,
+                "expected": 0.05,
+                "actual": 0.0,
+                "severity": "pass"
+              },
+              {
+                "name": "failed_url_count",
+                "passed": true,
+                "expected": 0,
+                "actual": 0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:category",
+                "field": "category",
+                "passed": true,
+                "expected": 0.95,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:description",
+                "field": "description",
+                "passed": true,
+                "expected": 0.8,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:image_urls",
+                "field": "image_urls",
+                "passed": true,
+                "expected": 0.8,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:price",
+                "field": "price",
+                "passed": true,
+                "expected": 0.95,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:title",
+                "field": "title",
+                "passed": true,
+                "expected": 0.95,
+                "actual": 1.0,
+                "severity": "pass"
+              }
+            ]
+          }
+        },
+        "report": {
+          "schema_version": "profile-run-report/v1",
+          "generated_at": "2026-05-15T08:26:13.577522+00:00",
+          "profile": {
+            "name": "real-dummyjson-products",
+            "path": "autonomous_crawler\\tests\\fixtures\\ecommerce_real_dummyjson_profile.json",
+            "target": "https://dummyjson.com/products"
+          },
+          "run": {
+            "run_id": "profile-real-batch-real-dummyjson-products",
+            "runtime_backend": "native_static",
+            "parser_backend": "json_profile",
+            "runner_summary": {
+              "run_id": "profile-real-batch-real-dummyjson-products",
+              "batches": 3,
+              "claimed": 3,
+              "succeeded": 3,
+              "failed": 0,
+              "retried": 0,
+              "records_saved": 75,
+              "discovered_urls": 2,
+              "checkpoint_errors": 0,
+              "item_errors": [],
+              "frontier_stats": {
+                "done": 3
+              }
+            },
+            "stop_reason": "offset_max_pages_or_empty_page"
+          },
+          "metrics": {
+            "record_count": 75,
+            "field_completeness": {
+              "title": 1.0,
+              "price": 1.0,
+              "highest_price": 1.0,
+              "category": 1.0,
+              "description": 1.0,
+              "image_urls": 1.0,
+              "colors": 1.0,
+              "sizes": 1.0
+            },
+            "duplicate_rate": 0.0,
+            "duplicate_count": 0,
+            "failed_url_count": 0,
+            "failed_urls": [],
+            "frontier_stats": {
+              "done": 3
+            }
+          },
+          "quality_gate": {
+            "mode": "warn",
+            "passed": true,
+            "should_fail": false,
+            "severity": "pass",
+            "checks": [
+              {
+                "name": "min_items",
+                "passed": true,
+                "expected": 50,
+                "actual": 75,
+                "severity": "pass"
+              },
+              {
+                "name": "duplicate_rate",
+                "passed": true,
+                "expected": 0.05,
+                "actual": 0.0,
+                "severity": "pass"
+              },
+              {
+                "name": "failed_url_count",
+                "passed": true,
+                "expected": 0,
+                "actual": 0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:category",
+                "field": "category",
+                "passed": true,
+                "expected": 0.95,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:description",
+                "field": "description",
+                "passed": true,
+                "expected": 0.8,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:image_urls",
+                "field": "image_urls",
+                "passed": true,
+                "expected": 0.8,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:price",
+                "field": "price",
+                "passed": true,
+                "expected": 0.95,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:title",
+                "field": "title",
+                "passed": true,
+                "expected": 0.95,
+                "actual": 1.0,
+                "severity": "pass"
+              }
+            ]
+          },
+          "quality_policy": {
+            "mode": "warn",
+            "min_items": 50,
+            "field_thresholds": {
+              "title": 0.95,
+              "price": 0.95,
+              "category": 0.95,
+              "description": 0.8,
+              "image_urls": 0.8
+            },
+            "max_duplicate_rate": 0.05,
+            "max_failed_url_count": 0
+          },
+          "duplicate_key_strategy": {
+            "field": "dedupe_key",
+            "source": "ProductRecord",
+            "strategy": "sha256(source_site | category | canonical_url_or_source_url_or_title)[:32]",
+            "category_aware": true,
+            "notes": [
+              "The runner compares generated ProductRecord.dedupe_key values.",
+              "Duplicate rate quality depends on profile canonical URL mapping quality."
+            ]
+          },
+          "samples": [
+            {
+              "title": "Essence Mascara Lash Princess",
+              "price": 9.99,
+              "category": "catalog",
+              "description": "The Essence Mascara Lash Princess is a popular mascara known for its volumizing and lengthening effects. Achieve dramatic lashes with this long-lasting and cruelty-free formula.",
+              "image_urls": [
+                "https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/thumbnail.webp",
+                "https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/1.webp"
+              ],
+              "canonical_url": "https://dummyjson.com/1"
+            },
+            {
+              "title": "Eyeshadow Palette with Mirror",
+              "price": 19.99,
+              "category": "catalog",
+              "description": "The Eyeshadow Palette with Mirror offers a versatile range of eyeshadow shades for creating stunning eye looks. With a built-in mirror, it's convenient for on-the-go makeup application.",
+              "image_urls": [
+                "https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/thumbnail.webp",
+                "https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/1.webp"
+              ],
+              "canonical_url": "https://dummyjson.com/2"
+            },
+            {
+              "title": "Powder Canister",
+              "price": 14.99,
+              "category": "catalog",
+              "description": "The Powder Canister is a finely milled setting powder designed to set makeup and control shine. With a lightweight and translucent formula, it provides a smooth and matte finish.",
+              "image_urls": [
+                "https://cdn.dummyjson.com/product-images/beauty/powder-canister/thumbnail.webp",
+                "https://cdn.dummyjson.com/product-images/beauty/powder-canister/1.webp"
+              ],
+              "canonical_url": "https://dummyjson.com/3"
+            },
+            {
+              "title": "Red Lipstick",
+              "price": 12.99,
+              "category": "catalog",
+              "description": "The Red Lipstick is a classic and bold choice for adding a pop of color to your lips. With a creamy and pigmented formula, it provides a vibrant and long-lasting finish.",
+              "image_urls": [
+                "https://cdn.dummyjson.com/product-images/beauty/red-lipstick/thumbnail.webp",
+                "https://cdn.dummyjson.com/product-images/beauty/red-lipstick/1.webp"
+              ],
+              "canonical_url": "https://dummyjson.com/4"
+            },
+            {
+              "title": "Red Nail Polish",
+              "price": 8.99,
+              "category": "catalog",
+              "description": "The Red Nail Polish offers a rich and glossy red hue for vibrant and polished nails. With a quick-drying formula, it provides a salon-quality finish at home.",
+              "image_urls": [
+                "https://cdn.dummyjson.com/product-images/beauty/red-nail-polish/thumbnail.webp",
+                "https://cdn.dummyjson.com/product-images/beauty/red-nail-polish/1.webp"
+              ],
+              "canonical_url": "https://dummyjson.com/5"
+            }
+          ],
+          "failures": [],
+          "next_actions": [
+            "No immediate quality gate action required; continue broader real-site regression."
+          ],
+          "notes": [
+            "REAL-HARDEN-3 public ecommerce-like product API training profile.",
+            "Uses DummyJSON products endpoint with offset pagination.",
+            "No auth, cookies, private headers, proxy, or runtime site rules."
+          ],
+          "accepted": true
+        },
+        "failures": [],
+        "sample_records": [
+          {
+            "title": "Essence Mascara Lash Princess",
+            "price": 9.99,
+            "category": "catalog",
+            "description": "The Essence Mascara Lash Princess is a popular mascara known for its volumizing and lengthening effects. Achieve dramatic lashes with this long-lasting and cruelty-free formula.",
+            "image_urls": [
+              "https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/thumbnail.webp",
+              "https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/1.webp"
+            ],
+            "canonical_url": "https://dummyjson.com/1"
+          },
+          {
+            "title": "Eyeshadow Palette with Mirror",
+            "price": 19.99,
+            "category": "catalog",
+            "description": "The Eyeshadow Palette with Mirror offers a versatile range of eyeshadow shades for creating stunning eye looks. With a built-in mirror, it's convenient for on-the-go makeup application.",
+            "image_urls": [
+              "https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/thumbnail.webp",
+              "https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/1.webp"
+            ],
+            "canonical_url": "https://dummyjson.com/2"
+          },
+          {
+            "title": "Powder Canister",
+            "price": 14.99,
+            "category": "catalog",
+            "description": "The Powder Canister is a finely milled setting powder designed to set makeup and control shine. With a lightweight and translucent formula, it provides a smooth and matte finish.",
+            "image_urls": [
+              "https://cdn.dummyjson.com/product-images/beauty/powder-canister/thumbnail.webp",
+              "https://cdn.dummyjson.com/product-images/beauty/powder-canister/1.webp"
+            ],
+            "canonical_url": "https://dummyjson.com/3"
+          },
+          {
+            "title": "Red Lipstick",
+            "price": 12.99,
+            "category": "catalog",
+            "description": "The Red Lipstick is a classic and bold choice for adding a pop of color to your lips. With a creamy and pigmented formula, it provides a vibrant and long-lasting finish.",
+            "image_urls": [
+              "https://cdn.dummyjson.com/product-images/beauty/red-lipstick/thumbnail.webp",
+              "https://cdn.dummyjson.com/product-images/beauty/red-lipstick/1.webp"
+            ],
+            "canonical_url": "https://dummyjson.com/4"
+          },
+          {
+            "title": "Red Nail Polish",
+            "price": 8.99,
+            "category": "catalog",
+            "description": "The Red Nail Polish offers a rich and glossy red hue for vibrant and polished nails. With a quick-drying formula, it provides a salon-quality finish at home.",
+            "image_urls": [
+              "https://cdn.dummyjson.com/product-images/beauty/red-nail-polish/thumbnail.webp",
+              "https://cdn.dummyjson.com/product-images/beauty/red-nail-polish/1.webp"
+            ],
+            "canonical_url": "https://dummyjson.com/5"
+          }
+        ],
+        "runtime_name": "native_static"
+      },
+      "fixture_regression": null
+    },
+    {
+      "profile": "real-platzi-fake-store-products",
+      "profile_path": "autonomous_crawler\\tests\\fixtures\\ecommerce_real_platzi_profile.json",
+      "real_result": {
+        "label": "real",
+        "accepted": true,
+        "record_count": 73,
+        "runner": {
+          "run_id": "profile-real-batch-real-platzi-fake-store-products",
+          "batches": 2,
+          "claimed": 2,
+          "succeeded": 2,
+          "failed": 0,
+          "retried": 0,
+          "records_saved": 73,
+          "discovered_urls": 1,
+          "checkpoint_errors": 0,
+          "item_errors": [],
+          "frontier_stats": {
+            "done": 2
+          }
+        },
+        "frontier_stats": {
+          "done": 2
+        },
+        "quality_summary": {
+          "total_records": 73,
+          "min_items": 50,
+          "meets_min_items": true,
+          "field_completeness": {
+            "title": 1.0,
+            "price": 1.0,
+            "highest_price": 1.0,
+            "category": 1.0,
+            "description": 1.0,
+            "image_urls": 1.0,
+            "colors": 0.0,
+            "sizes": 0.0
+          },
+          "duplicate_count": 0,
+          "duplicate_rate": 0.0,
+          "duplicate_key_strategy": {
+            "field": "dedupe_key",
+            "source": "ProductRecord",
+            "strategy": "sha256(source_site | category | canonical_url_or_source_url_or_title)[:32]",
+            "category_aware": true,
+            "notes": [
+              "The runner compares generated ProductRecord.dedupe_key values.",
+              "Duplicate rate quality depends on profile canonical URL mapping quality."
+            ]
+          },
+          "failed_urls": [],
+          "failed_url_count": 0,
+          "pagination_stop_reason": "offset_max_pages_or_empty_page",
+          "frontier_stats": {
+            "done": 2
+          },
+          "quality_policy": {
+            "mode": "warn",
+            "min_items": 50,
+            "field_thresholds": {
+              "title": 0.95,
+              "price": 0.95,
+              "category": 0.95,
+              "description": 0.8,
+              "image_urls": 0.8
+            },
+            "max_duplicate_rate": 0.05,
+            "max_failed_url_count": 0
+          },
+          "quality_gate": {
+            "mode": "warn",
+            "passed": true,
+            "should_fail": false,
+            "severity": "pass",
+            "checks": [
+              {
+                "name": "min_items",
+                "passed": true,
+                "expected": 50,
+                "actual": 73,
+                "severity": "pass"
+              },
+              {
+                "name": "duplicate_rate",
+                "passed": true,
+                "expected": 0.05,
+                "actual": 0.0,
+                "severity": "pass"
+              },
+              {
+                "name": "failed_url_count",
+                "passed": true,
+                "expected": 0,
+                "actual": 0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:category",
+                "field": "category",
+                "passed": true,
+                "expected": 0.95,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:description",
+                "field": "description",
+                "passed": true,
+                "expected": 0.8,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:image_urls",
+                "field": "image_urls",
+                "passed": true,
+                "expected": 0.8,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:price",
+                "field": "price",
+                "passed": true,
+                "expected": 0.95,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:title",
+                "field": "title",
+                "passed": true,
+                "expected": 0.95,
+                "actual": 1.0,
+                "severity": "pass"
+              }
+            ]
+          }
+        },
+        "report": {
+          "schema_version": "profile-run-report/v1",
+          "generated_at": "2026-05-15T08:26:19.624872+00:00",
+          "profile": {
+            "name": "real-platzi-fake-store-products",
+            "path": "autonomous_crawler\\tests\\fixtures\\ecommerce_real_platzi_profile.json",
+            "target": "https://api.escuelajs.co/api/v1/products"
+          },
+          "run": {
+            "run_id": "profile-real-batch-real-platzi-fake-store-products",
+            "runtime_backend": "native_static",
+            "parser_backend": "json_profile",
+            "runner_summary": {
+              "run_id": "profile-real-batch-real-platzi-fake-store-products",
+              "batches": 2,
+              "claimed": 2,
+              "succeeded": 2,
+              "failed": 0,
+              "retried": 0,
+              "records_saved": 73,
+              "discovered_urls": 1,
+              "checkpoint_errors": 0,
+              "item_errors": [],
+              "frontier_stats": {
+                "done": 2
+              }
+            },
+            "stop_reason": "offset_max_pages_or_empty_page"
+          },
+          "metrics": {
+            "record_count": 73,
+            "field_completeness": {
+              "title": 1.0,
+              "price": 1.0,
+              "highest_price": 1.0,
+              "category": 1.0,
+              "description": 1.0,
+              "image_urls": 1.0,
+              "colors": 0.0,
+              "sizes": 0.0
+            },
+            "duplicate_rate": 0.0,
+            "duplicate_count": 0,
+            "failed_url_count": 0,
+            "failed_urls": [],
+            "frontier_stats": {
+              "done": 2
+            }
+          },
+          "quality_gate": {
+            "mode": "warn",
+            "passed": true,
+            "should_fail": false,
+            "severity": "pass",
+            "checks": [
+              {
+                "name": "min_items",
+                "passed": true,
+                "expected": 50,
+                "actual": 73,
+                "severity": "pass"
+              },
+              {
+                "name": "duplicate_rate",
+                "passed": true,
+                "expected": 0.05,
+                "actual": 0.0,
+                "severity": "pass"
+              },
+              {
+                "name": "failed_url_count",
+                "passed": true,
+                "expected": 0,
+                "actual": 0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:category",
+                "field": "category",
+                "passed": true,
+                "expected": 0.95,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:description",
+                "field": "description",
+                "passed": true,
+                "expected": 0.8,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:image_urls",
+                "field": "image_urls",
+                "passed": true,
+                "expected": 0.8,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:price",
+                "field": "price",
+                "passed": true,
+                "expected": 0.95,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:title",
+                "field": "title",
+                "passed": true,
+                "expected": 0.95,
+                "actual": 1.0,
+                "severity": "pass"
+              }
+            ]
+          },
+          "quality_policy": {
+            "mode": "warn",
+            "min_items": 50,
+            "field_thresholds": {
+              "title": 0.95,
+              "price": 0.95,
+              "category": 0.95,
+              "description": 0.8,
+              "image_urls": 0.8
+            },
+            "max_duplicate_rate": 0.05,
+            "max_failed_url_count": 0
+          },
+          "duplicate_key_strategy": {
+            "field": "dedupe_key",
+            "source": "ProductRecord",
+            "strategy": "sha256(source_site | category | canonical_url_or_source_url_or_title)[:32]",
+            "category_aware": true,
+            "notes": [
+              "The runner compares generated ProductRecord.dedupe_key values.",
+              "Duplicate rate quality depends on profile canonical URL mapping quality."
+            ]
+          },
+          "samples": [
+            {
+              "title": "Majestic Mountain Graphic T-Shirt",
+              "price": 44.0,
+              "category": "catalog",
+              "description": "Elevate your wardrobe with this stylish black t-shirt featuring a striking monochrome mountain range graphic. Perfect for those who love the outdoors or want to add a touch of nature-inspired design to their look, this tee is crafted from soft, breathable fabric ensuring all-day comfort. Ideal for casual outings or as a unique gift, this t-shirt is a versatile addition to any collection.",
+              "image_urls": [
+                "https://i.imgur.com/QkIa5tT.jpeg"
+              ],
+              "canonical_url": "https://api.escuelajs.co/api/v1/1"
+            },
+            {
+              "title": "Classic Red Pullover Hoodie",
+              "price": 111.0,
+              "category": "catalog",
+              "description": "Elevate your casual wardrobe with our Classic Red Pullover Hoodie. Crafted with a soft cotton blend for ultimate comfort, this vibrant red hoodie features a kangaroo pocket, adjustable drawstring hood, and ribbed cuffs for a snug fit. The timeless design ensures easy pairing with jeans or joggers for a relaxed yet stylish look, making it a versatile addition to your everyday attire.",
+              "image_urls": [
+                "https://i.imgur.com/1twoaDy.jpeg",
+                "https://i.imgur.com/1twoaDy.jpeg"
+              ],
+              "canonical_url": "https://api.escuelajs.co/api/v1/2"
+            },
+            {
+              "title": "Classic Heather Gray Hoodie",
+              "price": 69.0,
+              "category": "catalog",
+              "description": "Stay cozy and stylish with our Classic Heather Gray Hoodie. Crafted from soft, durable fabric, it features a kangaroo pocket, adjustable drawstring hood, and ribbed cuffs. Perfect for a casual day out or a relaxing evening in, this hoodie is a versatile addition to any wardrobe.",
+              "image_urls": [
+                "https://i.imgur.com/cHddUCu.jpeg",
+                "https://i.imgur.com/CFOjAgK.jpeg"
+              ],
+              "canonical_url": "https://api.escuelajs.co/api/v1/3"
+            },
+            {
+              "title": "Classic Grey Hooded Sweatshirt",
+              "price": 90.0,
+              "category": "catalog",
+              "description": "Elevate your casual wear with our Classic Grey Hooded Sweatshirt. Made from a soft cotton blend, this hoodie features a front kangaroo pocket, an adjustable drawstring hood, and ribbed cuffs for a snug fit. Perfect for those chilly evenings or lazy weekends, it pairs effortlessly with your favorite jeans or joggers.",
+              "image_urls": [
+                "https://i.imgur.com/R2PN9Wq.jpeg",
+                "https://i.imgur.com/IvxMPFr.jpeg"
+              ],
+              "canonical_url": "https://api.escuelajs.co/api/v1/4"
+            },
+            {
+              "title": "Classic Black Hooded Sweatshirt",
+              "price": 79.0,
+              "category": "catalog",
+              "description": "Elevate your casual wardrobe with our Classic Black Hooded Sweatshirt. Made from high-quality, soft fabric that ensures comfort and durability, this hoodie features a spacious kangaroo pocket and an adjustable drawstring hood. Its versatile design makes it perfect for a relaxed day at home or a casual outing.",
+              "image_urls": [
+                "https://i.imgur.com/cSytoSD.jpeg",
+                "https://i.imgur.com/WwKucXb.jpeg"
+              ],
+              "canonical_url": "https://api.escuelajs.co/api/v1/5"
+            }
+          ],
+          "failures": [],
+          "next_actions": [
+            "No immediate quality gate action required; continue broader real-site regression."
+          ],
+          "notes": [
+            "Public product-like API profile for profile real batch training.",
+            "Uses offset/limit pagination and profile field mapping only.",
+            "No auth, cookies, private headers, proxy, or runtime site rules."
+          ],
+          "accepted": true
+        },
+        "failures": [],
+        "sample_records": [
+          {
+            "title": "Majestic Mountain Graphic T-Shirt",
+            "price": 44.0,
+            "category": "catalog",
+            "description": "Elevate your wardrobe with this stylish black t-shirt featuring a striking monochrome mountain range graphic. Perfect for those who love the outdoors or want to add a touch of nature-inspired design to their look, this tee is crafted from soft, breathable fabric ensuring all-day comfort. Ideal for casual outings or as a unique gift, this t-shirt is a versatile addition to any collection.",
+            "image_urls": [
+              "https://i.imgur.com/QkIa5tT.jpeg"
+            ],
+            "canonical_url": "https://api.escuelajs.co/api/v1/1"
+          },
+          {
+            "title": "Classic Red Pullover Hoodie",
+            "price": 111.0,
+            "category": "catalog",
+            "description": "Elevate your casual wardrobe with our Classic Red Pullover Hoodie. Crafted with a soft cotton blend for ultimate comfort, this vibrant red hoodie features a kangaroo pocket, adjustable drawstring hood, and ribbed cuffs for a snug fit. The timeless design ensures easy pairing with jeans or joggers for a relaxed yet stylish look, making it a versatile addition to your everyday attire.",
+            "image_urls": [
+              "https://i.imgur.com/1twoaDy.jpeg",
+              "https://i.imgur.com/1twoaDy.jpeg"
+            ],
+            "canonical_url": "https://api.escuelajs.co/api/v1/2"
+          },
+          {
+            "title": "Classic Heather Gray Hoodie",
+            "price": 69.0,
+            "category": "catalog",
+            "description": "Stay cozy and stylish with our Classic Heather Gray Hoodie. Crafted from soft, durable fabric, it features a kangaroo pocket, adjustable drawstring hood, and ribbed cuffs. Perfect for a casual day out or a relaxing evening in, this hoodie is a versatile addition to any wardrobe.",
+            "image_urls": [
+              "https://i.imgur.com/cHddUCu.jpeg",
+              "https://i.imgur.com/CFOjAgK.jpeg"
+            ],
+            "canonical_url": "https://api.escuelajs.co/api/v1/3"
+          },
+          {
+            "title": "Classic Grey Hooded Sweatshirt",
+            "price": 90.0,
+            "category": "catalog",
+            "description": "Elevate your casual wear with our Classic Grey Hooded Sweatshirt. Made from a soft cotton blend, this hoodie features a front kangaroo pocket, an adjustable drawstring hood, and ribbed cuffs for a snug fit. Perfect for those chilly evenings or lazy weekends, it pairs effortlessly with your favorite jeans or joggers.",
+            "image_urls": [
+              "https://i.imgur.com/R2PN9Wq.jpeg",
+              "https://i.imgur.com/IvxMPFr.jpeg"
+            ],
+            "canonical_url": "https://api.escuelajs.co/api/v1/4"
+          },
+          {
+            "title": "Classic Black Hooded Sweatshirt",
+            "price": 79.0,
+            "category": "catalog",
+            "description": "Elevate your casual wardrobe with our Classic Black Hooded Sweatshirt. Made from high-quality, soft fabric that ensures comfort and durability, this hoodie features a spacious kangaroo pocket and an adjustable drawstring hood. Its versatile design makes it perfect for a relaxed day at home or a casual outing.",
+            "image_urls": [
+              "https://i.imgur.com/cSytoSD.jpeg",
+              "https://i.imgur.com/WwKucXb.jpeg"
+            ],
+            "canonical_url": "https://api.escuelajs.co/api/v1/5"
+          }
+        ],
+        "runtime_name": "native_static"
+      },
+      "fixture_regression": null
+    },
+    {
+      "profile": "real-fakestoreapi-products",
+      "profile_path": "autonomous_crawler\\tests\\fixtures\\ecommerce_real_fakestore_profile.json",
+      "real_result": {
+        "label": "real",
+        "accepted": true,
+        "record_count": 20,
+        "runner": {
+          "run_id": "profile-real-batch-real-fakestoreapi-products",
+          "batches": 1,
+          "claimed": 1,
+          "succeeded": 1,
+          "failed": 0,
+          "retried": 0,
+          "records_saved": 20,
+          "discovered_urls": 0,
+          "checkpoint_errors": 0,
+          "item_errors": [],
+          "frontier_stats": {
+            "done": 1
+          }
+        },
+        "frontier_stats": {
+          "done": 1
+        },
+        "quality_summary": {
+          "total_records": 20,
+          "min_items": 50,
+          "meets_min_items": false,
+          "field_completeness": {
+            "title": 1.0,
+            "price": 1.0,
+            "highest_price": 1.0,
+            "category": 1.0,
+            "description": 1.0,
+            "image_urls": 1.0,
+            "colors": 0.0,
+            "sizes": 0.0
+          },
+          "duplicate_count": 0,
+          "duplicate_rate": 0.0,
+          "duplicate_key_strategy": {
+            "field": "dedupe_key",
+            "source": "ProductRecord",
+            "strategy": "sha256(source_site | category | canonical_url_or_source_url_or_title)[:32]",
+            "category_aware": true,
+            "notes": [
+              "The runner compares generated ProductRecord.dedupe_key values.",
+              "Duplicate rate quality depends on profile canonical URL mapping quality."
+            ]
+          },
+          "failed_urls": [],
+          "failed_url_count": 0,
+          "pagination_stop_reason": "max_pages",
+          "frontier_stats": {
+            "done": 1
+          },
+          "quality_policy": {
+            "mode": "warn",
+            "min_items": 50,
+            "field_thresholds": {
+              "title": 0.95,
+              "price": 0.95,
+              "category": 0.95,
+              "description": 0.8,
+              "image_urls": 0.8
+            },
+            "max_duplicate_rate": 0.05,
+            "max_failed_url_count": 0
+          },
+          "quality_gate": {
+            "mode": "warn",
+            "passed": false,
+            "should_fail": false,
+            "severity": "warn",
+            "checks": [
+              {
+                "name": "min_items",
+                "passed": false,
+                "expected": 50,
+                "actual": 20,
+                "severity": "warn"
+              },
+              {
+                "name": "duplicate_rate",
+                "passed": true,
+                "expected": 0.05,
+                "actual": 0.0,
+                "severity": "pass"
+              },
+              {
+                "name": "failed_url_count",
+                "passed": true,
+                "expected": 0,
+                "actual": 0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:category",
+                "field": "category",
+                "passed": true,
+                "expected": 0.95,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:description",
+                "field": "description",
+                "passed": true,
+                "expected": 0.8,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:image_urls",
+                "field": "image_urls",
+                "passed": true,
+                "expected": 0.8,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:price",
+                "field": "price",
+                "passed": true,
+                "expected": 0.95,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:title",
+                "field": "title",
+                "passed": true,
+                "expected": 0.95,
+                "actual": 1.0,
+                "severity": "pass"
+              }
+            ]
+          }
+        },
+        "report": {
+          "schema_version": "profile-run-report/v1",
+          "generated_at": "2026-05-15T08:26:23.383422+00:00",
+          "profile": {
+            "name": "real-fakestoreapi-products",
+            "path": "autonomous_crawler\\tests\\fixtures\\ecommerce_real_fakestore_profile.json",
+            "target": "https://fakestoreapi.com/products"
+          },
+          "run": {
+            "run_id": "profile-real-batch-real-fakestoreapi-products",
+            "runtime_backend": "native_static",
+            "parser_backend": "json_profile",
+            "runner_summary": {
+              "run_id": "profile-real-batch-real-fakestoreapi-products",
+              "batches": 1,
+              "claimed": 1,
+              "succeeded": 1,
+              "failed": 0,
+              "retried": 0,
+              "records_saved": 20,
+              "discovered_urls": 0,
+              "checkpoint_errors": 0,
+              "item_errors": [],
+              "frontier_stats": {
+                "done": 1
+              }
+            },
+            "stop_reason": "max_pages"
+          },
+          "metrics": {
+            "record_count": 20,
+            "field_completeness": {
+              "title": 1.0,
+              "price": 1.0,
+              "highest_price": 1.0,
+              "category": 1.0,
+              "description": 1.0,
+              "image_urls": 1.0,
+              "colors": 0.0,
+              "sizes": 0.0
+            },
+            "duplicate_rate": 0.0,
+            "duplicate_count": 0,
+            "failed_url_count": 0,
+            "failed_urls": [],
+            "frontier_stats": {
+              "done": 1
+            }
+          },
+          "quality_gate": {
+            "mode": "warn",
+            "passed": false,
+            "should_fail": false,
+            "severity": "warn",
+            "checks": [
+              {
+                "name": "min_items",
+                "passed": false,
+                "expected": 50,
+                "actual": 20,
+                "severity": "warn"
+              },
+              {
+                "name": "duplicate_rate",
+                "passed": true,
+                "expected": 0.05,
+                "actual": 0.0,
+                "severity": "pass"
+              },
+              {
+                "name": "failed_url_count",
+                "passed": true,
+                "expected": 0,
+                "actual": 0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:category",
+                "field": "category",
+                "passed": true,
+                "expected": 0.95,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:description",
+                "field": "description",
+                "passed": true,
+                "expected": 0.8,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:image_urls",
+                "field": "image_urls",
+                "passed": true,
+                "expected": 0.8,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:price",
+                "field": "price",
+                "passed": true,
+                "expected": 0.95,
+                "actual": 1.0,
+                "severity": "pass"
+              },
+              {
+                "name": "field:title",
+                "field": "title",
+                "passed": true,
+                "expected": 0.95,
+                "actual": 1.0,
+                "severity": "pass"
+              }
+            ]
+          },
+          "quality_policy": {
+            "mode": "warn",
+            "min_items": 50,
+            "field_thresholds": {
+              "title": 0.95,
+              "price": 0.95,
+              "category": 0.95,
+              "description": 0.8,
+              "image_urls": 0.8
+            },
+            "max_duplicate_rate": 0.05,
+            "max_failed_url_count": 0
+          },
+          "duplicate_key_strategy": {
+            "field": "dedupe_key",
+            "source": "ProductRecord",
+            "strategy": "sha256(source_site | category | canonical_url_or_source_url_or_title)[:32]",
+            "category_aware": true,
+            "notes": [
+              "The runner compares generated ProductRecord.dedupe_key values.",
+              "Duplicate rate quality depends on profile canonical URL mapping quality."
+            ]
+          },
+          "samples": [
+            {
+              "title": "Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops",
+              "price": 109.95,
+              "category": "catalog",
+              "description": "Your perfect pack for everyday use and walks in the forest. Stash your laptop (up to 15 inches) in the padded sleeve, your everyday",
+              "image_urls": [
+                "https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_t.png"
+              ],
+              "canonical_url": "https://fakestoreapi.com/1"
+            },
+            {
+              "title": "Mens Casual Premium Slim Fit T-Shirts",
+              "price": 22.3,
+              "category": "catalog",
+              "description": "Slim-fitting style, contrast raglan long sleeve, three-button henley placket, light weight & soft fabric for breathable and comfortable wearing. And Solid stitched shirts with round neck made for durability and a great fit for casual fashion wear and diehard baseball fans. The Henley style round neckline includes a three-button placket.",
+              "image_urls": [
+                "https://fakestoreapi.com/img/71-3HjGNDUL._AC_SY879._SX._UX._SY._UY_t.png"
+              ],
+              "canonical_url": "https://fakestoreapi.com/2"
+            },
+            {
+              "title": "Mens Cotton Jacket",
+              "price": 55.99,
+              "category": "catalog",
+              "description": "great outerwear jackets for Spring/Autumn/Winter, suitable for many occasions, such as working, hiking, camping, mountain/rock climbing, cycling, traveling or other outdoors. Good gift choice for you or your family member. A warm hearted love to Father, husband or son in this thanksgiving or Christmas Day.",
+              "image_urls": [
+                "https://fakestoreapi.com/img/71li-ujtlUL._AC_UX679_t.png"
+              ],
+              "canonical_url": "https://fakestoreapi.com/3"
+            },
+            {
+              "title": "Mens Casual Slim Fit",
+              "price": 15.99,
+              "category": "catalog",
+              "description": "The color could be slightly different between on the screen and in practice. / Please note that body builds vary by person, therefore, detailed size information should be reviewed below on the product description.",
+              "image_urls": [
+                "https://fakestoreapi.com/img/71YXzeOuslL._AC_UY879_t.png"
+              ],
+              "canonical_url": "https://fakestoreapi.com/4"
+            },
+            {
+              "title": "John Hardy Women's Legends Naga Gold & Silver Dragon Station Chain Bracelet",
+              "price": 695.0,
+              "category": "catalog",
+              "description": "From our Legends Collection, the Naga was inspired by the mythical water dragon that protects the ocean's pearl. Wear facing inward to be bestowed with love and abundance, or outward for protection.",
+              "image_urls": [
+                "https://fakestoreapi.com/img/71pWzhdJNwL._AC_UL640_QL65_ML3_t.png"
+              ],
+              "canonical_url": "https://fakestoreapi.com/5"
+            }
+          ],
+          "failures": [],
+          "next_actions": [
+            "Increase page depth, pagination coverage, or seed URLs to meet min_items."
+          ],
+          "notes": [
+            "Public product-like API profile with a small catalog.",
+            "Included to prove quality reports explain min_items gaps instead of hiding them.",
+            "No auth, cookies, private headers, proxy, or runtime site rules."
+          ],
+          "accepted": true
+        },
+        "failures": [],
+        "sample_records": [
+          {
+            "title": "Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops",
+            "price": 109.95,
+            "category": "catalog",
+            "description": "Your perfect pack for everyday use and walks in the forest. Stash your laptop (up to 15 inches) in the padded sleeve, your everyday",
+            "image_urls": [
+              "https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_t.png"
+            ],
+            "canonical_url": "https://fakestoreapi.com/1"
+          },
+          {
+            "title": "Mens Casual Premium Slim Fit T-Shirts",
+            "price": 22.3,
+            "category": "catalog",
+            "description": "Slim-fitting style, contrast raglan long sleeve, three-button henley placket, light weight & soft fabric for breathable and comfortable wearing. And Solid stitched shirts with round neck made for durability and a great fit for casual fashion wear and diehard baseball fans. The Henley style round neckline includes a three-button placket.",
+            "image_urls": [
+              "https://fakestoreapi.com/img/71-3HjGNDUL._AC_SY879._SX._UX._SY._UY_t.png"
+            ],
+            "canonical_url": "https://fakestoreapi.com/2"
+          },
+          {
+            "title": "Mens Cotton Jacket",
+            "price": 55.99,
+            "category": "catalog",
+            "description": "great outerwear jackets for Spring/Autumn/Winter, suitable for many occasions, such as working, hiking, camping, mountain/rock climbing, cycling, traveling or other outdoors. Good gift choice for you or your family member. A warm hearted love to Father, husband or son in this thanksgiving or Christmas Day.",
+            "image_urls": [
+              "https://fakestoreapi.com/img/71li-ujtlUL._AC_UX679_t.png"
+            ],
+            "canonical_url": "https://fakestoreapi.com/3"
+          },
+          {
+            "title": "Mens Casual Slim Fit",
+            "price": 15.99,
+            "category": "catalog",
+            "description": "The color could be slightly different between on the screen and in practice. / Please note that body builds vary by person, therefore, detailed size information should be reviewed below on the product description.",
+            "image_urls": [
+              "https://fakestoreapi.com/img/71YXzeOuslL._AC_UY879_t.png"
+            ],
+            "canonical_url": "https://fakestoreapi.com/4"
+          },
+          {
+            "title": "John Hardy Women's Legends Naga Gold & Silver Dragon Station Chain Bracelet",
+            "price": 695.0,
+            "category": "catalog",
+            "description": "From our Legends Collection, the Naga was inspired by the mythical water dragon that protects the ocean's pearl. Wear facing inward to be bestowed with love and abundance, or outward for protection.",
+            "image_urls": [
+              "https://fakestoreapi.com/img/71pWzhdJNwL._AC_UL640_QL65_ML3_t.png"
+            ],
+            "canonical_url": "https://fakestoreapi.com/5"
+          }
+        ],
+        "runtime_name": "native_static"
+      },
+      "fixture_regression": null
+    }
+  ],
+  "total_real_records": 168,
+  "accepted": true,
+  "notes": [
+    "Training uses SiteProfile files and profile runner callbacks.",
+    "Site-specific endpoint and field mappings live in profile files only.",
+    "Warning quality gates are allowed to surface field/count gaps without aborting the batch."
+  ]
+}

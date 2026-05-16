@@ -1,0 +1,74 @@
+{
+  "name": "fixture-ecommerce-api-pagination",
+  "selectors": {},
+  "target_fields": [
+    "title",
+    "highest_price",
+    "colors",
+    "sizes",
+    "description",
+    "image_urls"
+  ],
+  "api_hints": {
+    "endpoint": "https://api-profile-shop.local/v1/products",
+    "method": "GET",
+    "kind": "api",
+    "priority": 9,
+    "items_path": "data.products",
+    "field_mapping": {
+      "title": "name",
+      "highest_price": "price.amount",
+      "currency": "price.currency",
+      "canonical_url": "url",
+      "colors": "variants.colors",
+      "sizes": "variants.sizes",
+      "description": "description",
+      "image_urls": "media.images"
+    },
+    "params": {
+      "category": "training-shoes"
+    }
+  },
+  "pagination_hints": {
+    "type": "page",
+    "page_param": "page",
+    "start_page": 1,
+    "page_size_param": "limit",
+    "page_size": 20,
+    "max_pages": 3
+  },
+  "access_config": {
+    "mode": "api_replay",
+    "login_required": false,
+    "captcha_bypass": false,
+    "headers_required": false
+  },
+  "rate_limits": {
+    "default": {
+      "delay_seconds": 0
+    }
+  },
+  "quality_expectations": {
+    "min_items": 50,
+    "required_fields": [
+      "title",
+      "highest_price",
+      "image_urls"
+    ],
+    "currency": "USD",
+    "category": "training-shoes"
+  },
+  "training_notes": [
+    "Offline observed API pagination fixture.",
+    "Uses page/limit query parameters and JSON field mapping to create ProductRecord rows.",
+    "No auth, cookie, captcha, proxy, or site-specific code is required."
+  ],
+  "constraints": {
+    "max_items": 60
+  },
+  "crawl_preferences": {
+    "runtime": "native_static",
+    "parser": "json_profile",
+    "seed_kind": "api"
+  }
+}

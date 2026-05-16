@@ -9,7 +9,9 @@ It does NOT import Scrapling.  All browser lifecycle is handled via Playwright.
 from __future__ import annotations
 
 import hashlib
+import json
 import time
+from collections import deque
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -119,11 +121,261 @@ class BrowserProfile:
         }
 
 
-class BrowserProfileRotator:
-    """Round-robin profile rotation for anti-detection diversity.
+@dataclass
+class WindowedHealthRecord:
+    """A single request outcome record with timestamp for windowed scoring."""
+    timestamp: float
+    ok: bool
+    elapsed_seconds: float
+    failure_category: str = "none"
 
-    Maintains a list of profiles and cycles through them on each request.
-    Integrates with BrowserPoolManager via fingerprint-based context reuse.
+
+@dataclass
+class BrowserProfileHealth:
+    """Mutable health tracker for a single BrowserProfile.
+
+    Records success/failure/timeout/challenge/http_blocked counts and
+    computes a health score in [0.0, 1.0] where 1.0 is perfectly healthy.
+
+    Supports two scoring modes:
+    - cumulative: uses all-time counters (legacy behavior)
+    - windowed: uses only records within `window_seconds` (default 300s)
+      so old failures decay away and profiles can recover.
+
+    The `health_score` property uses windowed scoring when windowed records
+    are available, falling back to cumulative otherwise.
+    """
+
+    profile_id: str
+    total_requests: int = 0
+    success_count: int = 0
+    failure_count: int = 0
+    timeout_count: int = 0
+    challenge_count: int = 0
+    http_blocked_count: int = 0
+    total_elapsed_seconds: float = 0.0
+    last_failure_category: str = ""
+    # Windowed tracking
+    window_seconds: float = 300.0
+    _records: deque[WindowedHealthRecord] = field(default_factory=lambda: deque(maxlen=500))
+
+    @property
+    def avg_elapsed_seconds(self) -> float:
+        if self.total_requests == 0:
+            return 0.0
+        return self.total_elapsed_seconds / self.total_requests
+
+    @property
+    def success_rate(self) -> float:
+        if self.total_requests == 0:
+            return 1.0  # unknown → assume healthy
+        return self.success_count / self.total_requests
+
+    def _windowed_records(self) -> list[WindowedHealthRecord]:
+        """Return records within the time window."""
+        if not self._records:
+            return []
+        cutoff = time.time() - self.window_seconds
+        return [r for r in self._records if r.timestamp >= cutoff]
+
+    def _windowed_health_score(self) -> float:
+        """Compute health score from windowed records only."""
+        records = self._windowed_records()
+        if not records:
+            return 1.0  # no recent data → assume healthy
+        total = len(records)
+        successes = sum(1 for r in records if r.ok)
+        timeouts = sum(1 for r in records if r.failure_category == "navigation_timeout")
+        challenges = sum(1 for r in records if r.failure_category in {"challenge_like", "managed_challenge", "captcha"})
+        blocked = sum(1 for r in records if r.failure_category == "http_blocked")
+        base = successes / total
+        timeout_penalty = min(timeouts * 0.1, 0.3)
+        challenge_penalty = min(challenges * 0.15, 0.3)
+        blocked_penalty = min(blocked * 0.05, 0.15)
+        return max(0.0, base - timeout_penalty - challenge_penalty - blocked_penalty)
+
+    @property
+    def health_score(self) -> float:
+        """Score in [0.0, 1.0]. Uses windowed scoring when records exist."""
+        if self._records:
+            return self._windowed_health_score()
+        # Fallback to cumulative (backward compat for pre-window data)
+        if self.total_requests == 0:
+            return 1.0
+        base = self.success_rate
+        timeout_penalty = min(self.timeout_count * 0.1, 0.3)
+        challenge_penalty = min(self.challenge_count * 0.15, 0.3)
+        blocked_penalty = min(self.http_blocked_count * 0.05, 0.15)
+        return max(0.0, base - timeout_penalty - challenge_penalty - blocked_penalty)
+
+    @property
+    def windowed_request_count(self) -> int:
+        """Number of records within the current window."""
+        return len(self._windowed_records())
+
+    def record(
+        self,
+        *,
+        ok: bool,
+        elapsed_seconds: float,
+        failure_category: str = "none",
+    ) -> None:
+        """Record a single request outcome (cumulative + windowed)."""
+        self.total_requests += 1
+        self.total_elapsed_seconds += elapsed_seconds
+        if ok:
+            self.success_count += 1
+        else:
+            self.failure_count += 1
+            self.last_failure_category = failure_category
+            if failure_category == "navigation_timeout":
+                self.timeout_count += 1
+            elif failure_category in {"challenge_like", "managed_challenge", "captcha"}:
+                self.challenge_count += 1
+            elif failure_category == "http_blocked":
+                self.http_blocked_count += 1
+        # Windowed record
+        self._records.append(WindowedHealthRecord(
+            timestamp=time.time(),
+            ok=ok,
+            elapsed_seconds=elapsed_seconds,
+            failure_category=failure_category,
+        ))
+
+    def health_summary(self) -> dict[str, Any]:
+        """Compact summary for run reports."""
+        records = self._windowed_records()
+        windowed_total = len(records)
+        windowed_success = sum(1 for r in records if r.ok)
+        windowed_failures: dict[str, int] = {}
+        for r in records:
+            if not r.ok and r.failure_category != "none":
+                windowed_failures[r.failure_category] = windowed_failures.get(r.failure_category, 0) + 1
+        return {
+            "profile_id": self.profile_id,
+            "health_score": round(self.health_score, 3),
+            "cumulative": {
+                "total_requests": self.total_requests,
+                "success_rate": round(self.success_rate, 3),
+                "avg_elapsed_seconds": round(self.avg_elapsed_seconds, 3),
+            },
+            "windowed": {
+                "window_seconds": self.window_seconds,
+                "request_count": windowed_total,
+                "success_count": windowed_success,
+                "failure_breakdown": windowed_failures,
+            },
+            "last_failure_category": self.last_failure_category,
+        }
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "profile_id": self.profile_id,
+            "total_requests": self.total_requests,
+            "success_count": self.success_count,
+            "failure_count": self.failure_count,
+            "timeout_count": self.timeout_count,
+            "challenge_count": self.challenge_count,
+            "http_blocked_count": self.http_blocked_count,
+            "total_elapsed_seconds": self.total_elapsed_seconds,
+            "avg_elapsed_seconds": round(self.avg_elapsed_seconds, 3),
+            "success_rate": round(self.success_rate, 3),
+            "health_score": round(self.health_score, 3),
+            "last_failure_category": self.last_failure_category,
+            "window_seconds": self.window_seconds,
+            "windowed_request_count": self.windowed_request_count,
+        }
+
+    def to_persistable_dict(self) -> dict[str, Any]:
+        """Export for JSON/SQLite persistence. Includes windowed records."""
+        d = self.to_dict()
+        d["_records"] = [
+            {"t": r.timestamp, "ok": r.ok, "e": r.elapsed_seconds, "f": r.failure_category}
+            for r in self._records
+        ]
+        return d
+
+    @classmethod
+    def from_persistable_dict(cls, data: dict[str, Any]) -> "BrowserProfileHealth":
+        """Restore from persisted dict."""
+        h = cls(
+            profile_id=data["profile_id"],
+            total_requests=data.get("total_requests", 0),
+            success_count=data.get("success_count", 0),
+            failure_count=data.get("failure_count", 0),
+            timeout_count=data.get("timeout_count", 0),
+            challenge_count=data.get("challenge_count", 0),
+            http_blocked_count=data.get("http_blocked_count", 0),
+            total_elapsed_seconds=data.get("total_elapsed_seconds", 0.0),
+            last_failure_category=data.get("last_failure_category", ""),
+            window_seconds=data.get("window_seconds", 300.0),
+        )
+        for rec in data.get("_records", []):
+            h._records.append(WindowedHealthRecord(
+                timestamp=rec.get("t", 0),
+                ok=rec.get("ok", True),
+                elapsed_seconds=rec.get("e", 0.0),
+                failure_category=rec.get("f", "none"),
+            ))
+        return h
+
+
+class BrowserProfileHealthStore:
+    """Lightweight persistence adapter for BrowserProfileHealth.
+
+    Draft implementation — saves/loads health data as JSON files.
+    Can be swapped for SQLite later without changing callers.
+    """
+
+    def __init__(self, store_dir: str | Path) -> None:
+        self._dir = Path(store_dir)
+        self._dir.mkdir(parents=True, exist_ok=True)
+
+    def _path_for(self, profile_id: str) -> Path:
+        safe_id = profile_id.replace("/", "_").replace("\\", "_")
+        return self._dir / f"{safe_id}.json"
+
+    def save(self, health: BrowserProfileHealth) -> None:
+        """Persist a single profile's health data."""
+        path = self._path_for(health.profile_id)
+        path.write_text(json.dumps(health.to_persistable_dict(), indent=2), encoding="utf-8")
+
+    def load(self, profile_id: str) -> BrowserProfileHealth | None:
+        """Load a profile's health data. Returns None if not found."""
+        path = self._path_for(profile_id)
+        if not path.exists():
+            return None
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            return BrowserProfileHealth.from_persistable_dict(data)
+        except (json.JSONDecodeError, KeyError, TypeError):
+            return None
+
+    def save_all(self, health_map: dict[str, BrowserProfileHealth]) -> None:
+        """Persist all profiles."""
+        for health in health_map.values():
+            self.save(health)
+
+    def load_all(self) -> dict[str, BrowserProfileHealth]:
+        """Load all persisted profiles."""
+        result: dict[str, BrowserProfileHealth] = {}
+        for path in self._dir.glob("*.json"):
+            try:
+                data = json.loads(path.read_text(encoding="utf-8"))
+                health = BrowserProfileHealth.from_persistable_dict(data)
+                result[health.profile_id] = health
+            except (json.JSONDecodeError, KeyError, TypeError):
+                continue
+        return result
+
+
+class BrowserProfileRotator:
+    """Profile rotation with optional health-aware selection.
+
+    Maintains a list of profiles and a per-profile health tracker.
+    Supports two strategies:
+    - "round_robin" (default): cycle through profiles in order
+    - "healthiest": pick the profile with the highest health_score
     """
 
     def __init__(self, profiles: list[BrowserProfile | dict[str, Any]]) -> None:
@@ -136,18 +388,53 @@ class BrowserProfileRotator:
                 if profile is not None:
                     self._profiles.append(profile)
         self._index = 0
+        self._health: dict[str, BrowserProfileHealth] = {}
 
     @property
     def profile_count(self) -> int:
         return len(self._profiles)
 
-    def next_profile(self) -> BrowserProfile | None:
-        """Return the next profile in round-robin rotation."""
+    def _get_health(self, profile_id: str) -> BrowserProfileHealth:
+        if profile_id not in self._health:
+            self._health[profile_id] = BrowserProfileHealth(profile_id=profile_id)
+        return self._health[profile_id]
+
+    def next_profile(self, strategy: str = "round_robin") -> BrowserProfile | None:
+        """Return the next profile using the given strategy."""
         if not self._profiles:
             return None
+        if strategy == "healthiest":
+            return self._healthiest_profile()
+        # default: round-robin
         profile = self._profiles[self._index % len(self._profiles)]
         self._index += 1
         return profile
+
+    def _healthiest_profile(self) -> BrowserProfile:
+        best = self._profiles[0]
+        best_score = self._get_health(best.profile_id).health_score
+        for p in self._profiles[1:]:
+            score = self._get_health(p.profile_id).health_score
+            if score > best_score:
+                best = p
+                best_score = score
+        return best
+
+    def update_health(
+        self,
+        profile_id: str,
+        *,
+        ok: bool,
+        elapsed_seconds: float,
+        failure_category: str = "none",
+    ) -> None:
+        """Feed back a request outcome to the profile's health tracker."""
+        health = self._get_health(profile_id)
+        health.record(ok=ok, elapsed_seconds=elapsed_seconds, failure_category=failure_category)
+
+    def get_health(self, profile_id: str) -> BrowserProfileHealth:
+        """Return the health tracker for a profile (creates if missing)."""
+        return self._get_health(profile_id)
 
     def current_profile(self) -> BrowserProfile | None:
         """Return the most recently selected profile."""
@@ -155,11 +442,17 @@ class BrowserProfileRotator:
             return None
         return self._profiles[(self._index - 1) % len(self._profiles)]
 
+    def health_summaries(self) -> dict[str, dict[str, Any]]:
+        """Return health summaries for all tracked profiles."""
+        return {pid: h.health_summary() for pid, h in self._health.items()}
+
     def to_safe_dict(self) -> dict[str, Any]:
         return {
             "profile_count": self.profile_count,
             "current_index": self._index,
             "profiles": [p.to_safe_dict() for p in self._profiles],
+            "health": {pid: h.to_dict() for pid, h in self._health.items()},
+            "health_summaries": self.health_summaries(),
         }
 
 

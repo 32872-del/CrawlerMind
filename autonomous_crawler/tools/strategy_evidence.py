@@ -56,9 +56,13 @@ def build_strategy_evidence_report(recon_report: dict[str, Any]) -> StrategyEvid
     warnings: list[str] = []
 
     dom_structure = recon.get("dom_structure")
+    api_candidates = recon.get("api_candidates") or []
+    js_evidence = recon.get("js_evidence") or {}
     signals.extend(_dom_signals(dom_structure if isinstance(dom_structure, dict) else {}))
-    signals.extend(_api_candidate_signals(recon.get("api_candidates") or []))
-    signals.extend(_js_signals(recon.get("js_evidence") or {}))
+    signals.extend(_api_candidate_signals(api_candidates))
+    signals.extend(_js_signals(js_evidence))
+    signals.extend(_api_reverse_signals(api_candidates))
+    signals.extend(_graphql_signals(api_candidates, js_evidence))
     transport = recon.get("transport_diagnostics")
     fingerprint = recon.get("browser_fingerprint_probe")
     access = recon.get("access_diagnostics")
@@ -78,6 +82,10 @@ def build_strategy_evidence_report(recon_report: dict[str, Any]) -> StrategyEvid
             "crypto_signature_flow",
             "crypto_encryption_flow",
             "visual_challenge_evidence",
+            "graphql_signature_hint",
+            "api_auth_token_hint",
+            "graphql_rate_limit",
+            "api_rate_limit",
         }:
             warnings.append(signal.code)
 
@@ -86,83 +94,111 @@ def build_strategy_evidence_report(recon_report: dict[str, Any]) -> StrategyEvid
         signals=signals,
         dominant_sources=_dominant_sources(signals),
         warnings=_dedupe(warnings),
-        action_hints=build_reverse_engineering_hints(recon.get("js_evidence") or {}),
+        action_hints=build_reverse_engineering_hints(js_evidence, api_candidates),
     )
 
 
-def build_reverse_engineering_hints(js_evidence: dict[str, Any]) -> dict[str, Any]:
-    """Build action hints from JS crypto/signature evidence."""
+def build_reverse_engineering_hints(
+    js_evidence: dict[str, Any],
+    api_candidates: list[Any] | None = None,
+) -> dict[str, Any]:
+    """Build action hints from JS crypto/signature evidence and API/GraphQL clues."""
+    from autonomous_crawler.tools.hook_sandbox_planner import plan_hook_sandbox
+
     if not isinstance(js_evidence, dict):
-        return {}
+        js_evidence = {}
+    if api_candidates is None:
+        api_candidates = []
 
     crypto_items = _crypto_items(js_evidence)
-    if not crypto_items and not js_evidence.get("top_crypto_signals"):
+    has_js_crypto = bool(crypto_items or js_evidence.get("top_crypto_signals"))
+    has_api_candidates = bool(api_candidates)
+
+    if not has_js_crypto and not has_api_candidates:
         return {}
 
-    categories: set[str] = set()
-    signal_names: list[str] = []
-    likely_signature = False
-    likely_encryption = False
-    likely_timestamp_nonce = False
-    max_score = 0
-    sources: list[dict[str, Any]] = []
-    recommendations: list[str] = []
+    hints: dict[str, Any] = {}
 
-    for item in crypto_items:
-        crypto = item.get("crypto_analysis") or {}
-        if not isinstance(crypto, dict):
-            continue
-        categories.update(str(value) for value in crypto.get("categories") or [] if value)
-        likely_signature = likely_signature or bool(crypto.get("likely_signature_flow"))
-        likely_encryption = likely_encryption or bool(crypto.get("likely_encryption_flow"))
-        likely_timestamp_nonce = likely_timestamp_nonce or bool(crypto.get("likely_timestamp_nonce_flow"))
-        max_score = max(max_score, _safe_int(crypto.get("score")))
-        recommendations.extend(str(value) for value in crypto.get("recommendations") or [] if value)
-        for signal in crypto.get("signals") or []:
-            if not isinstance(signal, dict):
+    if has_js_crypto:
+        categories: set[str] = set()
+        signal_names: list[str] = []
+        likely_signature = False
+        likely_encryption = False
+        likely_timestamp_nonce = False
+        max_score = 0
+        sources: list[dict[str, Any]] = []
+        recommendations: list[str] = []
+
+        for item in crypto_items:
+            crypto = item.get("crypto_analysis") or {}
+            if not isinstance(crypto, dict):
                 continue
-            kind = str(signal.get("kind") or "")
-            name = str(signal.get("name") or "")
-            label = f"{kind}:{name}" if kind and name else kind or name
-            if label:
-                signal_names.append(label)
-        sources.append({
-            "source": item.get("source", ""),
-            "url": item.get("url", ""),
-            "inline_id": item.get("inline_id", ""),
-            "score": _safe_int(item.get("total_score")),
-            "reasons": list(item.get("reasons") or [])[:5],
-        })
+            categories.update(str(value) for value in crypto.get("categories") or [] if value)
+            likely_signature = likely_signature or bool(crypto.get("likely_signature_flow"))
+            likely_encryption = likely_encryption or bool(crypto.get("likely_encryption_flow"))
+            likely_timestamp_nonce = likely_timestamp_nonce or bool(crypto.get("likely_timestamp_nonce_flow"))
+            max_score = max(max_score, _safe_int(crypto.get("score")))
+            recommendations.extend(str(value) for value in crypto.get("recommendations") or [] if value)
+            for signal in crypto.get("signals") or []:
+                if not isinstance(signal, dict):
+                    continue
+                kind = str(signal.get("kind") or "")
+                name = str(signal.get("name") or "")
+                label = f"{kind}:{name}" if kind and name else kind or name
+                if label:
+                    signal_names.append(label)
+            sources.append({
+                "source": item.get("source", ""),
+                "url": item.get("url", ""),
+                "inline_id": item.get("inline_id", ""),
+                "score": _safe_int(item.get("total_score")),
+                "reasons": list(item.get("reasons") or [])[:5],
+            })
 
-    signal_names.extend(str(value) for value in js_evidence.get("top_crypto_signals") or [] if value)
-    signal_names = _dedupe(signal_names)[:20]
-    categories_list = sorted(categories)
+        signal_names.extend(str(value) for value in js_evidence.get("top_crypto_signals") or [] if value)
+        signal_names = _dedupe(signal_names)[:20]
+        categories_list = sorted(categories)
 
-    hints: dict[str, Any] = {
-        "crypto_score": max_score,
-        "crypto_signals": signal_names,
-        "crypto_categories": categories_list,
-        "high_score_sources": sources[:5],
-        "recommendations": _dedupe(recommendations)[:8],
-    }
-    if likely_signature:
-        hints["hook_plan"] = {
-            "target": "signature_or_token_generation",
-            "signals": signal_names[:10],
-            "capture": ["request_url", "query_params", "headers", "body", "timestamp", "nonce"],
+        hints = {
+            "crypto_score": max_score,
+            "crypto_signals": signal_names,
+            "crypto_categories": categories_list,
+            "high_score_sources": sources[:5],
+            "recommendations": _dedupe(recommendations)[:8],
         }
-        hints["signature_inputs"] = _signature_inputs(categories)
-        hints["api_replay_blocker"] = "signature_flow_requires_runtime_inputs"
-    if likely_encryption:
-        hints["sandbox_plan"] = {
-            "target": "encryption_or_webcrypto_routine",
-            "runtime": "browser" if "webcrypto" in categories else "node_or_browser",
-            "capture": ["plaintext_inputs", "key_material_references", "iv_or_nonce", "ciphertext_output"],
-        }
-        hints["needs_browser_runtime"] = "webcrypto" in categories
-        hints.setdefault("api_replay_blocker", "encrypted_payload_requires_runtime_execution")
-    if likely_timestamp_nonce:
-        hints["dynamic_inputs"] = ["timestamp", "nonce"]
+        if likely_signature:
+            hints["hook_plan"] = {
+                "target": "signature_or_token_generation",
+                "signals": signal_names[:10],
+                "capture": ["request_url", "query_params", "headers", "body", "timestamp", "nonce"],
+            }
+            hints["signature_inputs"] = _signature_inputs(categories)
+            hints["api_replay_blocker"] = "signature_flow_requires_runtime_inputs"
+        if likely_encryption:
+            hints["sandbox_plan"] = {
+                "target": "encryption_or_webcrypto_routine",
+                "runtime": "browser" if "webcrypto" in categories else "node_or_browser",
+                "capture": ["plaintext_inputs", "key_material_references", "iv_or_nonce", "ciphertext_output"],
+            }
+            hints["needs_browser_runtime"] = "webcrypto" in categories
+            hints.setdefault("api_replay_blocker", "encrypted_payload_requires_runtime_execution")
+        if likely_timestamp_nonce:
+            hints["dynamic_inputs"] = ["timestamp", "nonce"]
+
+    # Incorporate API/GraphQL reverse evidence clues
+    if has_api_candidates:
+        api_replay_hints = _api_replay_blocker_hints(api_candidates)
+        for key, value in api_replay_hints.items():
+            if key not in hints:
+                hints[key] = value
+            elif key == "api_replay_blocker" and value:
+                hints[key] = value  # API blocker takes precedence
+
+    # Structured hook/sandbox plan (REVERSE-HARDEN-1)
+    hook_sandbox = plan_hook_sandbox(js_evidence, api_candidates)
+    if hook_sandbox.risk_level != "none":
+        hints["hook_sandbox_plan"] = hook_sandbox.to_dict()
+
     return {key: value for key, value in hints.items() if value not in ([], {}, "", None)}
 
 
@@ -171,8 +207,12 @@ def has_high_crypto_replay_risk(report: StrategyEvidenceReport) -> bool:
     hints = report.action_hints or {}
     if hints.get("api_replay_blocker"):
         return True
+    replay_risk_codes = {
+        "crypto_signature_flow", "crypto_encryption_flow",
+        "graphql_signature_hint", "api_auth_token_hint",
+    }
     for signal in report.signals:
-        if signal.code in {"crypto_signature_flow", "crypto_encryption_flow"} and signal.score >= 50:
+        if signal.code in replay_risk_codes and signal.score >= 50:
             return True
     return False
 
@@ -290,6 +330,192 @@ def _crypto_signal(code: str, item: dict[str, Any], crypto: dict[str, Any]) -> E
             "signals": list(crypto.get("signals") or [])[:10],
         },
     )
+
+
+# ---------------------------------------------------------------------------
+# API / GraphQL reverse evidence signals
+# ---------------------------------------------------------------------------
+
+_SIGNATURE_KEYWORDS = (
+    "signature", "sign", "hmac", "hash", "digest", "mac",
+    "x-sign", "x-signature", "x-token", "x-api-sign",
+    "authorization", "bearer", "api-key",
+)
+
+_TIMESTAMP_KEYWORDS = ("timestamp", "ts", "time", "nonce", "nonce_str", "random")
+
+_ENCRYPTED_KEYWORDS = ("encrypt", "cipher", "aes", "rsa", "rsa_oaep", "jwe", "jws")
+
+
+def _api_reverse_signals(candidates: list[Any]) -> list[EvidenceSignal]:
+    """Detect signature/timestamp/nonce/token clues in API candidate URLs and metadata."""
+    signals: list[EvidenceSignal] = []
+    for candidate in candidates[:10]:
+        if not isinstance(candidate, dict):
+            continue
+        url = str(candidate.get("url") or "").lower()
+        method = str(candidate.get("method") or "GET").upper()
+        kind = str(candidate.get("kind") or "")
+        headers = candidate.get("headers") or {}
+        body = candidate.get("body") or candidate.get("post_data") or ""
+        # Split URL into path+query params for precise matching
+        from urllib.parse import urlparse, parse_qs
+        parsed = urlparse(url)
+        query_params = parse_qs(parsed.query, keep_blank_values=True)
+        param_keys = set(query_params.keys())
+
+        sig_hits = [kw for kw in _SIGNATURE_KEYWORDS if kw in url or kw in str(headers).lower()]
+        ts_hits = [kw for kw in _TIMESTAMP_KEYWORDS if kw in param_keys]
+        enc_hits = [kw for kw in _ENCRYPTED_KEYWORDS if kw in url or kw in str(body).lower()]
+
+        if sig_hits:
+            signals.append(EvidenceSignal(
+                code="api_auth_token_hint",
+                source="api",
+                confidence="high" if len(sig_hits) >= 2 else "medium",
+                score=min(80, 40 + len(sig_hits) * 12),
+                details={
+                    "url": candidate.get("url", ""),
+                    "method": method,
+                    "kind": kind,
+                    "matched_keywords": sig_hits[:5],
+                    "hint": "API request contains signature/token parameters that may require runtime input generation",
+                },
+            ))
+        if ts_hits:
+            signals.append(EvidenceSignal(
+                code="api_dynamic_input_hint",
+                source="api",
+                confidence="medium",
+                score=min(65, 30 + len(ts_hits) * 10),
+                details={
+                    "url": candidate.get("url", ""),
+                    "matched_keywords": ts_hits[:5],
+                    "hint": "API request uses timestamp/nonce parameters — must be generated at request time",
+                },
+            ))
+        if enc_hits:
+            signals.append(EvidenceSignal(
+                code="api_encrypted_payload_hint",
+                source="api",
+                confidence="high",
+                score=70,
+                details={
+                    "url": candidate.get("url", ""),
+                    "matched_keywords": enc_hits[:5],
+                    "hint": "API request appears to contain encrypted payload — replay requires runtime encryption",
+                },
+            ))
+    return signals
+
+
+def _graphql_signals(
+    candidates: list[Any],
+    js_evidence: dict[str, Any],
+) -> list[EvidenceSignal]:
+    """Detect GraphQL-specific reverse evidence: rate limits, auth, signatures."""
+    signals: list[EvidenceSignal] = []
+    for candidate in candidates[:10]:
+        if not isinstance(candidate, dict):
+            continue
+        kind = str(candidate.get("kind") or "").lower()
+        if "graphql" not in kind:
+            continue
+        url = str(candidate.get("url") or "")
+        status_code = _safe_int(candidate.get("status_code"))
+        query = str(candidate.get("query") or "")
+        headers = candidate.get("headers") or {}
+
+        # Rate-limited GraphQL
+        if status_code == 429:
+            retry_after = ""
+            if isinstance(headers, dict):
+                retry_after = str(headers.get("Retry-After") or headers.get("retry-after") or "")
+            signals.append(EvidenceSignal(
+                code="graphql_rate_limit",
+                source="graphql",
+                confidence="high",
+                score=75,
+                details={
+                    "url": url,
+                    "status_code": 429,
+                    "retry_after": retry_after,
+                    "hint": "GraphQL endpoint rate-limited — use domain rate limiter with backoff",
+                },
+            ))
+
+        # Auth/signature in GraphQL headers
+        auth_keys = [k for k in (headers.keys() if isinstance(headers, dict) else []) if "auth" in k.lower() or "sign" in k.lower() or "token" in k.lower()]
+        if auth_keys or "authorization" in str(headers).lower():
+            signals.append(EvidenceSignal(
+                code="graphql_signature_hint",
+                source="graphql",
+                confidence="high",
+                score=70,
+                details={
+                    "url": url,
+                    "auth_headers": auth_keys[:5],
+                    "hint": "GraphQL endpoint requires auth/signature headers — replay needs valid session or token generation",
+                },
+            ))
+
+        # Nested field complexity hints
+        depth = query.count("{")
+        if depth >= 4:
+            signals.append(EvidenceSignal(
+                code="graphql_nested_complexity",
+                source="graphql",
+                confidence="low",
+                score=30,
+                details={
+                    "url": url,
+                    "nesting_depth": depth,
+                    "hint": "Deeply nested GraphQL query — may hit complexity limits",
+                },
+            ))
+    return signals
+
+
+def _api_replay_blocker_hints(candidates: list[Any]) -> dict[str, Any]:
+    """Build replay blocker hints from API/GraphQL candidate evidence."""
+    hints: dict[str, Any] = {}
+    for candidate in candidates[:10]:
+        if not isinstance(candidate, dict):
+            continue
+        url = str(candidate.get("url") or "").lower()
+        kind = str(candidate.get("kind") or "").lower()
+        headers = candidate.get("headers") or {}
+        body = str(candidate.get("body") or candidate.get("post_data") or "")
+
+        # Signature/token in URL or headers
+        has_sig = any(kw in url for kw in _SIGNATURE_KEYWORDS)
+        has_header_sig = False
+        if isinstance(headers, dict):
+            has_header_sig = any(
+                "sign" in k.lower() or "token" in k.lower() or "auth" in k.lower()
+                for k in headers
+            )
+        if has_sig or has_header_sig:
+            hints.setdefault("api_replay_blocker", "signature_or_token_in_request")
+            hints.setdefault("hook_plan", {
+                "target": "api_signature_or_token_generation",
+                "capture": ["request_url", "headers", "query_params", "timestamp", "nonce"],
+            })
+
+        # Encrypted payload
+        if any(kw in body for kw in _ENCRYPTED_KEYWORDS):
+            hints["api_replay_blocker"] = "encrypted_payload_requires_runtime_execution"
+            hints.setdefault("sandbox_plan", {
+                "target": "api_payload_encryption",
+                "runtime": "node_or_browser",
+                "capture": ["plaintext_inputs", "encryption_routine", "key_material"],
+            })
+
+        # Rate-limited GraphQL
+        if "graphql" in kind and _safe_int(candidate.get("status_code")) == 429:
+            hints["rate_limit_hint"] = "graphql_endpoint_rate_limited"
+            hints.setdefault("dynamic_inputs", ["timestamp"])
+    return hints
 
 
 def _transport_signals(report: dict[str, Any]) -> list[EvidenceSignal]:
