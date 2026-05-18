@@ -20,6 +20,7 @@ NOISE_ONLY_IMAGES = "noise_only_images"
 UNPARSABLE_PRICE = "unparsable_price"
 NEGATIVE_PRICE = "negative_price"
 MISSING_BODY = "missing_body"
+INVALID_TITLE = "invalid_title"
 SHORT_BODY = "short_body"
 MISSING_HANDLE = "missing_handle"
 MISSING_DEDUPE_KEY = "missing_dedupe_key"
@@ -155,20 +156,27 @@ def validate_product_record(
     if "title" in required and not title:
         severity = SEVERITY_WARNING if is_partial and partial_allowed else SEVERITY_ERROR
         issues.append(_issue(MISSING_TITLE, severity, "title", "Product title is required."))
+    if title and _matches_any(title, profile_cfg.get("invalid_title_patterns")):
+        issues.append(_issue(INVALID_TITLE, SEVERITY_ERROR, "title", f"Product title matches an invalid-page pattern: {title!r}."))
 
     parsed_price = parse_price(price_raw)
     price_required = bool(profile_cfg.get("price_required", True))
     allow_missing_price = bool(profile_cfg.get("allow_missing_price", False))
+    price_required_by_fields = bool({"price", "highest_price"} & required)
     if price_raw is not None and price_raw != "":
         if parsed_price is None:
             severity = SEVERITY_INFO if is_partial and partial_allowed else SEVERITY_WARNING
+            if price_required_by_fields:
+                severity = SEVERITY_ERROR
             issues.append(_issue(UNPARSABLE_PRICE, severity, "price", f"Cannot parse price: {price_raw!r}."))
         elif parsed_price < 0:
             issues.append(_issue(NEGATIVE_PRICE, SEVERITY_ERROR, "price", f"Negative price: {parsed_price}."))
     elif price_required and not allow_missing_price and not (is_partial and partial_allowed):
-        issues.append(_issue(UNPARSABLE_PRICE, SEVERITY_WARNING, "price", "Price is missing."))
+        severity = SEVERITY_ERROR if price_required_by_fields else SEVERITY_WARNING
+        issues.append(_issue(UNPARSABLE_PRICE, severity, "price", "Price is missing."))
 
     image_required = bool(profile_cfg.get("image_required", True))
+    image_required_by_fields = bool({"image", "images", "image_url", "image_urls"} & required)
     if images:
         for image in images:
             if image.startswith("data:"):
@@ -176,13 +184,16 @@ def validate_product_record(
                 break
         non_noise = [image for image in images if not _is_noise_image(image) and not image.startswith("data:")]
         if not non_noise and image_required and not (is_partial and partial_allowed):
-            issues.append(_issue(NOISE_ONLY_IMAGES, SEVERITY_WARNING, "image_urls", "All image URLs look like noise."))
+            severity = SEVERITY_ERROR if image_required_by_fields else SEVERITY_WARNING
+            issues.append(_issue(NOISE_ONLY_IMAGES, severity, "image_urls", "All image URLs look like noise."))
     elif image_required and not (is_partial and partial_allowed):
-        issues.append(_issue(EMPTY_IMAGES, SEVERITY_WARNING, "image_urls", "No product images found."))
+        severity = SEVERITY_ERROR if image_required_by_fields else SEVERITY_WARNING
+        issues.append(_issue(EMPTY_IMAGES, severity, "image_urls", "No product images found."))
 
     min_description_length = int(profile_cfg.get("min_description_length") or 0)
     if not description and not (is_partial and partial_allowed):
-        issues.append(_issue(MISSING_BODY, SEVERITY_INFO, "description", "Product description is empty."))
+        severity = SEVERITY_ERROR if "description" in required else SEVERITY_INFO
+        issues.append(_issue(MISSING_BODY, severity, "description", "Product description is empty."))
     elif min_description_length and len(description) < min_description_length:
         issues.append(
             _issue(
@@ -197,7 +208,8 @@ def validate_product_record(
         issues.append(_issue(MISSING_HANDLE, SEVERITY_INFO, "handle", "No stable product handle is set."))
 
     if not category:
-        issues.append(_issue(MISSING_CATEGORY, SEVERITY_INFO, "category", "No category context is set."))
+        severity = SEVERITY_ERROR if "category" in required else SEVERITY_INFO
+        issues.append(_issue(MISSING_CATEGORY, severity, "category", "No category context is set."))
 
     if not dedupe_key:
         severity = SEVERITY_WARNING if profile_cfg.get("dedupe_key_required") else SEVERITY_INFO
@@ -278,6 +290,22 @@ def _image_list(raw: Any) -> list[str]:
 def _is_noise_image(url: str) -> bool:
     lowered = url.lower()
     return any(pattern in lowered for pattern in _IMAGE_NOISE_PATTERNS)
+
+
+def _matches_any(value: str, patterns: Any) -> bool:
+    if not patterns:
+        return False
+    for pattern in patterns if isinstance(patterns, (list, tuple, set)) else [patterns]:
+        text = str(pattern or "").strip()
+        if not text:
+            continue
+        try:
+            if re.search(text, value, flags=re.IGNORECASE):
+                return True
+        except re.error:
+            if text.lower() in value.lower():
+                return True
+    return False
 
 
 def _issue(code: str, severity: str, field: str, message: str) -> ProductQualityIssue:

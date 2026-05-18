@@ -5,7 +5,10 @@ from autonomous_crawler.tools.product_quality import (
     BLOCKED_WITHOUT_NOTES,
     DATA_IMAGE_URL,
     EMPTY_IMAGES,
+    INVALID_TITLE,
     MISSING_DEDUPE_KEY,
+    MISSING_BODY,
+    MISSING_CATEGORY,
     MISSING_TITLE,
     MISSING_URL,
     NEGATIVE_PRICE,
@@ -276,6 +279,37 @@ class ProductQualityTests(unittest.TestCase):
 
         self.assertIn(MISSING_DEDUPE_KEY, codes(issues))
         self.assertEqual(issue_by_code(issues, MISSING_DEDUPE_KEY).severity, SEVERITY_WARNING)
+
+    def test_required_price_image_description_and_category_can_be_hard_errors(self):
+        issues = validate_product_record(
+            {
+                "url": "https://example.test/incomplete",
+                "title": "Incomplete product",
+                "image_urls": ["https://example.test/payment-visa.png"],
+            },
+            profile={
+                "required_fields": ("url", "title", "highest_price", "image_urls", "description", "category"),
+            },
+        )
+
+        self.assertEqual(issue_by_code(issues, "unparsable_price").severity, SEVERITY_ERROR)
+        self.assertEqual(issue_by_code(issues, NOISE_ONLY_IMAGES).severity, SEVERITY_ERROR)
+        self.assertEqual(issue_by_code(issues, MISSING_BODY).severity, SEVERITY_ERROR)
+        self.assertEqual(issue_by_code(issues, MISSING_CATEGORY).severity, SEVERITY_ERROR)
+
+    def test_invalid_title_patterns_are_hard_errors(self):
+        issues = validate_product_record(
+            {
+                "url": "https://example.test/not-found",
+                "title": "Strona nieodnaleziona.",
+                "price": "10",
+                "image_urls": ["https://example.test/product.jpg"],
+            },
+            profile={"invalid_title_patterns": ["strona nieodnaleziona"]},
+        )
+
+        self.assertIn(INVALID_TITLE, codes(issues))
+        self.assertEqual(issue_by_code(issues, INVALID_TITLE).severity, SEVERITY_ERROR)
 
     def test_product_record_dataclass_input_works(self):
         record = ProductRecord(

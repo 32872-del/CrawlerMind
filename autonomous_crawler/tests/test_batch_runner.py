@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from typing import Any
@@ -127,6 +128,34 @@ class BatchRunnerTests(unittest.TestCase):
         self.assertEqual(second.succeeded, 2)
         self.assertEqual(self.frontier.stats(), {"done": 3})
 
+    def test_item_workers_process_batch_concurrently(self) -> None:
+        self.frontier.add_urls([
+            "https://example.test/1",
+            "https://example.test/2",
+            "https://example.test/3",
+            "https://example.test/4",
+        ])
+
+        def processor(item: dict[str, Any]) -> ItemProcessResult:
+            time.sleep(0.05)
+            return ItemProcessResult.success()
+
+        started = time.perf_counter()
+        summary = BatchRunner(
+            frontier=self.frontier,
+            processor=processor,
+            config=BatchRunnerConfig(
+                run_id="run-workers",
+                batch_size=4,
+                item_workers=4,
+            ),
+        ).run()
+        elapsed = time.perf_counter() - started
+
+        self.assertEqual(summary.succeeded, 4)
+        self.assertLess(elapsed, 0.22)
+        self.assertEqual(self.frontier.stats(), {"done": 4})
+
     def test_discovered_urls_are_added_to_frontier(self) -> None:
         self.frontier.add_urls(["https://example.test/list"])
 
@@ -199,6 +228,8 @@ class BatchRunnerTests(unittest.TestCase):
             BatchRunnerConfig(run_id="x", max_batches=-1)
         with self.assertRaises(ValueError):
             BatchRunnerConfig(run_id="x", lease_seconds=-1)
+        with self.assertRaises(ValueError):
+            BatchRunnerConfig(run_id="x", item_workers=0)
 
 
 if __name__ == "__main__":

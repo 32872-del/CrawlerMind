@@ -1,0 +1,1054 @@
+{
+  "schema_version": "dual-ecommerce-longrun/v1",
+  "targets": {
+    "sephora": "https://www.sephora.pl/",
+    "uvex": "https://uvex.com.pl/"
+  },
+  "field_requirements": [
+    "title",
+    "highest_price_regular",
+    "colors",
+    "subtitle",
+    "product_detail",
+    "image_urls"
+  ],
+  "runs": {
+    "sephora": {
+      "site": "sephora.pl",
+      "requested_target": 100,
+      "sitemap_url_count": 24642,
+      "category_count": 669,
+      "attempted": 142,
+      "accepted": 100,
+      "failed": 42,
+      "blocked": 0,
+      "rejected_quality": 42,
+      "rejected_invalid_page": 42,
+      "catalog_exhausted": false,
+      "elapsed_seconds": 29.96,
+      "records_per_minute": 200.28,
+      "acceptance_rate": 0.7042,
+      "failures": [
+        {
+          "url": "https://www.sephora.pl/p/japonica-mokara-diffuser---dyfuzor-P10051987.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/bad-boy-power-spray----woda-toaletowa-P10012869.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/perfect-hair-day-shampoo-nawilzajacy-szampon-do-wlosow-P10024608.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/the-smooth-search-duet-peeling-gommage-i-nawilzenie-P10043572.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/luxe-crease-screen-queen-n228-P3416004.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/la-creme-beau-jour--krem-nawilzajacy-P10025420.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/butterfly---roz-do-policzkow-w-odcieniu-zlotopomaranczowym-P10025831.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/maison-noir-freesia-clementine-5-wick-candle---swieca-P10056008.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/force-supreme-blue-serum-serum-do-twarzy-P10023793.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/blue-toning-foam---pianka-poprawiajaca-kolor-wlosow-P10026996.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/moodpatch-chill-mode---aromaterapeutyczne-platki-pod-oczy-P3959086.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/concentrated-neck-contour-treatment-P60646.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/japonica-forbidden-fig-petite-jar-candle---swieca-P10051939.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/powder-foundation-brush-P3073055.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/skin-ressource-protective-moisturizing-velvet-cream---krem-do-twarzy-refill-P10026088.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/noyo-detox-P10047992.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/cities-milan---woda-toaletowa-P2736020.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/blot-and-glow-powder-in-puff-refill-P10017082.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/self-tan-classic-watermelon---samoopalacz-w-piance-z-ekstraktem-z-arbuza-P3698014.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/frizz-conditioner-wygladzajaca-odzywka-do-wlosow-P10024603.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/sheen-screen-peach-spf-50-przeciwsloneczny-nawilzajacy-balsam-do-ust-P10024937.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/day%E2%80%99lightfull---woda-perfumowana-P10018055.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/ka-brow---kremowo-zelowa-pomada-do-brwi-P2578012.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/t.l.c.-happi-scalp-scrub---peeling-skory-glowy-P10013703.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/rose-hips-nourishing-oil---olejek-do-twarzy-P3607086.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/vanilla-woods-woda-perfumowana-roll-on-P10016541.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/hydrating-milky-peel---peeling-w-kremie-P3921120.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/sunkissed-nudes-mini---zestaw-do-makijazu-P4042098.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/dream-routine---nawilzajaca-maska-na-noc-P10050042.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/lagodna-kojaca-pianka-do-mycia-do-cery-bardzo-suchej-i-wrazliwej-P10013232.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/fresh-capsule---maska-do-twarzy-P3714039.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/balsam-podkreslajacy-kolor-ust---balsam-do-ust-P3269008.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/phenomeneyes-effet-extension---wydluzajacy-tusz-do-rzes-P87400.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/maison-noir-suede-noir-diffuser---dyfuzor-P10056052.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/cipresso-di-toscana---woda-toaletowa-P3715020.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/rouge-dior-couture-color-refillable-lipstick---pomadka-do-ust-P10013305.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/olympea-legend---woda-perfumowana-P3656093.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/pigment-perfect---serum-korygujace-przebarwienia-P2997011.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/dior-forever-perfect-fix---mgielka-utrwalajaca-makijaz-P10014711.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/advanced-night-repair---regenerujaca-maseczka-pod-oczy-P2825012.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/clarinsmen---line-control-eye-balm-P2484007.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        },
+        {
+          "url": "https://www.sephora.pl/p/specifique---cure-anti-chute-intensive-P3903096.html",
+          "error": "quality rejected: invalid_title, unparsable_price, empty_images, missing_body, missing_handle"
+        }
+      ],
+      "category_samples": [
+        "https://www.sephora.pl/babette-babet/",
+        "https://www.sephora.pl/beauty-offers/",
+        "https://www.sephora.pl/bestsellery-sephora-collection/",
+        "https://www.sephora.pl/cialo-i-kapiel/dermokosmetyki-do-ciala-c347409/",
+        "https://www.sephora.pl/cialo-i-kapiel/dermokosmetyki-do-ciala/dermokosmetyki-do-higieny-ciala-c347411/",
+        "https://www.sephora.pl/cialo-i-kapiel/dermokosmetyki-do-ciala/dermokosmetyki-nawilzajace-do-ciala-c347412/",
+        "https://www.sephora.pl/cialo-i-kapiel/karta-upominkowa-pl_placeholder_bodycare_giftcard/",
+        "https://www.sephora.pl/cialo-i-kapiel/kosmetyki-do-kapieli/mydla-w-kostce-c347429/",
+        "https://www.sephora.pl/cialo-i-kapiel/pielegnacja-seksualna/gadzety-erotyczne-c7800/",
+        "https://www.sephora.pl/cialo-i-kapiel/pielegnacja-seksualna/kosmetyki-do-higieny-intymnej-c7802/",
+        "https://www.sephora.pl/dzien-matki/",
+        "https://www.sephora.pl/dzien-matki/karta-upominkowa-dm-karta-upominkowa/",
+        "https://www.sephora.pl/dzien-matki/makijaz/",
+        "https://www.sephora.pl/dzien-matki/mamy-maja-moc.-dm-landing-page/",
+        "https://www.sephora.pl/dzien-matki/perfumy/",
+        "https://www.sephora.pl/dzien-matki/pielegnacja/",
+        "https://www.sephora.pl/dzien-matki/pielegnacja/cialo/",
+        "https://www.sephora.pl/dzien-matki/pielegnacja/pielegnacja-twarzy/",
+        "https://www.sephora.pl/dzien-matki/pielegnacja/wlosy/",
+        "https://www.sephora.pl/dzien-matki/sephora-collection/",
+        "https://www.sephora.pl/dzien-matki/wylacznie-w-sephora/",
+        "https://www.sephora.pl/dzien-matki/zestawy/",
+        "https://www.sephora.pl/inspo-perfumy/",
+        "https://www.sephora.pl/kenzoki-kzoki/",
+        "https://www.sephora.pl/linia-colorful-sephora-collection/",
+        "https://www.sephora.pl/makijaz-premium/",
+        "https://www.sephora.pl/makijaz/karta-upominkowa-pl_placeholder_giftcard/",
+        "https://www.sephora.pl/makijaz/try-me---sprawdz-zanim-zdecydujesz-%F0%9F%8E%81-try-me-makeup/",
+        "https://www.sephora.pl/makijaz/wybrane-produkty-do-makijazu-w-smart-cenach-placeholder_makeup_5/",
+        "https://www.sephora.pl/marki-brand-page/"
+      ],
+      "timing": {
+        "catalog_seconds": 0.007,
+        "fetch_parse_seconds": 27.018
+      },
+      "issue_counts": {
+        "empty_images": 42,
+        "invalid_title": 42,
+        "missing_body": 42,
+        "missing_handle": 42,
+        "unparsable_price": 42
+      },
+      "coverage_report": {
+        "schema_version": "coverage-report/v1",
+        "counters": {
+          "estimated_inventory": 24642,
+          "discovered_urls": 24642,
+          "attempted_fetches": 142,
+          "time_budget_exhausted": false,
+          "fetched_success": 142,
+          "blocked_or_challenged": 0,
+          "fetch_failed": 0,
+          "render_attempted": 0,
+          "render_success": 0,
+          "render_failed": 0,
+          "parsed_records": 142,
+          "quality_passed": 100,
+          "quality_failed": 42,
+          "exported_unique": 100,
+          "duplicate_dropped": 0,
+          "stale_or_invalid_pages": 42,
+          "missing_required_fields": 126,
+          "catalog_exhausted": false
+        },
+        "rates": {
+          "discovery_rate": 1.0,
+          "fetch_success_rate": 1.0,
+          "block_rate": 0.0,
+          "render_success_rate": 0.0,
+          "parse_success_rate": 1.0,
+          "quality_pass_rate": 0.7042,
+          "export_rate": 1.0,
+          "overall_coverage_rate": 0.0041,
+          "target_completion_rate": 1.0
+        },
+        "losses": [
+          {
+            "stage": "discovery",
+            "expected": 24642,
+            "actual": 24642,
+            "lost": 0,
+            "rate": 1.0,
+            "reason": "missing_inventory_discovery"
+          },
+          {
+            "stage": "schedule",
+            "expected": 24642,
+            "actual": 142,
+            "lost": 24500,
+            "rate": 0.0058,
+            "reason": "time_budget_or_frontier_pending"
+          },
+          {
+            "stage": "access",
+            "expected": 142,
+            "actual": 142,
+            "lost": 0,
+            "rate": 1.0,
+            "reason": "access_or_transport_loss"
+          },
+          {
+            "stage": "parse",
+            "expected": 142,
+            "actual": 142,
+            "lost": 0,
+            "rate": 1.0,
+            "reason": "parser_or_selector_loss"
+          },
+          {
+            "stage": "quality",
+            "expected": 142,
+            "actual": 100,
+            "lost": 42,
+            "rate": 0.7042,
+            "reason": "quality_gate_loss"
+          },
+          {
+            "stage": "export",
+            "expected": 100,
+            "actual": 100,
+            "lost": 0,
+            "rate": 1.0,
+            "reason": "dedupe_or_export_loss"
+          }
+        ],
+        "main_loss_reason": "time_budget_or_frontier_pending",
+        "recommended_recovery": [
+          "increase_throughput: cache catalog discovery + parallel fetch + adaptive concurrency + resume pending frontier",
+          "recover_quality: reject invalid pages, clean media, enqueue replacement URLs until valid target is met"
+        ],
+        "accepted": true
+      },
+      "time_budget_exhausted": false
+    },
+    "uvex": {
+      "site": "uvex.com.pl",
+      "requested_target": 100,
+      "sitemap_url_count": 919,
+      "category_count": 35,
+      "attempted": 100,
+      "accepted": 100,
+      "failed": 0,
+      "blocked": 0,
+      "rejected_quality": 0,
+      "rejected_invalid_page": 0,
+      "catalog_exhausted": false,
+      "elapsed_seconds": 29.96,
+      "records_per_minute": 200.28,
+      "acceptance_rate": 1.0,
+      "failures": [],
+      "category_samples": [
+        "https://uvex.com.pl/produkty/akcesoria/",
+        "https://uvex.com.pl/produkty/akcesoria/akcesoria-do-gogli/",
+        "https://uvex.com.pl/produkty/akcesoria/akcesoria-do-kaskow-narciarskich/",
+        "https://uvex.com.pl/produkty/akcesoria/akcesoria-do-kaskow-rowerowych/",
+        "https://uvex.com.pl/produkty/akcesoria/akcesoria-do-okularow/",
+        "https://uvex.com.pl/produkty/akcesoria/pozostale/",
+        "https://uvex.com.pl/produkty/gogle/",
+        "https://uvex.com.pl/produkty/gogle/gogle-allround/",
+        "https://uvex.com.pl/produkty/gogle/gogle-attract/",
+        "https://uvex.com.pl/produkty/gogle/gogle-colorvision/",
+        "https://uvex.com.pl/produkty/gogle/gogle-junior/",
+        "https://uvex.com.pl/produkty/gogle/gogle-race/",
+        "https://uvex.com.pl/produkty/gogle/gogle-take-off/",
+        "https://uvex.com.pl/produkty/gogle/gogle-variomatic/",
+        "https://uvex.com.pl/produkty/kaski-narciarskie/",
+        "https://uvex.com.pl/produkty/kaski-narciarskie/kaski-narciarskie-allround/",
+        "https://uvex.com.pl/produkty/kaski-narciarskie/kaski-narciarskie-junior/",
+        "https://uvex.com.pl/produkty/kaski-narciarskie/kaski-narciarskie-performance/",
+        "https://uvex.com.pl/produkty/kaski-narciarskie/kaski-narciarskie-visor/",
+        "https://uvex.com.pl/produkty/kaski-rowerowe/",
+        "https://uvex.com.pl/produkty/kaski-rowerowe/kaski-rowerowe-allround/",
+        "https://uvex.com.pl/produkty/kaski-rowerowe/kaski-rowerowe-city/",
+        "https://uvex.com.pl/produkty/kaski-rowerowe/kaski-rowerowe-junior/",
+        "https://uvex.com.pl/produkty/kaski-rowerowe/kaski-rowerowe-mountainbike/",
+        "https://uvex.com.pl/produkty/kaski-rowerowe/kaski-rowerowe-performance/",
+        "https://uvex.com.pl/produkty/okulary/",
+        "https://uvex.com.pl/produkty/okulary/okulary-allround/",
+        "https://uvex.com.pl/produkty/okulary/okulary-colorvision/",
+        "https://uvex.com.pl/produkty/okulary/okulary-fashion/",
+        "https://uvex.com.pl/produkty/okulary/okulary-junior/"
+      ],
+      "timing": {
+        "catalog_seconds": 0.0,
+        "fetch_parse_seconds": 29.951
+      },
+      "issue_counts": {},
+      "coverage_report": {
+        "schema_version": "coverage-report/v1",
+        "counters": {
+          "estimated_inventory": 919,
+          "discovered_urls": 919,
+          "attempted_fetches": 100,
+          "time_budget_exhausted": false,
+          "fetched_success": 100,
+          "blocked_or_challenged": 0,
+          "fetch_failed": 0,
+          "render_attempted": 0,
+          "render_success": 0,
+          "render_failed": 0,
+          "parsed_records": 100,
+          "quality_passed": 100,
+          "quality_failed": 0,
+          "exported_unique": 100,
+          "duplicate_dropped": 0,
+          "stale_or_invalid_pages": 0,
+          "missing_required_fields": 0,
+          "catalog_exhausted": false
+        },
+        "rates": {
+          "discovery_rate": 1.0,
+          "fetch_success_rate": 1.0,
+          "block_rate": 0.0,
+          "render_success_rate": 0.0,
+          "parse_success_rate": 1.0,
+          "quality_pass_rate": 1.0,
+          "export_rate": 1.0,
+          "overall_coverage_rate": 0.1088,
+          "target_completion_rate": 1.0
+        },
+        "losses": [
+          {
+            "stage": "discovery",
+            "expected": 919,
+            "actual": 919,
+            "lost": 0,
+            "rate": 1.0,
+            "reason": "missing_inventory_discovery"
+          },
+          {
+            "stage": "schedule",
+            "expected": 919,
+            "actual": 100,
+            "lost": 819,
+            "rate": 0.1088,
+            "reason": "time_budget_or_frontier_pending"
+          },
+          {
+            "stage": "access",
+            "expected": 100,
+            "actual": 100,
+            "lost": 0,
+            "rate": 1.0,
+            "reason": "access_or_transport_loss"
+          },
+          {
+            "stage": "parse",
+            "expected": 100,
+            "actual": 100,
+            "lost": 0,
+            "rate": 1.0,
+            "reason": "parser_or_selector_loss"
+          },
+          {
+            "stage": "quality",
+            "expected": 100,
+            "actual": 100,
+            "lost": 0,
+            "rate": 1.0,
+            "reason": "quality_gate_loss"
+          },
+          {
+            "stage": "export",
+            "expected": 100,
+            "actual": 100,
+            "lost": 0,
+            "rate": 1.0,
+            "reason": "dedupe_or_export_loss"
+          }
+        ],
+        "main_loss_reason": "time_budget_or_frontier_pending",
+        "recommended_recovery": [
+          "increase_throughput: cache catalog discovery + parallel fetch + adaptive concurrency + resume pending frontier"
+        ],
+        "accepted": true
+      },
+      "time_budget_exhausted": false
+    }
+  },
+  "summary": {
+    "sephora_records": 100,
+    "uvex_records": 100,
+    "total_records": 200,
+    "accepted": true,
+    "known_limitations": [
+      "Sephora direct product pages trigger Akamai challenge; Product-Detail endpoint is used for field extraction.",
+      "uvex sitemap includes stale 404 product URLs and media URLs; collector filters catalog-product-view pages."
+    ],
+    "multi_site_runner": {
+      "total_sites": 2,
+      "ok_sites": 2,
+      "failed_sites": 0,
+      "elapsed_seconds": 29.953,
+      "results": [
+        {
+          "name": "sephora",
+          "ok": true,
+          "error": "",
+          "elapsed_seconds": 27.066
+        },
+        {
+          "name": "uvex",
+          "ok": true,
+          "error": "",
+          "elapsed_seconds": 29.952
+        }
+      ]
+    }
+  },
+  "samples": {
+    "sephora": [
+      {
+        "site": "sephora.pl",
+        "source_url": "https://www.sephora.pl/p/my-supertips---my-superlips-P2519006.html",
+        "detail_endpoint": "https://www.sephora.pl/on/demandware.store/Sites-Sephora_PL-Site/pl_PL/Product-Detail?pid=P2519006",
+        "category": "product",
+        "title": "My Supertips - My Superlips",
+        "subtitle": "GUERLAIN",
+        "brand": "GUERLAIN",
+        "highest_price_regular": 185.0,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [],
+        "product_detail": "Super-bohater ust, w oka mgnieniu regeneruje, odżywia, wygładza i zmiękcza usta. Zawiera niezwykle",
+        "image_urls": [
+          "https://media.sephora.eu/content/dam/digital/pim/published/G/GUERLAIN/350635/50731-media_swatch.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/G/GUERLAIN/P2519006/22172-media_1.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/G/GUERLAIN/P2519006/22172-media_2.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/massivpimupload/G/GUERLAIN/350635/50731-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53"
+        ],
+        "status": "ok",
+        "access_path": "sfcc_product_detail_endpoint"
+      },
+      {
+        "site": "sephora.pl",
+        "source_url": "https://www.sephora.pl/p/rabanne-fame-couture---woda-perfumowana-do-ponownego-napelniania-P1000205671.html",
+        "detail_endpoint": "https://www.sephora.pl/on/demandware.store/Sites-Sephora_PL-Site/pl_PL/Product-Detail?pid=P1000205671",
+        "category": "product",
+        "title": "Fame Couture – woda perfumowana",
+        "subtitle": "RABANNE FRAGRANCES",
+        "brand": "RABANNE FRAGRANCES",
+        "highest_price_regular": 825.0,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [],
+        "product_detail": "Odkryj limitowaną edycję wody perfumowanej FAME. Nowy ambrowo-kwiatowo-drzewny zapach kryje się w",
+        "image_urls": [
+          "https://media.sephora.eu/content/dam/digital/pim/published/R/RABANNE_FRAGRANCES/763115/365313-media_swatch.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/R/RABANNE_FRAGRANCES/P1000205671/109302-media_1.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/R/RABANNE_FRAGRANCES/P1000205671/109302-media_2.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/R/RABANNE_FRAGRANCES/P1000205671/109302-media_3.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/R/RABANNE_FRAGRANCES/P1000205671/109302-media_4.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined"
+        ],
+        "status": "ok",
+        "access_path": "sfcc_product_detail_endpoint"
+      },
+      {
+        "site": "sephora.pl",
+        "source_url": "https://www.sephora.pl/p/x-P1000209784.html",
+        "detail_endpoint": "https://www.sephora.pl/on/demandware.store/Sites-Sephora_PL-Site/pl_PL/Product-Detail?pid=P1000209784",
+        "category": "product",
+        "title": "Chitosan - Multi-use styling Spray",
+        "subtitle": "DYSON",
+        "brand": "DYSON",
+        "highest_price_regular": 319.0,
+        "currency": "PLN",
+        "colors": [
+          "165 ml"
+        ],
+        "sizes": [],
+        "product_detail": "Wielofunkcyjna mgiełka do stylizacji w wersji podróżnej, długotrwale utrwala lub odświeża fryzurę,",
+        "image_urls": [
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/377364-media_swatch.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/113414-media_1.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/113414-media_2.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/113414-media_3.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/113414-media_4.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/113414-media_5.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/384124-media_swatch.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53"
+        ],
+        "status": "ok",
+        "access_path": "sfcc_product_detail_endpoint"
+      },
+      {
+        "site": "sephora.pl",
+        "source_url": "https://www.sephora.pl/p/super-restorative-rose-radiance---krem-na-dzien-ast-P1000203111.html",
+        "detail_endpoint": "https://www.sephora.pl/on/demandware.store/Sites-Sephora_PL-Site/pl_PL/Product-Detail?pid=P1000203111",
+        "category": "product",
+        "title": "Rose Radiance - Krem na Dzien AST",
+        "subtitle": "CLARINS",
+        "brand": "CLARINS",
+        "highest_price_regular": 363.0,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [],
+        "product_detail": "W tej generacji Rose Radiance, Clarins skupia się na przywróceniu różanego blasku skórze w okresie",
+        "image_urls": [
+          "https://media.sephora.eu/content/dam/digital/pim/published/C/CLARINS/732114/350257-media_swatch.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/C/CLARINS/P1000203111/101010-media_1.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/C/CLARINS/P1000203111/101010-media_2.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/C/CLARINS/P1000203111/101010-media_3.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/C/CLARINS/P1000203111/101010-media_4.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/C/CLARINS/P1000203111/101010-media_5.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined"
+        ],
+        "status": "ok",
+        "access_path": "sfcc_product_detail_endpoint"
+      },
+      {
+        "site": "sephora.pl",
+        "source_url": "https://www.sephora.pl/p/n.5-leave-in---odzywka-regenerujaco-nawilzajaca-bez-splukiwania-P1000203508.html",
+        "detail_endpoint": "https://www.sephora.pl/on/demandware.store/Sites-Sephora_PL-Site/pl_PL/Product-Detail?pid=P1000203508",
+        "category": "product",
+        "title": "No.5 Leave In Moisturize & Mend - Odżywka regenerująco-nawilżająca",
+        "subtitle": "OLAPLEX",
+        "brand": "OLAPLEX",
+        "highest_price_regular": 145.0,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [],
+        "product_detail": "Odżywka nawilżająca bez spłukiwania o kremowo-żelowej konsystencji, która natychmiast nawilża i",
+        "image_urls": [
+          "https://media.sephora.eu/content/dam/digital/pim/published/O/OLAPLEX/736718/355609-media_swatch.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/O/OLAPLEX/P1000203508/104123-media_1.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/O/OLAPLEX/P1000203508/104123-media_2.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/O/OLAPLEX/P1000203508/104123-media_3.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/O/OLAPLEX/P1000203508/104123-media_4.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/O/OLAPLEX/P1000203508/104123-media_5.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined"
+        ],
+        "status": "ok",
+        "access_path": "sfcc_product_detail_endpoint"
+      },
+      {
+        "site": "sephora.pl",
+        "source_url": "https://www.sephora.pl/p/miss-dior---rozany-zel-antybakteryjny-do-rak-P10017118.html",
+        "detail_endpoint": "https://www.sephora.pl/on/demandware.store/Sites-Sephora_PL-Site/pl_PL/Product-Detail?pid=P10017118",
+        "category": "product",
+        "title": "Miss Dior - Różany żel antybakteryjny do rąk",
+        "subtitle": "DIOR",
+        "brand": "DIOR",
+        "highest_price_regular": 239.0,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [],
+        "product_detail": "Zapach preferowany przez kobiety.Dior stworzył różany, odświeżający, delikatnie pachnący żel do rąk",
+        "image_urls": [
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DIOR/555138/237612-media_swatch.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined"
+        ],
+        "status": "ok",
+        "access_path": "sfcc_product_detail_endpoint"
+      },
+      {
+        "site": "sephora.pl",
+        "source_url": "https://www.sephora.pl/p/rio-deo-40---wklad-do-dezodorantu-P10053861.html",
+        "detail_endpoint": "https://www.sephora.pl/on/demandware.store/Sites-Sephora_PL-Site/pl_PL/Product-Detail?pid=P10053861",
+        "category": "product",
+        "title": "Rio Deo 40 - Wkład do dezodorantu",
+        "subtitle": "SOL DE JANEIRO",
+        "brand": "SOL DE JANEIRO",
+        "highest_price_regular": 85.0,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [],
+        "product_detail": "Dezodorant bez aluminium Rio Deo - Cheirosa '40Dezodorant bez aluminium i wodorowęglanu sody, który",
+        "image_urls": [
+          "https://media.sephora.eu/content/dam/digital/pim/published/S/SOL_DE_JANEIRO/709763/336495-media_swatch.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/S/SOL_DE_JANEIRO/P10053861/95675-media_1.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/S/SOL_DE_JANEIRO/P10053861/95675-media_2.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/S/SOL_DE_JANEIRO/P10053861/95675-media_3.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/S/SOL_DE_JANEIRO/P10053861/95675-media_4.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/S/SOL_DE_JANEIRO/P10053861/95675-media_5.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined"
+        ],
+        "status": "ok",
+        "access_path": "sfcc_product_detail_endpoint"
+      },
+      {
+        "site": "sephora.pl",
+        "source_url": "https://www.sephora.pl/p/hydro-grip-gel-tint---tonujacy-zel-nawilzajacy-12-godz.-P10061406.html",
+        "detail_endpoint": "https://www.sephora.pl/on/demandware.store/Sites-Sephora_PL-Site/pl_PL/Product-Detail?pid=P10061406",
+        "category": "product",
+        "title": "Hydro Grip Gel Tint - Tonujący żel nawilżający 12 godz.",
+        "subtitle": "MILK MAKEUP",
+        "brand": "MILK MAKEUP",
+        "highest_price_regular": 195.0,
+        "currency": "PLN",
+        "colors": [
+          "1 (35 ml)"
+        ],
+        "sizes": [],
+        "product_detail": "Ten tonujący żel nawilżający o niekomedogennej formule z kwasem hialuronowym o potrójnie silnym",
+        "image_urls": [
+          "https://media.sephora.eu/content/dam/digital/pim/published/M/MILK_MAKEUP/757845/364365-media_swatch.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/M/MILK_MAKEUP/P10061406/105751-media_1.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/M/MILK_MAKEUP/P10061406/105751-media_2.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/M/MILK_MAKEUP/P10061406/105751-media_3.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/M/MILK_MAKEUP/757845/364365-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/M/MILK_MAKEUP/757844/364006-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/M/MILK_MAKEUP/757843/364364-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/M/MILK_MAKEUP/758358/364014-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/M/MILK_MAKEUP/758357/364013-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/M/MILK_MAKEUP/758353/364010-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/M/MILK_MAKEUP/758352/364009-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/M/MILK_MAKEUP/757846/364007-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/M/MILK_MAKEUP/758351/364008-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/M/MILK_MAKEUP/758359/364015-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/M/MILK_MAKEUP/758360/364367-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/M/MILK_MAKEUP/758354/364011-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/M/MILK_MAKEUP/758356/364012-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/M/MILK_MAKEUP/758355/364366-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/M/MILK_MAKEUP/758533/364368-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53"
+        ],
+        "status": "ok",
+        "access_path": "sfcc_product_detail_endpoint"
+      },
+      {
+        "site": "sephora.pl",
+        "source_url": "https://www.sephora.pl/p/eau-a-levres---rouge-a-levres-non-transfert-longue-tenue-P3251013.html",
+        "detail_endpoint": "https://www.sephora.pl/on/demandware.store/Sites-Sephora_PL-Site/pl_PL/Product-Detail?pid=P3251013",
+        "category": "product",
+        "title": "Y",
+        "subtitle": "CLARINS",
+        "brand": "CLARINS",
+        "highest_price_regular": 10000.01,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [],
+        "product_detail": "Opinie Filtruj po Najnowsze Najnowsze Najstarsze Najwyższa ocena do najniższej oceny Najniższa ocena do najwyższej oceny Filtruj po Najnowsze Najnowsze Najstarsze Najwyższa ocena do najniższej oceny Najniższa ocena do najwyższej oceny Oceń ten produkt jako pierwszy Regulamin dodawania opinii",
+        "image_urls": [
+          "https://media.sephora.eu/content/dam/digital/pim/published/C/CLARINS/428242/30141-media_swatch.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/C/CLARINS/428241/30148-media_swatch.jpg?scaleHeight=585&scaleMode=fit&scaleWidth=585",
+          "https://media.sephora.eu/content/dam/digital/pim/published/C/CLARINS/P3251013/16212-media_1.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/C/CLARINS/P3251013/16212-media_2.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/C/CLARINS/428241/30148-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/C/CLARINS/428242/30141-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/C/CLARINS/428243/30143-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53"
+        ],
+        "status": "ok",
+        "access_path": "sfcc_product_detail_endpoint"
+      },
+      {
+        "site": "sephora.pl",
+        "source_url": "https://www.sephora.pl/p/boiing-cakeless---mocno-kryjacy-korektor-do-calej-twarzy-P3787003.html",
+        "detail_endpoint": "https://www.sephora.pl/on/demandware.store/Sites-Sephora_PL-Site/pl_PL/Product-Detail?pid=P3787003",
+        "category": "product",
+        "title": "Boiing Cakeless - Mocno Kryjący Korektor Do Twarzy",
+        "subtitle": "BENEFIT COSMETICS",
+        "brand": "BENEFIT COSMETICS",
+        "highest_price_regular": 139.0,
+        "currency": "PLN",
+        "colors": [
+          "Odcień 3 (5 g)"
+        ],
+        "sizes": [],
+        "product_detail": "Cienie pod oczami? Nieproszeni goście na twarzy? Zapomnij o nich z płynnym, mocno kryjącym",
+        "image_urls": [
+          "https://media.sephora.eu/content/dam/digital/pim/published/B/BENEFIT_COSMETICS/483359/447946-media_swatch.jpg?scaleHeight=undefined&scaleMode=undefined&scaleWidth=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/B/BENEFIT_COSMETICS/483357/447944-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/B/BENEFIT_COSMETICS/483358/447945-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/B/BENEFIT_COSMETICS/507338/178537-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/B/BENEFIT_COSMETICS/483359/447946-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/B/BENEFIT_COSMETICS/483360/118619-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/B/BENEFIT_COSMETICS/577988/271576-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/B/BENEFIT_COSMETICS/577989/271577-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/B/BENEFIT_COSMETICS/577986/271574-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/B/BENEFIT_COSMETICS/483361/118620-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/B/BENEFIT_COSMETICS/483362/447949-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/B/BENEFIT_COSMETICS/577987/271575-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/B/BENEFIT_COSMETICS/577990/271578-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/B/BENEFIT_COSMETICS/507339/178535-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/B/BENEFIT_COSMETICS/483363/447950-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/B/BENEFIT_COSMETICS/483364/447951-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/B/BENEFIT_COSMETICS/483365/447952-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/B/BENEFIT_COSMETICS/483366/447953-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/B/BENEFIT_COSMETICS/577998/271586-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53",
+          "https://media.sephora.eu/content/dam/digital/pim/published/B/BENEFIT_COSMETICS/577993/271581-media_thumbnail.jpg?scaleHeight=64&scaleMode=fit&scaleWidth=53"
+        ],
+        "status": "ok",
+        "access_path": "sfcc_product_detail_endpoint"
+      }
+    ],
+    "uvex": [
+      {
+        "site": "uvex.com.pl",
+        "source_url": "https://uvex.com.pl/uvex/kask-rowerowy-dzieciecy-uvex-react-jr-mips-41-0-708-05/",
+        "category": "uvex > kask-rowerowy-dzieciecy-uvex-react-jr-mips-41-0-708-05",
+        "title": "Kask rowerowy dziecięcy uvex react jr. MIPS",
+        "subtitle": "Kask uvex react jr. MIPS został stworzony specjalnie z myślą o tych młodszych rowerzystach górskich - z najlepszą ochroną w każdej sytuacji.",
+        "brand": "uvex",
+        "highest_price_regular": 499.9,
+        "current_price": 499.9,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [
+          "52-56"
+        ],
+        "product_detail": "Kask rowerowy dziecięcy uvex react jr. MIPS Dzieci rządzą! Ochrona i styl są tak ważne, gdy młodzi ludzie odkrywają kolarstwo górskie na własne oczy. Kask uvex react jr. MIPS jest idealny: dzięki niższemu wycięciu na szyję i skronie oraz zintegrowanemu systemowi MIPS zapewnia jeszcze lepszą ochronę w razie upadku. Cechy produktu: system MIPS technologia inmould 1 rozmiar skorupy zapięcie monomatic system 3D IAS (2 opcje regulacji) elastyczny daszek FlexShield wyściółka wykonana w 100% z recyklingu – poliester (prać ręcznie) siatka przeciw owadom waga od 330 g normy: EN 1078 Technologie: System MIPS: Kompleksowy system bezpieczeństwa składa się z warstwy o niskim współczynniku tarcia zamontowanej wewnątrz kasku. Warstwa jest zaprojektowana w taki sposób, aby zmniejszyć ryzyko uszkodzenia mózgu – podczas zderzenia można lekko poruszać się wewnątrz skorupy, co pomaga przekierować siły z dala od głowy. Technologia inmould: Nierozdzielna skorupa wykonana z wewnętrznej warstwy EPS i zewnętrznej warstwy poliwęglanowej. EPS spieniany jest bezpośrednio w powłoce wykonanej z poliwęglanu. Wyróżnia się swoją lekkością i odpornością na uderzenia. uvex IAS 3D: Kaski uvex z systemem IAS 3D można regulować na szerokość i wysokość za pomocą ergonomicznego systemu regulacji oraz dopasować do każdego rozmiaru i kształtu głowy. Dodatkowym atutem jest możliwość obsługi w rękawiczkach. uvex monomatic: Komfortowe zapięcie uvex monomatic o wielostopniowej budowie oraz anatomicznym kształcie można otwierać i zamykać jedną ręką, co za każdym razem zapewnia idealne dopasowanie paska podbródkowego. Zastosowane technologie: inmould Nierozdzielna skorupa wykonana z wewnętrznej warstwy EPS i zewnętrznej warstwy poliwęglanowej. EPS spieniany jest bezpośrednio w powłoce wykonanej z poliwęglanu. Tworzy to lekką konstrukcję o najwyższej odporności na uderzenia. System MIPS Kompleksowy system bezpieczeństwa składa się z warstwy o niskim współczynniku tarcia zamontowanej wewnątrz kasku. Warstwa jest zaprojektowana w taki sposób, aby zmniejszyć ryzyko uszkodzenia mózgu – podczas zderzenia można lekko poruszać się wewnątrz skorupy, co pomaga przekierować siły z dala od głowy. uvex IAS 3D Kaski uvex z systemem IAS 3D można regulować na szerokość i wysokość za pomocą ergonomicznego systemu regulacji oraz dopasować do każdego rozmiaru i kształtu głowy. Dodatkowym atutem jest możliwość obsługi w rękawiczkach. uvex monomatic Komfortowe zapięcie uvex monomatic o wielostopniowej budowie oraz anatomicznym kształcie można otwierać i zamykać jedną ręką, co za każdym razem zapewnia idealne dopasowanie paska podbródkowego.",
+        "image_urls": [
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/410708_05_P1_956a.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/410708_05_P2_1395.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/410708_05_P3_854f.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/410708_05_P4_1ffd.jpg"
+        ],
+        "status": "ok",
+        "access_path": "magento_product_html"
+      },
+      {
+        "site": "uvex.com.pl",
+        "source_url": "https://uvex.com.pl/gogle-narciarskie-uvex-athletic-fm-55-0-520-2150/",
+        "category": "gogle-narciarskie-uvex-athletic-fm-55-0-520-2150",
+        "title": "Gogle narciarskie UVEX Athletic FM",
+        "subtitle": "Zainspirowane kanciastym designem gogli z lat 80-tych, nowe sportowe uvex athletic FM to gogle na stok, do parku i na puch. Dzięki wiedzy zdobytej podczas Pucharu Świata w narciarstwie alpejskim inżynierowie uvex opracowali gogle, których ostry wygląd wywołuje poruszenie. Duże pole widzenia sprawia, że gogle wyróżniają się na tle innych.",
+        "brand": "gogle-narciarskie-uvex-athletic-fm-55-0-520-2150",
+        "highest_price_regular": 329.9,
+        "current_price": 329.9,
+        "currency": "PLN",
+        "colors": [
+          "róż"
+        ],
+        "sizes": [
+          "one size"
+        ],
+        "product_detail": "Gogle narciarskie uvex athletic FM Gogle uvex athletic FM wymagają przede wszystkim jednego: maksymalnej prędkości. Zarówno na stoku, jak i poza nim. Jednocześnie kanciasta konstrukcja ramki rozciąga się głęboko na policzki, oferując idealne dopasowanie do różnych modeli kasków. Kolejną imponującą cechą wersji uvex athletic FM jest podwójna soczewka z pełnym lustrem. Soczewka: mirror ruby (S2) Transmisja światła: 37% Oprawka: black matt Cechy: 100% ochrony UVA, UVB, UVC technologia uvex supravision® podwójne, cylindryczne szyby pojedyncza welurowa pianka membrana klimatyczna technologia OTG (dla osób noszących okulary korekcyjne) antypoślizgowy silikon na pasku norma EN ISO 18527-1:2022 Zastosowane technologie: Decentralne soczewki Szyby uvex klasy 1 wykonane metodą wtryskową z technologią zdecentralizowanej soczewki zapewniają wyraźny obraz bez zniekształceń. Technologia zapewnia realny obraz i sprawia, że oko się nie męczy. Ochrona UV Over The Glasses (OTG) Ramka gogli została dopasowana tak, by istniała możliwość nałożenia konstrukcji na okulary korekcyjne. Dzięki technologii OTG możesz wygodnie jeździć w okularach i goglach jednocześnie. uvex supravision® Powłoka przeciwmgielna dla optymalnego widzenia podczas każdej pogody. Technologia ta zapewnia o 400% większą ochronę przed zaparowaniem w porównaniu do standardów rynkowych, zapewniając przejrzystość bez zaparowania do 120 sekund. Powłoka uvex supravision® jest nakładana na wewnętrzną szybę gogli i zapobiega parowaniu nawet podczas dużych zmian temperatury.",
+        "image_urls": [
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/5/5/550520_2150_P1_cfd8.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/5/5/550520_2150_P2_dd4e.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/5/5/550520_2150_P3_1dd8.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/5/5/550520_2150_P4_3b5c.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/5/5/550520_2330_P1_b20d.jpg"
+        ],
+        "status": "ok",
+        "access_path": "magento_product_html"
+      },
+      {
+        "site": "uvex.com.pl",
+        "source_url": "https://uvex.com.pl/kask-rowerowy-uvex-air-wing-2-cc-41-4-668-01/",
+        "category": "kask-rowerowy-uvex-air-wing-2-cc-41-4-668-01",
+        "title": "Kask rowerowy UVEX Air wing 2 CC",
+        "subtitle": "uvex air wing 2 cc jest lekki, świetnie leży na głowie i zapewnia solidną ochronę dzięki wytrzymałej konstrukcji inmould , systemowi dopasowania uvex 3D IAS oraz obsłudze przyjaznej dla dzieci.",
+        "brand": "kask-rowerowy-uvex-air-wing-2-cc-41-4-668-01",
+        "highest_price_regular": 299.9,
+        "current_price": 299.9,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [
+          "50-54",
+          "52-57"
+        ],
+        "product_detail": "Kask rowerowy uvex Air wing 2 CC Wytrzymały. Praktyczny. Uniwersalny. Od drogi do szkoły po weekendowe wypady – gdy nadchodzi czas, by ruszyć w teren, uvex air wing 2 cc jest gotowy. Ten wszechstronny kask zapewnia pewną ochronę dzięki konstrukcji inmould z pochłaniającą wstrząsy warstwą EPS oraz solidną zewnętrzną skorupą z poliwęglanu. Dostępny w dwóch rozmiarach i wyposażony w system dopasowania uvex 3D IAS , pozwala idealnie ułożyć kask na głowie młodego rowerzysty. Miękka, wyściółka jest wyjmowana i nadaje się do prania, co gwarantuje wysoki komfort przez cały dzień. Liczne otwory wentylacyjne z siateczkami utrzymują stały przepływ powietrza i optymalny klimat wewnątrz kasku. Mały daszek osłania oczy przed słońcem, deszczem i wiatrem. Dodatkową widoczność można uzyskać dzięki opcjonalnej lampce LED montowanej z tyłu (sprzedawanej oddzielnie). A zapięcie uvex monomatic zatrzaskuje się jednym kliknięciem, pewnie utrzymując paski na miejscu. uvex air wing 2 cc – matowe wykończenie, świetna jazda – w przystępnej cenie. Cechy produktu: 2 rozmiary skorupy technologia inmould system FAS zapięcie monomatic 2.0 system IAS 3D 2.0 siatka przeciw owadom 25 kanałów wentylacyjnych wyjmowana wyściółka typu basic lampka LED (opcjonalnie) waga od 225 g normy: EN 1078 Zastosowane technologie: inmould Nierozdzielna skorupa wykonana z wewnętrznej warstwy EPS i zewnętrznej warstwy poliwęglanowej. EPS spieniany jest bezpośrednio w powłoce wykonanej z poliwęglanu. Tworzy to lekką konstrukcję o najwyższej odporności na uderzenia. System FAS Paski Fast Adapting System można łatwo i na bieżąco dopasowywać do kształtu głowy każdego użytkownika. uvex IAS 3D Kaski uvex z systemem IAS 3D można regulować na szerokość i wysokość za pomocą ergonomicznego systemu regulacji oraz dopasować do każdego rozmiaru i kształtu głowy. Dodatkowym atutem jest możliwość obsługi w rękawiczkach. uvex monomatic Komfortowe zapięcie uvex monomatic o wielostopniowej budowie oraz anatomicznym kształcie można otwierać i zamykać jedną ręką, co za każdym razem zapewnia idealne dopasowanie paska podbródkowego.",
+        "image_urls": [
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/414668_01_P1_73c6.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/414668_01_P2_007a.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/414668_01_P3_56af.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/414668_01_P4_a7f3.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/414668_01_P5_2449.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/414668_04_P1_86c6.jpg"
+        ],
+        "status": "ok",
+        "access_path": "magento_product_html"
+      },
+      {
+        "site": "uvex.com.pl",
+        "source_url": "https://uvex.com.pl/wysciolka-kasku-uvex-ravage-pad-set-41-9-935-0600/",
+        "category": "wysciolka-kasku-uvex-ravage-pad-set-41-9-935-0600",
+        "title": "Wyściółka kasku UVEX Ravage pad set",
+        "subtitle": "Wymienna wyściółka do kasku uvex ravage.",
+        "brand": "wysciolka-kasku-uvex-ravage-pad-set-41-9-935-0600",
+        "highest_price_regular": 99.9,
+        "current_price": 99.9,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [
+          "56-59"
+        ],
+        "product_detail": "Wyściółka kasku UVEX Ravage pad set Wymienna wyściółka do kasku uvex ravage wykonana z hipoalergicznego materiału COOLMAX EcoMade, dostępna w 3 rozmiarach.",
+        "image_urls": [
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/419935_0600_P1_fb05.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/419935_0100_P1_e6aa.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/419935_0200_P1_eab5.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/419935_0300_P1_27be.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/419935_0400_P1_a2cd.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/419935_0500_P1_a787.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/419935_0700_P1_e3d4.jpg"
+        ],
+        "status": "ok",
+        "access_path": "magento_product_html"
+      },
+      {
+        "site": "uvex.com.pl",
+        "source_url": "https://uvex.com.pl/uvex/lampka-do-kasku-rowerowego-uvex-plug-in-led-41-9-115-0400/",
+        "category": "uvex > lampka-do-kasku-rowerowego-uvex-plug-in-led-41-9-115-0400",
+        "title": "Lampka do kasku rowerowego UVEX Plug-in LED",
+        "subtitle": "",
+        "brand": "uvex",
+        "highest_price_regular": 49.9,
+        "current_price": 49.9,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [
+          "one size"
+        ],
+        "product_detail": "Lampka uvex plug-in LED Lampka uvex plug-in LED to przydatny gadżet dla rowerzystów. Pasuje do modelów: uvex quatro pro uvex quatro uvex quatro xc uvex gravel x uvex quatro cc MIPS uvex quatro cc",
+        "image_urls": [
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/419115_0400_a4ee.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/419115_1200_P1_a27c.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/419115_1400_P1_9220.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/419115_1100_P1_4ac6.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/u/v/uvex_plug_in_LED_i_vo_S4191150100_on_60mm_7476.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/u/v/uvex_plug_in_LED_quatro_junior_S4191150200_on_60mm_178d.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/419115_0600_ab1b.jpg"
+        ],
+        "status": "ok",
+        "access_path": "magento_product_html"
+      },
+      {
+        "site": "uvex.com.pl",
+        "source_url": "https://uvex.com.pl/szyba-do-okularow-uvex-pace-stage-cv-mirror-silver-53-7-052-0084/",
+        "category": "szyba-do-okularow-uvex-pace-stage-cv-mirror-silver-53-7-052-0084",
+        "title": "Szyba do okularów UVEX Pace stage CV mirror silver",
+        "subtitle": "Wymienna szyba do okularów uvex pace stage.",
+        "brand": "szyba-do-okularow-uvex-pace-stage-cv-mirror-silver-53-7-052-0084",
+        "highest_price_regular": 399.9,
+        "current_price": 399.9,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [
+          "one size"
+        ],
+        "product_detail": "Szyba do okularów UVEX Pace stage ESS Okulary uvex pace stage CV wyglądają jak klasyczne okulary sportowe, ale oferują znacznie więcej dzięki efektownemu designowi. Dodatkowa szyba zwiększy możliwości dotychczas używanych okularów lub pozwoli na dostosowanie ich do indywidualnego stylu lub potrzeb wizualnych. Soczewka: mirror silver Poziom ochrony: S3 Cechy produktu: technologia uvex supravision® technologia uvex colorvision® łatwe w czyszczeniu 100% ochrona UVA, UVB, UVC Technologie: 100% UV Protection: Dzięki zastosowaniu filtrów blokujących promienie UV bezpośrednio w surowcu, soczewki uvex skutecznie odfiltrowują 100% promieniowania UV o długości do 400 nm. Kompleksowa ochrona przed promieniowaniem UVA, UVB i UVC. Jest to również podstawą nazwy naszej firmy: uv-ex = ultraviolet excluded. uvex supravision®: Powłoka przeciwmgielna dla optymalnego widzenia podczas każdej pogody. Technologia ta zapewnia o 400% większą ochronę przed zaparowaniem w porównaniu do standardów rynkowych, zapewniając przejrzystość bez zaparowania do 120 sekund. Powłoka uvex supravision® jest nakładana na wewnętrzną szybę gogli i zapobiega parowaniu nawet podczas dużych zmian temperatury. uvex colorvision®: Synonim najwyższego poziomu kontrastu między jaskrawymi kolorami – niezależnie od miejsca i warunków. Niezależnie od tego, gdzie jesteś. Niezależnie od tego, co robisz. Trzy innowacyjne filtry kolorów zapewniają wyjątkowy kontrast i doskonałą widoczność. Dodatkowo: lepsze postrzeganie głębi, nawet przy słabej widoczności. Zastosowane technologie: Ochrona UV uvex colorvision® Synonim najwyższego poziomu kontrastu między jaskrawymi kolorami – niezależnie od miejsca i warunków. Niezależnie od tego, gdzie jesteś. Niezależnie od tego, co robisz. Trzy innowacyjne filtry kolorów zapewniają wyjątkowy kontrast i doskonałą widoczność. Dodatkowo: lepsze postrzeganie głębi, nawet przy słabej widoczności. uvex supravision® Powłoka przeciwmgielna dla optymalnego widzenia podczas każdej pogody. Technologia ta zapewnia o 400% większą ochronę przed zaparowaniem w porównaniu do standardów rynkowych, zapewniając przejrzystość bez zaparowania do 120 sekund. Powłoka uvex supravision® jest nakładana na wewnętrzną szybę gogli i zapobiega parowaniu nawet podczas dużych zmian temperatury.",
+        "image_urls": [
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/5/3/537052_0084_P1_84ed.jpg"
+        ],
+        "status": "ok",
+        "access_path": "magento_product_html"
+      },
+      {
+        "site": "uvex.com.pl",
+        "source_url": "https://uvex.com.pl/uvex/kask-rowerowy-uvex-gravel-x-41-0-044-11/",
+        "category": "uvex > kask-rowerowy-uvex-gravel-x-41-0-044-11",
+        "title": "Kask rowerowy uvex gravel x",
+        "subtitle": "Idealne rozwiązanie na następną żwirową przygodę: przeżyj maksimum akcji z doskonałą ochroną! Kask uvex gravel x to niezwykle wytrzymały i wygodny kask rowerowy, który stosować można w różnych typach kolarstwa. Świetnie poradzi sobie przy gravelu, MTB, a także w codziennej jeździe po mieście.",
+        "brand": "uvex",
+        "highest_price_regular": 599.9,
+        "current_price": 407.92,
+        "currency": "PLN",
+        "colors": [
+          "róż",
+          "roz"
+        ],
+        "sizes": [
+          "52-57",
+          "56-61"
+        ],
+        "product_detail": "Kask rowerowy uvex gravel x Jest lekki, super ochronny i naprawdę dobrze wentylowany. Kask uvex gravel x to wytrzymały, odporny na wstrząsy kask z technologią double inmould, który zawsze idealnie pasuje do każdej głowy, dzięki regulacji anatomic IAS . Zdecyduj, czy chcesz ścigać się po asfalcie, czy pokonywać kamieniste szlaki - ten kask poradzi sobie ze wszystkim. Posiada 17 kanałów wentylacyjnych, wyposażonych w siatkę przeciw owadom, które pomagają zachować chłodną głowę. Możesz nawet dodać opcjonalną diodę LED dla dodatkowego bezpieczeństwa podczas wieczornych przejażdżek. Cechy produktu: t echnologia double inmould 2 rozmiary skorupy elementy odblaskowe 17 kanałów wentylacyjnych zapięcie monomatic system anatomic IAS system FAS siatka przeciw owadom wyściółka typu vent lampka LED (opcjonalnie) waga od 300 g normy: EN 1078 Technologie: Technologia inmould: Nierozdzielna skorupa wykonana z wewnętrznej warstwy EPS i zewnętrznej warstwy poliwęglanowej. EPS spieniany jest bezpośrednio w powłoce wykonanej z poliwęglanu. Wyróżnia się swoją lekkością i odpornością na uderzenia. uvex monomatic: Komfortowe zapięcie uvex monomatic o wielostopniowej budowie oraz anatomicznym kształcie można otwierać i zamykać jedną ręką, co za każdym razem zapewnia idealne dopasowanie paska podbródkowego. uvex anatomic IAS: Technologia ta korzysta z rozwiązania IAS 3D, zawierając dodatkowo przylegające, elastyczne skrzydełko umieszczone przy pokrętle regulacyjnym, które dopasowuje się do kształtu tyłu głowy. System FAS: Paski Fast Adapting System można łatwo i na bieżąco dopasowywać do kształtu głowy każdego użytkownika. System wentylacji: Skuteczny system wentylacji, zapewniający optymalny przepływ powietrza. Przednie otwory wentylacyjne zasysają świeże powietrze, które odbiera ciepło i wilgoć z głowy, a następnie wydostaje się przez otwory zlokalizowane w tylnej części skorupy. Zastosowane technologie: inmould Nierozdzielna skorupa wykonana z wewnętrznej warstwy EPS i zewnętrznej warstwy poliwęglanowej. EPS spieniany jest bezpośrednio w powłoce wykonanej z poliwęglanu. Tworzy to lekką konstrukcję o najwyższej odporności na uderzenia. System FAS Paski Fast Adapting System można łatwo i na bieżąco dopasowywać do kształtu głowy każdego użytkownika. System wentylacji Skuteczny system wentylacji, zapewniający optymalny przepływ powietrza. Przednie otwory wentylacyjne zasysają świeże powietrze, które odbiera ciepło i wilgoć z głowy, a następnie wydostaje się przez otwory zlokalizowane w tylnej części skorupy. uvex anatomic IAS Technologia ta korzysta z rozwiązania IAS 3D, zawierając dodatkowo przylegające, elastyczne skrzydełko umieszczone przy pokrętle regulacyjnym, które dopasowuje się do kształtu tyłu głowy. uvex monomatic Komfortowe zapięcie uvex monomatic o wielostopniowej budowie oraz anatomicznym kształcie można otwierać i zamykać jedną ręką, co za każdym razem zapewnia idealne dopasowanie paska podbródkowego.",
+        "image_urls": [
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/410044_11_P1_f9ac.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/410044_11_P2_cce2.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/410044_11_P3_12fd.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/410044_11_P4_6b2d.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/410044_07_P1_65cd.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/410044_08_P1_f06b.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/410044_06_P1_2629.jpg"
+        ],
+        "status": "ok",
+        "access_path": "magento_product_html"
+      },
+      {
+        "site": "uvex.com.pl",
+        "source_url": "https://uvex.com.pl/uvex/kask-rowerowy-dzieciecy-uvex-kid-2-41-4-306-17/",
+        "category": "uvex > kask-rowerowy-dzieciecy-uvex-kid-2-41-4-306-17",
+        "title": "Kask rowerowy dziecięcy Uvex Kid 2 - 41/4/306/17",
+        "subtitle": "",
+        "brand": "uvex",
+        "highest_price_regular": 199.9,
+        "current_price": 97.86,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [
+          "46-52"
+        ],
+        "product_detail": "Kask rowerowy dziecięcy Uvex Kid 2 - 41/4/306/17 Kolorowy kask Uvex idealny dla najmłodszych dzieci Kask dla maluszków w wieku 1-3 lat. Te kolorowe, ultralekkie kaski są idealne dla najmłodszych, przewożonych w rowerowych siodełkach. Kask przystosowany do zamocowania diody triangle (dostępna oddzielnie). W kasku została zastosowana technologia Inmould , która tworzy ekstremalnie bezpieczną i stabilną konstrukcje kasku , wraz z doskonałą wentylacją . Z kolei system IAS pozwala na dopasowanie kasku do kształtu głowy za pomocą jednej ręki. Natomiast system Monomatic jest to zamek blokujący, który pozwala na wielostopniową regulację paska podbródka za pomocą jednej ręki. Ponadto wśród zalet kasku Kid 2 należy wspomnieć o 8 kanałach wentylacyjnych oraz siatce chroniącej przed owadami . Ponadto w kasku znajduje się wyjmowana wyściółka typu basic, nadająca się do prania. Kolorowa i wesoła kolorystyka sprawia, że kask przypadnie do gustu zarówno dziewczynkom jak i chłopakom. Wśród głównych zalet kasku Kid 2 należy wymienić: Technologia Inmould, tworząca ekstremalnie bezpieczną i stabilną konstrukcje kasku, wraz z doskonałą wentylacją Spełniający normy: EN 1078 / TÜV GS / CE System IAS, który pozwala na dopasowanie kasku do kształtu głowy za pomocą jednej ręki System Monomatic- to zamek blokujący, który pozwala na wielostopniową regulację paska podbródka za pomocą jednej ręki 8 kanałów wentylacyjnych Siatka chroniąca przed owadami Waga od 185g System FAS, pozwalający na proste dopasowanie długości pasków do własnych potrzeb. Dzięki temu kask leży mocno na głowie, nie mając możliwości ześlizgnięcia się, nawet podczas gwałtownego uderzenia Kask przystosowany do lampki triangle LED Zastosowane technologie: System FAS Paski Fast Adapting System można łatwo i na bieżąco dopasowywać do kształtu głowy każdego użytkownika. uvex IAS Kaski uvex z systemem IAS można regulować na szerokość i dopasować do każdego rozmiaru i kształtu głowy. Dodatkowym atutem jest możliwość obsługi w rękawiczkach.",
+        "image_urls": [
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/414306_17_P1_2039.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/414306_17_P2_92bb.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/414306_17_P3_9f86.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/414306_17_P4_4c9e.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/414306_17_P5_2c44.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/414306_20_P1_483a.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/414306_32_P1_b950.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/414306_33_P1_0de4.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/414306_34_P1_e72f.jpg"
+        ],
+        "status": "ok",
+        "access_path": "magento_product_html"
+      },
+      {
+        "site": "uvex.com.pl",
+        "source_url": "https://uvex.com.pl/uvex/okulary-dzieciece-uvex-rookie-53-3-077-9316/",
+        "category": "uvex > okulary-dzieciece-uvex-rookie-53-3-077-9316",
+        "title": "Okulary dziecięce UVEX Rookie",
+        "subtitle": "Modne kombinacje kolorów. Sportowy urok. Tylko dla dzieci. 100% ochrony UV, lustrzane soczewki i stylowe połączenia kolorów sprawiają, że okulary przeciwsłoneczne uvex rookie są idealnym towarzyszem na słoneczne dni na świeżym powietrzu.",
+        "brand": "uvex",
+        "highest_price_regular": 109.9,
+        "current_price": 109.9,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [
+          "one size"
+        ],
+        "product_detail": "Okulary dziecięce UVEX rookie Modne kombinacje kolorów. Sportowy urok. Tylko dla dzieci. Uvex rookie – stylowe okulary uniwersalne na słoneczne dni. Wysokiej jakości soczewki ze 100% ochroną przed promieniowaniem UVA, UVB i UVC do 400 nm. Lustrzane soczewki nie tylko wyglądają fajnie, ale także redukują odblaski w jasne dni. Gwarantowana wyraźna widoczność. Sportowe okulary przeciwsłoneczne w czterech popularnych kombinacjach kolorów. To więcej niż tylko dobry wygląd. Soczewka: mirror pink Transmisja światła: 14% (kat. 3) Oprawka: clear-pink matt Cechy produktu: 100% ochrona UVA, UVB, UVC Zastosowane technologie: Ochrona UV uvex supravision® Powłoka przeciwmgielna dla optymalnego widzenia podczas każdej pogody. Technologia ta zapewnia o 400% większą ochronę przed zaparowaniem w porównaniu do standardów rynkowych, zapewniając przejrzystość bez zaparowania do 120 sekund. Powłoka uvex supravision® jest nakładana na wewnętrzną szybę gogli i zapobiega parowaniu nawet podczas dużych zmian temperatury.",
+        "image_urls": [
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/5/3/533077_9316_P1_9d62.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/5/3/533077_9316_P2_4efc.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/5/3/533077_9316_P3_b8d7.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/5/3/533077_9316_P4_0f66.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/5/3/533077_9316_P5_ce94.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/5/3/533077_2216_P1_b8ea.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/5/3/533077_5516_P1_2548.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/5/3/533077_5616_P1_0c6b.jpg"
+        ],
+        "status": "ok",
+        "access_path": "magento_product_html"
+      },
+      {
+        "site": "uvex.com.pl",
+        "source_url": "https://uvex.com.pl/uvex/kask-rowerowy-uvex-react-41-0-709-10/",
+        "category": "uvex > kask-rowerowy-uvex-react-41-0-709-10",
+        "title": "Kask rowerowy UVEX React",
+        "subtitle": "Z nowym kaskiem uvex react podbijesz każdy teren, nawet ten najtrudniejszy.",
+        "brand": "uvex",
+        "highest_price_regular": 499.9,
+        "current_price": 499.9,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [
+          "52-56",
+          "56-59"
+        ],
+        "product_detail": "Kask rowerowy uvex react Jesteś minimalistą, gdy ruszasz na wymagające trasy? W takim razie uvex react w swojej maksymalnie odchudzonej formie będzie strzałem w dziesiątkę. Zaprojektowany z myślą o sportowych, nierównych szlakach, ten uniwersalny kask MTB to świetny wybór dla ambitnych początkujących, którzy szukają wysokiej jakości w rozsądnej cenie. Łącząc w sobie funkcjonalność, ochronę i styl, oferuje dokładnie to, czego potrzebujesz na górskich wypadach. Cechy produktu: technologia double inmould 3 rozmiary skorupy system 3D IAS zapięcie monomatic regulowany, zdejmowany daszek wyściółka typu basic możliwość regulacji dopasowania uchwyt do mocowania okularów waga od 300 g normy: EN 1078 Zastosowane technologie: inmould Nierozdzielna skorupa wykonana z wewnętrznej warstwy EPS i zewnętrznej warstwy poliwęglanowej. EPS spieniany jest bezpośrednio w powłoce wykonanej z poliwęglanu. Tworzy to lekką konstrukcję o najwyższej odporności na uderzenia. System FAS Paski Fast Adapting System można łatwo i na bieżąco dopasowywać do kształtu głowy każdego użytkownika. uvex IAS Kaski uvex z systemem IAS można regulować na szerokość i dopasować do każdego rozmiaru i kształtu głowy. Dodatkowym atutem jest możliwość obsługi w rękawiczkach. uvex monomatic Komfortowe zapięcie uvex monomatic o wielostopniowej budowie oraz anatomicznym kształcie można otwierać i zamykać jedną ręką, co za każdym razem zapewnia idealne dopasowanie paska podbródkowego.",
+        "image_urls": [
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/410709_10_P1_ae1d.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/410709_10_P2_1155.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/410709_10_P3_53cc.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/410709_10_P4_f67a.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/410709_06_P1_3dae.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/410709_07_P1_ea9f.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/410709_08_P1_30c7.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/410709_12_P1_e606.jpg"
+        ],
+        "status": "ok",
+        "access_path": "magento_product_html"
+      }
+    ]
+  }
+}

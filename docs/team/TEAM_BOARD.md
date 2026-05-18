@@ -6,7 +6,7 @@ Last updated: 2026-05-15
 
 | Employee ID | Display Name | Current Project Role | Status | Current Assignment |
 |---|---|---|---|---|
-| LLM-2026-000 | Supervisor Codex | Project Supervisor | active | Backend execution automation hardening accepted; planning real runtime execution |
+| LLM-2026-000 | Supervisor Codex | Project Supervisor | active | Frontend product workflow API implemented: analyze/import/fields/test/full/status/events/export |
 | LLM-2026-001 | Worker Alpha | Browser Runtime Worker | standby | Profile draft generation and profile draft smoke accepted |
 | LLM-2026-002 | Worker Beta | Proxy / Transport Runtime Worker | standby | Replay executor and 30k resumable checkpoint restart accepted |
 | LLM-2026-003 | Worker Gamma | Unassigned | standby | none |
@@ -233,12 +233,12 @@ Last updated: 2026-05-15
 
 1. REPLAY-RUNTIME-1: Add a real JS/WebCrypto sandbox execution path behind the accepted replay result contract.
 2. PROFILE-AUTO-2: Add advisor-assisted profile refinement, selector repair, and missing-field explanation on top of generated drafts.
-3. SCALE-RUNTIME-1: Connect resumable checkpoint logic to real `URLFrontier`, `SpiderRuntimeProcessor`, and `ProductStore` long-running jobs.
-4. REAL-ECOM-2: Run 600+ records through profile runner on public ecommerce/API targets with profile-run reports.
-5. RUNTIME-HARDEN-1: Add persistent async client pooling, DNS reuse tuning, and adaptive concurrency using the accepted scale metrics.
+3. REAL-ECOM-2: Run 600+ records through profile long-run entrypoints on public ecommerce/API targets with profile-run reports.
+4. RUNTIME-HARDEN-1: Add adaptive concurrency/backpressure using latency, block rate, and quality-loss metrics.
+5. SCALE-RUNTIME-2: Add durable multi-site job registry and restart recovery for `/profile-runs/batch`.
 6. REAL-HARDEN-5: Expand real dynamic training to harder virtualized/protected-profile targets from the scenario matrix.
 7. VISUAL-HARDEN-1: Add real OCR provider adapter and screenshot-to-DOM alignment.
-8. UX-P1: Simplify user onboarding around `clm.py`, FastAPI, and future UI config without weakening the native backend.
+8. UX-P1: Build frontend screens on top of the new product workflow API without weakening the native backend.
 
 ## Supervisor Notes
 
@@ -268,3 +268,25 @@ Last updated: 2026-05-15
   reports, and 30k pause/resume checkpoint restart evidence. Next work should
   connect these pieces to real JS sandbox execution and real long-running
   ecommerce runs.
+- Supervisor mainline on 2026-05-16 added `ProfileLongRunExecutor`, a reusable
+  profile-driven long-run facade over `URLFrontier`, `BatchRunner`,
+  `SpiderRuntimeProcessor`, `ProductStore`, `CheckpointStore`, and
+  `profile-run-report/v1`. The offline smoke paused, resumed, stored 55
+  products, completed checkpoint status, and emitted a report.
+- Supervisor follow-up on 2026-05-16 added product entrypoints:
+  `clm.py profile-run`, `POST /profile-runs`, and
+  `GET /profile-runs/{task_id}`. Focused CLI/API/profile-longrun verification
+  passed with 56 tests.
+- Supervisor mainline on 2026-05-18 promoted speed work from training script
+  into product backends: `BatchRunnerConfig.item_workers`,
+  `ProfileLongRunConfig.item_workers`, `clm.py profile-run --workers`,
+  `clm.py multi-profile-run --max-sites 5 --workers`,
+  `POST /profile-runs` body `item_workers`, and `POST /profile-runs/batch`.
+  `NativeFetchRuntime` can reuse an HTTP connection pool for threaded static/API
+  jobs. Focused verification passed with 95 tests plus compileall.
+- Supervisor product workflow slice on 2026-05-18 added
+  `autonomous_crawler/runners/product_workflow.py`, `POST /catalog/import`,
+  `POST /site/analyze`, `POST /fields/resolve`, `POST /runs/test`,
+  `POST /runs/full`, `GET /runs/{task_id}/status`,
+  `GET /runs/{task_id}/events`, and `POST /exports`. This is the first stable
+  API contract for the future frontend.

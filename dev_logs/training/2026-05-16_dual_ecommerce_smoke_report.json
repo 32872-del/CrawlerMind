@@ -1,0 +1,748 @@
+{
+  "schema_version": "dual-ecommerce-longrun/v1",
+  "targets": {
+    "sephora": "https://www.sephora.pl/",
+    "uvex": "https://uvex.com.pl/"
+  },
+  "field_requirements": [
+    "title",
+    "highest_price_regular",
+    "colors",
+    "subtitle",
+    "product_detail",
+    "image_urls"
+  ],
+  "runs": {
+    "sephora": {
+      "site": "sephora.pl",
+      "requested_target": 10,
+      "sitemap_url_count": 24660,
+      "category_count": 669,
+      "attempted": 26,
+      "accepted": 10,
+      "failed": 16,
+      "blocked": 0,
+      "elapsed_seconds": 104.35,
+      "failures": [
+        {
+          "url": "https://www.sephora.pl/p/nutritious-radiant-energy-water-gel-creme---krem-do-twarzy-445638.html",
+          "error": "missing Sephora pid in URL"
+        },
+        {
+          "url": "https://www.sephora.pl/p/bawelniane-platki-kosmetyczne-wielokrotnego-uzytku-%E2%80%94-zestaw-7-sztuk-z-bawelny-organicznej-458693.html",
+          "error": "missing Sephora pid in URL"
+        },
+        {
+          "url": "https://www.sephora.pl/p/oil-to-foam-total-cleanser---oczyszczajacy-plyn-do-demakijazu-690029.html",
+          "error": "missing Sephora pid in URL"
+        },
+        {
+          "url": "https://www.sephora.pl/p/magic-primer-anti-shine-face-base---baza-matujaca-411751.html",
+          "error": "missing Sephora pid in URL"
+        },
+        {
+          "url": "https://www.sephora.pl/p/south-bay---woda-toaletowa-358879.html",
+          "error": "missing Sephora pid in URL"
+        },
+        {
+          "url": "https://www.sephora.pl/p/touchable-texture-spray-644507.html",
+          "error": "missing Sephora pid in URL"
+        },
+        {
+          "url": "https://www.sephora.pl/p/ultimate-repair---rewitalizujaca-kuracja-do-wlosow-zniszczonych-705667.html",
+          "error": "missing Sephora pid in URL"
+        },
+        {
+          "url": "https://www.sephora.pl/p/master-mattes-liquid-liner---eyeliner-w-plynie-570450.html",
+          "error": "missing Sephora pid in URL"
+        },
+        {
+          "url": "https://www.sephora.pl/p/lust-for-sun---woda-perfumowana-660394.html",
+          "error": "missing Sephora pid in URL"
+        },
+        {
+          "url": "https://www.sephora.pl/p/a-drop-dissey---woda-perfumowana-542356.html",
+          "error": "missing Sephora pid in URL"
+        },
+        {
+          "url": "https://www.sephora.pl/p/x-653519.html",
+          "error": "missing Sephora pid in URL"
+        },
+        {
+          "url": "https://www.sephora.pl/p/moisture-surge-spf-25-sheer-hydrator---krem-nawilzajacy-z-filtrem-spf25-659234.html",
+          "error": "missing Sephora pid in URL"
+        },
+        {
+          "url": "https://www.sephora.pl/p/powder-foundation-brush-406249.html",
+          "error": "missing Sephora pid in URL"
+        },
+        {
+          "url": "https://www.sephora.pl/p/together-we-shine---paleta-cieni-do-powiek-w-formacie-podroznym-549405.html",
+          "error": "missing Sephora pid in URL"
+        },
+        {
+          "url": "https://www.sephora.pl/p/always-on-liquid-lipstic---plynna-pomadka-504515.html",
+          "error": "missing Sephora pid in URL"
+        },
+        {
+          "url": "https://www.sephora.pl/p/sunshine-under-eye-tint-brighten-refill----wklad-do-korektora-579620.html",
+          "error": "missing Sephora pid in URL"
+        }
+      ],
+      "category_samples": [
+        "https://www.sephora.pl/babette-babet/",
+        "https://www.sephora.pl/beauty-offers/",
+        "https://www.sephora.pl/bestsellery-sephora-collection/",
+        "https://www.sephora.pl/cialo-i-kapiel/dermokosmetyki-do-ciala-c347409/",
+        "https://www.sephora.pl/cialo-i-kapiel/dermokosmetyki-do-ciala/dermokosmetyki-do-higieny-ciala-c347411/",
+        "https://www.sephora.pl/cialo-i-kapiel/dermokosmetyki-do-ciala/dermokosmetyki-nawilzajace-do-ciala-c347412/",
+        "https://www.sephora.pl/cialo-i-kapiel/karta-upominkowa-pl_placeholder_bodycare_giftcard/",
+        "https://www.sephora.pl/cialo-i-kapiel/kosmetyki-do-kapieli/mydla-w-kostce-c347429/",
+        "https://www.sephora.pl/cialo-i-kapiel/pielegnacja-seksualna/gadzety-erotyczne-c7800/",
+        "https://www.sephora.pl/cialo-i-kapiel/pielegnacja-seksualna/kosmetyki-do-higieny-intymnej-c7802/",
+        "https://www.sephora.pl/dzien-matki/",
+        "https://www.sephora.pl/dzien-matki/karta-upominkowa-dm-karta-upominkowa/",
+        "https://www.sephora.pl/dzien-matki/makijaz/",
+        "https://www.sephora.pl/dzien-matki/mamy-maja-moc.-dm-landing-page/",
+        "https://www.sephora.pl/dzien-matki/perfumy/",
+        "https://www.sephora.pl/dzien-matki/pielegnacja/",
+        "https://www.sephora.pl/dzien-matki/pielegnacja/cialo/",
+        "https://www.sephora.pl/dzien-matki/pielegnacja/pielegnacja-twarzy/",
+        "https://www.sephora.pl/dzien-matki/pielegnacja/wlosy/",
+        "https://www.sephora.pl/dzien-matki/sephora-collection/",
+        "https://www.sephora.pl/dzien-matki/wylacznie-w-sephora/",
+        "https://www.sephora.pl/dzien-matki/zestawy/",
+        "https://www.sephora.pl/inspo-perfumy/",
+        "https://www.sephora.pl/kenzoki-kzoki/",
+        "https://www.sephora.pl/linia-colorful-sephora-collection/",
+        "https://www.sephora.pl/makijaz-premium/",
+        "https://www.sephora.pl/makijaz/karta-upominkowa-pl_placeholder_giftcard/",
+        "https://www.sephora.pl/makijaz/try-me---sprawdz-zanim-zdecydujesz-%F0%9F%8E%81-try-me-makeup/",
+        "https://www.sephora.pl/makijaz/wybrane-produkty-do-makijazu-w-smart-cenach-placeholder_makeup_5/",
+        "https://www.sephora.pl/marki-brand-page/"
+      ]
+    },
+    "uvex": {
+      "site": "uvex.com.pl",
+      "requested_target": 10,
+      "sitemap_url_count": 18213,
+      "category_count": 28,
+      "attempted": 80,
+      "accepted": 2,
+      "failed": 78,
+      "blocked": 0,
+      "elapsed_seconds": 82.94,
+      "failures": [
+        {
+          "url": "https://uvex.com.pl/bbb/torba-na-rame-bbb-lockpack-bsb-24-black/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/produkty/gogle/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/osprey/plecak-trekkingowy-damski-osprey-aura-ag-50-fioletowy-1-176-474/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/super-natural/koszulka-z-dlugim-rekawem-damska-super-natural-w-header-ls-brazowa-snwp04059-91b/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/eisbar/czapka-eisbar-tiana-lux-crystal-mu-e80129-008/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/uvex/kask-rowerowy-uvex-race-7-41-0-968-02/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/odlo/legginsy-termoaktywne-dzieciece-odlo-active-warm-eco-kids-czerwony-159219-30867/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/protest/kurtka-koszulowa-z-kolnierzem-meska-protest-prtgrade-niebieska-p6728344-944/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/protest/kurtka-narciarska-snowboardowa-dziecieca-protest-prtfugy-jr-rozowy-p6911632-873/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/odlo/bluza-techniczna-z-kapturem-meska-odlo-zeroweight-pro-pw-seamless-windproof-mid-layer-hoody-1-2-zip-czarna-612722-15000/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/osprey/organizer-osprey-ultralight-roll-organizer-granatowy-3109-512/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/odlo/kominiarka-dziecieca-odlo-active-warm-kids-face-mask-niebieska-762729-21090/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/buff/opaska-buff-coolnet-uvr-wide-headband-bear-2023-bu133077-555/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/eisbar/czapka-eisbar-lania-os-mu-e30838-670/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/bca/pila-do-sniegu-bca-snow-saw-23c8005-11/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/tyr/okularki-plywackie-tyr-blackops-140ev-jr-lgbkopj-085/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/reusch/opaska-reusch-mica-headband-61-80-004-3427/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/eisbar/czapka-eisbar-anka-pompon-mu-e30744-650/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/eisbar/czapka-eisbar-stravo-pompon-mu-e30893-008/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/bbb/koszyk-na-bidon-bbb-fueltank-bbc-03-white/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/eisbar/opaska-eisbar-north-stb-rl-e36145-099/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/protest/kurtka-narciarska-snowboardowa-z-kapturem-meska-protest-prtbarric-zolta-p6710444-708/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/bbb/sakwa-bbb-stack-pack-4l-bsb-145-black/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/viking/czapka-viking-natasha-821-13-2100-15-821-13-2100-15/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/k2/kask-k2-varsity-pro-burgundy-30g4231-11/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/sea-to-summit/recznik-szybkoschnacy-sea-to-summit-airlite-towel-aair-ba/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/protest/kurtka-damska-protest-nxgsalvia-outerwear-jacket-p6670022-737/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/killtec/kurtka-techniczna-z-odpinanym-kapturem-zapinana-na-zamek-meska-killtec-stoy-stw-18-khaki-39810-756/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/fashy/dziewczece-bikini-fashy-f25715-1/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/meindl/buty-sportowe-damskie-meindl-power-walker-lady-3-5-boar-5578-59/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/eisbar/opaska-eisbar-agnes-stb-e25195-150/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/odlo/kurtka-do-narciarstwa-biegowego-damska-odlo-brensholmen-granatowy-612661-22200/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/buff/czapka-buff-crossknit-beanie-solid-light-grey-bu132891-933/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/odlo/koszulka-termoaktywna-z-dlugim-rekawem-damska-odlo-merino-200-czarny-111601-15000/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/catalog/product/view/id/140339",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/osprey/pokrowiec-osprey-daylite-packing-cube-large-szary-3397-451/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/meindl/buty-zimowe-damskie-meindl-solden-lady-7774-10/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/bbb/zebatka-rowerowa-bbb-chainring-elevengear-szary-bcr-26s-anthracite/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/bbb/uchwyt-na-telefon-bbb-smartphone-mount-bracket-spacerfix-czarny-one-size-bsm-92-black/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/viking/bluza-damska-viking-tesero-polartec-lady-czarna-740-24-5658-0900/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/viking/bandana-viking-6362-kids-415-19-6362-01-415-19-6362-01/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/odlo/koszulka-termoaktywna-z-dlugim-rekawem-damska-odlo-kinship-pw-200-czarna-111171-15015/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/protest/spodenki-damskie-protest-cherie-beachshort-p2610611-290/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/camelbak/butelka-termiczna-camelbak-eddy-sst-750ml-granatowa-c2809-401075-c2809-401075/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/osprey/plecak-turystyczny-damski-osprey-tempest-velocity-30-fioletowy-3357-1007/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/protest/kurtka-meska-protest-prtmalawi-snowjacket-p6711122-808/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/super-natural/koszulka-z-krotkim-rekawem-damska-super-natural-w-yoga-loose-tee-fioletowa-snw013470-74b/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/odlo/koszulka-tech-meska-odlo-t-shirt-crew-neck-s-s-zeroweight-enginee-313732-40416/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/silvini/koszulka-meska-silvini-men-jersey-ceno-md2015-3122-md2015-4343/",
+          "error": "not catalog-product-view"
+        },
+        {
+          "url": "https://uvex.com.pl/killtec/kurtka-narciarska-z-kapturem-zapinana-na-zamek-chlopieca-killtec-kow-370-niebieska-42164-838/",
+          "error": "not catalog-product-view"
+        }
+      ],
+      "category_samples": [
+        "360-degrees",
+        "aqua-feel",
+        "bbb",
+        "bca",
+        "blog",
+        "buff",
+        "camelbak",
+        "catalog",
+        "eisbar",
+        "fashy",
+        "k2",
+        "killtec",
+        "leatt",
+        "meindl",
+        "odlo",
+        "osprey",
+        "produkty",
+        "protest",
+        "reusch",
+        "sea-to-summit",
+        "silvini",
+        "street-surfing",
+        "super-natural",
+        "trezeta",
+        "tyr",
+        "uvex",
+        "viking",
+        "zero-c"
+      ]
+    }
+  },
+  "summary": {
+    "sephora_records": 10,
+    "uvex_records": 2,
+    "total_records": 12,
+    "accepted": false,
+    "known_limitations": [
+      "Sephora direct product pages trigger Akamai challenge; Product-Detail endpoint is used for field extraction.",
+      "uvex sitemap includes stale 404 product URLs and media URLs; collector filters catalog-product-view pages."
+    ]
+  },
+  "samples": {
+    "sephora": [
+      {
+        "site": "sephora.pl",
+        "source_url": "https://www.sephora.pl/p/a-perfect-world-spf-40-age-defense-moisturizer-with-white-tea-P2886035.html",
+        "detail_endpoint": "https://www.sephora.pl/on/demandware.store/Sites-Sephora_PL-Site/pl_PL/Product-Detail?pid=P2886035",
+        "category": "product",
+        "title": "A Perfect World SPF 40 Age-Defense Moisturizer with White Tea",
+        "subtitle": "ORIGINS",
+        "brand": "ORIGINS",
+        "highest_price_regular": 279.0,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [],
+        "product_detail": "Co to jest:Beztłuszczowy krem nawilżający z SPF nasyca skórę zdrowym nawilżeniem i chroni ją przed",
+        "image_urls": [
+          "https://media.sephora.eu/content/dam/digital/massivpimupload/O/ORIGINS/388399/21869-media_swatch.jpg?scaleWidth=undefined&scaleHeight=undefined&scaleMode=undefined",
+          "https://media.sephora.eu/content/dam/digital/massivpimupload/O/ORIGINS/388399/21869-media_swatch.jpg?scaleWidth=585&scaleHeight=585&scaleMode=fit",
+          "https://media.sephora.eu/content/dam/digital/massivpimupload/O/ORIGINS/388399/21869-media_swatch.jpg?scaleWidth=265&scaleHeight=265&scaleMode=fit",
+          "https://media.sephora.eu/content/dam/digital/pim/published/O/ORIGINS/P2886035/9353-media_1.jpg?scaleWidth=undefined&scaleHeight=undefined&scaleMode=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/O/ORIGINS/P2886035/9353-media_1.jpg?scaleWidth=265&scaleHeight=265&scaleMode=fit",
+          "https://media.sephora.eu/content/dam/digital/pim/published/O/ORIGINS/P2886035/9353-media_2.jpg?scaleWidth=undefined&scaleHeight=undefined&scaleMode=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/O/ORIGINS/P2886035/9353-media_2.jpg?scaleWidth=265&scaleHeight=265&scaleMode=fit",
+          "https://media.sephora.eu/content/dam/digital/pim/published/O/ORIGINS/P2886035/9353-media_3.jpg?scaleWidth=undefined&scaleHeight=undefined&scaleMode=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/O/ORIGINS/P2886035/9353-media_3.jpg?scaleWidth=265&scaleHeight=265&scaleMode=fit",
+          "https://media.sephora.eu/content/dam/digital/pim/published/O/ORIGINS/P2886035/9353-media_4.jpg?scaleWidth=undefined&scaleHeight=undefined&scaleMode=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/O/ORIGINS/P2886035/9353-media_4.jpg?scaleWidth=265&scaleHeight=265&scaleMode=fit",
+          "https://media.sephora.eu/content/dam/digital/pim/published/O/ORIGINS/P2886035/9353-media_5.jpg?scaleWidth=undefined&scaleHeight=undefined&scaleMode=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/O/ORIGINS/P2886035/9353-media_5.jpg?scaleWidth=265&scaleHeight=265&scaleMode=fit",
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw1bc14229/images/svg-icons/rating-star-full-icon.svg",
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw2e920691/images/svg-icons/rating-star-empty-icon.svg",
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw7bc6e600/images/svg-icons/add-to-wishlist-black.svg",
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw9b26171d/images/svg-icons/hovered-add-to-wishlist.svg",
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw916f75cd/images/svg-icons/added-to-wishlist-black.svg",
+          "https://media.sephora.eu/content/dam/digital/massivpimupload/O/ORIGINS/388399/21869-media_thumbnail.jpg?scaleWidth=53&scaleHeight=64&scaleMode=fit",
+          "/on/demandware.static/-/Sites/default/dw6e1bcb25/checkout/paypal Rouded.svg"
+        ],
+        "status": "ok",
+        "access_path": "sfcc_product_detail_endpoint"
+      },
+      {
+        "site": "sephora.pl",
+        "source_url": "https://www.sephora.pl/p/biotherm-blue-pro-retinol-swiateczny-zestaw-z-kosmetykami-do-pielegnacji-P10054674.html",
+        "detail_endpoint": "https://www.sephora.pl/on/demandware.store/Sites-Sephora_PL-Site/pl_PL/Product-Detail?pid=P10054674",
+        "category": "product",
+        "title": "Strona nieodnaleziona.",
+        "subtitle": "",
+        "brand": "",
+        "highest_price_regular": null,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [],
+        "product_detail": "",
+        "image_urls": [
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw9e272e17/images/svg-icons/basket-icon-bold.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dw3f6e1f3d/Footer/Click&Collect.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dwd084421f/Footer/Delivery.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dw55b05d5d/Footer/Returns.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dw58420cd3/Footer/SecurePayment.svg",
+          "https://www.sephora.pl/akam/13/pixel_1bb6e0ac?a=dD04MzVlMGFmNWEyZGE0Yzc2ZTU5MjM4YWNkNGYyMjgyNDcyNWIwOTYyJmpzPW9mZg=="
+        ],
+        "status": "ok",
+        "access_path": "sfcc_product_detail_endpoint"
+      },
+      {
+        "site": "sephora.pl",
+        "source_url": "https://www.sephora.pl/p/charlotte-tilbury-goddess-skin-clay-mask-maska-z-glinka-P3491131.html",
+        "detail_endpoint": "https://www.sephora.pl/on/demandware.store/Sites-Sephora_PL-Site/pl_PL/Product-Detail?pid=P3491131",
+        "category": "product",
+        "title": "Strona nieodnaleziona.",
+        "subtitle": "",
+        "brand": "",
+        "highest_price_regular": null,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [],
+        "product_detail": "",
+        "image_urls": [
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw9e272e17/images/svg-icons/basket-icon-bold.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dw3f6e1f3d/Footer/Click&Collect.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dwd084421f/Footer/Delivery.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dw55b05d5d/Footer/Returns.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dw58420cd3/Footer/SecurePayment.svg",
+          "https://www.sephora.pl/akam/13/pixel_1bb6e0ac?a=dD04MzVlMGFmNWEyZGE0Yzc2ZTU5MjM4YWNkNGYyMjgyNDcyNWIwOTYyJmpzPW9mZg=="
+        ],
+        "status": "ok",
+        "access_path": "sfcc_product_detail_endpoint"
+      },
+      {
+        "site": "sephora.pl",
+        "source_url": "https://www.sephora.pl/p/x-P1000209784.html",
+        "detail_endpoint": "https://www.sephora.pl/on/demandware.store/Sites-Sephora_PL-Site/pl_PL/Product-Detail?pid=P1000209784",
+        "category": "product",
+        "title": "Chitosan - Multi-use styling Spray",
+        "subtitle": "DYSON",
+        "brand": "DYSON",
+        "highest_price_regular": 319.0,
+        "currency": "PLN",
+        "colors": [
+          "165 ml"
+        ],
+        "sizes": [],
+        "product_detail": "Wielofunkcyjna mgiełka do stylizacji w wersji podróżnej, długotrwale utrwala lub odświeża fryzurę,",
+        "image_urls": [
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/377364-media_swatch.jpg?scaleWidth=undefined&scaleHeight=undefined&scaleMode=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/377364-media_swatch.jpg?scaleWidth=585&scaleHeight=585&scaleMode=fit",
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/377364-media_swatch.jpg?scaleWidth=265&scaleHeight=265&scaleMode=fit",
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/113414-media_1.jpg?scaleWidth=undefined&scaleHeight=undefined&scaleMode=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/113414-media_1.jpg?scaleWidth=265&scaleHeight=265&scaleMode=fit",
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/113414-media_2.jpg?scaleWidth=undefined&scaleHeight=undefined&scaleMode=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/113414-media_2.jpg?scaleWidth=265&scaleHeight=265&scaleMode=fit",
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/113414-media_3.jpg?scaleWidth=undefined&scaleHeight=undefined&scaleMode=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/113414-media_3.jpg?scaleWidth=265&scaleHeight=265&scaleMode=fit",
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/113414-media_4.jpg?scaleWidth=undefined&scaleHeight=undefined&scaleMode=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/113414-media_4.jpg?scaleWidth=265&scaleHeight=265&scaleMode=fit",
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/113414-media_5.jpg?scaleWidth=undefined&scaleHeight=undefined&scaleMode=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/113414-media_5.jpg?scaleWidth=265&scaleHeight=265&scaleMode=fit",
+          "//i.ytimg.com/vi/pRM8I1FVE54/mqdefault.jpg",
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw1bc14229/images/svg-icons/rating-star-full-icon.svg",
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw7bc6e600/images/svg-icons/add-to-wishlist-black.svg",
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw9b26171d/images/svg-icons/hovered-add-to-wishlist.svg",
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw916f75cd/images/svg-icons/added-to-wishlist-black.svg",
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/377364-media_swatch.jpg?scaleWidth=53&scaleHeight=64&scaleMode=fit",
+          "https://media.sephora.eu/content/dam/digital/pim/published/D/DYSON/DYSON/384124-media_swatch.jpg?scaleWidth=53&scaleHeight=64&scaleMode=fit"
+        ],
+        "status": "ok",
+        "access_path": "sfcc_product_detail_endpoint"
+      },
+      {
+        "site": "sephora.pl",
+        "source_url": "https://www.sephora.pl/p/rose-and-rose---woda-perfumowana-P3785007.html",
+        "detail_endpoint": "https://www.sephora.pl/on/demandware.store/Sites-Sephora_PL-Site/pl_PL/Product-Detail?pid=P3785007",
+        "category": "product",
+        "title": "Strona nieodnaleziona.",
+        "subtitle": "",
+        "brand": "",
+        "highest_price_regular": null,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [],
+        "product_detail": "",
+        "image_urls": [
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw9e272e17/images/svg-icons/basket-icon-bold.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dw3f6e1f3d/Footer/Click&Collect.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dwd084421f/Footer/Delivery.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dw55b05d5d/Footer/Returns.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dw58420cd3/Footer/SecurePayment.svg",
+          "https://www.sephora.pl/akam/13/pixel_1bb6e0ac?a=dD04MzVlMGFmNWEyZGE0Yzc2ZTU5MjM4YWNkNGYyMjgyNDcyNWIwOTYyJmpzPW9mZg=="
+        ],
+        "status": "ok",
+        "access_path": "sfcc_product_detail_endpoint"
+      },
+      {
+        "site": "sephora.pl",
+        "source_url": "https://www.sephora.pl/p/odmladzajacy-botulinowy-krem-booster---krem-przeciwzmarszczkowy-na-dzien-i-noc-P1000207997.html",
+        "detail_endpoint": "https://www.sephora.pl/on/demandware.store/Sites-Sephora_PL-Site/pl_PL/Product-Detail?pid=P1000207997",
+        "category": "product",
+        "title": "Odmładzający Botulinowy Krem-Booster - krem przeciwzmarszczkowy na dzień i noc",
+        "subtitle": "YONELLE",
+        "brand": "YONELLE",
+        "highest_price_regular": 499.0,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [],
+        "product_detail": "NOWY WYMIAR ZAAWANSOWANEJ PIELĘGNACJI PREMIUMWysokoaktywny biologicznie krem-booster do cery dojrza",
+        "image_urls": [
+          "https://media.sephora.eu/content/dam/digital/pim/published/Y/YONELLE/776356/372887-media_swatch.jpg?scaleWidth=undefined&scaleHeight=undefined&scaleMode=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/Y/YONELLE/776356/372887-media_swatch.jpg?scaleWidth=585&scaleHeight=585&scaleMode=fit",
+          "https://media.sephora.eu/content/dam/digital/pim/published/Y/YONELLE/776356/372887-media_swatch.jpg?scaleWidth=265&scaleHeight=265&scaleMode=fit",
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw2e920691/images/svg-icons/rating-star-empty-icon.svg",
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw7bc6e600/images/svg-icons/add-to-wishlist-black.svg",
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw9b26171d/images/svg-icons/hovered-add-to-wishlist.svg",
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw916f75cd/images/svg-icons/added-to-wishlist-black.svg",
+          "https://media.sephora.eu/content/dam/digital/pim/published/Y/YONELLE/776356/372887-media_swatch.jpg?scaleWidth=53&scaleHeight=64&scaleMode=fit",
+          "/on/demandware.static/-/Sites/default/dw6e1bcb25/checkout/paypal Rouded.svg",
+          "/on/demandware.static/-/Sites/default/dw6d63f605/checkout/Visa.svg",
+          "/on/demandware.static/-/Sites/default/dw8ae76668/checkout/mastercard.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/default/dwc1fb415d/storefront.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/default/dw35a07c56/truck.svg",
+          "https://www.sephora.pl/dw/image/v2/BCVW_PRD/on/demandware.static/-/Sites/pl_PL/dw4af1369f/000PromoPackshot_2026_PL.jpg?sw=77&sh=77&sm=fit",
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw933d841a/images/one_px.png"
+        ],
+        "status": "ok",
+        "access_path": "sfcc_product_detail_endpoint"
+      },
+      {
+        "site": "sephora.pl",
+        "source_url": "https://www.sephora.pl/p/liquid-lipstick---plynna-matowa-pomadka-P2678021.html",
+        "detail_endpoint": "https://www.sephora.pl/on/demandware.store/Sites-Sephora_PL-Site/pl_PL/Product-Detail?pid=P2678021",
+        "category": "product",
+        "title": "Strona nieodnaleziona.",
+        "subtitle": "",
+        "brand": "",
+        "highest_price_regular": null,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [],
+        "product_detail": "",
+        "image_urls": [
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw9e272e17/images/svg-icons/basket-icon-bold.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dw3f6e1f3d/Footer/Click&Collect.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dwd084421f/Footer/Delivery.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dw55b05d5d/Footer/Returns.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dw58420cd3/Footer/SecurePayment.svg",
+          "https://www.sephora.pl/akam/13/pixel_1bb6e0ac?a=dD04MzVlMGFmNWEyZGE0Yzc2ZTU5MjM4YWNkNGYyMjgyNDcyNWIwOTYyJmpzPW9mZg=="
+        ],
+        "status": "ok",
+        "access_path": "sfcc_product_detail_endpoint"
+      },
+      {
+        "site": "sephora.pl",
+        "source_url": "https://www.sephora.pl/p/blue-sage---zel-pod-prysznic-P2979007.html",
+        "detail_endpoint": "https://www.sephora.pl/on/demandware.store/Sites-Sephora_PL-Site/pl_PL/Product-Detail?pid=P2979007",
+        "category": "product",
+        "title": "Strona nieodnaleziona.",
+        "subtitle": "",
+        "brand": "",
+        "highest_price_regular": null,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [],
+        "product_detail": "",
+        "image_urls": [
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw9e272e17/images/svg-icons/basket-icon-bold.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dw3f6e1f3d/Footer/Click&Collect.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dwd084421f/Footer/Delivery.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dw55b05d5d/Footer/Returns.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dw58420cd3/Footer/SecurePayment.svg",
+          "https://www.sephora.pl/akam/13/pixel_1bb6e0ac?a=dD04MzVlMGFmNWEyZGE0Yzc2ZTU5MjM4YWNkNGYyMjgyNDcyNWIwOTYyJmpzPW9mZg=="
+        ],
+        "status": "ok",
+        "access_path": "sfcc_product_detail_endpoint"
+      },
+      {
+        "site": "sephora.pl",
+        "source_url": "https://www.sephora.pl/p/miss-dior-blooming-scented-soap---perfumowane-mydlo-P10051121.html",
+        "detail_endpoint": "https://www.sephora.pl/on/demandware.store/Sites-Sephora_PL-Site/pl_PL/Product-Detail?pid=P10051121",
+        "category": "product",
+        "title": "Strona nieodnaleziona.",
+        "subtitle": "",
+        "brand": "",
+        "highest_price_regular": null,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [],
+        "product_detail": "",
+        "image_urls": [
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw9e272e17/images/svg-icons/basket-icon-bold.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dw3f6e1f3d/Footer/Click&Collect.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dwd084421f/Footer/Delivery.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dw55b05d5d/Footer/Returns.svg",
+          "https://www.sephora.pl/on/demandware.static/-/Sites/pl_PL/dw58420cd3/Footer/SecurePayment.svg",
+          "https://www.sephora.pl/akam/13/pixel_1bb6e0ac?a=dD04MzVlMGFmNWEyZGE0Yzc2ZTU5MjM4YWNkNGYyMjgyNDcyNWIwOTYyJmpzPW9mZg=="
+        ],
+        "status": "ok",
+        "access_path": "sfcc_product_detail_endpoint"
+      },
+      {
+        "site": "sephora.pl",
+        "source_url": "https://www.sephora.pl/p/eden-sweet-peach---woda-perfumowana-P1000213146.html",
+        "detail_endpoint": "https://www.sephora.pl/on/demandware.store/Sites-Sephora_PL-Site/pl_PL/Product-Detail?pid=P1000213146",
+        "category": "product",
+        "title": "Eden Sweet Peach - Woda perfumowana",
+        "subtitle": "KAYALI",
+        "brand": "KAYALI",
+        "highest_price_regular": 589.0,
+        "currency": "PLN",
+        "colors": [
+          "50 ml"
+        ],
+        "sizes": [],
+        "product_detail": "Delikatny, aksamitny i gourmand, zapach Eden Sweet Peach | 35 Eau de Parfum to szczęście w czystej",
+        "image_urls": [
+          "https://media.sephora.eu/content/dam/digital/pim/published/K/KAYALI/805094/393634-media_swatch-0.jpg?scaleWidth=undefined&scaleHeight=undefined&scaleMode=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/K/KAYALI/805094/393634-media_swatch-0.jpg?scaleWidth=585&scaleHeight=585&scaleMode=fit",
+          "https://media.sephora.eu/content/dam/digital/pim/published/K/KAYALI/805094/393634-media_swatch-0.jpg?scaleWidth=265&scaleHeight=265&scaleMode=fit",
+          "https://media.sephora.eu/content/dam/digital/pim/published/K/KAYALI/P1000213146/116776-media_1-0.jpg?scaleWidth=undefined&scaleHeight=undefined&scaleMode=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/K/KAYALI/P1000213146/116776-media_1-0.jpg?scaleWidth=265&scaleHeight=265&scaleMode=fit",
+          "https://media.sephora.eu/content/dam/digital/pim/published/K/KAYALI/P1000213146/116776-media_2-0.jpg?scaleWidth=undefined&scaleHeight=undefined&scaleMode=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/K/KAYALI/P1000213146/116776-media_2-0.jpg?scaleWidth=265&scaleHeight=265&scaleMode=fit",
+          "https://media.sephora.eu/content/dam/digital/pim/published/K/KAYALI/P1000213146/116776-media_3-0.jpg?scaleWidth=undefined&scaleHeight=undefined&scaleMode=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/K/KAYALI/P1000213146/116776-media_3-0.jpg?scaleWidth=265&scaleHeight=265&scaleMode=fit",
+          "https://media.sephora.eu/content/dam/digital/pim/published/K/KAYALI/P1000213146/116776-media_4-0.jpg?scaleWidth=undefined&scaleHeight=undefined&scaleMode=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/K/KAYALI/P1000213146/116776-media_4-0.jpg?scaleWidth=265&scaleHeight=265&scaleMode=fit",
+          "https://media.sephora.eu/content/dam/digital/pim/published/K/KAYALI/P1000213146/116776-media_5-0.jpg?scaleWidth=undefined&scaleHeight=undefined&scaleMode=undefined",
+          "https://media.sephora.eu/content/dam/digital/pim/published/K/KAYALI/P1000213146/116776-media_5-0.jpg?scaleWidth=265&scaleHeight=265&scaleMode=fit",
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw1bc14229/images/svg-icons/rating-star-full-icon.svg",
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw2e920691/images/svg-icons/rating-star-empty-icon.svg",
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw7bc6e600/images/svg-icons/add-to-wishlist-black.svg",
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw9b26171d/images/svg-icons/hovered-add-to-wishlist.svg",
+          "/on/demandware.static/Sites-Sephora_PL-Site/-/default/dw916f75cd/images/svg-icons/added-to-wishlist-black.svg",
+          "/on/demandware.static/-/Sites/default/dw6e1bcb25/checkout/paypal Rouded.svg",
+          "/on/demandware.static/-/Sites/default/dw6d63f605/checkout/Visa.svg"
+        ],
+        "status": "ok",
+        "access_path": "sfcc_product_detail_endpoint"
+      }
+    ],
+    "uvex": [
+      {
+        "site": "uvex.com.pl",
+        "source_url": "https://uvex.com.pl/uvex/kask-rowerowy-uvex-finale-2-0-tocsen-41-0-472-04/",
+        "category": "uvex",
+        "title": "Kask rowerowy uvex finale 2.0 Tocsen",
+        "subtitle": "Podróżujesz samotnie i odczuwasz lekki niepokój? Teraz nie ma takiej potrzeby dzięki uvex finale 2.0 Tocsen, który sprawia, że rowerzyści nie są już sami podczas wypadku Kask uvex finale 2.0 Tocsen pokazuje, jak działa inteligentny system Safety 2.0 w terenie.",
+        "brand": "uvex",
+        "highest_price_regular": 999.9,
+        "current_price": 637.42,
+        "currency": "PLN",
+        "colors": [
+          "róż"
+        ],
+        "sizes": [
+          "52-57",
+          "56-61"
+        ],
+        "product_detail": "Kask rowerowy uvex finale 2.0 Tocsen Wielofunkcyjny kask enduro z inteligentnym czujnikiem wypadkowym Tocsen uruchamia połączenie alarmowe i przesyła dane GPS do listy kluczowych kontaktów osobistych w razie wypadku lub utraty przytomności przez rowerzystę. Aby to umożliwić, czujnik Tocsen zintegrowany z pokrętłem systemu regulacji rozmiaru łączy się z odpowiednią aplikacją na smartfona przed rozpoczęciem jazdy. Jako dodatkowa funkcja bezpieczeństwa, system powiadamia również stale rosnącą społeczność Tocsen o wypadku, dzięki czemu osoby udzielające pierwszej pomocy w bezpośrednim sąsiedztwie mogą szybko dotrzeć na miejsce. Dodatkowe cechy wyróżniające uvex finale 2.0 Tocsen to osłona z trzema różnymi pozycjami, głęboki tył dla lepszej ochrony przed uderzeniami i 20 kanałów wentylacyjnych. Cechy produktu: czujnik wypadkowy Tocsen technologia double inmould 2 rozmiary skorupy 20 kanałów wentylacyjnych system anatomic IAS zapięcie monomatic system FAS regulowany, zdejmowany daszek siatka przeciw owadom wyściółka typu vent waga od 350 g normy: EN 1078 Technologie: Czujnik wypadkowy Tocsen: Technologia Tocsen wzywa profesjonalistów w nagłych wypadkach. Precyzyjny czujnik wykrywa kolizje – i może uratować życie. Jeśli po upadku Tocsen nie otrzyma żadnej odpowiedzi od rowerzysty, automatycznie zadzwoni do służb ratunkowych i prześle im dane GPS. Łączy się również z całą pobliską społecznością Tocsen. Technologia inmould: Nierozdzielna skorupa wykonana z wewnętrznej warstwy EPS i zewnętrznej warstwy poliwęglanowej. EPS spieniany jest bezpośrednio w powłoce wykonanej z poliwęglanu. Wyróżnia się swoją lekkością i odpornością na uderzenia. System wentylacji: Skuteczny system wentylacji, zapewniający optymalny przepływ powietrza. Przednie otwory wentylacyjne zasysają świeże powietrze, które odbiera ciepło i wilgoć z głowy, a następnie wydostaje się przez otwory zlokalizowane w tylnej części skorupy. uvex anatomic IAS: Technologia ta korzysta z rozwiązania IAS 3D, zawierając dodatkowo przylegające, elastyczne skrzydełko umieszczone przy pokrętle regulacyjnym, które dopasowuje się do kształtu tyłu głowy. uvex monomatic: Komfortowe zapięcie uvex monomatic o wielostopniowej budowie oraz anatomicznym kształcie można otwierać i zamykać jedną ręką, co za każdym razem zapewnia idealne dopasowanie paska podbródkowego. System FAS: Paski Fast Adapting System można łatwo i na bieżąco dopasowywać do kształtu głowy każdego użytkownika. Zastosowane technologie: Czujnik wypadkowy Tocsen Technologia Tocsen wzywa profesjonalistów w nagłych wypadkach. Precyzyjny czujnik wykrywa kolizje – i może uratować życie. Jeśli po upadku Tocsen nie otrzyma żadnej odpowiedzi od rowerzysty, automatycznie zadzwoni do służb ratunkowych i prześle im dane GPS. Łączy się również z całą pobliską społecznością Tocsen. inmould Nierozdzielna skorupa wykonana z wewnętrznej warstwy EPS i zewnętrznej warstwy poliwęglanowej. EPS spieniany jest bezpośrednio w powłoce wykonanej z poliwęglanu. Tworzy to lekką konstrukcję o najwyższej odporności na uderzenia. System FAS Paski Fast Adapting System można łatwo i na bieżąco dopasowywać do kształtu głowy każdego użytkownika. System wentylacji Skuteczny system wentylacji, zapewniający optymalny przepływ powietrza. Przednie otwory wentylacyjne zasysają świeże powietrze, które odbiera ciepło i wilgoć z głowy, a następnie wydostaje się przez otwory zlokalizowane w tylnej części skorupy. uvex anatomic IAS Technologia ta korzysta z rozwiązania IAS 3D, zawierając dodatkowo przylegające, elastyczne skrzydełko umieszczone przy pokrętle regulacyjnym, które dopasowuje się do kształtu tyłu głowy. uvex monomatic Komfortowe zapięcie uvex monomatic o wielostopniowej budowie oraz anatomicznym kształcie można otwierać i zamykać jedną ręką, co za każdym razem zapewnia idealne dopasowanie paska podbródkowego.",
+        "image_urls": [
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/410472_04_P1_083a.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/f339a84d301127e9535e195053e33256/4/1/410472_04_P1_083a.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/410472_04_P2_6a09.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/f339a84d301127e9535e195053e33256/4/1/410472_04_P2_6a09.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/410472_04_P3_32de.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/f339a84d301127e9535e195053e33256/4/1/410472_04_P3_32de.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/410472_04_P4_83c3.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/f339a84d301127e9535e195053e33256/4/1/410472_04_P4_83c3.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/4/1/410472_04_P5_e87d.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/f339a84d301127e9535e195053e33256/4/1/410472_04_P5_e87d.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/4/1/410472_04_P1_083a.jpg"
+        ],
+        "status": "ok",
+        "access_path": "magento_product_html"
+      },
+      {
+        "site": "uvex.com.pl",
+        "source_url": "https://uvex.com.pl/uvex/okulary-rowerowe-uvex-sportstyle-230-53-2-069-5116/",
+        "category": "uvex",
+        "title": "Okulary rowerowe UVEX Sportstyle 230",
+        "subtitle": "Uvex Sportstyle 230 oferuje świetny wygląd i niezrównany stosunek jakości do ceny.",
+        "brand": "uvex",
+        "highest_price_regular": 129.9,
+        "current_price": 129.9,
+        "currency": "PLN",
+        "colors": [],
+        "sizes": [
+          "one size"
+        ],
+        "product_detail": "Okulary rowerowe uvex sportstyle 230 Idealne jako sportowy uniwersalny wybór lub druga para – lustrzane okulary uvex Sportstyle 230 dostępne są w modnych kolorach, z miękkimi zausznikami i noskami oraz 100% ochroną przed promieniowaniem UV. Soczewka: mirror blue (S3) Oprawka: smoke transparent Cechy produktu: elastyczne, miękkie noski plastyczne, formowane na zimno końcówki zauszników 100 % ochrona UVA, UVB, UVC Zastosowane technologie: Ochrona UV uvex supravision® Powłoka przeciwmgielna dla optymalnego widzenia podczas każdej pogody. Technologia ta zapewnia o 400% większą ochronę przed zaparowaniem w porównaniu do standardów rynkowych, zapewniając przejrzystość bez zaparowania do 120 sekund. Powłoka uvex supravision® jest nakładana na wewnętrzną szybę gogli i zapobiega parowaniu nawet podczas dużych zmian temperatury.",
+        "image_urls": [
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/5/3/532069_5116_P1_76b5.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/f339a84d301127e9535e195053e33256/5/3/532069_5116_P1_76b5.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/5/3/532069_5116_P2_6dc5.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/f339a84d301127e9535e195053e33256/5/3/532069_5116_P2_6dc5.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/5/3/532069_5116_P3_2100.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/f339a84d301127e9535e195053e33256/5/3/532069_5116_P3_2100.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/5/3/532069_5116_P4_5a2a.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/f339a84d301127e9535e195053e33256/5/3/532069_5116_P4_5a2a.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/bf332f7854df27ad98fe05ac7d63ebb5/5/3/532069_5116_P5_6d11.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/f339a84d301127e9535e195053e33256/5/3/532069_5116_P5_6d11.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/5/3/532069_2216_P1_b9ed.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/5/3/532069_4416_P1_3fdf.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/5/3/532069_5116_P1_76b5.jpg",
+          "https://uvex.com.pl/media/catalog/product/cache/d58506ca772430369c6a3d03d5ff6feb/5/3/532069_2215_P1_1470.jpg"
+        ],
+        "status": "ok",
+        "access_path": "magento_product_html"
+      }
+    ]
+  }
+}

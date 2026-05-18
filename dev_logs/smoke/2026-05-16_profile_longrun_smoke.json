@@ -1,0 +1,1452 @@
+{
+  "accepted": true,
+  "run_id": "profile-longrun-smoke-2026-05-16",
+  "profile": "fixture-ecommerce-api-pagination",
+  "first_pass": {
+    "accepted": true,
+    "run_id": "profile-longrun-smoke-2026-05-16",
+    "profile_name": "fixture-ecommerce-api-pagination",
+    "status": "paused",
+    "runner_summary": {
+      "run_id": "profile-longrun-smoke-2026-05-16",
+      "batches": 1,
+      "claimed": 1,
+      "succeeded": 1,
+      "failed": 0,
+      "retried": 0,
+      "records_saved": 20,
+      "discovered_urls": 1,
+      "checkpoint_errors": 0,
+      "item_errors": [],
+      "frontier_stats": {
+        "done": 1,
+        "queued": 1
+      }
+    },
+    "frontier_stats": {
+      "done": 1,
+      "queued": 1
+    },
+    "product_stats": {
+      "run_id": "profile-longrun-smoke-2026-05-16",
+      "total": 20,
+      "by_status": {
+        "ok": 20
+      },
+      "by_site": {
+        "fixture-ecommerce-api-pagination": 20
+      },
+      "price_min": 20.0,
+      "price_max": 21.9,
+      "price_avg": 20.95
+    },
+    "quality_summary": {
+      "total_records": 20,
+      "min_items": 50,
+      "meets_min_items": false,
+      "field_completeness": {
+        "title": 1.0,
+        "price": 1.0,
+        "highest_price": 1.0,
+        "category": 1.0,
+        "description": 1.0,
+        "image_urls": 1.0,
+        "colors": 1.0,
+        "sizes": 1.0
+      },
+      "duplicate_count": 0,
+      "duplicate_rate": 0.0,
+      "duplicate_key_strategy": {
+        "field": "dedupe_key",
+        "source": "ProductRecord",
+        "strategy": "sha256(source_site | category | canonical_url_or_source_url_or_title)[:32]",
+        "category_aware": true,
+        "notes": [
+          "The runner compares generated ProductRecord.dedupe_key values.",
+          "Duplicate rate quality depends on profile canonical URL mapping quality."
+        ]
+      },
+      "failed_urls": [],
+      "failed_url_count": 0,
+      "pagination_stop_reason": "bounded_pass_paused",
+      "frontier_stats": {
+        "done": 1,
+        "queued": 1
+      },
+      "quality_policy": {
+        "mode": "warn",
+        "min_items": 50,
+        "field_thresholds": {
+          "title": 1.0,
+          "price": 1.0,
+          "image_urls": 1.0
+        },
+        "max_duplicate_rate": 0.0,
+        "max_failed_url_count": 0
+      },
+      "quality_gate": {
+        "mode": "warn",
+        "passed": false,
+        "should_fail": false,
+        "severity": "warn",
+        "checks": [
+          {
+            "name": "min_items",
+            "passed": false,
+            "expected": 50,
+            "actual": 20,
+            "severity": "warn"
+          },
+          {
+            "name": "duplicate_rate",
+            "passed": true,
+            "expected": 0.0,
+            "actual": 0.0,
+            "severity": "pass"
+          },
+          {
+            "name": "failed_url_count",
+            "passed": true,
+            "expected": 0,
+            "actual": 0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:image_urls",
+            "field": "image_urls",
+            "passed": true,
+            "expected": 1.0,
+            "actual": 1.0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:price",
+            "field": "price",
+            "passed": true,
+            "expected": 1.0,
+            "actual": 1.0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:title",
+            "field": "title",
+            "passed": true,
+            "expected": 1.0,
+            "actual": 1.0,
+            "severity": "pass"
+          }
+        ]
+      }
+    },
+    "checkpoint_latest": {
+      "run": {
+        "run_id": "profile-longrun-smoke-2026-05-16",
+        "status": "paused",
+        "config": {
+          "profile": {
+            "access_config": {
+              "captcha_bypass": false,
+              "headers_required": false,
+              "login_required": false,
+              "mode": "api_replay"
+            },
+            "api_hints": {
+              "endpoint": "https://api-profile-shop.local/v1/products",
+              "field_mapping": {
+                "canonical_url": "url",
+                "colors": "variants.colors",
+                "currency": "price.currency",
+                "description": "description",
+                "highest_price": "price.amount",
+                "image_urls": "media.images",
+                "sizes": "variants.sizes",
+                "title": "name"
+              },
+              "items_path": "data.products",
+              "kind": "api",
+              "method": "GET",
+              "params": {
+                "category": "training-shoes"
+              },
+              "priority": 9
+            },
+            "constraints": {
+              "max_items": 60
+            },
+            "crawl_preferences": {
+              "parser": "json_profile",
+              "runtime": "native_static",
+              "seed_kind": "api"
+            },
+            "name": "fixture-ecommerce-api-pagination",
+            "pagination_hints": {
+              "max_pages": 3,
+              "page_param": "page",
+              "page_size": 20,
+              "page_size_param": "limit",
+              "start_page": 1,
+              "type": "page"
+            },
+            "quality_expectations": {
+              "category": "training-shoes",
+              "currency": "USD",
+              "min_items": 50,
+              "required_fields": [
+                "title",
+                "highest_price",
+                "image_urls"
+              ]
+            },
+            "rate_limits": {
+              "default": {
+                "delay_seconds": 0
+              }
+            },
+            "selectors": {},
+            "target_fields": [
+              "title",
+              "highest_price",
+              "colors",
+              "sizes",
+              "description",
+              "image_urls"
+            ],
+            "training_notes": [
+              "Offline observed API pagination fixture.",
+              "Uses page/limit query parameters and JSON field mapping to create ProductRecord rows.",
+              "No auth, cookie, captcha, proxy, or site-specific code is required."
+            ]
+          }
+        },
+        "pause_reason": "bounded profile long-run pass",
+        "started_at": "2026-05-16T08:30:37.098484+00:00",
+        "updated_at": "2026-05-16T08:30:37.236430+00:00",
+        "completed_at": ""
+      },
+      "latest_checkpoint": {
+        "id": 1,
+        "run_id": "profile-longrun-smoke-2026-05-16",
+        "batch_id": "profile-longrun-pass-1-pass-1",
+        "summary": {
+          "async_fetch_fail": 0,
+          "async_fetch_ok": 0,
+          "backpressure_events": 0,
+          "batches": 1,
+          "blocked_requests": 0,
+          "checkpoint_errors": 0,
+          "checkpoint_writes": 0,
+          "claimed": 1,
+          "discovered_urls": 1,
+          "events": [],
+          "failed": 0,
+          "failure_buckets": {},
+          "frontier_stats": {
+            "done": 1,
+            "queued": 1
+          },
+          "max_concurrency_per_domain": {},
+          "offsite_dropped": 0,
+          "pool_acquired_events": 0,
+          "pool_released_events": 0,
+          "proxy_attempts_total": 0,
+          "proxy_failures": 0,
+          "proxy_retries": 0,
+          "proxy_successes": 0,
+          "records_saved": 20,
+          "response_status_count": {},
+          "retried": 0,
+          "robots_disallowed": 0,
+          "run_id": "profile-longrun-smoke-2026-05-16",
+          "skipped": 0,
+          "status": "paused",
+          "succeeded": 1
+        },
+        "frontier_items": [],
+        "events": [
+          {
+            "data": {
+              "claimed": 1,
+              "records_saved": 20,
+              "status": "paused",
+              "worker_id": "profile-longrun-pass-1"
+            },
+            "message": "profile long-run checkpoint saved",
+            "type": "spider.checkpoint_saved"
+          }
+        ],
+        "created_at": "2026-05-16T08:30:37.227165+00:00"
+      },
+      "item_count": 20,
+      "failure_count": 0
+    },
+    "sample_records": [
+      {
+        "title": "LongRun Product 00",
+        "highest_price": 20.0,
+        "currency": "USD",
+        "colors": [
+          "Black",
+          "Blue"
+        ],
+        "sizes": [
+          "40",
+          "41",
+          "42"
+        ],
+        "description": "Long-run API product 0",
+        "image_urls": [
+          "https://api-profile-shop.local/images/longrun-product-00.jpg"
+        ],
+        "category": "training-shoes",
+        "canonical_url": "https://api-profile-shop.local/products/00",
+        "dedupe_key": "386efa3d560813aaf8280bb54a10c8bc"
+      },
+      {
+        "title": "LongRun Product 01",
+        "highest_price": 20.1,
+        "currency": "USD",
+        "colors": [
+          "White"
+        ],
+        "sizes": [
+          "40",
+          "41",
+          "42"
+        ],
+        "description": "Long-run API product 1",
+        "image_urls": [
+          "https://api-profile-shop.local/images/longrun-product-01.jpg"
+        ],
+        "category": "training-shoes",
+        "canonical_url": "https://api-profile-shop.local/products/01",
+        "dedupe_key": "b25c8208cca30328ca0caa8037eebb38"
+      },
+      {
+        "title": "LongRun Product 02",
+        "highest_price": 20.2,
+        "currency": "USD",
+        "colors": [
+          "Black",
+          "Blue"
+        ],
+        "sizes": [
+          "40",
+          "41",
+          "42"
+        ],
+        "description": "Long-run API product 2",
+        "image_urls": [
+          "https://api-profile-shop.local/images/longrun-product-02.jpg"
+        ],
+        "category": "training-shoes",
+        "canonical_url": "https://api-profile-shop.local/products/02",
+        "dedupe_key": "0101cfb8f9bca6365146183cb64136a1"
+      },
+      {
+        "title": "LongRun Product 03",
+        "highest_price": 20.3,
+        "currency": "USD",
+        "colors": [
+          "White"
+        ],
+        "sizes": [
+          "40",
+          "41",
+          "42"
+        ],
+        "description": "Long-run API product 3",
+        "image_urls": [
+          "https://api-profile-shop.local/images/longrun-product-03.jpg"
+        ],
+        "category": "training-shoes",
+        "canonical_url": "https://api-profile-shop.local/products/03",
+        "dedupe_key": "05a25854f698efeca77d2d5e12d79440"
+      },
+      {
+        "title": "LongRun Product 04",
+        "highest_price": 20.4,
+        "currency": "USD",
+        "colors": [
+          "Black",
+          "Blue"
+        ],
+        "sizes": [
+          "40",
+          "41",
+          "42"
+        ],
+        "description": "Long-run API product 4",
+        "image_urls": [
+          "https://api-profile-shop.local/images/longrun-product-04.jpg"
+        ],
+        "category": "training-shoes",
+        "canonical_url": "https://api-profile-shop.local/products/04",
+        "dedupe_key": "e01d4d17a956687e9e73cc7d6ab73b4f"
+      }
+    ],
+    "failures": [],
+    "report": {
+      "schema_version": "profile-run-report/v1",
+      "generated_at": "2026-05-16T08:30:37.258804+00:00",
+      "profile": {
+        "name": "fixture-ecommerce-api-pagination",
+        "path": "",
+        "target": "https://api-profile-shop.local/v1/products"
+      },
+      "run": {
+        "run_id": "profile-longrun-smoke-2026-05-16",
+        "runtime_backend": "profile_longrun_api_fixture",
+        "parser_backend": "native_parser",
+        "runner_summary": {
+          "run_id": "profile-longrun-smoke-2026-05-16",
+          "batches": 1,
+          "claimed": 1,
+          "succeeded": 1,
+          "failed": 0,
+          "retried": 0,
+          "records_saved": 20,
+          "discovered_urls": 1,
+          "checkpoint_errors": 0,
+          "item_errors": [],
+          "frontier_stats": {
+            "done": 1,
+            "queued": 1
+          }
+        },
+        "stop_reason": "bounded_pass_paused"
+      },
+      "metrics": {
+        "record_count": 20,
+        "field_completeness": {
+          "title": 1.0,
+          "price": 1.0,
+          "highest_price": 1.0,
+          "category": 1.0,
+          "description": 1.0,
+          "image_urls": 1.0,
+          "colors": 1.0,
+          "sizes": 1.0
+        },
+        "duplicate_rate": 0.0,
+        "duplicate_count": 0,
+        "failed_url_count": 0,
+        "failed_urls": [],
+        "frontier_stats": {
+          "done": 1,
+          "queued": 1
+        }
+      },
+      "quality_gate": {
+        "mode": "warn",
+        "passed": false,
+        "should_fail": false,
+        "severity": "warn",
+        "checks": [
+          {
+            "name": "min_items",
+            "passed": false,
+            "expected": 50,
+            "actual": 20,
+            "severity": "warn"
+          },
+          {
+            "name": "duplicate_rate",
+            "passed": true,
+            "expected": 0.0,
+            "actual": 0.0,
+            "severity": "pass"
+          },
+          {
+            "name": "failed_url_count",
+            "passed": true,
+            "expected": 0,
+            "actual": 0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:image_urls",
+            "field": "image_urls",
+            "passed": true,
+            "expected": 1.0,
+            "actual": 1.0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:price",
+            "field": "price",
+            "passed": true,
+            "expected": 1.0,
+            "actual": 1.0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:title",
+            "field": "title",
+            "passed": true,
+            "expected": 1.0,
+            "actual": 1.0,
+            "severity": "pass"
+          }
+        ]
+      },
+      "quality_policy": {
+        "mode": "warn",
+        "min_items": 50,
+        "field_thresholds": {
+          "title": 1.0,
+          "price": 1.0,
+          "image_urls": 1.0
+        },
+        "max_duplicate_rate": 0.0,
+        "max_failed_url_count": 0
+      },
+      "duplicate_key_strategy": {
+        "field": "dedupe_key",
+        "source": "ProductRecord",
+        "strategy": "sha256(source_site | category | canonical_url_or_source_url_or_title)[:32]",
+        "category_aware": true,
+        "notes": [
+          "The runner compares generated ProductRecord.dedupe_key values.",
+          "Duplicate rate quality depends on profile canonical URL mapping quality."
+        ]
+      },
+      "samples": [
+        {
+          "title": "LongRun Product 00",
+          "highest_price": 20.0,
+          "currency": "USD",
+          "colors": [
+            "Black",
+            "Blue"
+          ],
+          "sizes": [
+            "40",
+            "41",
+            "42"
+          ],
+          "description": "Long-run API product 0",
+          "image_urls": [
+            "https://api-profile-shop.local/images/longrun-product-00.jpg"
+          ],
+          "category": "training-shoes",
+          "canonical_url": "https://api-profile-shop.local/products/00",
+          "dedupe_key": "386efa3d560813aaf8280bb54a10c8bc"
+        },
+        {
+          "title": "LongRun Product 01",
+          "highest_price": 20.1,
+          "currency": "USD",
+          "colors": [
+            "White"
+          ],
+          "sizes": [
+            "40",
+            "41",
+            "42"
+          ],
+          "description": "Long-run API product 1",
+          "image_urls": [
+            "https://api-profile-shop.local/images/longrun-product-01.jpg"
+          ],
+          "category": "training-shoes",
+          "canonical_url": "https://api-profile-shop.local/products/01",
+          "dedupe_key": "b25c8208cca30328ca0caa8037eebb38"
+        },
+        {
+          "title": "LongRun Product 02",
+          "highest_price": 20.2,
+          "currency": "USD",
+          "colors": [
+            "Black",
+            "Blue"
+          ],
+          "sizes": [
+            "40",
+            "41",
+            "42"
+          ],
+          "description": "Long-run API product 2",
+          "image_urls": [
+            "https://api-profile-shop.local/images/longrun-product-02.jpg"
+          ],
+          "category": "training-shoes",
+          "canonical_url": "https://api-profile-shop.local/products/02",
+          "dedupe_key": "0101cfb8f9bca6365146183cb64136a1"
+        },
+        {
+          "title": "LongRun Product 03",
+          "highest_price": 20.3,
+          "currency": "USD",
+          "colors": [
+            "White"
+          ],
+          "sizes": [
+            "40",
+            "41",
+            "42"
+          ],
+          "description": "Long-run API product 3",
+          "image_urls": [
+            "https://api-profile-shop.local/images/longrun-product-03.jpg"
+          ],
+          "category": "training-shoes",
+          "canonical_url": "https://api-profile-shop.local/products/03",
+          "dedupe_key": "05a25854f698efeca77d2d5e12d79440"
+        },
+        {
+          "title": "LongRun Product 04",
+          "highest_price": 20.4,
+          "currency": "USD",
+          "colors": [
+            "Black",
+            "Blue"
+          ],
+          "sizes": [
+            "40",
+            "41",
+            "42"
+          ],
+          "description": "Long-run API product 4",
+          "image_urls": [
+            "https://api-profile-shop.local/images/longrun-product-04.jpg"
+          ],
+          "category": "training-shoes",
+          "canonical_url": "https://api-profile-shop.local/products/04",
+          "dedupe_key": "e01d4d17a956687e9e73cc7d6ab73b4f"
+        }
+      ],
+      "failures": [],
+      "next_actions": [
+        "Increase page depth, pagination coverage, or seed URLs to meet min_items."
+      ],
+      "notes": [],
+      "accepted": true
+    }
+  },
+  "resume_pass": {
+    "accepted": true,
+    "run_id": "profile-longrun-smoke-2026-05-16",
+    "profile_name": "fixture-ecommerce-api-pagination",
+    "status": "completed",
+    "runner_summary": {
+      "run_id": "profile-longrun-smoke-2026-05-16",
+      "batches": 2,
+      "claimed": 2,
+      "succeeded": 2,
+      "failed": 0,
+      "retried": 0,
+      "records_saved": 35,
+      "discovered_urls": 1,
+      "checkpoint_errors": 0,
+      "item_errors": [],
+      "frontier_stats": {
+        "done": 3
+      }
+    },
+    "frontier_stats": {
+      "done": 3
+    },
+    "product_stats": {
+      "run_id": "profile-longrun-smoke-2026-05-16",
+      "total": 55,
+      "by_status": {
+        "ok": 55
+      },
+      "by_site": {
+        "fixture-ecommerce-api-pagination": 55
+      },
+      "price_min": 20.0,
+      "price_max": 25.4,
+      "price_avg": 22.7
+    },
+    "quality_summary": {
+      "total_records": 55,
+      "min_items": 50,
+      "meets_min_items": true,
+      "field_completeness": {
+        "title": 1.0,
+        "price": 1.0,
+        "highest_price": 1.0,
+        "category": 1.0,
+        "description": 1.0,
+        "image_urls": 1.0,
+        "colors": 1.0,
+        "sizes": 1.0
+      },
+      "duplicate_count": 0,
+      "duplicate_rate": 0.0,
+      "duplicate_key_strategy": {
+        "field": "dedupe_key",
+        "source": "ProductRecord",
+        "strategy": "sha256(source_site | category | canonical_url_or_source_url_or_title)[:32]",
+        "category_aware": true,
+        "notes": [
+          "The runner compares generated ProductRecord.dedupe_key values.",
+          "Duplicate rate quality depends on profile canonical URL mapping quality."
+        ]
+      },
+      "failed_urls": [],
+      "failed_url_count": 0,
+      "pagination_stop_reason": "frontier_exhausted",
+      "frontier_stats": {
+        "done": 3
+      },
+      "quality_policy": {
+        "mode": "warn",
+        "min_items": 50,
+        "field_thresholds": {
+          "title": 1.0,
+          "price": 1.0,
+          "image_urls": 1.0
+        },
+        "max_duplicate_rate": 0.0,
+        "max_failed_url_count": 0
+      },
+      "quality_gate": {
+        "mode": "warn",
+        "passed": true,
+        "should_fail": false,
+        "severity": "pass",
+        "checks": [
+          {
+            "name": "min_items",
+            "passed": true,
+            "expected": 50,
+            "actual": 55,
+            "severity": "pass"
+          },
+          {
+            "name": "duplicate_rate",
+            "passed": true,
+            "expected": 0.0,
+            "actual": 0.0,
+            "severity": "pass"
+          },
+          {
+            "name": "failed_url_count",
+            "passed": true,
+            "expected": 0,
+            "actual": 0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:image_urls",
+            "field": "image_urls",
+            "passed": true,
+            "expected": 1.0,
+            "actual": 1.0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:price",
+            "field": "price",
+            "passed": true,
+            "expected": 1.0,
+            "actual": 1.0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:title",
+            "field": "title",
+            "passed": true,
+            "expected": 1.0,
+            "actual": 1.0,
+            "severity": "pass"
+          }
+        ]
+      }
+    },
+    "checkpoint_latest": {
+      "run": {
+        "run_id": "profile-longrun-smoke-2026-05-16",
+        "status": "completed",
+        "config": {
+          "profile": {
+            "access_config": {
+              "captcha_bypass": false,
+              "headers_required": false,
+              "login_required": false,
+              "mode": "api_replay"
+            },
+            "api_hints": {
+              "endpoint": "https://api-profile-shop.local/v1/products",
+              "field_mapping": {
+                "canonical_url": "url",
+                "colors": "variants.colors",
+                "currency": "price.currency",
+                "description": "description",
+                "highest_price": "price.amount",
+                "image_urls": "media.images",
+                "sizes": "variants.sizes",
+                "title": "name"
+              },
+              "items_path": "data.products",
+              "kind": "api",
+              "method": "GET",
+              "params": {
+                "category": "training-shoes"
+              },
+              "priority": 9
+            },
+            "constraints": {
+              "max_items": 60
+            },
+            "crawl_preferences": {
+              "parser": "json_profile",
+              "runtime": "native_static",
+              "seed_kind": "api"
+            },
+            "name": "fixture-ecommerce-api-pagination",
+            "pagination_hints": {
+              "max_pages": 3,
+              "page_param": "page",
+              "page_size": 20,
+              "page_size_param": "limit",
+              "start_page": 1,
+              "type": "page"
+            },
+            "quality_expectations": {
+              "category": "training-shoes",
+              "currency": "USD",
+              "min_items": 50,
+              "required_fields": [
+                "title",
+                "highest_price",
+                "image_urls"
+              ]
+            },
+            "rate_limits": {
+              "default": {
+                "delay_seconds": 0
+              }
+            },
+            "selectors": {},
+            "target_fields": [
+              "title",
+              "highest_price",
+              "colors",
+              "sizes",
+              "description",
+              "image_urls"
+            ],
+            "training_notes": [
+              "Offline observed API pagination fixture.",
+              "Uses page/limit query parameters and JSON field mapping to create ProductRecord rows.",
+              "No auth, cookie, captcha, proxy, or site-specific code is required."
+            ]
+          }
+        },
+        "pause_reason": "",
+        "started_at": "2026-05-16T08:30:37.098484+00:00",
+        "updated_at": "2026-05-16T08:30:37.468722+00:00",
+        "completed_at": "2026-05-16T08:30:37.468722+00:00"
+      },
+      "latest_checkpoint": {
+        "id": 2,
+        "run_id": "profile-longrun-smoke-2026-05-16",
+        "batch_id": "profile-longrun-resume-pass-2",
+        "summary": {
+          "async_fetch_fail": 0,
+          "async_fetch_ok": 0,
+          "backpressure_events": 0,
+          "batches": 2,
+          "blocked_requests": 0,
+          "checkpoint_errors": 0,
+          "checkpoint_writes": 0,
+          "claimed": 2,
+          "discovered_urls": 1,
+          "events": [],
+          "failed": 0,
+          "failure_buckets": {},
+          "frontier_stats": {
+            "done": 3
+          },
+          "max_concurrency_per_domain": {},
+          "offsite_dropped": 0,
+          "pool_acquired_events": 0,
+          "pool_released_events": 0,
+          "proxy_attempts_total": 0,
+          "proxy_failures": 0,
+          "proxy_retries": 0,
+          "proxy_successes": 0,
+          "records_saved": 35,
+          "response_status_count": {},
+          "retried": 0,
+          "robots_disallowed": 0,
+          "run_id": "profile-longrun-smoke-2026-05-16",
+          "skipped": 0,
+          "status": "completed",
+          "succeeded": 2
+        },
+        "frontier_items": [],
+        "events": [
+          {
+            "data": {
+              "claimed": 2,
+              "records_saved": 35,
+              "status": "completed",
+              "worker_id": "profile-longrun-resume"
+            },
+            "message": "profile long-run checkpoint saved",
+            "type": "spider.checkpoint_saved"
+          }
+        ],
+        "created_at": "2026-05-16T08:30:37.455355+00:00"
+      },
+      "item_count": 55,
+      "failure_count": 0
+    },
+    "sample_records": [
+      {
+        "title": "LongRun Product 00",
+        "highest_price": 20.0,
+        "currency": "USD",
+        "colors": [
+          "Black",
+          "Blue"
+        ],
+        "sizes": [
+          "40",
+          "41",
+          "42"
+        ],
+        "description": "Long-run API product 0",
+        "image_urls": [
+          "https://api-profile-shop.local/images/longrun-product-00.jpg"
+        ],
+        "category": "training-shoes",
+        "canonical_url": "https://api-profile-shop.local/products/00",
+        "dedupe_key": "386efa3d560813aaf8280bb54a10c8bc"
+      },
+      {
+        "title": "LongRun Product 01",
+        "highest_price": 20.1,
+        "currency": "USD",
+        "colors": [
+          "White"
+        ],
+        "sizes": [
+          "40",
+          "41",
+          "42"
+        ],
+        "description": "Long-run API product 1",
+        "image_urls": [
+          "https://api-profile-shop.local/images/longrun-product-01.jpg"
+        ],
+        "category": "training-shoes",
+        "canonical_url": "https://api-profile-shop.local/products/01",
+        "dedupe_key": "b25c8208cca30328ca0caa8037eebb38"
+      },
+      {
+        "title": "LongRun Product 02",
+        "highest_price": 20.2,
+        "currency": "USD",
+        "colors": [
+          "Black",
+          "Blue"
+        ],
+        "sizes": [
+          "40",
+          "41",
+          "42"
+        ],
+        "description": "Long-run API product 2",
+        "image_urls": [
+          "https://api-profile-shop.local/images/longrun-product-02.jpg"
+        ],
+        "category": "training-shoes",
+        "canonical_url": "https://api-profile-shop.local/products/02",
+        "dedupe_key": "0101cfb8f9bca6365146183cb64136a1"
+      },
+      {
+        "title": "LongRun Product 03",
+        "highest_price": 20.3,
+        "currency": "USD",
+        "colors": [
+          "White"
+        ],
+        "sizes": [
+          "40",
+          "41",
+          "42"
+        ],
+        "description": "Long-run API product 3",
+        "image_urls": [
+          "https://api-profile-shop.local/images/longrun-product-03.jpg"
+        ],
+        "category": "training-shoes",
+        "canonical_url": "https://api-profile-shop.local/products/03",
+        "dedupe_key": "05a25854f698efeca77d2d5e12d79440"
+      },
+      {
+        "title": "LongRun Product 04",
+        "highest_price": 20.4,
+        "currency": "USD",
+        "colors": [
+          "Black",
+          "Blue"
+        ],
+        "sizes": [
+          "40",
+          "41",
+          "42"
+        ],
+        "description": "Long-run API product 4",
+        "image_urls": [
+          "https://api-profile-shop.local/images/longrun-product-04.jpg"
+        ],
+        "category": "training-shoes",
+        "canonical_url": "https://api-profile-shop.local/products/04",
+        "dedupe_key": "e01d4d17a956687e9e73cc7d6ab73b4f"
+      },
+      {
+        "title": "LongRun Product 05",
+        "highest_price": 20.5,
+        "currency": "USD",
+        "colors": [
+          "White"
+        ],
+        "sizes": [
+          "40",
+          "41",
+          "42"
+        ],
+        "description": "Long-run API product 5",
+        "image_urls": [
+          "https://api-profile-shop.local/images/longrun-product-05.jpg"
+        ],
+        "category": "training-shoes",
+        "canonical_url": "https://api-profile-shop.local/products/05",
+        "dedupe_key": "41803b495d7131a6d67b027314fd5574"
+      },
+      {
+        "title": "LongRun Product 06",
+        "highest_price": 20.6,
+        "currency": "USD",
+        "colors": [
+          "Black",
+          "Blue"
+        ],
+        "sizes": [
+          "40",
+          "41",
+          "42"
+        ],
+        "description": "Long-run API product 6",
+        "image_urls": [
+          "https://api-profile-shop.local/images/longrun-product-06.jpg"
+        ],
+        "category": "training-shoes",
+        "canonical_url": "https://api-profile-shop.local/products/06",
+        "dedupe_key": "468b701a652095ce9a2d60727e4b2179"
+      },
+      {
+        "title": "LongRun Product 07",
+        "highest_price": 20.7,
+        "currency": "USD",
+        "colors": [
+          "White"
+        ],
+        "sizes": [
+          "40",
+          "41",
+          "42"
+        ],
+        "description": "Long-run API product 7",
+        "image_urls": [
+          "https://api-profile-shop.local/images/longrun-product-07.jpg"
+        ],
+        "category": "training-shoes",
+        "canonical_url": "https://api-profile-shop.local/products/07",
+        "dedupe_key": "f611a00711961f2152bc88846550ce9b"
+      },
+      {
+        "title": "LongRun Product 08",
+        "highest_price": 20.8,
+        "currency": "USD",
+        "colors": [
+          "Black",
+          "Blue"
+        ],
+        "sizes": [
+          "40",
+          "41",
+          "42"
+        ],
+        "description": "Long-run API product 8",
+        "image_urls": [
+          "https://api-profile-shop.local/images/longrun-product-08.jpg"
+        ],
+        "category": "training-shoes",
+        "canonical_url": "https://api-profile-shop.local/products/08",
+        "dedupe_key": "0a5ffb7588a64ee2cb711446aed43860"
+      },
+      {
+        "title": "LongRun Product 09",
+        "highest_price": 20.9,
+        "currency": "USD",
+        "colors": [
+          "White"
+        ],
+        "sizes": [
+          "40",
+          "41",
+          "42"
+        ],
+        "description": "Long-run API product 9",
+        "image_urls": [
+          "https://api-profile-shop.local/images/longrun-product-09.jpg"
+        ],
+        "category": "training-shoes",
+        "canonical_url": "https://api-profile-shop.local/products/09",
+        "dedupe_key": "3fef4d4ad9af3ffdd7e7f7740dbeb9a2"
+      }
+    ],
+    "failures": [],
+    "report": {
+      "schema_version": "profile-run-report/v1",
+      "generated_at": "2026-05-16T08:30:37.501618+00:00",
+      "profile": {
+        "name": "fixture-ecommerce-api-pagination",
+        "path": "",
+        "target": "https://api-profile-shop.local/v1/products"
+      },
+      "run": {
+        "run_id": "profile-longrun-smoke-2026-05-16",
+        "runtime_backend": "profile_longrun_api_fixture",
+        "parser_backend": "native_parser",
+        "runner_summary": {
+          "run_id": "profile-longrun-smoke-2026-05-16",
+          "batches": 2,
+          "claimed": 2,
+          "succeeded": 2,
+          "failed": 0,
+          "retried": 0,
+          "records_saved": 35,
+          "discovered_urls": 1,
+          "checkpoint_errors": 0,
+          "item_errors": [],
+          "frontier_stats": {
+            "done": 3
+          }
+        },
+        "stop_reason": "frontier_exhausted"
+      },
+      "metrics": {
+        "record_count": 55,
+        "field_completeness": {
+          "title": 1.0,
+          "price": 1.0,
+          "highest_price": 1.0,
+          "category": 1.0,
+          "description": 1.0,
+          "image_urls": 1.0,
+          "colors": 1.0,
+          "sizes": 1.0
+        },
+        "duplicate_rate": 0.0,
+        "duplicate_count": 0,
+        "failed_url_count": 0,
+        "failed_urls": [],
+        "frontier_stats": {
+          "done": 3
+        }
+      },
+      "quality_gate": {
+        "mode": "warn",
+        "passed": true,
+        "should_fail": false,
+        "severity": "pass",
+        "checks": [
+          {
+            "name": "min_items",
+            "passed": true,
+            "expected": 50,
+            "actual": 55,
+            "severity": "pass"
+          },
+          {
+            "name": "duplicate_rate",
+            "passed": true,
+            "expected": 0.0,
+            "actual": 0.0,
+            "severity": "pass"
+          },
+          {
+            "name": "failed_url_count",
+            "passed": true,
+            "expected": 0,
+            "actual": 0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:image_urls",
+            "field": "image_urls",
+            "passed": true,
+            "expected": 1.0,
+            "actual": 1.0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:price",
+            "field": "price",
+            "passed": true,
+            "expected": 1.0,
+            "actual": 1.0,
+            "severity": "pass"
+          },
+          {
+            "name": "field:title",
+            "field": "title",
+            "passed": true,
+            "expected": 1.0,
+            "actual": 1.0,
+            "severity": "pass"
+          }
+        ]
+      },
+      "quality_policy": {
+        "mode": "warn",
+        "min_items": 50,
+        "field_thresholds": {
+          "title": 1.0,
+          "price": 1.0,
+          "image_urls": 1.0
+        },
+        "max_duplicate_rate": 0.0,
+        "max_failed_url_count": 0
+      },
+      "duplicate_key_strategy": {
+        "field": "dedupe_key",
+        "source": "ProductRecord",
+        "strategy": "sha256(source_site | category | canonical_url_or_source_url_or_title)[:32]",
+        "category_aware": true,
+        "notes": [
+          "The runner compares generated ProductRecord.dedupe_key values.",
+          "Duplicate rate quality depends on profile canonical URL mapping quality."
+        ]
+      },
+      "samples": [
+        {
+          "title": "LongRun Product 00",
+          "highest_price": 20.0,
+          "currency": "USD",
+          "colors": [
+            "Black",
+            "Blue"
+          ],
+          "sizes": [
+            "40",
+            "41",
+            "42"
+          ],
+          "description": "Long-run API product 0",
+          "image_urls": [
+            "https://api-profile-shop.local/images/longrun-product-00.jpg"
+          ],
+          "category": "training-shoes",
+          "canonical_url": "https://api-profile-shop.local/products/00",
+          "dedupe_key": "386efa3d560813aaf8280bb54a10c8bc"
+        },
+        {
+          "title": "LongRun Product 01",
+          "highest_price": 20.1,
+          "currency": "USD",
+          "colors": [
+            "White"
+          ],
+          "sizes": [
+            "40",
+            "41",
+            "42"
+          ],
+          "description": "Long-run API product 1",
+          "image_urls": [
+            "https://api-profile-shop.local/images/longrun-product-01.jpg"
+          ],
+          "category": "training-shoes",
+          "canonical_url": "https://api-profile-shop.local/products/01",
+          "dedupe_key": "b25c8208cca30328ca0caa8037eebb38"
+        },
+        {
+          "title": "LongRun Product 02",
+          "highest_price": 20.2,
+          "currency": "USD",
+          "colors": [
+            "Black",
+            "Blue"
+          ],
+          "sizes": [
+            "40",
+            "41",
+            "42"
+          ],
+          "description": "Long-run API product 2",
+          "image_urls": [
+            "https://api-profile-shop.local/images/longrun-product-02.jpg"
+          ],
+          "category": "training-shoes",
+          "canonical_url": "https://api-profile-shop.local/products/02",
+          "dedupe_key": "0101cfb8f9bca6365146183cb64136a1"
+        },
+        {
+          "title": "LongRun Product 03",
+          "highest_price": 20.3,
+          "currency": "USD",
+          "colors": [
+            "White"
+          ],
+          "sizes": [
+            "40",
+            "41",
+            "42"
+          ],
+          "description": "Long-run API product 3",
+          "image_urls": [
+            "https://api-profile-shop.local/images/longrun-product-03.jpg"
+          ],
+          "category": "training-shoes",
+          "canonical_url": "https://api-profile-shop.local/products/03",
+          "dedupe_key": "05a25854f698efeca77d2d5e12d79440"
+        },
+        {
+          "title": "LongRun Product 04",
+          "highest_price": 20.4,
+          "currency": "USD",
+          "colors": [
+            "Black",
+            "Blue"
+          ],
+          "sizes": [
+            "40",
+            "41",
+            "42"
+          ],
+          "description": "Long-run API product 4",
+          "image_urls": [
+            "https://api-profile-shop.local/images/longrun-product-04.jpg"
+          ],
+          "category": "training-shoes",
+          "canonical_url": "https://api-profile-shop.local/products/04",
+          "dedupe_key": "e01d4d17a956687e9e73cc7d6ab73b4f"
+        },
+        {
+          "title": "LongRun Product 05",
+          "highest_price": 20.5,
+          "currency": "USD",
+          "colors": [
+            "White"
+          ],
+          "sizes": [
+            "40",
+            "41",
+            "42"
+          ],
+          "description": "Long-run API product 5",
+          "image_urls": [
+            "https://api-profile-shop.local/images/longrun-product-05.jpg"
+          ],
+          "category": "training-shoes",
+          "canonical_url": "https://api-profile-shop.local/products/05",
+          "dedupe_key": "41803b495d7131a6d67b027314fd5574"
+        },
+        {
+          "title": "LongRun Product 06",
+          "highest_price": 20.6,
+          "currency": "USD",
+          "colors": [
+            "Black",
+            "Blue"
+          ],
+          "sizes": [
+            "40",
+            "41",
+            "42"
+          ],
+          "description": "Long-run API product 6",
+          "image_urls": [
+            "https://api-profile-shop.local/images/longrun-product-06.jpg"
+          ],
+          "category": "training-shoes",
+          "canonical_url": "https://api-profile-shop.local/products/06",
+          "dedupe_key": "468b701a652095ce9a2d60727e4b2179"
+        },
+        {
+          "title": "LongRun Product 07",
+          "highest_price": 20.7,
+          "currency": "USD",
+          "colors": [
+            "White"
+          ],
+          "sizes": [
+            "40",
+            "41",
+            "42"
+          ],
+          "description": "Long-run API product 7",
+          "image_urls": [
+            "https://api-profile-shop.local/images/longrun-product-07.jpg"
+          ],
+          "category": "training-shoes",
+          "canonical_url": "https://api-profile-shop.local/products/07",
+          "dedupe_key": "f611a00711961f2152bc88846550ce9b"
+        },
+        {
+          "title": "LongRun Product 08",
+          "highest_price": 20.8,
+          "currency": "USD",
+          "colors": [
+            "Black",
+            "Blue"
+          ],
+          "sizes": [
+            "40",
+            "41",
+            "42"
+          ],
+          "description": "Long-run API product 8",
+          "image_urls": [
+            "https://api-profile-shop.local/images/longrun-product-08.jpg"
+          ],
+          "category": "training-shoes",
+          "canonical_url": "https://api-profile-shop.local/products/08",
+          "dedupe_key": "0a5ffb7588a64ee2cb711446aed43860"
+        },
+        {
+          "title": "LongRun Product 09",
+          "highest_price": 20.9,
+          "currency": "USD",
+          "colors": [
+            "White"
+          ],
+          "sizes": [
+            "40",
+            "41",
+            "42"
+          ],
+          "description": "Long-run API product 9",
+          "image_urls": [
+            "https://api-profile-shop.local/images/longrun-product-09.jpg"
+          ],
+          "category": "training-shoes",
+          "canonical_url": "https://api-profile-shop.local/products/09",
+          "dedupe_key": "3fef4d4ad9af3ffdd7e7f7740dbeb9a2"
+        }
+      ],
+      "failures": [],
+      "next_actions": [
+        "No immediate quality gate action required; continue broader real-site regression."
+      ],
+      "notes": [],
+      "accepted": true
+    }
+  },
+  "request_urls": [
+    "https://api-profile-shop.local/v1/products?category=training-shoes&page=1&limit=20",
+    "https://api-profile-shop.local/v1/products?category=training-shoes&page=2&limit=20",
+    "https://api-profile-shop.local/v1/products?category=training-shoes&page=3&limit=20"
+  ],
+  "report_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\clm_profile_longrun_smoke_wojuri3r\\profile_run_report.json",
+  "runtime_dir": ""
+}

@@ -1,5 +1,5 @@
 {
-  "run_at": "2026-05-15T08:54:46.035379+00:00",
+  "run_at": "2026-05-16T08:16:27.495430+00:00",
   "purpose": "PROFILE-AUTO-1 profile draft training smoke",
   "source_evidence": "dev_logs\\training\\2026-05-15_real_harden4_dynamic_list_training.json",
   "summary": {
@@ -63,7 +63,13 @@
         "quality_expectations": {
           "min_items_expected": 50,
           "item_count_observed": 50,
-          "html_size_observed": 5391
+          "html_size_observed": 5391,
+          "required_fields": [
+            "title"
+          ],
+          "field_thresholds": {
+            "item_title": 5
+          }
         },
         "training_notes": [
           "Scroll training produced 10 events"
@@ -76,6 +82,26 @@
             "http://127.0.0.1:53899/infinite_scroll.html"
           ],
           "seed_kind": "list"
+        },
+        "profile_diagnostics": {
+          "missing_fields": [
+            "description",
+            "image",
+            "price"
+          ],
+          "candidate_selectors": {},
+          "candidate_api_paths": {},
+          "weak_selectors": [],
+          "api_candidate_quality": {
+            "confidence": "none"
+          },
+          "pagination_confidence": {
+            "confidence": "high",
+            "type": "infinite_scroll"
+          },
+          "recommended_next_actions": [
+            "Resolve missing fields: description, image, price"
+          ]
         }
       }
     },
@@ -132,7 +158,13 @@
           "min_items_expected": 18,
           "item_count_observed": 18,
           "html_size_observed": 7006,
-          "category": "listing"
+          "category": "listing",
+          "required_fields": [
+            "price"
+          ],
+          "field_thresholds": {
+            "item_price": 6
+          }
         },
         "training_notes": [
           "Scroll training produced 16 events"
@@ -145,6 +177,26 @@
             "http://127.0.0.1:53899/virtualized_list.html"
           ],
           "seed_kind": "list"
+        },
+        "profile_diagnostics": {
+          "missing_fields": [
+            "description",
+            "image",
+            "title"
+          ],
+          "candidate_selectors": {},
+          "candidate_api_paths": {},
+          "weak_selectors": [],
+          "api_candidate_quality": {
+            "confidence": "none"
+          },
+          "pagination_confidence": {
+            "confidence": "high",
+            "type": "infinite_scroll"
+          },
+          "recommended_next_actions": [
+            "Resolve missing fields: description, image, title"
+          ]
         }
       }
     },
@@ -198,7 +250,13 @@
         "quality_expectations": {
           "min_items_expected": 8,
           "item_count_observed": 8,
-          "html_size_observed": 10140
+          "html_size_observed": 10140,
+          "required_fields": [
+            "title"
+          ],
+          "field_thresholds": {
+            "card_title": 4
+          }
         },
         "training_notes": [],
         "access_config": {},
@@ -209,6 +267,27 @@
             "http://127.0.0.1:53899/mobile_viewport.html"
           ],
           "seed_kind": "list"
+        },
+        "profile_diagnostics": {
+          "missing_fields": [
+            "description",
+            "image",
+            "price"
+          ],
+          "candidate_selectors": {},
+          "candidate_api_paths": {},
+          "weak_selectors": [],
+          "api_candidate_quality": {
+            "confidence": "none"
+          },
+          "pagination_confidence": {
+            "confidence": "none",
+            "type": ""
+          },
+          "recommended_next_actions": [
+            "Resolve missing fields: description, image, price",
+            "No pagination detected — verify if list is complete or needs scroll/page"
+          ]
         }
       }
     },
@@ -267,6 +346,28 @@
             "https://virtuoso.dev/infinite-scrolling/"
           ],
           "seed_kind": "list"
+        },
+        "profile_diagnostics": {
+          "missing_fields": [
+            "description",
+            "image",
+            "price",
+            "title"
+          ],
+          "candidate_selectors": {},
+          "candidate_api_paths": {},
+          "weak_selectors": [],
+          "api_candidate_quality": {
+            "confidence": "none"
+          },
+          "pagination_confidence": {
+            "confidence": "none",
+            "type": ""
+          },
+          "recommended_next_actions": [
+            "Resolve missing fields: description, image, price, title",
+            "No selectors inferred — manual selector definition required"
+          ]
         }
       }
     },
@@ -330,6 +431,28 @@
             "https://vuejs.org/examples/"
           ],
           "seed_kind": "list"
+        },
+        "profile_diagnostics": {
+          "missing_fields": [
+            "description",
+            "image",
+            "price",
+            "title"
+          ],
+          "candidate_selectors": {},
+          "candidate_api_paths": {},
+          "weak_selectors": [],
+          "api_candidate_quality": {
+            "confidence": "none"
+          },
+          "pagination_confidence": {
+            "confidence": "none",
+            "type": ""
+          },
+          "recommended_next_actions": [
+            "Resolve missing fields: description, image, price, title",
+            "No pagination detected — verify if list is complete or needs scroll/page"
+          ]
         }
       }
     },
@@ -412,6 +535,39 @@
           ],
           "seed_kind": "list",
           "include_seed_urls_with_api": false
+        },
+        "profile_diagnostics": {
+          "missing_fields": [
+            "description",
+            "image",
+            "price",
+            "title"
+          ],
+          "candidate_selectors": {},
+          "candidate_api_paths": {},
+          "weak_selectors": [
+            {
+              "field": "article",
+              "selector": ".article",
+              "match_count": 1
+            }
+          ],
+          "api_candidate_quality": {
+            "confidence": "high",
+            "endpoint": "https://react.dev/_next/data/zOPJ31-FwqWsy9R-dXtS9/versions.json?markdownPath=versions",
+            "format": "json",
+            "json_response_count": 16
+          },
+          "pagination_confidence": {
+            "confidence": "none",
+            "type": ""
+          },
+          "recommended_next_actions": [
+            "Resolve missing fields: description, image, price, title",
+            "Verify weak selectors (low match count): article",
+            "Consider API-first crawl strategy for better data quality",
+            "No pagination detected — verify if list is complete or needs scroll/page"
+          ]
         }
       }
     },
@@ -486,6 +642,32 @@
           ],
           "seed_kind": "list",
           "include_seed_urls_with_api": false
+        },
+        "profile_diagnostics": {
+          "missing_fields": [
+            "description",
+            "image",
+            "price",
+            "title"
+          ],
+          "candidate_selectors": {},
+          "candidate_api_paths": {},
+          "weak_selectors": [],
+          "api_candidate_quality": {
+            "confidence": "high",
+            "endpoint": "https://tanstack.com/_serverFn/b9ec6ebffe71881613f7d1e66d9126b4f7a9390f5be2d567f1ebaf09da5cfc18",
+            "format": "json",
+            "json_response_count": 3
+          },
+          "pagination_confidence": {
+            "confidence": "none",
+            "type": ""
+          },
+          "recommended_next_actions": [
+            "Resolve missing fields: description, image, price, title",
+            "Consider API-first crawl strategy for better data quality",
+            "No pagination detected — verify if list is complete or needs scroll/page"
+          ]
         }
       }
     },
@@ -552,6 +734,29 @@
             "https://scrapethissite.com/pages/ajax-javascript/"
           ],
           "seed_kind": "list"
+        },
+        "profile_diagnostics": {
+          "missing_fields": [
+            "description",
+            "image",
+            "price",
+            "title"
+          ],
+          "candidate_selectors": {},
+          "candidate_api_paths": {},
+          "weak_selectors": [],
+          "api_candidate_quality": {
+            "confidence": "low",
+            "xhr_count": 3
+          },
+          "pagination_confidence": {
+            "confidence": "none",
+            "type": ""
+          },
+          "recommended_next_actions": [
+            "Resolve missing fields: description, image, price, title",
+            "No pagination detected — verify if list is complete or needs scroll/page"
+          ]
         }
       }
     },
@@ -618,6 +823,32 @@
           ],
           "seed_kind": "list",
           "include_seed_urls_with_api": false
+        },
+        "profile_diagnostics": {
+          "missing_fields": [
+            "description",
+            "image",
+            "price",
+            "title"
+          ],
+          "candidate_selectors": {},
+          "candidate_api_paths": {},
+          "weak_selectors": [],
+          "api_candidate_quality": {
+            "confidence": "high",
+            "endpoint": "https://dummyjson.com/products",
+            "format": "json",
+            "json_response_count": 1
+          },
+          "pagination_confidence": {
+            "confidence": "none",
+            "type": ""
+          },
+          "recommended_next_actions": [
+            "Resolve missing fields: description, image, price, title",
+            "Consider API-first crawl strategy for better data quality",
+            "No selectors inferred — manual selector definition required"
+          ]
         }
       }
     },
@@ -686,6 +917,29 @@
             "https://scrapethissite.com/pages/simple/"
           ],
           "seed_kind": "list"
+        },
+        "profile_diagnostics": {
+          "missing_fields": [
+            "description",
+            "image",
+            "price",
+            "title"
+          ],
+          "candidate_selectors": {},
+          "candidate_api_paths": {},
+          "weak_selectors": [],
+          "api_candidate_quality": {
+            "confidence": "low",
+            "xhr_count": 3
+          },
+          "pagination_confidence": {
+            "confidence": "none",
+            "type": ""
+          },
+          "recommended_next_actions": [
+            "Resolve missing fields: description, image, price, title",
+            "No pagination detected — verify if list is complete or needs scroll/page"
+          ]
         }
       }
     }

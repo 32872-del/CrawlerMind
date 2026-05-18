@@ -361,6 +361,28 @@ architecture.
   - Real profile batch: 168 product-like records across DummyJSON, Platzi Fake
     Store API, and FakeStoreAPI; two targets passed and one warn-mode target
     was accepted.
+- SCALE-RUNTIME-1 first supervisor slice completed on 2026-05-16:
+  - `ProfileLongRunExecutor` now provides a reusable profile-driven long-run
+    facade over `SiteProfile`, `URLFrontier`, `BatchRunner`,
+    `SpiderRuntimeProcessor`, `ProductStore`, `CheckpointStore`, and
+    `profile-run-report/v1`.
+  - The executor seeds the frontier from `initial_requests_from_profile()`,
+    supports bounded passes through `max_batches`, writes product checkpoints,
+    persists spider checkpoints, marks runs paused/completed, computes profile
+    quality summaries, and emits stable reports.
+  - Offline smoke `run_profile_longrun_smoke_2026_05_16.py` paused after one
+    API page, resumed through the remaining pages, stored 55 product records,
+    completed checkpoint status, and wrote
+    `dev_logs/smoke/2026-05-16_profile_longrun_smoke.json`.
+- SCALE-RUNTIME-1 user entrypoint slice completed on 2026-05-16:
+  - Easy Mode now has `clm.py profile-run --profile <profile.json>` for
+    profile-driven long-running crawls.
+  - FastAPI now exposes `POST /profile-runs` and `GET /profile-runs/{task_id}`
+    as profile long-run job boundaries.
+  - Profile run jobs use the same background registry pattern as `/crawl`,
+    while returning profile-specific run id, profile name, record count,
+    accepted flag, and profile-run report payload.
+  - Focused CLI/API/profile-longrun tests passed with 56 tests.
 - Supervisor/worker LLM team workspace added under `docs/team/`, including
   badges, assignments, acceptance protocol, accepted-work records, and new LLM
   onboarding.
@@ -768,6 +790,34 @@ python -m compileall autonomous_crawler clm.py run_simple.py run_browser_scenari
 OK
 ```
 
+Latest SCALE-RUNTIME-1 profile long-run verification on 2026-05-16:
+
+```text
+python -m unittest autonomous_crawler.tests.test_profile_longrun autonomous_crawler.tests.test_profile_ecommerce_runner autonomous_crawler.tests.test_spider_runner autonomous_crawler.tests.test_checkpoint_store autonomous_crawler.tests.test_batch_runner -v
+Ran 40 tests in 9.027s
+OK
+
+python run_profile_longrun_smoke_2026_05_16.py
+accepted=true, record_count=55, first_status=paused, resume_status=completed
+
+python -m compileall autonomous_crawler clm.py run_simple.py -q
+OK
+```
+
+Latest SCALE-RUNTIME-1 CLI/API entrypoint verification on 2026-05-16:
+
+```text
+python -m unittest autonomous_crawler.tests.test_profile_longrun autonomous_crawler.tests.test_clm_cli autonomous_crawler.tests.test_api_mvp -v
+Ran 56 tests in 7.828s
+OK
+
+python run_profile_longrun_smoke_2026_05_16.py
+accepted=true, record_count=55, first_status=paused, resume_status=completed
+
+python -m compileall autonomous_crawler clm.py run_profile_longrun_smoke_2026_05_16.py -q
+OK
+```
+
 Latest Scrapling absorption baseline closeout on 2026-05-15:
 
 ```text
@@ -1131,13 +1181,18 @@ Immediate steps:
    accepted deterministic replay result contract.
 2. Add `PROFILE-AUTO-2`: advisor-assisted profile refinement, selector repair,
    and missing-field explanation on top of generated `SiteProfile` drafts.
-3. Add `SCALE-RUNTIME-1`: connect resumable checkpoints to real
-   `URLFrontier`, `SpiderRuntimeProcessor`, and `ProductStore` long-running
-   jobs.
+3. Continue `SCALE-RUNTIME-1`: run real ecommerce training through the new
+   CLI/API profile long-run entrypoints and preserve reports.
+   - 2026-05-18 update: backend entrypoints now support `item_workers`,
+     CLI `--workers`, and batch multi-site profile runs capped at 5 sites.
+   - 2026-05-18 product workflow update: frontend-facing endpoints now cover
+     catalog import, site analysis, field resolution, test/full runs, status,
+     events, and exports.
 4. Run `REAL-ECOM-2`: 600+ records through profile runner on public
    ecommerce/API targets with profile-run reports.
-5. Continue runtime hardening: persistent async client pooling, DNS reuse,
-   adaptive concurrency, and profile health metrics in spider summaries.
+5. Continue runtime hardening: adaptive concurrency/backpressure, durable
+   multi-site job registry, DNS reuse tuning, and profile health metrics in
+   spider summaries.
 6. Continue visual hardening: real OCR provider adapter and screenshot-to-DOM
    alignment.
 

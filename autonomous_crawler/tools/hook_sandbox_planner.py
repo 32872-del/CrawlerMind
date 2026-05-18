@@ -24,9 +24,10 @@ class HookTarget:
     context: str = ""
     inputs_to_capture: list[str] = field(default_factory=list)
     outputs_to_capture: list[str] = field(default_factory=list)
+    source_code: str = ""  # JS source for sandbox execution (optional)
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        d = {
             "name": self.name,
             "kind": self.kind,
             "source": self.source,
@@ -35,6 +36,9 @@ class HookTarget:
             "inputs_to_capture": list(self.inputs_to_capture),
             "outputs_to_capture": list(self.outputs_to_capture),
         }
+        if self.source_code:
+            d["has_source_code"] = True
+        return d
 
 
 @dataclass(frozen=True)
@@ -59,14 +63,18 @@ class SandboxTarget:
     runtime: str  # browser | node | browser_or_node
     reason: str = ""
     capture: list[str] = field(default_factory=list)
+    source_code: str = ""  # JS source for sandbox execution (optional)
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        d = {
             "name": self.name,
             "runtime": self.runtime,
             "reason": self.reason,
             "capture": list(self.capture),
         }
+        if self.source_code:
+            d["has_source_code"] = True
+        return d
 
 
 @dataclass(frozen=True)

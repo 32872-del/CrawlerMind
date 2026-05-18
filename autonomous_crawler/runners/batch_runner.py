@@ -8,6 +8,7 @@ scraping strategy.
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
@@ -35,6 +36,7 @@ class BatchRunnerConfig:
     max_batches: int = 0
     lease_seconds: int = 300
     retry_failed: bool = False
+    item_workers: int = 1
 
     def __post_init__(self) -> None:
         if not self.run_id:
@@ -45,6 +47,8 @@ class BatchRunnerConfig:
             raise ValueError("max_batches must be >= 0")
         if self.lease_seconds < 0:
             raise ValueError("lease_seconds must be >= 0")
+        if self.item_workers < 1:
+            raise ValueError("item_workers must be >= 1")
 
 
 @dataclass
@@ -143,6 +147,7 @@ class BatchRunner:
 
     def run(self) -> BatchRunnerSummary:
         summary = BatchRunnerSummary(run_id=self.config.run_id)
+        workers = max(1, int(self.config.item_workers))
         while True:
             if self.config.max_batches and summary.batches >= self.config.max_batches:
                 break
@@ -157,18 +162,44 @@ class BatchRunner:
 
             summary.batches += 1
             summary.claimed += len(batch)
-            for item in batch:
-                self._process_one(item, summary)
+            if workers == 1 or len(batch) == 1:
+                for item in batch:
+                    processed_item, result = self._process_item(item)
+                    self._apply_result(processed_item, result, summary)
+            else:
+                with ThreadPoolExecutor(max_workers=min(workers, len(batch))) as executor:
+                    futures = [executor.submit(self._process_item, item) for item in batch]
+                    for future in as_completed(futures):
+                        processed_item, result = future.result()
+                        self._apply_result(processed_item, result, summary)
 
         summary.frontier_stats = self.frontier.stats()
         return summary
 
     def _process_one(self, item: FrontierItem, summary: BatchRunnerSummary) -> None:
-        item_id = int(item["id"])
+        """Process and persist one item.
+
+        Kept for compatibility with tests/extensions that may call the helper
+        directly. The main runner uses `_process_item` + `_apply_result` so
+        expensive runtime work can happen in parallel while SQLite writes stay
+        serialized.
+        """
+        processed_item, result = self._process_item(item)
+        self._apply_result(processed_item, result, summary)
+
+    def _process_item(self, item: FrontierItem) -> tuple[FrontierItem, ItemProcessResult]:
         try:
-            result = self.processor(item)
+            return item, self.processor(item)
         except Exception as exc:
-            result = ItemProcessResult.failure(str(exc), retry=self.config.retry_failed)
+            return item, ItemProcessResult.failure(str(exc), retry=self.config.retry_failed)
+
+    def _apply_result(
+        self,
+        item: FrontierItem,
+        result: ItemProcessResult,
+        summary: BatchRunnerSummary,
+    ) -> None:
+        item_id = int(item["id"])
 
         if result.ok:
             if result.records and self.checkpoint:

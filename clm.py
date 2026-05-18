@@ -11,6 +11,13 @@ from pathlib import Path
 from typing import Any
 
 from autonomous_crawler.llm import LLMConfigurationError
+from autonomous_crawler.runners import (
+    ProfileLongRunConfig,
+    SiteProfile,
+    run_multi_profile_longrun,
+    run_profile_longrun,
+)
+from autonomous_crawler.runtime import NativeFetchRuntime
 from run_simple import build_simple_advisor, check_llm_config, load_simple_config
 from run_skeleton import run_crawl
 
@@ -61,6 +68,36 @@ def build_parser() -> argparse.ArgumentParser:
     crawl_parser.add_argument("--no-llm", action="store_true", help="force LLM off")
     crawl_parser.set_defaults(func=cmd_crawl)
 
+    profile_run_parser = subparsers.add_parser(
+        "profile-run",
+        help="run a profile-driven long crawl",
+    )
+    profile_run_parser.add_argument("--profile", type=Path, required=True, help="SiteProfile JSON path")
+    profile_run_parser.add_argument("--run-id", default="", help="stable run id; generated if omitted")
+    profile_run_parser.add_argument("--batch-size", type=int, default=20)
+    profile_run_parser.add_argument("--max-batches", type=int, default=0)
+    profile_run_parser.add_argument("--timeout-ms", type=int, default=30000)
+    profile_run_parser.add_argument("--workers", type=int, default=1, help="concurrent URL workers inside this site run")
+    profile_run_parser.add_argument("--category", default="")
+    profile_run_parser.add_argument("--output", type=Path, help="write profile-run-report JSON")
+    profile_run_parser.add_argument("--runtime-dir", type=Path, help="persist frontier/product/checkpoint DBs here")
+    profile_run_parser.set_defaults(func=cmd_profile_run)
+
+    multi_profile_parser = subparsers.add_parser(
+        "multi-profile-run",
+        help="run up to five profile-driven crawls concurrently",
+    )
+    multi_profile_parser.add_argument(
+        "--jobs",
+        type=Path,
+        required=True,
+        help="JSON file: {site_name: {profile_path/profile, config fields...}}",
+    )
+    multi_profile_parser.add_argument("--max-sites", type=int, default=5, help="concurrent site jobs, capped at 5")
+    multi_profile_parser.add_argument("--workers", type=int, default=1, help="default URL workers per site")
+    multi_profile_parser.add_argument("--output", type=Path, help="write multi-site summary JSON")
+    multi_profile_parser.set_defaults(func=cmd_multi_profile_run)
+
     smoke_parser = subparsers.add_parser("smoke", help="run a small smoke test")
     smoke_parser.add_argument(
         "--kind",
@@ -82,6 +119,7 @@ def build_parser() -> argparse.ArgumentParser:
             "1", "2", "3", "4", "ecommerce", "real-2026-05-11",
             "native-vs-transition", "native-vs-transition-dynamic",
             "native-vs-transition-profile", "native-spider-smoke",
+            "profile-longrun-smoke",
         ),
     )
     train_parser.set_defaults(func=cmd_train)
@@ -185,6 +223,81 @@ def cmd_crawl(args: argparse.Namespace) -> int:
     return 0 if final_state.get("status") == "completed" else 1
 
 
+def cmd_profile_run(args: argparse.Namespace) -> int:
+    try:
+        profile = SiteProfile.load(args.profile)
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        print(f"Profile load failed: {exc}")
+        return 1
+
+    run_id = args.run_id.strip() or f"profile-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+    try:
+        fetch_runtime = NativeFetchRuntime(reuse_httpx_client=args.workers > 1)
+        try:
+            result = run_profile_longrun(
+                profile=profile,
+                config=ProfileLongRunConfig(
+                    run_id=run_id,
+                    worker_id="clm-profile-run",
+                    batch_size=args.batch_size,
+                    max_batches=args.max_batches,
+                    timeout_ms=args.timeout_ms,
+                    item_workers=args.workers,
+                    category=args.category,
+                    output_report_path=str(args.output or ""),
+                ),
+                fetch_runtime=fetch_runtime,
+                runtime_dir=args.runtime_dir,
+            )
+        finally:
+            fetch_runtime.close()
+    except Exception as exc:
+        print(f"Profile run failed: {exc}")
+        return 1
+
+    print(json.dumps({
+        "accepted": result.accepted,
+        "run_id": result.run_id,
+        "profile": result.profile_name,
+        "status": result.status,
+        "records": result.product_stats.get("total", 0),
+        "quality": result.quality_summary.get("quality_gate", {}),
+        "frontier": result.frontier_stats,
+        "output": str(args.output or ""),
+    }, ensure_ascii=True, indent=2, default=str))
+    return 0 if result.accepted else 1
+
+
+def cmd_multi_profile_run(args: argparse.Namespace) -> int:
+    try:
+        jobs = json.loads(args.jobs.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"Jobs file load failed: {exc}")
+        return 1
+    if not isinstance(jobs, dict):
+        print("Jobs file must contain a JSON object keyed by site name.")
+        return 2
+    normalized: dict[str, dict[str, Any]] = {}
+    for name, payload in jobs.items():
+        if not isinstance(payload, dict):
+            print(f"Job `{name}` must be an object.")
+            return 2
+        job = dict(payload)
+        job.setdefault("item_workers", args.workers)
+        normalized[str(name)] = job
+    try:
+        summary = run_multi_profile_longrun(normalized, max_sites=args.max_sites)
+    except Exception as exc:
+        print(f"Multi profile run failed: {exc}")
+        return 1
+    payload = summary.to_dict()
+    if args.output:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(json.dumps(payload, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+    print(json.dumps(payload, ensure_ascii=True, indent=2, default=str))
+    return 0 if summary.failed_sites == 0 else 1
+
+
 def cmd_smoke(args: argparse.Namespace) -> int:
     command = {
         "runner": "python run_batch_runner_smoke.py",
@@ -230,6 +343,7 @@ def cmd_train(args: argparse.Namespace) -> int:
         "native-vs-transition-dynamic": "python run_native_transition_comparison_2026_05_14.py --suite dynamic",
         "native-vs-transition-profile": "python run_native_transition_comparison_2026_05_14.py --suite profile --profile autonomous_crawler/tests/fixtures/native_transition_profile.json",
         "native-spider-smoke": "python run_spider_runtime_smoke_2026_05_14.py",
+        "profile-longrun-smoke": "python run_profile_longrun_smoke_2026_05_16.py",
     }
     if args.round:
         print(commands[args.round])

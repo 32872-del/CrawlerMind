@@ -138,6 +138,22 @@ class NativeFetchRuntimeHttpxTests(unittest.TestCase):
         self.assertNotIn("secret", payload["error"])
         self.assertEqual(response.runtime_events[-1].type, "fetch_error")
 
+    @patch("autonomous_crawler.runtime.native_static.httpx.Client")
+    def test_reuse_httpx_client_keeps_connection_pool_until_close(self, mock_client_cls: MagicMock) -> None:
+        client = mock_client_cls.return_value
+        client.request.return_value = _httpx_response()
+        runtime = NativeFetchRuntime(reuse_httpx_client=True)
+
+        first = runtime.fetch(RuntimeRequest(url="https://example.com/a"))
+        second = runtime.fetch(RuntimeRequest(url="https://example.com/b"))
+        runtime.close()
+
+        self.assertTrue(first.ok)
+        self.assertTrue(second.ok)
+        self.assertEqual(mock_client_cls.call_count, 1)
+        self.assertEqual(client.request.call_count, 2)
+        client.close.assert_called_once()
+
 
 class NativeFetchRuntimeCurlCffiTests(unittest.TestCase):
     def setUp(self) -> None:

@@ -46,6 +46,16 @@ profile ecommerce training now have deterministic tests and artifacts.
 BACKEND-EXECUTION-AUTOMATION is accepted: runnable profile drafts,
 deterministic replay execution fixtures, profile run reports, and 30k
 checkpoint restart evidence are now part of the CLM-native backend track.
+SCALE-RUNTIME-1 first slice is implemented: ProfileLongRunExecutor connects
+SiteProfile, URLFrontier, BatchRunner, SpiderRuntimeProcessor, ProductStore,
+CheckpointStore, and profile-run-report/v1 into a reusable long-run facade.
+SCALE-RUNTIME-1 entrypoint slice is implemented: `clm.py profile-run` and
+FastAPI `/profile-runs` now expose the profile long-run facade to users and
+future frontend tools.
+SCALE-RUNTIME-1 parallel slice is implemented: profile long-runs now support
+per-site concurrent URL workers, `NativeFetchRuntime` connection reuse for
+threaded static/API jobs, `clm.py multi-profile-run`, and FastAPI
+`POST /profile-runs/batch` with a hard cap of 5 concurrent sites.
 ```
 
 Already accepted:
@@ -99,6 +109,12 @@ Already accepted:
 - replay executor training evidence
 - resumable 30k checkpoint restart evidence
 - real profile batch report evidence
+- `autonomous_crawler/runners/profile_longrun.py`
+- `run_profile_longrun_smoke_2026_05_16.py`
+- profile long-run pause/resume smoke evidence
+- `clm.py profile-run`
+- `POST /profile-runs`
+- `GET /profile-runs/{task_id}`
 
 Transition adapters are still useful as bridges and benchmarks. They should not
 be treated as the final backend architecture.
@@ -344,6 +360,36 @@ patterns into native modules. The priority is no longer proving that these
 pieces can exist independently; it is connecting them into real execution:
 real JS/WebCrypto replay runtime, advisor-assisted profile refinement, real
 long-running checkpointed ecommerce jobs, and broader dynamic-site training.
+
+SCALE-RUNTIME-1 first slice:
+
+```text
+python -m unittest autonomous_crawler.tests.test_profile_longrun autonomous_crawler.tests.test_profile_ecommerce_runner autonomous_crawler.tests.test_spider_runner autonomous_crawler.tests.test_checkpoint_store autonomous_crawler.tests.test_batch_runner -v
+Ran 40 tests in 9.027s
+OK
+
+python run_profile_longrun_smoke_2026_05_16.py
+accepted=true, record_count=55, first_status=paused, resume_status=completed
+```
+
+SCALE-RUNTIME-1 entrypoint slice:
+
+```text
+python -m unittest autonomous_crawler.tests.test_profile_longrun autonomous_crawler.tests.test_clm_cli autonomous_crawler.tests.test_api_mvp -v
+Ran 56 tests in 7.828s
+OK
+```
+
+SCALE-RUNTIME-1 parallel backend slice:
+
+```text
+python -m unittest autonomous_crawler.tests.test_batch_runner autonomous_crawler.tests.test_profile_longrun autonomous_crawler.tests.test_multi_site_runner autonomous_crawler.tests.test_clm_cli autonomous_crawler.tests.test_api_mvp autonomous_crawler.tests.test_native_static_runtime -v
+Ran 95 tests in 10.882s
+OK
+
+python -m compileall autonomous_crawler clm.py run_dual_ecommerce_longrun_2026_05_16.py -q
+OK
+```
 
 ## Non-Goals
 

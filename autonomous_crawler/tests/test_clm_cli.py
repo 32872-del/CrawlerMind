@@ -95,6 +95,97 @@ class CLMEasyModeTests(unittest.TestCase):
             self.assertFalse(run_crawl.call_args.kwargs["use_llm"])
             self.assertTrue(output_path.exists())
 
+    def test_profile_run_invokes_longrun_executor(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            profile_path = Path(temp_dir) / "profile.json"
+            output_path = Path(temp_dir) / "report.json"
+            profile_path.write_text(
+                json.dumps({
+                    "name": "cli-profile",
+                    "api_hints": {"endpoint": "https://example.test/api/products"},
+                    "pagination_hints": {"type": "page"},
+                    "quality_expectations": {"min_items": 1},
+                }),
+                encoding="utf-8",
+            )
+
+            class Result:
+                accepted = True
+                run_id = "cli-run"
+                profile_name = "cli-profile"
+                status = "completed"
+                product_stats = {"total": 3}
+                quality_summary = {"quality_gate": {"passed": True}}
+                frontier_stats = {"done": 1}
+
+            with patch("clm.run_profile_longrun", return_value=Result()) as run_profile:
+                exit_code = clm.main([
+                    "profile-run",
+                    "--profile",
+                    str(profile_path),
+                    "--run-id",
+                    "cli-run",
+                    "--max-batches",
+                    "1",
+                    "--workers",
+                    "6",
+                    "--output",
+                    str(output_path),
+                    "--runtime-dir",
+                    str(Path(temp_dir) / "runtime"),
+                ])
+
+            self.assertEqual(exit_code, 0)
+            run_profile.assert_called_once()
+            self.assertEqual(run_profile.call_args.kwargs["config"].run_id, "cli-run")
+            self.assertEqual(run_profile.call_args.kwargs["config"].max_batches, 1)
+            self.assertEqual(run_profile.call_args.kwargs["config"].item_workers, 6)
+            self.assertEqual(str(run_profile.call_args.kwargs["config"].output_report_path), str(output_path))
+
+    def test_multi_profile_run_invokes_batch_executor(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            jobs_path = Path(temp_dir) / "jobs.json"
+            output_path = Path(temp_dir) / "summary.json"
+            jobs_path.write_text(
+                json.dumps({
+                    "shop_a": {"profile": {"name": "shop-a"}, "run_id": "run-a"},
+                    "shop_b": {"profile": {"name": "shop-b"}, "run_id": "run-b", "item_workers": 2},
+                }),
+                encoding="utf-8",
+            )
+
+            class Summary:
+                failed_sites = 0
+
+                def to_dict(self):
+                    return {"total_sites": 2, "ok_sites": 2, "failed_sites": 0, "results": []}
+
+            with patch("clm.run_multi_profile_longrun", return_value=Summary()) as run_multi:
+                exit_code = clm.main([
+                    "multi-profile-run",
+                    "--jobs",
+                    str(jobs_path),
+                    "--max-sites",
+                    "2",
+                    "--workers",
+                    "5",
+                    "--output",
+                    str(output_path),
+                ])
+
+            self.assertEqual(exit_code, 0)
+            run_multi.assert_called_once()
+            jobs_arg = run_multi.call_args.args[0]
+            self.assertEqual(jobs_arg["shop_a"]["item_workers"], 5)
+            self.assertEqual(jobs_arg["shop_b"]["item_workers"], 2)
+            self.assertEqual(run_multi.call_args.kwargs["max_sites"], 2)
+            self.assertTrue(output_path.exists())
+
+    def test_train_round_prints_profile_longrun_smoke_command(self) -> None:
+        exit_code = clm.main(["train", "--round", "profile-longrun-smoke"])
+
+        self.assertEqual(exit_code, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

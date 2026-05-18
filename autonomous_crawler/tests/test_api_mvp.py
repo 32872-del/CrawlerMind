@@ -189,6 +189,181 @@ class FastAPIMVPTests(unittest.TestCase):
         self.assertEqual(response.json()["item_count"], 5)
 
 
+class FastAPIProfileRunTests(unittest.TestCase):
+    """Tests for profile-driven long-run API entrypoints."""
+
+    def setUp(self) -> None:
+        with _jobs_lock:
+            _jobs.clear()
+
+    def _profile_payload(self) -> dict:
+        return {
+            "name": "api-profile",
+            "api_hints": {
+                "endpoint": "https://example.test/api/products",
+                "items_path": "items",
+            },
+            "pagination_hints": {"type": "page"},
+            "quality_expectations": {"min_items": 1},
+        }
+
+    def test_post_profile_run_starts_background_job(self) -> None:
+        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+            block = threading.Event()
+
+            def _run(request, *, task_id):
+                block.wait(timeout=5)
+                return {
+                    "accepted": True,
+                    "status": "completed",
+                    "product_stats": {"total": 3},
+                }
+
+            mock_run.side_effect = _run
+            client = TestClient(create_app())
+            response = client.post(
+                "/profile-runs",
+                json={
+                    "profile": self._profile_payload(),
+                    "run_id": "api-profile-run",
+                    "max_batches": 1,
+                    "item_workers": 7,
+                },
+            )
+
+            self.assertEqual(response.status_code, 200)
+            payload = response.json()
+            self.assertEqual(payload["status"], "running")
+            self.assertEqual(payload["run_id"], "api-profile-run")
+            self.assertEqual(payload["profile_name"], "api-profile")
+
+            get_resp = client.get(f"/profile-runs/{payload['task_id']}")
+            self.assertEqual(get_resp.status_code, 200)
+            self.assertEqual(get_resp.json()["status"], "running")
+
+            block.set()
+            time.sleep(0.3)
+
+    def test_profile_run_passes_item_workers_to_workflow(self) -> None:
+        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+            mock_run.return_value = {
+                "accepted": True,
+                "status": "completed",
+                "product_stats": {"total": 1},
+            }
+            client = TestClient(create_app())
+            client.post(
+                "/profile-runs",
+                json={
+                    "profile": self._profile_payload(),
+                    "item_workers": 9,
+                },
+            )
+            time.sleep(0.4)
+
+        request = mock_run.call_args.args[0]
+        self.assertEqual(request.item_workers, 9)
+
+    def test_multi_profile_run_starts_batch_job(self) -> None:
+        with patch("autonomous_crawler.api.app.run_multi_profile_longrun_workflow") as mock_run:
+            mock_run.return_value = {
+                "total_sites": 2,
+                "ok_sites": 2,
+                "failed_sites": 0,
+                "results": [
+                    {"ok": True, "result": {"product_stats": {"total": 3}}},
+                    {"ok": True, "result": {"product_stats": {"total": 4}}},
+                ],
+            }
+            client = TestClient(create_app())
+            post = client.post(
+                "/profile-runs/batch",
+                json={
+                    "max_sites": 2,
+                    "default_item_workers": 5,
+                    "jobs": {
+                        "a": {"profile": self._profile_payload()},
+                        "b": {"profile": {**self._profile_payload(), "name": "api-profile-b"}},
+                    },
+                },
+            )
+            self.assertEqual(post.status_code, 200)
+            task_id = post.json()["task_id"]
+            time.sleep(0.4)
+            get_resp = client.get(f"/profile-runs/batch/{task_id}")
+
+        self.assertEqual(get_resp.status_code, 200)
+        payload = get_resp.json()
+        self.assertEqual(payload["status"], "completed")
+        self.assertEqual(payload["record_count"], 7)
+        self.assertTrue(payload["accepted"])
+
+    def test_multi_profile_run_rejects_too_many_jobs_for_limit(self) -> None:
+        client = TestClient(create_app())
+        response = client.post(
+            "/profile-runs/batch",
+            json={
+                "max_sites": 2,
+                "jobs": {
+                    "a": {"profile": self._profile_payload()},
+                    "b": {"profile": self._profile_payload()},
+                    "c": {"profile": self._profile_payload()},
+                },
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_profile_run_completion_is_queryable(self) -> None:
+        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+            mock_run.return_value = {
+                "accepted": True,
+                "status": "completed",
+                "product_stats": {"total": 5},
+                "report": {"schema_version": "profile-run-report/v1"},
+            }
+            client = TestClient(create_app())
+            post = client.post("/profile-runs", json={"profile": self._profile_payload()})
+            task_id = post.json()["task_id"]
+
+            time.sleep(0.4)
+            get_resp = client.get(f"/profile-runs/{task_id}")
+
+        self.assertEqual(get_resp.status_code, 200)
+        payload = get_resp.json()
+        self.assertEqual(payload["status"], "completed")
+        self.assertEqual(payload["record_count"], 5)
+        self.assertTrue(payload["accepted"])
+        self.assertEqual(payload["profile_run"]["report"]["schema_version"], "profile-run-report/v1")
+
+    def test_profile_run_requires_profile_or_path(self) -> None:
+        client = TestClient(create_app())
+        response = client.post("/profile-runs", json={})
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("profile or profile_path", response.json()["detail"])
+
+    def test_profile_run_background_error_is_queryable(self) -> None:
+        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+            mock_run.side_effect = RuntimeError("profile runtime failed")
+            client = TestClient(create_app())
+            post = client.post("/profile-runs", json={"profile": self._profile_payload()})
+            task_id = post.json()["task_id"]
+
+            time.sleep(0.4)
+            get_resp = client.get(f"/profile-runs/{task_id}")
+
+        self.assertEqual(get_resp.status_code, 200)
+        self.assertEqual(get_resp.json()["status"], "failed")
+        self.assertIn("profile runtime failed", get_resp.json()["error"])
+
+    def test_get_profile_run_unknown_returns_404(self) -> None:
+        client = TestClient(create_app())
+        response = client.get("/profile-runs/unknown")
+
+        self.assertEqual(response.status_code, 404)
+
+
 class JobRegistryTests(unittest.TestCase):
     """Unit tests for the in-memory job registry helpers."""
 

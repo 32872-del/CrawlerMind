@@ -7,6 +7,7 @@ CLM-owned backend contract.  It does not import or call ``scrapling``.
 from __future__ import annotations
 
 import time
+from threading import Lock
 from typing import Any
 
 import httpx
@@ -38,6 +39,18 @@ class NativeFetchRuntime:
     """CLM-owned ``FetchRuntime`` implementation for static HTTP/API requests."""
 
     name: str = "native_static"
+
+    def __init__(self, *, reuse_httpx_client: bool = False) -> None:
+        self.reuse_httpx_client = bool(reuse_httpx_client)
+        self._client_lock = Lock()
+        self._httpx_clients: dict[tuple[Any, ...], httpx.Client] = {}
+
+    def close(self) -> None:
+        with self._client_lock:
+            clients = list(self._httpx_clients.values())
+            self._httpx_clients.clear()
+        for client in clients:
+            client.close()
 
     def fetch(self, request: RuntimeRequest) -> RuntimeResponse:
         retry_cfg = _RetryConfig.from_proxy_config(request.proxy_config)
@@ -175,14 +188,17 @@ class NativeFetchRuntime:
         if proxy_url:
             client_kwargs["proxy"] = proxy_url
 
+        request_kwargs = {
+            "params": request.params or None,
+            "content": request.data if request.json is None else None,
+            "json": request.json,
+        }
+        if self.reuse_httpx_client:
+            client = self._httpx_client_for(client_kwargs)
+            return client.request(request.method, request.url, **request_kwargs)
+
         with httpx.Client(**client_kwargs) as client:
-            return client.request(
-                request.method,
-                request.url,
-                params=request.params or None,
-                content=request.data if request.json is None else None,
-                json=request.json,
-            )
+            return client.request(request.method, request.url, **request_kwargs)
 
     def _fetch_curl_cffi(self, request: RuntimeRequest, proxy_url: str = "") -> Any:
         import curl_cffi.requests as curl_requests
@@ -213,6 +229,15 @@ class NativeFetchRuntime:
         if transport == "curl_cffi":
             return self._fetch_curl_cffi(request, proxy_url=proxy_url)
         return self._fetch_httpx(request, proxy_url=proxy_url)
+
+    def _httpx_client_for(self, kwargs: dict[str, Any]) -> httpx.Client:
+        key = _httpx_client_key(kwargs)
+        with self._client_lock:
+            client = self._httpx_clients.get(key)
+            if client is None:
+                client = httpx.Client(**kwargs)
+                self._httpx_clients[key] = client
+            return client
 
 
 # ======================================================================
@@ -309,6 +334,18 @@ def _transport_for(request: RuntimeRequest) -> str:
         or DEFAULT_TRANSPORT
     ).strip().lower()
     return transport if transport in SUPPORTED_TRANSPORTS else DEFAULT_TRANSPORT
+
+
+def _httpx_client_key(kwargs: dict[str, Any]) -> tuple[Any, ...]:
+    headers = tuple(sorted((str(key), str(value)) for key, value in dict(kwargs.get("headers") or {}).items()))
+    cookies = tuple(sorted((str(key), str(value)) for key, value in dict(kwargs.get("cookies") or {}).items()))
+    return (
+        bool(kwargs.get("follow_redirects")),
+        str(kwargs.get("proxy") or ""),
+        repr(kwargs.get("timeout")),
+        headers,
+        cookies,
+    )
 
 
 def _proxy_url_for(request: RuntimeRequest) -> str:
@@ -412,4 +449,3 @@ def _looks_textual(headers: dict[str, str], text: str) -> bool:
         return True
     stripped = (text or "").lstrip()
     return stripped.startswith(("<", "{", "["))
-
