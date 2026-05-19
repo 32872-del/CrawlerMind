@@ -205,6 +205,26 @@ class NativeBrowserRuntimeTests(unittest.TestCase):
         self.assertEqual(response.engine_result["fingerprint_report"]["profile"]["locale"], "nl-NL")
 
     @patch("autonomous_crawler.runtime.native_browser.sync_playwright")
+    def test_auto_accept_cookie_banner_attempts_click(self, mock_pw: MagicMock) -> None:
+        page, _context, _routes, _response_handlers = _setup_mock_playwright(mock_pw)
+        cookie_button = MagicMock()
+        cookie_button.is_visible.return_value = True
+        page.locator.return_value.first = cookie_button
+
+        request = RuntimeRequest.from_dict({
+            "url": "https://example.com/app",
+            "browser_config": {
+                "auto_accept_cookies": True,
+                "render_time_ms": 0,
+            },
+        })
+
+        response = NativeBrowserRuntime().render(request)
+
+        self.assertTrue(response.ok)
+        cookie_button.click.assert_called_once()
+
+    @patch("autonomous_crawler.runtime.native_browser.sync_playwright")
     def test_response_handlers_capture_xhr_before_completion(self, mock_pw: MagicMock) -> None:
         page, _context, _routes, response_handlers = _setup_mock_playwright(mock_pw)
 

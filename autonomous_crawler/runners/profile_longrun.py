@@ -20,6 +20,7 @@ from autonomous_crawler.storage.checkpoint_store import CheckpointStore
 from autonomous_crawler.storage.frontier import URLFrontier
 from autonomous_crawler.storage.product_store import ProductStore
 
+from .backpressure import BackpressureConfig, BackpressureMonitor, classify_bottlenecks, recommendation_text
 from .batch_runner import BatchRunner, BatchRunnerConfig, BatchRunnerSummary, ProductRecordCheckpoint
 from .multi_site_runner import MultiSiteRunner, MultiSiteRunnerConfig, MultiSiteRunSummary
 from .profile_ecommerce import (
@@ -82,6 +83,8 @@ class ProfileLongRunResult:
     checkpoint_latest: dict[str, Any] | None = None
     sample_records: list[dict[str, Any]] = field(default_factory=list)
     failures: list[dict[str, Any]] = field(default_factory=list)
+    backpressure: dict[str, Any] | None = None
+    diagnostics: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -97,6 +100,8 @@ class ProfileLongRunResult:
             "sample_records": list(self.sample_records),
             "failures": list(self.failures),
             "report": dict(self.report),
+            "backpressure": self.backpressure,
+            "diagnostics": self.diagnostics,
         }
 
 
@@ -138,6 +143,7 @@ class ProfileLongRunExecutor:
     def run(self, config: ProfileLongRunConfig) -> ProfileLongRunResult:
         self.checkpoint_store.start_run(config.run_id, {"profile": self.profile.to_dict()})
         self.seed_frontier(config)
+        effective_mode = effective_runtime_mode(self.profile, config.mode)
 
         callbacks = make_ecommerce_profile_callbacks(self.profile, run_id=config.run_id)
         processor = SpiderRuntimeProcessor(
@@ -146,11 +152,17 @@ class ProfileLongRunExecutor:
             browser_runtime=self.browser_runtime,
             parser=self.parser,
             checkpoint_store=self.checkpoint_store,
-            mode=config.mode,
+            mode=effective_mode,
             timeout_ms=config.timeout_ms,
             selector_builder=callbacks.selector_builder,
             record_builder=callbacks.record_builder,
             link_builder=callbacks.link_builder,
+        )
+        effective_seed_kind = str(self.profile.crawl_preferences.get("seed_kind") or "").lower()
+        backpressure_monitor = BackpressureMonitor(
+            BackpressureConfig(latency_pause_ms=120000.0)
+            if effective_seed_kind == "api"
+            else BackpressureConfig(latency_pause_ms=60000.0, consecutive_slow_threshold=5)
         )
         runner_summary = BatchRunner(
             frontier=self.frontier,
@@ -165,10 +177,14 @@ class ProfileLongRunExecutor:
                 item_workers=config.item_workers,
             ),
             checkpoint=ProductRecordCheckpoint(self.product_store),
+            backpressure=backpressure_monitor,
         ).run()
 
         frontier_stats = self.frontier.stats()
-        status = run_status_from_frontier(frontier_stats, runner_summary)
+        if runner_summary.status in ("aborted", "paused"):
+            status = runner_summary.status
+        else:
+            status = run_status_from_frontier(frontier_stats, runner_summary)
         self._save_batch_checkpoint(config, runner_summary, status=status)
         if status == "completed":
             self.checkpoint_store.mark_completed(config.run_id)
@@ -185,6 +201,21 @@ class ProfileLongRunExecutor:
             quality_policy=self.profile.quality_expectations,
         )
         sample_records = [product_record_sample(record) for record in records[: config.sample_limit or 0]]
+
+        # Compute diagnostics from backpressure signals + item errors + frontier
+        bp_signals = backpressure_monitor.current_signals()
+        bottlenecks = classify_bottlenecks(
+            bp_signals,
+            item_errors=runner_summary.item_errors,
+            frontier_stats=frontier_stats,
+        )
+        recommendation = recommendation_text(bp_signals, bottlenecks)
+        diagnostics = {
+            "bottlenecks": bottlenecks,
+            "recommendation": recommendation,
+            "backpressure_signals": bp_signals.as_dict(),
+        }
+
         report = build_profile_run_report(
             profile_name=self.profile.name,
             run_id=config.run_id,
@@ -192,10 +223,12 @@ class ProfileLongRunExecutor:
             quality_summary=quality_summary,
             sample_records=sample_records,
             failures=failures,
-            runtime_backend=runtime_backend_name(self.fetch_runtime, self.browser_runtime, config.mode),
+            runtime_backend=runtime_backend_name(self.fetch_runtime, self.browser_runtime, effective_mode),
             parser_backend=getattr(self.parser, "name", type(self.parser).__name__),
             stop_reason=quality_summary.get("pagination_stop_reason", ""),
             target=first_seed_url(self.profile),
+            backpressure=runner_summary.backpressure,
+            diagnostics=diagnostics,
         )
         if config.output_report_path:
             write_report(config.output_report_path, report)
@@ -212,6 +245,8 @@ class ProfileLongRunExecutor:
             checkpoint_latest=self.checkpoint_store.load_latest(config.run_id),
             sample_records=sample_records,
             failures=failures,
+            backpressure=runner_summary.backpressure,
+            diagnostics=diagnostics,
         )
 
     def seed_frontier(self, config: ProfileLongRunConfig) -> dict[str, int]:
@@ -303,6 +338,19 @@ def run_profile_longrun(
     finally:
         if runtime_dir is None and frontier is None and product_store is None and checkpoint_store is None:
             executor.close()
+
+
+def effective_runtime_mode(profile: SiteProfile, configured_mode: str) -> str:
+    mode = str(configured_mode or "static").strip().lower()
+    if mode in {"dynamic", "protected"}:
+        return mode
+    access = profile.access_config if isinstance(profile.access_config, dict) else {}
+    profile_mode = str(access.get("mode") or access.get("runtime_mode") or "").strip().lower()
+    if profile_mode in {"browser", "playwright"}:
+        return "dynamic"
+    if profile_mode in {"dynamic", "protected"}:
+        return profile_mode
+    return "static"
 
 
 def run_multi_profile_longrun(

@@ -155,12 +155,47 @@ Body:
   "export": {
     "format": "xlsx",
     "output_path": "dev_logs/exports/shop-test.xlsx"
+  },
+  "llm": {
+    "enabled": true,
+    "base_url": "https://api.example.com/v1",
+    "api_key": "sk-...",
+    "model": "model-name",
+    "provider": "openai-compatible"
+  },
+  "managed_ai": {
+    "enabled": true,
+    "mode": "supervised",
+    "pre_run_review": true,
+    "post_run_diagnosis": true
   }
 }
 ```
 
 This creates a profile-run job with bounded batches. The response returns a
 `task_id` and `run_id`.
+
+`managed_ai` is optional. When omitted or disabled, `/runs/test` and
+`/runs/full` remain deterministic. When enabled, `llm.enabled=true`,
+`llm.base_url`, and `llm.model` are required.
+
+Supported `managed_ai.mode` values:
+
+```text
+analysis_only, supervised, full_managed
+```
+
+Current backend behavior:
+
+- `supervised` and `full_managed` run an LLM pre-run plan review before the
+  background job starts.
+- When `apply_pre_run_patch=true`, an allowlisted profile patch from the
+  pre-run review can update seeds, runtime mode, waits, selectors, pagination,
+  and quality expectations before execution. Accepted/rejected patch keys are
+  exposed as `ai_patch_applications`.
+- `supervised` and `full_managed` run an LLM post-run diagnosis after the
+  profile runner finishes.
+- Model decisions are recorded in job state and exposed through status/events.
 
 ## 6. Full Run
 
@@ -186,11 +221,84 @@ Status includes:
 
 ```text
 status, record_count, accepted, progress.records_saved, progress.failed,
-progress.queued, progress.done, progress.completion, quality
+progress.queued, progress.done, progress.completion, quality,
+managed_ai, ai_decisions, ai_diagnostics, ai_repair_suggestions,
+ai_patch_applications
 ```
 
-Events include job lifecycle and failure snippets. This is currently polling
-friendly. A future frontend can wrap it with SSE/WebSocket.
+Events include job lifecycle, failure snippets, export events, and AI decision
+events such as:
+
+```text
+ai_pre_run_review
+ai_post_run_diagnosis
+```
+
+This is currently polling friendly. A future frontend can wrap it with
+SSE/WebSocket.
+
+## 7.1 AI Repair Rerun
+
+Endpoint:
+
+```text
+POST /runs/{task_id}/ai-rerun
+```
+
+Use this after a test/full product run has AI diagnostics. The backend reads
+`ai_diagnostics.next_run_overrides`, applies bounded run/profile changes, and
+starts a child product run.
+
+Body:
+
+```json
+{
+  "run_kind": "test",
+  "apply_diagnostics": true,
+  "extra_overrides": {
+    "item_workers": 8,
+    "access_config": {
+      "mode": "dynamic",
+      "wait_until": "networkidle"
+    },
+    "selectors": {
+      "title": "h1.product-title"
+    },
+    "export": {
+      "format": "csv"
+    }
+  },
+  "managed_ai": {
+    "enabled": true,
+    "mode": "supervised",
+    "pre_run_review": true,
+    "post_run_diagnosis": true,
+    "apply_pre_run_patch": true
+  },
+  "llm": {
+    "enabled": true,
+    "base_url": "https://api.example.com/v1",
+    "api_key": "sk-...",
+    "model": "model-name"
+  }
+}
+```
+
+Supported `run_kind`:
+
+```text
+test, full
+```
+
+The response returns a new `task_id`, plus:
+
+```text
+parent_task_id, repair_source, patch_application
+```
+
+The child run status also includes `parent_task_id`, `repair_source`, and
+`ai_patch_applications`, so the workbench can show exactly which AI suggestions
+were accepted or rejected.
 
 ## 8. Export
 
@@ -224,6 +332,132 @@ json, csv, xlsx, sqlite, db
 The current template behavior is data-first. `template_path` is accepted by the
 API, but exact cell-coordinate writing should be a follow-up `TemplateSpec`
 slice.
+
+An optional `template` object controls xlsx layout:
+
+```json
+{
+  "template": {
+    "sheet_name": "Products",
+    "start_row": 3,
+    "start_column": 2,
+    "field_to_column": {"title": "Product Name", "highest_price": "Price"},
+    "columns": ["title", "highest_price", "colors"]
+  }
+}
+```
+
+## 9. LLM Model List
+
+Endpoint:
+
+```text
+POST /llm/models
+```
+
+Body:
+
+```json
+{
+  "base_url": "https://api.openai.com",
+  "api_key": "sk-...",
+  "provider": "openai-compatible"
+}
+```
+
+Response:
+
+```json
+{
+  "provider": "openai-compatible",
+  "models": [{"id": "gpt-4", "label": "gpt-4"}, {"id": "gpt-3.5-turbo", "label": "gpt-3.5-turbo"}],
+  "raw_count": 2,
+  "status": "ok",
+  "error": "",
+  "latency_ms": 350.2
+}
+```
+
+Handles common relay shapes: `{data: [...]}`, `{models: [...]}`, flat list.
+API keys are redacted from all error messages.
+
+## 10. LLM Health Check
+
+Endpoint:
+
+```text
+POST /llm/health
+```
+
+Body: same as `/llm/models`.
+
+Response:
+
+```json
+{
+  "status": "ok",
+  "status_code": 200,
+  "latency_ms": 150.0,
+  "normalized_url": "https://api.openai.com",
+  "endpoint": "https://api.openai.com/v1/models",
+  "error": ""
+}
+```
+
+Uses `/v1/models` GET — no chat completion required.
+
+## 11. Export Path Validation
+
+Endpoint:
+
+```text
+POST /exports/validate-path
+```
+
+Body:
+
+```json
+{"directory": "/path/to/exports", "create": true}
+```
+
+Response:
+
+```json
+{"exists": true, "created": true, "writable": true, "normalized_path": "/abs/path", "error": ""}
+```
+
+## 12. Export Path Resolution
+
+Endpoint:
+
+```text
+POST /exports/resolve-path
+```
+
+Body:
+
+```json
+{"directory": "/tmp/exports", "run_id": "test-abc", "format": "xlsx", "filename": ""}
+```
+
+Response:
+
+```json
+{"directory": "/tmp/exports", "filename": "test-abc.xlsx", "output_path": "/tmp/exports/test-abc.xlsx", "format": "xlsx"}
+```
+
+Auto-appends missing extension. Empty filename defaults to `{run_id}.{ext}`.
+
+## 13. Workbench Config
+
+Endpoint:
+
+```text
+GET /workbench/config
+```
+
+Response includes: version, supported export formats, max active jobs, default
+retention seconds, and all available endpoint paths.
 
 ## Current Gaps
 

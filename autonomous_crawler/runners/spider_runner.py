@@ -230,7 +230,7 @@ class SpiderRuntimeProcessor:
         request: CrawlRequestEnvelope,
         item: FrontierItem,
     ) -> RuntimeRequest:
-        runtime_request = request.to_runtime_request(mode=self._runtime_mode(), timeout_ms=self.timeout_ms)
+        runtime_request = request.to_runtime_request(mode=self._runtime_mode_for_request(request), timeout_ms=self.timeout_ms)
         selectors = self.selector_builder(request, item) if self.selector_builder else []
         if selectors:
             runtime_request = RuntimeRequest(
@@ -261,6 +261,11 @@ class SpiderRuntimeProcessor:
         if configured in {"dynamic", "protected"}:
             return configured
         return "static"
+
+    def _runtime_mode_for_request(self, request: CrawlRequestEnvelope) -> str:
+        if request.kind in {"api", "api_list", "api_page"}:
+            return "static"
+        return self._runtime_mode()
 
     def _execute_runtime(self, request: RuntimeRequest) -> RuntimeResponse:
         if request.mode in {"dynamic", "protected"}:

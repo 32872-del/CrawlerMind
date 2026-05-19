@@ -13,13 +13,13 @@ from autonomous_crawler.api import app as app_module
 from autonomous_crawler.api.app import (
     create_app,
     _cleanup_stale_jobs,
+    _clear_jobs,
     _count_active_jobs,
     _get_job,
     _job_retention_seconds,
-    _jobs,
-    _jobs_lock,
     _max_active_jobs,
     _register_job,
+    _registry,
     _try_register_job,
     _update_job,
     LLMConfig,
@@ -30,8 +30,7 @@ from autonomous_crawler.api.app import (
 class FastAPIMVPTests(unittest.TestCase):
     def setUp(self) -> None:
         # Clear the in-memory job registry between tests
-        with _jobs_lock:
-            _jobs.clear()
+        _clear_jobs()
 
     def test_post_crawl_returns_immediately_with_running_status(self) -> None:
         """POST /crawl should return before the workflow finishes."""
@@ -193,8 +192,7 @@ class FastAPIProfileRunTests(unittest.TestCase):
     """Tests for profile-driven long-run API entrypoints."""
 
     def setUp(self) -> None:
-        with _jobs_lock:
-            _jobs.clear()
+        _clear_jobs()
 
     def _profile_payload(self) -> dict:
         return {
@@ -368,8 +366,7 @@ class JobRegistryTests(unittest.TestCase):
     """Unit tests for the in-memory job registry helpers."""
 
     def setUp(self) -> None:
-        with _jobs_lock:
-            _jobs.clear()
+        _clear_jobs()
 
     def test_register_and_get_job(self) -> None:
         _register_job("abc", "goal", "https://example.com")
@@ -393,8 +390,7 @@ class ConcurrencyLimitTests(unittest.TestCase):
     """Tests for the active job concurrency guard."""
 
     def setUp(self) -> None:
-        with _jobs_lock:
-            _jobs.clear()
+        _clear_jobs()
 
     def _make_client(self) -> TestClient:
         return TestClient(create_app())
@@ -559,16 +555,28 @@ class TTLcleanupTests(unittest.TestCase):
     """Tests for completed/failed job TTL cleanup."""
 
     def setUp(self) -> None:
-        with _jobs_lock:
-            _jobs.clear()
+        _clear_jobs()
 
     def _age_job(self, task_id: str, seconds: int) -> None:
         """Backdate a job's updated_at by the given number of seconds."""
         from datetime import datetime, timezone, timedelta
         old = (datetime.now(timezone.utc) - timedelta(seconds=seconds)).isoformat()
-        with _jobs_lock:
-            if task_id in _jobs:
-                _jobs[task_id]["updated_at"] = old
+        with _registry.connection() as conn:
+            conn.execute(
+                "UPDATE batch_jobs SET updated_at = ? WHERE task_id = ?",
+                (old, task_id),
+            )
+            row = conn.execute(
+                "SELECT job_json FROM batch_jobs WHERE task_id = ?", (task_id,)
+            ).fetchone()
+            if row:
+                import json
+                data = json.loads(row["job_json"])
+                data["updated_at"] = old
+                conn.execute(
+                    "UPDATE batch_jobs SET job_json = ? WHERE task_id = ?",
+                    (json.dumps(data), task_id),
+                )
 
     def test_completed_job_older_than_ttl_is_removed(self) -> None:
         """A completed job older than TTL should be cleaned up."""
@@ -643,8 +651,7 @@ class FastAPILLMOptInTests(unittest.TestCase):
     """Tests for opt-in LLM advisor support in the FastAPI crawl path."""
 
     def setUp(self) -> None:
-        with _jobs_lock:
-            _jobs.clear()
+        _clear_jobs()
 
     def test_post_crawl_without_llm_remains_deterministic(self) -> None:
         """POST /crawl without llm field should not enable LLM."""

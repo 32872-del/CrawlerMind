@@ -78,6 +78,7 @@ class NativeBrowserConfig:
     storage_state_output_path: str = ""
     close_persistent_context: bool = True
     visual_recon: bool = False
+    auto_accept_cookies: bool = False
 
     def to_safe_dict(self) -> dict[str, Any]:
         return {
@@ -100,6 +101,7 @@ class NativeBrowserConfig:
             "storage_state_output_path": redact_storage_state_path(self.storage_state_output_path),
             "close_persistent_context": self.close_persistent_context,
             "visual_recon": self.visual_recon,
+            "auto_accept_cookies": self.auto_accept_cookies,
         }
 
 
@@ -337,6 +339,20 @@ class NativeBrowserRuntime:
                             timeout=request.timeout_ms,
                             state=config.wait_selector_state,
                         )
+                    if config.auto_accept_cookies:
+                        accepted = _auto_accept_cookie_banner(page)
+                        events.append(RuntimeEvent(
+                            type="browser_cookie_banner",
+                            message="cookie banner auto-accept attempted",
+                            data={"accepted": accepted},
+                        ))
+                        if accepted:
+                            try:
+                                page.reload(wait_until=wait_until, timeout=request.timeout_ms)
+                                if config.render_time_ms > 0:
+                                    page.wait_for_timeout(config.render_time_ms)
+                            except Exception as exc:
+                                errors.append(f"cookie_reload_failed: {exc}")
                     if config.render_time_ms > 0:
                         page.wait_for_timeout(config.render_time_ms)
 
@@ -556,6 +572,7 @@ def resolve_native_browser_config(request: RuntimeRequest) -> NativeBrowserConfi
         ),
         close_persistent_context=bool(bc.get("close_persistent_context", True)),
         visual_recon=bool(bc.get("visual_recon", False)),
+        auto_accept_cookies=bool(bc.get("auto_accept_cookies", False)),
     )
 
 
@@ -681,6 +698,37 @@ def _add_request_cookies(context: Any, request: RuntimeRequest) -> None:
         context.add_cookies(payload)
     except Exception:
         return
+
+
+def _auto_accept_cookie_banner(page: Any) -> bool:
+    selectors = (
+        "#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll",
+        "#CybotCookiebotDialogBodyButtonAccept",
+        "button:has-text('Accept all')",
+        "button:has-text('Accept All')",
+        "button:has-text('I agree')",
+        "button:has-text('Agree')",
+        "button:has-text('Allow all')",
+        "button:has-text('Akceptuj wszystko')",
+        "button:has-text('Zgadzam')",
+        "button:has-text('Zaakceptuj')",
+        "button:has-text('Souhlasím')",
+        "button:has-text('Alles accepteren')",
+        "button:has-text('Alle akzeptieren')",
+    )
+    for selector in selectors:
+        try:
+            locator = page.locator(selector).first
+            if locator.is_visible(timeout=1000):
+                locator.click(timeout=3000)
+                try:
+                    page.wait_for_timeout(500)
+                except Exception:
+                    pass
+                return True
+        except Exception:
+            continue
+    return False
 
 
 def _capture_artifacts(

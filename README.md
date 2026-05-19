@@ -183,6 +183,34 @@ uvicorn autonomous_crawler.api.app:app --reload
 
 Open <http://127.0.0.1:8000/docs> for the interactive API docs.
 
+## Web Workbench
+
+CLM now includes a browser-based Chinese workbench for product workflow testing.
+
+Start the backend first:
+
+```bash
+uvicorn autonomous_crawler.api.app:app --reload --host 127.0.0.1 --port 8000
+```
+
+Then start the frontend:
+
+```bash
+cd frontend
+npm install
+npm run dev -- --port 5174
+```
+
+Open:
+
+```text
+http://127.0.0.1:5174
+```
+
+Beginner guide:
+
+[docs/runbooks/CLM_BEGINNER_USER_GUIDE_CN.md](docs/runbooks/CLM_BEGINNER_USER_GUIDE_CN.md)
+
 Endpoints:
 
 ```text

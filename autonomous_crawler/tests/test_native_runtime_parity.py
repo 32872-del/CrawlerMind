@@ -357,6 +357,22 @@ class ParityParserXpathTests(unittest.TestCase):
     def test_xpath_nested_categories(self) -> None:
         self._run_parity(NESTED_LIST_HTML, [nested_category_selector()])
 
+    def test_xpath_string_function_keeps_full_string(self) -> None:
+        _skip_if_no_native_parser()
+        native = NativeParserRuntime()
+        results = native.parse(
+            "<html><head><meta property='og:title' content='Alpha Shoe'></head><body><h1>Fallback</h1></body></html>",
+            [
+                RuntimeSelectorRequest(
+                    name="title",
+                    selector="string((//meta[@property='og:title']/@content | //h1)[1])",
+                    selector_type="xpath",
+                    many=False,
+                )
+            ],
+        )
+        self.assertEqual(results[0].values, ["Alpha Shoe"])
+
 
 # ===================================================================
 # Parser Parity: Regex Extraction

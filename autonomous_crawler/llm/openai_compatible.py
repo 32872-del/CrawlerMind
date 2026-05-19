@@ -116,6 +116,62 @@ class OpenAICompatibleAdvisor:
         ]
         return self._chat_json(messages)
 
+    def analyze_site(
+        self,
+        target_url: str,
+        field_goal: str,
+        recon_report: dict[str, Any],
+        discovered_catalog: list[dict[str, Any]] | None = None,
+    ) -> dict[str, Any]:
+        """Return frontend-oriented site analysis hints."""
+        payload = {
+            "target_url": target_url,
+            "field_goal": field_goal,
+            "recon_report": _bounded(recon_report, 8000),
+            "discovered_catalog": _bounded(discovered_catalog or [], 5000),
+        }
+        messages = [
+            {"role": "system", "content": _SITE_ANALYSIS_SYSTEM_PROMPT},
+            {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
+        ]
+        return self._chat_json(messages)
+
+    def review_run_plan(
+        self,
+        run_spec: dict[str, Any],
+        profile: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Review a product run plan before execution."""
+        payload = {
+            "run_spec": _bounded(run_spec, 7000),
+            "profile": _bounded(profile, 9000),
+        }
+        messages = [
+            {"role": "system", "content": _RUN_PLAN_REVIEW_SYSTEM_PROMPT},
+            {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
+        ]
+        return self._chat_json(messages)
+
+    def diagnose_run_result(
+        self,
+        run_spec: dict[str, Any],
+        profile: dict[str, Any],
+        run_result: dict[str, Any],
+        progress: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Diagnose a completed/failed product run and suggest repairs."""
+        payload = {
+            "run_spec": _bounded(run_spec, 6000),
+            "profile": _bounded(profile, 7000),
+            "run_result": _bounded(run_result, 9000),
+            "progress": _bounded(progress, 6000),
+        }
+        messages = [
+            {"role": "system", "content": _RUN_DIAGNOSIS_SYSTEM_PROMPT},
+            {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
+        ]
+        return self._chat_json(messages)
+
     def check_connection(self) -> dict[str, Any]:
         """Run a minimal provider check using the same JSON path as advisors."""
         messages = [
@@ -381,4 +437,66 @@ Allowed keys:
 
 Prefer deterministic recon selectors when they look usable. Suggest only small,
 safe changes.
+"""
+
+
+_SITE_ANALYSIS_SYSTEM_PROMPT = """You are the site-analysis advisor for Crawler-Mind.
+Return only one JSON object. Do not include markdown or commentary.
+
+Allowed keys:
+- target_fields: array of canonical field names such as title, highest_price,
+  colors, sizes, description, image_urls, canonical_url, category_level_1,
+  category_level_2, category_level_3
+- selectors: object mapping canonical field names to CSS selectors. You may
+  include item_container when you can infer a product-card selector.
+- catalog_tree: optional array or object describing catalog/menu nodes with
+  labels and URLs when the evidence supports it.
+- crawl_preferences: optional object. seed_urls may be an array of category or
+  listing URLs.
+- reasoning_summary: one short sentence
+
+Prefer deterministic recon and imported catalog data when it looks usable.
+Return empty arrays or objects when evidence is weak.
+"""
+
+
+_RUN_PLAN_REVIEW_SYSTEM_PROMPT = """You are the run-plan supervisor for Crawler-Mind.
+Return only one JSON object. Do not include markdown or commentary.
+
+You review the final crawl profile before execution. Your job is to catch bad
+plans, missing seeds, wrong runtime mode, missing fields, and likely empty runs.
+
+Allowed keys:
+- approved: boolean
+- risk_level: "low", "medium", or "high"
+- reasoning_summary: one short sentence
+- warnings: array of short strings
+- recommended_actions: array of short strings
+- profile_patch: optional object with conservative suggestions only. You may
+  suggest crawl_preferences.seed_kind, crawl_preferences.seed_urls,
+  crawl_preferences.max_items, access_config.mode, pagination_hints, selectors,
+  and quality_expectations. Do not invent unrelated site-specific code.
+
+Prefer the provided catalog/API evidence when present. If evidence is weak,
+approve with warnings instead of blocking.
+"""
+
+
+_RUN_DIAGNOSIS_SYSTEM_PROMPT = """You are the runtime diagnosis supervisor for Crawler-Mind.
+Return only one JSON object. Do not include markdown or commentary.
+
+You diagnose crawl results after a run. Explain whether the run succeeded,
+why records may be missing, and what the crawler should try next.
+
+Allowed keys:
+- status_assessment: "good", "needs_attention", or "failed"
+- reasoning_summary: one short sentence
+- likely_causes: array of short strings
+- repair_suggestions: array of objects with action, priority, and rationale
+- next_run_overrides: optional object with conservative suggestions for
+  runtime mode, seed strategy, item_workers, timeout, selectors, pagination, or
+  fields
+
+Base your answer on the provided progress, quality, failures, and profile. Do
+not claim certainty when evidence is weak.
 """

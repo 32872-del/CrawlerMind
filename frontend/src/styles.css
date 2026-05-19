@@ -1,0 +1,242 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #f3f5f7;
+  color: #172033;
+  font-family:
+    "Microsoft YaHei",
+    "PingFang SC",
+    "Noto Sans CJK SC",
+    Arial,
+    sans-serif;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-sider {
+  border-right: 1px solid #d8dee6;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: auto;
+  box-shadow: 1px 0 0 rgba(17, 24, 39, 0.02);
+}
+
+.brand {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  border-bottom: 1px solid #edf0f3;
+  background: #fbfcfe;
+}
+
+.brand-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  background: #2563eb;
+  color: white;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.brand-sub,
+.muted,
+.event-time {
+  color: #667085;
+  font-size: 12px;
+}
+
+.app-header {
+  height: 56px;
+  line-height: 56px;
+  border-bottom: 1px solid #d8dee6;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+.header-divider {
+  width: 1px;
+  height: 18px;
+  background: #e5e7eb;
+  display: inline-block;
+}
+
+.app-content {
+  padding: 16px;
+  max-width: 1560px;
+  width: 100%;
+}
+
+.page-stack {
+  width: 100%;
+}
+
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.metric-card .ant-statistic-title {
+  font-size: 12px;
+  color: #667085;
+}
+
+.metric-card .ant-statistic-content {
+  font-size: 22px;
+  color: #101828;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(320px, 0.9fr);
+  gap: 16px;
+}
+
+.dashboard-grid.secondary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.split-grid {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.75fr) minmax(0, 1.25fr);
+  gap: 16px;
+}
+
+.two-column-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.dense-card .ant-card-body {
+  padding-top: 12px;
+}
+
+.config-list {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 8px 12px;
+  margin: 0;
+}
+
+.config-list dt {
+  color: #667085;
+}
+
+.config-list dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.section-gap {
+  margin-top: 16px;
+}
+
+.section-gap-small {
+  margin-top: 8px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-help {
+  color: #667085;
+  font-size: 12px;
+  line-height: 1.6;
+  margin-top: 6px;
+}
+
+.check-list {
+  display: grid;
+  gap: 10px;
+  line-height: 1.7;
+}
+
+.event-title {
+  font-weight: 600;
+}
+
+.export-line {
+  display: grid;
+  grid-template-columns: minmax(110px, 160px) 1fr;
+  gap: 8px;
+}
+
+.workflow-card .ant-card-body {
+  padding-top: 16px;
+}
+
+.workflow-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.ant-table-cell {
+  vertical-align: top;
+}
+
+.ant-card {
+  border-color: #dce3ea;
+}
+
+.ant-card-head {
+  min-height: 44px;
+}
+
+.ant-table-thead > tr > th {
+  background: #f8fafc !important;
+  color: #344054;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .app-content {
+    padding: 12px;
+  }
+
+  .app-header {
+    padding: 0 12px;
+  }
+
+  .export-line {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-grid,
+  .dashboard-grid,
+  .dashboard-grid.secondary,
+  .split-grid,
+  .two-column-grid {
+    grid-template-columns: 1fr;
+  }
+}

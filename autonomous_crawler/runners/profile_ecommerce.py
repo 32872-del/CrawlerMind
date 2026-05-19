@@ -48,7 +48,8 @@ class EcommerceProfileCallbacks:
         if request.kind != "detail":
             return []
         fields = selector_result_values(selector_results)
-        title = first_text(fields.get("title"))
+        fallback = product_fields_from_html(response.html or response.text, base_url=response.final_url or request.url)
+        title = first_text(fields.get("title")) or first_text(as_list(fallback.get("title")))
         if not title:
             return []
         url = response.final_url or request.url
@@ -59,18 +60,29 @@ class EcommerceProfileCallbacks:
             source_url=request.url,
             canonical_url=url,
             title=title,
-            highest_price=parse_price(first_text(fields.get("highest_price") or fields.get("price"))),
-            currency=str(self.profile.quality_expectations.get("currency") or ""),
-            colors=clean_list(fields.get("colors") or fields.get("color")),
-            sizes=clean_list(fields.get("sizes") or fields.get("size")),
-            description=first_text(fields.get("description")),
-            image_urls=absolute_urls(clean_list(fields.get("image_urls") or fields.get("image")), base_url=url),
+            highest_price=parse_price(
+                first_text(fields.get("highest_price") or fields.get("price"))
+                or first_text(as_list(fallback.get("highest_price") or fallback.get("price")))
+            ),
+            currency=str(
+                self.profile.quality_expectations.get("currency")
+                or first_text(as_list(fallback.get("currency")))
+                or ""
+            ),
+            colors=clean_list(fields.get("colors") or fields.get("color") or as_list(fallback.get("colors"))),
+            sizes=clean_list(fields.get("sizes") or fields.get("size") or as_list(fallback.get("sizes"))),
+            description=first_text(fields.get("description")) or first_text(as_list(fallback.get("description"))),
+            image_urls=absolute_urls(
+                clean_list(fields.get("image_urls") or fields.get("image") or as_list(fallback.get("image_urls"))),
+                base_url=url,
+            ),
             category=category,
-            mode="profile-driven",
+            mode="profile-driven" if fields else "profile-fallback-html",
             raw_json={
                 "profile": self.profile.name,
                 "request_kind": request.kind,
                 "selector_fields": fields,
+                "html_fallback_fields": fallback,
             },
         )
         return [record]
@@ -92,7 +104,9 @@ class EcommerceProfileCallbacks:
             parent_request=request,
             rules=rule,
         )
-        return result.requests
+        requests = list(result.requests)
+        requests.extend(hydration_product_requests(self.profile, request, response))
+        return dedupe_requests(requests)
 
 
 def make_ecommerce_profile_callbacks(profile: SiteProfile, *, run_id: str) -> EcommerceProfileCallbacks:
@@ -110,6 +124,7 @@ def initial_requests_from_profile(
     endpoint = str(profile.api_hints.get("endpoint") or "").strip()
     if endpoint and profile.pagination_type() in {"page", "offset", "cursor"}:
         url = initial_api_url(profile)
+        api_json = dict(profile.api_hints.get("post_json") or {}) if isinstance(profile.api_hints.get("post_json"), dict) else None
         requests.append(
             CrawlRequestEnvelope(
                 run_id=run_id,
@@ -117,7 +132,15 @@ def initial_requests_from_profile(
                 method=str(profile.api_hints.get("method") or "GET"),
                 priority=int(profile.api_hints.get("priority") or 10),
                 kind=str(profile.api_hints.get("kind") or "api"),
-                meta={"category": category or str(profile.quality_expectations.get("category") or "")},
+                headers={"Content-Type": "application/json"} if api_json is not None else {},
+                json=api_json,
+                meta={
+                    "category": category or str(
+                        profile.api_hints.get("category")
+                        or profile.quality_expectations.get("category")
+                        or ""
+                    )
+                },
             )
         )
         if not profile.crawl_preferences.get("include_seed_urls_with_api"):
@@ -129,12 +152,29 @@ def initial_requests_from_profile(
             url=str(url),
             priority=10,
             kind=str(profile.crawl_preferences.get("seed_kind") or "list"),
-            meta={"category": category or str(profile.quality_expectations.get("category") or "")},
+            meta={
+                "category": category or str(profile.quality_expectations.get("category") or ""),
+                **runtime_meta_from_profile(profile),
+            },
         )
         for url in seed_urls
         if str(url).strip()
     )
     return requests
+
+
+def runtime_meta_from_profile(profile: SiteProfile) -> dict[str, Any]:
+    access = profile.access_config if isinstance(profile.access_config, dict) else {}
+    meta: dict[str, Any] = {}
+    if isinstance(access.get("browser_config"), dict):
+        meta["browser_config"] = dict(access.get("browser_config") or {})
+    if access.get("wait_until"):
+        meta["wait_until"] = str(access.get("wait_until"))
+    if access.get("wait_selector"):
+        meta["wait_selector"] = str(access.get("wait_selector"))
+    if access.get("capture_xhr"):
+        meta["capture_xhr"] = str(access.get("capture_xhr"))
+    return meta
 
 
 def selectors_for_kind(profile: SiteProfile, kind: str) -> dict[str, Any]:
@@ -183,6 +223,211 @@ def link_rule_from_profile(profile: SiteProfile) -> LinkDiscoveryRule:
         priority=int(link_hints.get("priority") or 0),
         max_links=int(link_hints.get("max_links") or 0),
     )
+
+
+def hydration_product_requests(
+    profile: SiteProfile,
+    request: CrawlRequestEnvelope,
+    response: RuntimeResponse,
+) -> list[CrawlRequestEnvelope]:
+    """Discover product detail URLs from rendered/hydrated ecommerce markup."""
+    html_text = response.html or response.text
+    if not html_text:
+        return []
+    base_url = response.final_url or request.url
+    rule = link_rule_from_profile(profile)
+    helper = LinkDiscoveryHelper()
+    base_domain = urlparse(base_url).netloc.lower()
+    urls = [
+        url for url in product_urls_from_html(html_text, base_url=base_url)
+        if not helper.drop_reason(url, rules=rule, base_domain=base_domain)
+    ]
+    max_links = int((profile.pagination_hints.get("link_discovery") or {}).get("max_links") or 300)
+    requests: list[CrawlRequestEnvelope] = []
+    for url in urls[:max_links]:
+        requests.append(CrawlRequestEnvelope(
+            run_id=request.run_id,
+            url=url,
+            priority=max(int(request.priority or 0), 20),
+            kind="detail",
+            depth=request.depth + 1,
+            parent_url=request.url,
+            meta={**dict(request.meta), "discovered_by": "hydration_product_links"},
+        ))
+    return requests
+
+
+def product_urls_from_html(html_text: str, *, base_url: str) -> list[str]:
+    urls: list[str] = []
+    try:
+        from lxml import html as lxml_html
+
+        root = lxml_html.fromstring(html_text)
+        for element in root.xpath("//a[@href]"):
+            href = str(element.get("href") or "").strip()
+            if not href:
+                continue
+            text = " ".join(str(part).strip() for part in element.xpath(".//text()") if str(part).strip())
+            class_text = str(element.get("class") or "")
+            aria = str(element.get("aria-label") or "")
+            absolute = urljoin(base_url, href)
+            if _looks_like_product_link(absolute, text=text, class_text=class_text, aria=aria):
+                urls.append(_strip_fragment(absolute))
+    except Exception:
+        pass
+    return dedupe_strings(urls)
+
+
+def product_fields_from_html(html_text: str, *, base_url: str) -> dict[str, Any]:
+    if not html_text:
+        return {}
+    fields: dict[str, Any] = {}
+    for product in _jsonld_products(html_text):
+        fields.update(_fields_from_jsonld_product(product, base_url=base_url))
+        if fields.get("title"):
+            break
+    try:
+        from lxml import html as lxml_html
+
+        root = lxml_html.fromstring(html_text)
+        fields.setdefault("title", first_text(_xpath_strings(root, [
+            "//meta[@property='og:title']/@content",
+            "//meta[@name='twitter:title']/@content",
+            "string((//h1 | //*[@itemprop='name'])[1])",
+            "string(//title[1])",
+        ])))
+        fields.setdefault("description", first_text(_xpath_strings(root, [
+            "//meta[@name='description']/@content",
+            "//meta[@property='og:description']/@content",
+            "string((//*[@itemprop='description'] | //*[contains(@class,'description')])[1])",
+        ])))
+        fields.setdefault("image_urls", absolute_urls(_xpath_strings(root, [
+            "//meta[@property='og:image']/@content",
+            "//meta[@name='twitter:image']/@content",
+            "//*[@itemprop='image']/@src",
+        ]), base_url=base_url))
+        price_text = first_text(_xpath_strings(root, [
+            "//meta[@property='product:price:amount']/@content",
+            "//*[@itemprop='price']/@content",
+            "string((//*[contains(@class,'price')])[1])",
+        ]))
+        if price_text and not fields.get("highest_price"):
+            fields["highest_price"] = price_text
+        currency = first_text(_xpath_strings(root, [
+            "//meta[@property='product:price:currency']/@content",
+            "//*[@itemprop='priceCurrency']/@content",
+        ]))
+        if currency and not fields.get("currency"):
+            fields["currency"] = currency
+    except Exception:
+        pass
+    return {key: value for key, value in fields.items() if value not in ("", [], None)}
+
+
+def _jsonld_products(html_text: str) -> list[dict[str, Any]]:
+    products: list[dict[str, Any]] = []
+    for raw in re.findall(r"<script[^>]+type=[\"']application/ld\+json[\"'][^>]*>(.*?)</script>", html_text, re.I | re.S):
+        try:
+            payload = json.loads(_strip_script_json(raw))
+        except Exception:
+            continue
+        products.extend(_walk_jsonld_products(payload))
+    return products
+
+
+def _walk_jsonld_products(value: Any) -> list[dict[str, Any]]:
+    found: list[dict[str, Any]] = []
+    if isinstance(value, dict):
+        type_value = value.get("@type") or value.get("type")
+        types = type_value if isinstance(type_value, list) else [type_value]
+        if any(str(item).lower() == "product" for item in types):
+            found.append(value)
+        for key in ("@graph", "graph", "itemListElement"):
+            found.extend(_walk_jsonld_products(value.get(key)))
+    elif isinstance(value, list):
+        for item in value:
+            found.extend(_walk_jsonld_products(item))
+    return found
+
+
+def _fields_from_jsonld_product(product: dict[str, Any], *, base_url: str) -> dict[str, Any]:
+    offers = product.get("offers")
+    offer = offers[0] if isinstance(offers, list) and offers else offers if isinstance(offers, dict) else {}
+    image = product.get("image")
+    images = image if isinstance(image, list) else [image] if image else []
+    return {
+        "title": first_text(as_list(product.get("name"))),
+        "description": first_text(as_list(product.get("description"))),
+        "highest_price": first_text(as_list(offer.get("highPrice") or offer.get("price"))),
+        "currency": first_text(as_list(offer.get("priceCurrency"))),
+        "colors": clean_list(as_list(product.get("color"))),
+        "sizes": clean_list(as_list(product.get("size"))),
+        "image_urls": absolute_urls(clean_list(as_list(images)), base_url=base_url),
+    }
+
+
+def _strip_script_json(value: str) -> str:
+    return re.sub(r"^\s*<!--|-->\s*$", "", value or "").strip()
+
+
+def _strip_fragment(url: str) -> str:
+    parsed = urlparse(url)
+    return urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, parsed.query, ""))
+
+
+def _xpath_strings(root: Any, expressions: list[str]) -> list[str]:
+    values: list[str] = []
+    for expr in expressions:
+        try:
+            result = root.xpath(expr)
+        except Exception:
+            continue
+        values.extend(as_list(result))
+    return clean_list(values)
+
+
+def _looks_like_product_link(url: str, *, text: str = "", class_text: str = "", aria: str = "") -> bool:
+    parsed = urlparse(url)
+    path = parsed.path.lower()
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        return False
+    blocked = (
+        "/cart", "/checkout", "/customer", "/account", "/login", "/privacy", "/terms",
+        "/blog", "/contact", "/search", "/wishlist", "/compare",
+    )
+    if any(token in path for token in blocked):
+        return False
+    combined = f"{text} {class_text} {aria}".lower()
+    if any(token in combined for token in ("add to cart", "do koszyka", "price", "cena", "product", "produkt")):
+        return True
+    if any(token in path for token in ("/product/", "/products/", "/produkt/", "/produkty/", "/p/")):
+        return True
+    if path.endswith(".html") and re.search(r"/[^/]*[a-z][a-z0-9-]*-\d{2,}[^/]*\.html$", path):
+        return True
+    return False
+
+
+def dedupe_requests(requests: list[CrawlRequestEnvelope]) -> list[CrawlRequestEnvelope]:
+    output: list[CrawlRequestEnvelope] = []
+    seen: set[str] = set()
+    for request in requests:
+        key = request.canonical_url()
+        if key in seen:
+            continue
+        seen.add(key)
+        output.append(request)
+    return output
+
+
+def dedupe_strings(values: list[str]) -> list[str]:
+    output: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        text = str(value or "").strip()
+        if text and text not in seen:
+            output.append(text)
+            seen.add(text)
+    return output
 
 
 def is_api_request(request: CrawlRequestEnvelope, profile: SiteProfile) -> bool:
@@ -241,6 +486,8 @@ def api_records_for_response(
             continue
         canonical_url = first_text(as_list(mapped_value(item, mapping, "canonical_url") or mapped_value(item, mapping, "url")))
         if canonical_url:
+            if not canonical_url.endswith(".html") and item.get("url_suffix"):
+                canonical_url = f"{canonical_url}{item.get('url_suffix')}"
             canonical_url = urljoin(response.final_url or request.url, canonical_url)
         else:
             canonical_url = response.final_url or request.url
@@ -280,6 +527,8 @@ def next_api_requests(
 ) -> list[CrawlRequestEnvelope]:
     pagination = profile.pagination_hints
     mode = profile.pagination_type()
+    if no_more_api_pages(profile, request, response):
+        return []
     next_url = ""
     if mode == "page":
         next_url = next_page_url(request.url, pagination)
@@ -301,9 +550,56 @@ def next_api_requests(
             kind=str(profile.api_hints.get("kind") or request.kind or "api"),
             depth=request.depth + 1,
             parent_url=request.url,
+            headers=dict(request.headers),
+            json=next_api_json(profile, request),
             meta={**dict(request.meta), "discovered_by": "api_pagination"},
         )
     ]
+
+
+def no_more_api_pages(profile: SiteProfile, request: CrawlRequestEnvelope, response: RuntimeResponse) -> bool:
+    payload = response_json(response)
+    total = value_at_path(payload, str(profile.api_hints.get("total_path") or ""))
+    items = value_at_path(payload, profile.api_items_path())
+    item_count = len(items) if isinstance(items, list) else 0
+    if item_count <= 0:
+        return True
+    page_size = int(profile.pagination_hints.get("page_size") or profile.api_hints.get("page_size") or item_count)
+    current_page = _current_api_page(profile, request)
+    try:
+        total_int = int(total)
+    except (TypeError, ValueError):
+        total_int = 0
+    if total_int and current_page * page_size >= total_int:
+        return True
+    max_items = int(profile.crawl_preferences.get("max_items") or 0)
+    if max_items and current_page * page_size >= max_items:
+        return True
+    return False
+
+
+def _current_api_page(profile: SiteProfile, request: CrawlRequestEnvelope) -> int:
+    if isinstance(request.json, dict):
+        variables = request.json.get("variables")
+        if isinstance(variables, dict):
+            try:
+                return int(variables.get("currentPage") or 1)
+            except (TypeError, ValueError):
+                return 1
+    page_param = str(profile.pagination_hints.get("page_param") or "page")
+    return int_query_value(request.url, page_param, int(profile.pagination_hints.get("start_page") or 1))
+
+
+def next_api_json(profile: SiteProfile, request: CrawlRequestEnvelope) -> Any:
+    if not isinstance(request.json, dict):
+        return request.json
+    payload = json.loads(json.dumps(request.json))
+    variables = payload.get("variables")
+    if isinstance(variables, dict):
+        variables["currentPage"] = int(variables.get("currentPage") or 1) + 1
+        if profile.pagination_hints.get("page_size"):
+            variables["pageSize"] = int(profile.pagination_hints.get("page_size") or variables.get("pageSize") or 50)
+    return payload
 
 
 def next_page_url(url: str, pagination: dict[str, Any]) -> str:
@@ -667,7 +963,15 @@ def value_at_path(payload: Any, path: str) -> Any:
 def mapped_value(item: dict[str, Any], mapping: dict[str, Any], field: str) -> Any:
     spec = mapping.get(field, field)
     if isinstance(spec, list):
-        return [value_at_path(item, str(path)) for path in spec]
+        values = [value_at_path(item, str(path)) for path in spec]
+        if field in {"highest_price", "price"}:
+            prices = [parse_price(str(value)) for value in values if value is not None]
+            prices = [value for value in prices if value is not None]
+            return max(prices) if prices else None
+        for value in values:
+            if value not in (None, "", []):
+                return value
+        return None
     return value_at_path(item, str(spec))
 
 
@@ -675,6 +979,11 @@ def as_list(value: Any) -> list[str]:
     if value is None:
         return []
     if isinstance(value, list):
+        result: list[str] = []
+        for item in value:
+            result.extend(as_list(item))
+        return result
+    if isinstance(value, tuple):
         result: list[str] = []
         for item in value:
             result.extend(as_list(item))

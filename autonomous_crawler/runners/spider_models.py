@@ -170,6 +170,10 @@ class CrawlRequestEnvelope:
             "params": self.params,
             "data": self.data,
             "json": self.json,
+            "browser_config": _safe_dict(self.meta.get("browser_config")),
+            "wait_until": str(self.meta.get("wait_until") or ""),
+            "wait_selector": str(self.meta.get("wait_selector") or ""),
+            "capture_xhr": str(self.meta.get("capture_xhr") or ""),
             "session_profile": session_profile,
             "proxy_config": proxy_config,
             "timeout_ms": timeout_ms,
@@ -290,6 +294,7 @@ class CrawlItemResult:
             ok=True,
             records=list(self.records),
             discovered_urls=discovered_urls,
+            discovered_requests=list(self.discovered_requests),
             discovered_kind=discovered_kind,
             discovered_priority=discovered_priority,
             metrics={

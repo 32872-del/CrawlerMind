@@ -1,5 +1,6 @@
 """Reusable long-running crawl runners."""
 
+from .backpressure import BackpressureConfig, BackpressureMonitor, BackpressureSignals, classify_bottlenecks, recommendation_text
 from .batch_runner import (
     BatchRunner,
     BatchRunnerConfig,
@@ -42,7 +43,12 @@ from .threaded_stage_runner import (
 )
 
 __all__ = [
+    "BackpressureConfig",
+    "BackpressureMonitor",
+    "BackpressureSignals",
     "BatchRunner",
+    "classify_bottlenecks",
+    "recommendation_text",
     "BatchRunnerConfig",
     "BatchRunnerSummary",
     "CrawlItemResult",

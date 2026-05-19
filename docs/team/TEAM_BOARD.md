@@ -1,16 +1,16 @@
 # Team Board
 
-Last updated: 2026-05-15
+Last updated: 2026-05-18
 
 ## Active Employees
 
 | Employee ID | Display Name | Current Project Role | Status | Current Assignment |
 |---|---|---|---|---|
-| LLM-2026-000 | Supervisor Codex | Project Supervisor | active | Frontend product workflow API implemented: analyze/import/fields/test/full/status/events/export |
-| LLM-2026-001 | Worker Alpha | Browser Runtime Worker | standby | Profile draft generation and profile draft smoke accepted |
-| LLM-2026-002 | Worker Beta | Proxy / Transport Runtime Worker | standby | Replay executor and 30k resumable checkpoint restart accepted |
+| LLM-2026-000 | Supervisor Codex | Project Supervisor | active | Frontend workbench planning and assignment supervision |
+| LLM-2026-001 | Worker Alpha | Browser Runtime Worker | standby | Frontend support API round 2 accepted |
+| LLM-2026-002 | Worker Beta | Proxy / Transport Runtime Worker | standby | Long-run operations round 2 accepted |
 | LLM-2026-003 | Worker Gamma | Unassigned | standby | none |
-| LLM-2026-004 | Worker Delta | Spider Runtime Worker | standby | Profile report export and real profile batch accepted |
+| LLM-2026-004 | Worker Delta | Spider Runtime Worker | standby | Chinese product workbench round 2 accepted |
 
 ## Current Project Roles
 
@@ -125,6 +125,15 @@ Last updated: 2026-05-15
 | Scrapling Harden Round 1 And 2 | LLM-2026-000 | ROLE-SUPERVISOR | accepted | `docs/team/acceptance/2026-05-15_scrapling_harden_round1_round2_ACCEPTED.md` |
 | Real Scale Reverse Profile Hardening | LLM-2026-000 | ROLE-SUPERVISOR | accepted | `docs/team/acceptance/2026-05-15_real_scale_reverse_profile_hardening_ACCEPTED.md` |
 | Backend Execution Automation Hardening | LLM-2026-000 | ROLE-SUPERVISOR | accepted | `docs/team/acceptance/2026-05-15_backend_execution_automation_hardening_ACCEPTED.md` |
+| CLM Frontend Workbench MVP | LLM-2026-004 | Frontend Workbench Worker | assigned | `docs/team/assignments/2026-05-18_LLM-2026-004_FRONTEND_WORKBENCH_MVP.md` |
+| Product Workflow Export and Status Hardening | LLM-2026-001 | Backend Product Workflow Worker | assigned | `docs/team/assignments/2026-05-18_LLM-2026-001_PRODUCT_WORKFLOW_EXPORT_AND_STATUS.md` |
+| Durable Batch Registry and Backpressure | LLM-2026-002 | Backend Stability Worker | assigned | `docs/team/assignments/2026-05-18_LLM-2026-002_DURABLE_BATCH_REGISTRY_AND_BACKPRESSURE.md` |
+| Chinese UI, Model Picker, Export Folder, and Visual Polish | LLM-2026-004 | Frontend Workbench Worker | assigned | `docs/team/assignments/2026-05-18_ROUND2_LLM-2026-004_CHINESE_UI_MODEL_EXPORT_POLISH.md` |
+| LLM Model List and Export Path API | LLM-2026-001 | Backend Product Workflow Worker | assigned | `docs/team/assignments/2026-05-18_ROUND2_LLM-2026-001_LLM_MODELS_AND_EXPORT_PATH_API.md` |
+| Long-Run Diagnostics and Recovery Smoke | LLM-2026-002 | Backend Stability Worker | assigned | `docs/team/assignments/2026-05-18_ROUND2_LLM-2026-002_LONGRUN_DIAGNOSTICS_AND_RECOVERY_SMOKE.md` |
+| Chinese Product Workbench Round 2 | LLM-2026-004 | Frontend Workbench Worker | accepted | `docs/team/acceptance/2026-05-18_round2_chinese_frontend_ACCEPTED.md` |
+| Frontend Support API Round 2 | LLM-2026-001 | Backend Product Workflow Worker | accepted | `docs/team/acceptance/2026-05-18_round2_frontend_support_api_ACCEPTED.md` |
+| Long-Run Operations Round 2 | LLM-2026-002 | Backend Stability Worker | accepted with follow-up | `docs/team/acceptance/2026-05-18_round2_longrun_operations_ACCEPTED.md` |
 
 ## Recent Accepted Work Log
 

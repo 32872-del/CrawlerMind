@@ -157,8 +157,22 @@ def _extract_xpath(
             error=f"xpath_error: {type(exc).__name__}: {exc}",
         )
 
+    if isinstance(matched, str):
+        values = [matched] if matched.strip() else []
+        if not req.many:
+            values = values[:1]
+        return RuntimeSelectorResult(
+            name=req.name,
+            values=values,
+            selector=req.selector,
+            selector_type="xpath",
+            matched=len(values),
+        )
+
     if matched and isinstance(matched[0], str):
-        values = list(matched) if req.many else matched[:1]
+        values = [str(value) for value in matched if str(value).strip()]
+        if not req.many:
+            values = values[:1]
         return RuntimeSelectorResult(
             name=req.name,
             values=values,

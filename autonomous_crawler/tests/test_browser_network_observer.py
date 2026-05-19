@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 from autonomous_crawler.tools.browser_network_observer import (
     NetworkEntry,
     NetworkObservationResult,
+    _entry_from_response,
     build_api_candidates_from_entries,
     observe_browser_network,
     sanitize_headers,
@@ -100,6 +101,29 @@ class BrowserNetworkObserverUnitTests(unittest.TestCase):
         self.assertEqual(len(candidates), 1)
         self.assertEqual(candidates[0]["url"], "https://example.com/api/list")
         self.assertEqual(candidates[0]["reason"], "browser_network_observation")
+
+    def test_entry_from_response_tolerates_unreadable_post_data(self) -> None:
+        class BrokenRequest:
+            method = "POST"
+            resource_type = "fetch"
+            headers = {}
+
+            @property
+            def post_data(self) -> str:
+                raise UnicodeDecodeError("utf-8", b"\xff", 0, 1, "invalid start byte")
+
+        response = MagicMock()
+        response.url = "https://example.com/graphql"
+        response.status = 200
+        response.headers = {"content-type": "application/json"}
+        response.request = BrokenRequest()
+        response.json.return_value = {"data": {}}
+
+        entry = _entry_from_response(response, capture_json_preview=True)
+
+        self.assertEqual(entry.method, "POST")
+        self.assertEqual(entry.post_data_preview, "")
+        self.assertEqual(entry.json_preview, {"data": {}})
 
 
 class BrowserNetworkObserverPlaywrightTests(unittest.TestCase):

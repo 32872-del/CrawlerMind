@@ -260,7 +260,10 @@ def _entry_from_response(response: Any, capture_json_preview: bool) -> NetworkEn
     request = getattr(response, "request", None)
     method = str(getattr(request, "method", "GET") or "GET")
     resource_type = str(getattr(request, "resource_type", "") or "")
-    post_data = getattr(request, "post_data", "") or ""
+    try:
+        post_data = getattr(request, "post_data", "") or ""
+    except Exception:
+        post_data = ""
 
     entry = NetworkEntry(
         url=str(getattr(response, "url", "")),

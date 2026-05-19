@@ -19,6 +19,8 @@ def build_profile_run_report(
     stop_reason: str = "",
     target: str = "",
     notes: list[str] | None = None,
+    backpressure: dict[str, Any] | None = None,
+    diagnostics: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build a product-like report payload from a profile training case.
 
@@ -67,6 +69,10 @@ def build_profile_run_report(
         "notes": list(notes or []),
     }
     report["accepted"] = not bool(report["quality_gate"].get("should_fail"))
+    if backpressure is not None:
+        report["backpressure"] = backpressure
+    if diagnostics is not None:
+        report["diagnostics"] = diagnostics
     return report
 
 
