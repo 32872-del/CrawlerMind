@@ -226,6 +226,7 @@ export function WorkbenchProvider({ children }: { children: React.ReactNode }) {
                 ai_decisions: status.ai_decisions || task.ai_decisions,
                 ai_diagnostics: status.ai_diagnostics || task.ai_diagnostics,
                 ai_repair_suggestions: status.ai_repair_suggestions || task.ai_repair_suggestions,
+                managed_actions: status.managed_actions || task.managed_actions,
                 error: status.error || '',
                 updated_at: nowIso()
               }

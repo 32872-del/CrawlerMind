@@ -1,6 +1,6 @@
-import { Alert, Button, Card, Descriptions, Empty, Input, Popconfirm, Progress, Select, Space, Table, message } from 'antd';
+import { Alert, Button, Card, Descriptions, Empty, Input, Popconfirm, Progress, Select, Space, Table, Tag, message } from 'antd';
 import { useEffect, useMemo, useState, type ChangeEvent } from 'react';
-import { cancelRun, deleteRun, exportRun, fetchRunEvents, fetchRunStatus } from '../api/client';
+import { cancelRun, deleteRun, exportRun, fetchRunEvents, fetchRunStatus, managedRepairRun } from '../api/client';
 import { AiManagedPanel } from '../components/AiManagedPanel';
 import { EventTimeline } from '../components/EventTimeline';
 import { MetricStrip } from '../components/MetricStrip';
@@ -9,7 +9,7 @@ import { WorkflowOverview } from '../components/WorkflowOverview';
 import { useWorkbench } from '../store/workbench';
 import { exportFilename, joinExportPath } from '../utils/format';
 import { formatTime, managedAiModeLabel, percent, qualitySeverityLabel, replaceExportPathSuffix, statusLabel, userFacingError } from '../utils/format';
-import type { ExportFormat } from '../types/workflow';
+import type { ExportFormat, ManagedActionRecord } from '../types/workflow';
 import { seedUrlRows } from '../utils/runPayload';
 
 function isMissingRunError(error: unknown): boolean {
@@ -50,6 +50,7 @@ export function TaskDetailPage() {
   const aiDecisions = status?.ai_decisions || task?.ai_decisions || [];
   const aiDiagnostics = status?.ai_diagnostics || task?.ai_diagnostics || [];
   const aiRepairSuggestions = status?.ai_repair_suggestions || task?.ai_repair_suggestions || [];
+  const managedActions = status?.managed_actions || task?.managed_actions || [];
   const selectedFields = payload?.selected_fields || wizard.selectedFields;
   const seedCount = payload ? seedUrlRows(payload).length : 0;
   const modelName = payload?.llm?.model || settings.llm.model || '未选择模型';
@@ -212,6 +213,69 @@ export function TaskDetailPage() {
     }
   };
 
+  const triggerManagedRepairRun = async () => {
+    if (!task) return;
+    setBusy(true);
+    try {
+      const runKind: 'test' | 'full' = task.mode === 'full' ? 'full' : 'test';
+      const result = await managedRepairRun(settings, task.task_id, {
+        execute: true,
+        use_llm: Boolean(settings.llm.base_url && settings.llm.model),
+        run_kind: runKind,
+        apply_diagnostics: true,
+        extra_context: {
+          field_goal: wizard.fieldGoal,
+          selected_fields: selectedFields,
+          imported_catalog: wizard.importedCatalog,
+          export: {
+            ...(task.export_config || wizard.export),
+            format,
+            output_path: replaceExportPathSuffix(outputPath, format)
+          }
+        },
+        managed_ai: settings.managed_ai,
+        llm: {
+          enabled: Boolean(settings.llm.base_url && settings.llm.model),
+          provider: settings.llm.provider,
+          base_url: settings.llm.base_url,
+          api_key: settings.llm.api_key,
+          model: settings.llm.model
+        }
+      });
+      const childTask = {
+        ...task,
+        task_id: result.task_id,
+        run_id: result.run_id,
+        status: result.status,
+        mode: runKind,
+        record_count: 0,
+        accepted: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        managed_actions: result.managed_action ? [result.managed_action] : task.managed_actions,
+        run_payload: task.run_payload
+          ? {
+              ...task.run_payload,
+              selected_fields: selectedFields,
+              export: {
+                ...(task.export_config || wizard.export),
+                format,
+                output_path: replaceExportPathSuffix(outputPath, format)
+              }
+            }
+          : task.run_payload,
+        error: ''
+      };
+      upsertTask(childTask);
+      setPolling(true);
+      message.success('AI 托管修复任务已启动');
+    } catch (error) {
+      message.error(userFacingError(error));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const triggerRemoveLocal = async () => {
     if (!task) return;
     setBusy(true);
@@ -235,6 +299,7 @@ export function TaskDetailPage() {
           <Space>
             <Button onClick={() => setPolling((value) => !value)}>{polling ? '暂停轮询' : '恢复轮询'}</Button>
             <Button loading={busy} onClick={() => refresh(false)}>立即刷新</Button>
+            <Button loading={busy} disabled={isRunning} onClick={triggerManagedRepairRun}>AI 托管修复并重跑</Button>
             <Button danger loading={busy} disabled={!isRunning} onClick={triggerCancel}>终止任务</Button>
             <Popconfirm title="只清除工作台记录，不删除已导出的文件。确认清除？" onConfirm={triggerRemoveLocal}>
               <Button>清除记录</Button>
@@ -284,6 +349,8 @@ export function TaskDetailPage() {
         aiRepairSuggestions={aiRepairSuggestions}
       />
 
+      <ManagedActionTable records={managedActions} />
+
       <div className="two-column-grid">
         <div>
           <Card title="事件流">
@@ -321,5 +388,46 @@ export function TaskDetailPage() {
         </div>
       </div>
     </Space>
+  );
+}
+
+function ManagedActionTable({ records }: { records: ManagedActionRecord[] }) {
+  const rows = records.map((record, index) => {
+    const plan = record.result?.plan || {};
+    const actions = Array.isArray(plan.actions) ? plan.actions : [];
+    return {
+      key: `${record.created_at || index}`,
+      time: record.created_at || '-',
+      source: String(plan.source || '-'),
+      action_count: actions.length,
+      actions: actions.map((item) => String(item.action || '')).filter(Boolean).join(', '),
+      rerun_ready: Boolean(record.result?.rerun_ready)
+    };
+  });
+
+  return (
+    <Card title="托管动作记录">
+      {rows.length ? (
+        <Table
+          size="small"
+          pagination={false}
+          dataSource={rows}
+          columns={[
+            { title: '时间', dataIndex: 'time', width: 220 },
+            { title: '来源', dataIndex: 'source', width: 120 },
+            { title: '动作数', dataIndex: 'action_count', width: 90 },
+            { title: '动作', dataIndex: 'actions' },
+            {
+              title: '可重跑',
+              dataIndex: 'rerun_ready',
+              width: 100,
+              render: (value: boolean) => <Tag color={value ? 'success' : 'default'}>{value ? '是' : '否'}</Tag>
+            }
+          ]}
+        />
+      ) : (
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无托管动作记录" />
+      )}
+    </Card>
   );
 }

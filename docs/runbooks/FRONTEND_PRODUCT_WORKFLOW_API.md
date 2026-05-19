@@ -411,6 +411,71 @@ Frontend behavior:
 - Show action timeline entries from `/runs/{task_id}/events`.
 - Enable a repair rerun button when `result.rerun_ready=true`.
 
+## 7.3 One-Click Managed Repair Rerun
+
+Endpoint:
+
+```text
+POST /runs/{task_id}/managed-repair-run
+```
+
+This is the frontend-friendly combined endpoint. It first executes managed crawl
+actions, stores the action record, then immediately starts a repaired child run
+using the latest action `run_overrides`.
+
+Body:
+
+```json
+{
+  "execute": true,
+  "use_llm": true,
+  "run_kind": "test",
+  "apply_diagnostics": true,
+  "extra_context": {
+    "field_goal": "title, price, colors, sizes, description, images",
+    "selected_fields": ["title", "highest_price", "colors", "sizes"],
+    "imported_catalog": {},
+    "export": {
+      "format": "csv",
+      "output_path": "F:/datawork/exports/shop.csv"
+    }
+  },
+  "managed_ai": {
+    "enabled": true,
+    "mode": "full_managed"
+  },
+  "llm": {
+    "enabled": true,
+    "base_url": "https://api.example.com/v1",
+    "api_key": "sk-...",
+    "model": "model-name"
+  }
+}
+```
+
+Response includes the new child run plus the executed managed action record:
+
+```json
+{
+  "task_id": "child123",
+  "run_id": "test-child123",
+  "status": "running",
+  "parent_task_id": "abc123",
+  "repair_source": "managed_actions",
+  "managed_action": {
+    "executed": true,
+    "result": {
+      "plan": {"source": "llm", "actions": []},
+      "rerun_ready": true
+    }
+  }
+}
+```
+
+The workbench should use this endpoint for the "AI 托管修复并重跑" button on the
+task detail page. It should then switch the active task to the returned child
+`task_id` and keep polling `/runs/{child_task_id}/status`.
+
 ## 8. Export
 
 Endpoint:

@@ -171,6 +171,7 @@ export interface RunStatusResponse {
   ai_decisions?: unknown[];
   ai_diagnostics?: unknown[];
   ai_repair_suggestions?: unknown[];
+  managed_actions?: ManagedActionRecord[];
 }
 
 export interface RunEvent {
@@ -193,6 +194,41 @@ export interface ExportResult {
   record_count?: number;
 }
 
+export interface ManagedActionRequest {
+  execute?: boolean;
+  use_llm?: boolean;
+  run_kind?: 'test' | 'full';
+  apply_diagnostics?: boolean;
+  extra_context?: Record<string, unknown>;
+  extra_overrides?: Record<string, unknown>;
+  managed_ai?: ManagedAiPayload;
+  llm?: Partial<LlmConfig> & { enabled?: boolean };
+}
+
+export interface ManagedActionRecord {
+  created_at?: string;
+  executed?: boolean;
+  result?: {
+    schema_version?: string;
+    plan?: {
+      source?: string;
+      reasoning_summary?: string;
+      actions?: Array<Record<string, unknown>>;
+    };
+    results?: Array<Record<string, unknown>>;
+    profile_patch?: Record<string, unknown>;
+    run_overrides?: Record<string, unknown>;
+    rerun_ready?: boolean;
+  };
+}
+
+export interface ManagedRepairRunResponse extends RunLaunchResponse {
+  parent_task_id?: string;
+  repair_source?: string;
+  patch_application?: Record<string, unknown>;
+  managed_action?: ManagedActionRecord & { task_id?: string };
+}
+
 export interface WorkbenchTask {
   task_id: string;
   run_id: string;
@@ -212,6 +248,7 @@ export interface WorkbenchTask {
   ai_decisions?: unknown[];
   ai_diagnostics?: unknown[];
   ai_repair_suggestions?: unknown[];
+  managed_actions?: ManagedActionRecord[];
   error?: string;
 }
 

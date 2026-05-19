@@ -123,6 +123,18 @@ Added after the managed runtime bridge checkpoint.
 - The OpenAI-compatible managed-actions prompt now explains the full action
   tool space, so compatible models can choose crawler operations rather than
   only diagnose textually.
+- Added `POST /runs/{task_id}/managed-repair-run` as a one-click frontend
+  endpoint. It executes managed actions, stores the action record, then starts a
+  repaired child run through the existing AI rerun path.
+- Expanded the profile patch allowlist so managed actions can safely carry
+  nested selector groups such as `selectors.detail.colors`, `target_fields`,
+  `quality_expectations.min_records`, and
+  `quality_expectations.min_field_coverage`.
+- The frontend task detail page now has an "AI 托管修复并重跑" button. It sends
+  current field goal, selected fields, imported catalog, export settings, LLM
+  config, and managed AI config to the backend, then switches to the child run.
+- The frontend task detail page now displays managed action records from
+  `status.managed_actions`.
 
 Verification:
 
@@ -131,5 +143,7 @@ python -m unittest autonomous_crawler.tests.test_batch_runner autonomous_crawler
 python -m unittest autonomous_crawler.tests.test_product_workflow_api.ManagedAIRunTests autonomous_crawler.tests.test_product_workflow_api.StatusEndpointTests autonomous_crawler.tests.test_batch_runner autonomous_crawler.tests.test_profile_longrun -v
 python -m unittest autonomous_crawler.tests.test_managed_actions autonomous_crawler.tests.test_openai_compatible_llm autonomous_crawler.tests.test_product_workflow_api.ManagedAIRunTests -v
 python -m unittest autonomous_crawler.tests.test_managed_actions autonomous_crawler.tests.test_product_workflow_api.ManagedAIRunTests autonomous_crawler.tests.test_openai_compatible_llm.OpenAICompatibleAdvisorTests.test_choose_managed_actions_returns_json_object autonomous_crawler.tests.test_openai_compatible_llm.OpenAICompatibleAdvisorTests.test_choose_managed_actions_prompt_lists_expanded_tool_space -v
+python -m unittest autonomous_crawler.tests.test_product_workflow_api.ManagedAIRunTests autonomous_crawler.tests.test_managed_actions -v
 python -m compileall autonomous_crawler -q
+npm --prefix frontend run build
 ```

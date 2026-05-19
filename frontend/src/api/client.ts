@@ -6,6 +6,8 @@ import type {
   FieldCandidate,
   FieldResolution,
   LlmModelListResponse,
+  ManagedActionRequest,
+  ManagedRepairRunResponse,
   RunEventsResponse,
   RunLaunchResponse,
   RunRequest,
@@ -102,6 +104,39 @@ export async function fetchRunStatus(settings: SettingsState, taskId: string, ru
 
 export async function fetchRunEvents(settings: SettingsState, taskId: string): Promise<RunEventsResponse> {
   return requestJson(settings, `/runs/${taskId}/events`, { method: 'GET' }, () => mockRunEvents(taskId));
+}
+
+export async function managedRepairRun(settings: SettingsState, taskId: string, payload: ManagedActionRequest): Promise<ManagedRepairRunResponse> {
+  return requestJson(
+    settings,
+    `/runs/${taskId}/managed-repair-run`,
+    { method: 'POST', body: JSON.stringify(payload) },
+    () => ({
+      task_id: `${taskId}-repair`,
+      run_id: `repair-run-${taskId}`,
+      status: 'running',
+      parent_task_id: taskId,
+      repair_source: 'managed_actions',
+      managed_action: {
+        created_at: nowIso(),
+        executed: true,
+        result: {
+          schema_version: 'managed-action-result/v1',
+          plan: {
+            source: 'mock',
+            actions: [
+              { action: 'probe_fields', priority: 'high', reason: '补齐字段' },
+              { action: 'adjust_runtime', priority: 'high', reason: '切换动态模式' }
+            ]
+          },
+          results: [],
+          profile_patch: {},
+          run_overrides: {},
+          rerun_ready: true
+        }
+      }
+    })
+  );
 }
 
 export async function cancelRun(settings: SettingsState, taskId: string): Promise<{ task_id: string; status: string }> {

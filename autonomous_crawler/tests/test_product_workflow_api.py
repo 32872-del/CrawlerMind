@@ -1233,6 +1233,57 @@ class ManagedAIRunTests(unittest.TestCase):
         self.assertEqual(plan["actions"][0]["action"], "adjust_runtime")
         advisor.choose_managed_actions.assert_called_once()
 
+    def test_managed_repair_run_executes_actions_and_starts_child_run(self) -> None:
+        client = TestClient(create_app())
+        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+            mock_run.return_value = {
+                "run_id": "run-managed-repair",
+                "status": "completed",
+                "accepted": False,
+                "product_stats": {"total": 0},
+                "runner_summary": {"claimed": 1, "records_saved": 0},
+            }
+            response = client.post("/runs/test", json={
+                "target_url": "https://shop.test/",
+                "profile": {
+                    "name": "shop.test",
+                    "crawl_preferences": {"seed_urls": ["https://shop.test/list"], "seed_kind": "list"},
+                    "access_config": {"mode": "static"},
+                },
+                "selected_fields": ["title"],
+                "export": {"format": "xlsx", "output_path": "out.xlsx"},
+            })
+            self.assertEqual(response.status_code, 200)
+            task_id = response.json()["task_id"]
+            for _ in range(20):
+                status = client.get(f"/runs/{task_id}/status").json()
+                if status["status"] == "completed":
+                    break
+                time.sleep(0.05)
+
+            repair = client.post(f"/runs/{task_id}/managed-repair-run", json={
+                "execute": True,
+                "use_llm": False,
+                "run_kind": "test",
+                "extra_context": {
+                    "selected_fields": ["title", "colors"],
+                    "export": {"format": "csv", "output_path": "fixed.csv"},
+                },
+            })
+
+        self.assertEqual(repair.status_code, 200)
+        body = repair.json()
+        self.assertEqual(body["repair_source"], "managed_actions")
+        self.assertIn("managed_action", body)
+        self.assertTrue(body["managed_action"]["result"]["rerun_ready"])
+        child_request = mock_run.call_args_list[-1].args[0]
+        child_profile = child_request.profile
+        self.assertEqual(child_profile["access_config"]["mode"], "dynamic")
+        self.assertIn("colors", child_profile["selectors"]["detail"])
+        self.assertEqual(child_profile["quality_expectations"]["required_fields"], ["title", "colors"])
+        child_status = client.get(f"/runs/{body['task_id']}/status").json()
+        self.assertEqual(child_status["ai_patch_applications"][0]["source"], "ai_diagnostics.next_run_overrides")
+
 
 class ProductWorkflowAPITests(unittest.TestCase):
     def setUp(self) -> None:

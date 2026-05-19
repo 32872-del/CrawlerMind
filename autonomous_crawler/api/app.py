@@ -180,6 +180,13 @@ class ManagedActionsRequest(BaseModel):
     llm: LLMConfig | None = None
 
 
+class ManagedRepairRunRequest(ManagedActionsRequest):
+    run_kind: str = "test"
+    apply_diagnostics: bool = True
+    extra_overrides: dict[str, Any] = Field(default_factory=dict)
+    managed_ai: ManagedAIConfig | None = None
+
+
 # ---------------------------------------------------------------------------
 # Durable job registry (SQLite-backed, survives restarts)
 # ---------------------------------------------------------------------------
@@ -622,9 +629,9 @@ def _apply_managed_profile_patch(
     if selectors_patch:
         selectors = dict(updated.get("selectors") or {})
         for key, value in selectors_patch.items():
-            selector = _safe_css_selector(value)
-            if selector:
-                selectors[str(key)[:80]] = selector
+            safe_value = _safe_selector_value(value)
+            if safe_value:
+                selectors[str(key)[:80]] = safe_value
                 accepted.append(f"selectors.{str(key)[:80]}")
             else:
                 rejected.append(f"selectors.{str(key)[:80]}")
@@ -672,7 +679,27 @@ def _apply_managed_profile_patch(
             if thresholds:
                 quality["field_thresholds"] = thresholds
                 accepted.append("quality_expectations.field_thresholds")
+        if "min_records" in quality_patch:
+            try:
+                quality["min_records"] = max(1, min(int(quality_patch.get("min_records")), 1_000_000))
+                accepted.append("quality_expectations.min_records")
+            except (TypeError, ValueError):
+                rejected.append("quality_expectations.min_records")
+        if "min_field_coverage" in quality_patch:
+            try:
+                quality["min_field_coverage"] = max(0.0, min(float(quality_patch.get("min_field_coverage")), 1.0))
+                accepted.append("quality_expectations.min_field_coverage")
+            except (TypeError, ValueError):
+                rejected.append("quality_expectations.min_field_coverage")
         updated["quality_expectations"] = quality
+
+    if isinstance(patch.get("target_fields"), list):
+        fields = [str(item).strip() for item in patch.get("target_fields", [])[:50] if str(item).strip()]
+        if fields:
+            updated["target_fields"] = fields
+            accepted.append("target_fields")
+        else:
+            rejected.append("target_fields")
 
     return updated, {
         "applied": bool(accepted),
@@ -823,6 +850,36 @@ def _safe_css_selector(value: Any) -> str:
     if any(ch in selector for ch in "\x00\r\n{};"):
         return ""
     return selector
+
+
+def _safe_selector_value(value: Any) -> Any:
+    selector = _safe_css_selector(value)
+    if selector:
+        return selector
+    if not isinstance(value, dict):
+        return None
+    allowed: dict[str, Any] = {}
+    for key, item in value.items():
+        safe_key = str(key).strip()[:80]
+        if not safe_key or "\x00" in safe_key:
+            continue
+        if isinstance(item, dict):
+            nested: dict[str, Any] = {}
+            selector_value = _safe_css_selector(item.get("selector"))
+            if selector_value:
+                nested["selector"] = selector_value
+                selector_type = _safe_choice(item.get("selector_type"), {"css", "xpath", "text", "regex"}, "")
+                if selector_type:
+                    nested["selector_type"] = selector_type
+                if "many" in item:
+                    nested["many"] = bool(item.get("many"))
+            if nested:
+                allowed[safe_key] = nested
+        else:
+            nested_selector = _safe_css_selector(item)
+            if nested_selector:
+                allowed[safe_key] = nested_selector
+    return allowed or None
 
 
 def _product_spec_summary(spec: CrawlRunSpec) -> dict[str, Any]:
@@ -1540,6 +1597,25 @@ def create_app() -> FastAPI:
         }
         _append_managed_action_record(task_id, record)
         return {"task_id": task_id, **record}
+
+    @app.post("/runs/{task_id}/managed-repair-run")
+    def product_managed_repair_run(task_id: str, request: ManagedRepairRunRequest) -> dict[str, Any]:
+        action_record = product_managed_actions(task_id, request)
+        rerun = product_ai_rerun(
+            task_id,
+            AIRerunRequest(
+                run_kind=request.run_kind,
+                apply_diagnostics=request.apply_diagnostics,
+                extra_overrides=request.extra_overrides,
+                managed_ai=request.managed_ai,
+                llm=request.llm,
+            ),
+        )
+        return {
+            **rerun,
+            "repair_source": "managed_actions",
+            "managed_action": action_record,
+        }
 
     @app.post("/runs/{task_id}/ai-rerun")
     def product_ai_rerun(task_id: str, request: AIRerunRequest) -> dict[str, Any]:

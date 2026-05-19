@@ -104,6 +104,8 @@ def build_deterministic_action_plan(
     supervision = supervision if isinstance(supervision, dict) else {}
     extra_context = extra_context if isinstance(extra_context, dict) else {}
     selected_fields = list(run_spec.get("selected_fields") or profile.get("target_fields") or [])
+    requested_fields = _canonical_field_list(extra_context.get("selected_fields") or [])
+    selected_field_set = set(_canonical_field_list(selected_fields))
 
     add_reanalyze = not profile.get("selectors") or not profile.get("crawl_preferences")
     if add_reanalyze:
@@ -123,12 +125,19 @@ def build_deterministic_action_plan(
             reason="No catalog nodes or seed URLs are available for the run.",
             params={"target_url": target_url, "imported_catalog": extra_context.get("imported_catalog")},
         ))
-    if not selected_fields or any(str(item).strip().lower() in {"", "auto", "*"} for item in selected_fields):
+    if (
+        not selected_fields
+        or any(str(item).strip().lower() in {"", "auto", "*"} for item in selected_fields)
+        or any(field not in selected_field_set for field in requested_fields)
+    ):
         actions.append(ManagedCrawlAction(
             action="probe_fields",
             priority="high",
             reason="Selected fields are missing or too vague; probe product fields before rerun.",
-            params={"field_goal": str(extra_context.get("field_goal") or "")},
+            params={
+                "field_goal": str(extra_context.get("field_goal") or ""),
+                "fields": requested_fields or selected_fields,
+            },
         ))
 
     last_supervision = supervision.get("last_event") if isinstance(supervision.get("last_event"), dict) else {}
@@ -161,7 +170,7 @@ def build_deterministic_action_plan(
             action="evaluate_quality",
             priority="medium",
             reason="Quality gate needs explicit required fields and success thresholds.",
-            params={"required_fields": selected_fields or DEFAULT_PRODUCT_FIELDS},
+            params={"required_fields": requested_fields or selected_fields or DEFAULT_PRODUCT_FIELDS},
         ))
     export = run_spec.get("export") if isinstance(run_spec.get("export"), dict) else {}
     if extra_context.get("export") or not export.get("format"):
@@ -356,13 +365,17 @@ def _execute_probe_fields(
             "min_field_coverage": float(action.params.get("min_field_coverage") or 0.8),
         },
     }
+    overrides = {
+        **patch,
+        "selected_fields": fields,
+    }
     return {
         "action": action.action,
         "ok": True,
         "summary": f"field probe prepared {len(fields)} target fields",
         "fields": fields,
         "patch": patch,
-        "overrides": patch,
+        "overrides": overrides,
     }
 
 
