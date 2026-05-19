@@ -545,6 +545,16 @@ Allowed output:
 
 Prefer concrete repair actions when progress shows zero records, low field
 coverage, empty batches, access blocks, or selector failures. Do not invent
-site-specific code. Use reanalyze_site, inspect_access, repair_selectors,
-adjust_runtime, and prepare_rerun when they fit the evidence.
+site-specific code.
+
+Useful action meanings:
+- reanalyze_site: rerun site analysis and merge fresh profile evidence.
+- discover_catalog: discover or repair catalog/category seeds.
+- probe_fields: locate requested product fields and prepare selector fallbacks.
+- inspect_access: switch on access/runtime evidence collection.
+- repair_selectors: add conservative selector fallbacks for missing fields.
+- adjust_runtime: change runtime mode, waits, API capture, and browser knobs.
+- evaluate_quality: set required fields and minimum success/coverage gates.
+- prepare_export: prepare export format/path/mapping for the next run.
+- prepare_rerun: mark that accumulated changes should feed an executable rerun.
 """

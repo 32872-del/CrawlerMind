@@ -489,6 +489,7 @@ def _build_managed_action_plan_for_job(
         progress=progress,
         diagnostics=diagnostics,
         supervision=supervision,
+        extra_context=request.extra_context,
     ), advisor
 
 
@@ -1518,6 +1519,7 @@ def create_app() -> FastAPI:
                     profile=payload.get("profile") if isinstance(payload.get("profile"), dict) else {},
                     run_spec=job.get("product_run_spec") if isinstance(job.get("product_run_spec"), dict) else {},
                     advisor=advisor,
+                    extra_context=request.extra_context,
                 )
                 if request.execute
                 else {

@@ -237,6 +237,37 @@ class OpenAICompatibleAdvisorTests(unittest.TestCase):
         self.assertEqual(result["actions"][0]["action"], "inspect_access")
         self.assertEqual(result["actions"][1]["params"]["fields"], ["title"])
 
+    def test_choose_managed_actions_prompt_lists_expanded_tool_space(self) -> None:
+        requests: list[httpx.Request] = []
+        advisor = self._advisor_with_response(
+            json.dumps({
+                "reasoning_summary": "Need catalog and field probe.",
+                "actions": [
+                    {"action": "discover_catalog", "priority": "high"},
+                    {"action": "probe_fields", "priority": "high", "params": {"fields": ["title", "colors"]}},
+                    {"action": "prepare_export", "priority": "low", "params": {"format": "csv"}},
+                ],
+            }),
+            request_log=requests,
+        )
+
+        result = advisor.choose_managed_actions(
+            target_url="https://shop.test",
+            profile={"name": "shop"},
+            run_spec={"selected_fields": ["title", "colors"]},
+            progress={"records_saved": 0},
+            diagnostics={},
+            supervision={},
+            available_actions=["discover_catalog", "probe_fields", "prepare_export", "prepare_rerun"],
+        )
+
+        body = json.loads(requests[0].content.decode("utf-8"))
+        prompt = body["messages"][0]["content"]
+        self.assertIn("discover_catalog", prompt)
+        self.assertIn("probe_fields", prompt)
+        self.assertIn("prepare_export", prompt)
+        self.assertEqual(result["actions"][0]["action"], "discover_catalog")
+
     def test_endpoint_property_returns_resolved_endpoint(self) -> None:
         advisor = OpenAICompatibleAdvisor(
             OpenAICompatibleConfig(

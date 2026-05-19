@@ -330,11 +330,28 @@ Supported actions:
 
 ```text
 reanalyze_site
+discover_catalog
+probe_fields
 inspect_access
 repair_selectors
 adjust_runtime
+evaluate_quality
+prepare_export
 prepare_rerun
 ```
+
+Action meaning:
+
+- `reanalyze_site`: rerun site analysis and merge fresh profile evidence.
+- `discover_catalog`: repair missing catalog/category seeds and imported menus.
+- `probe_fields`: prepare target fields and selector fallbacks.
+- `inspect_access`: enable runtime evidence collection, browser waits, API capture,
+  and cookie acceptance.
+- `repair_selectors`: add conservative field selector fallbacks.
+- `adjust_runtime`: change runtime mode, waits, and browser knobs.
+- `evaluate_quality`: set required fields, minimum records, and coverage gates.
+- `prepare_export`: prepare export format/path/mapping for the next run.
+- `prepare_rerun`: mark that accumulated changes should feed `/ai-rerun`.
 
 Body:
 
@@ -348,13 +365,27 @@ Body:
     "api_key": "sk-...",
     "model": "model-name"
   },
-  "extra_context": {}
+  "extra_context": {
+    "field_goal": "title, price, colors, sizes, description, images",
+    "selected_fields": ["title", "highest_price", "colors", "sizes"],
+    "imported_catalog": {},
+    "export": {
+      "format": "csv",
+      "output_path": "F:/datawork/exports/shop.csv"
+    }
+  }
 }
 ```
 
 If `use_llm=true`, the model chooses from the supported action list. If the LLM
 is disabled, unavailable, or returns no usable actions, CLM builds a
 deterministic plan from progress, diagnostics, and supervision evidence.
+
+`extra_context` is optional but recommended from the frontend. It gives the
+managed action layer the same context the user selected in the workbench:
+natural-language field goals, selected fields, imported catalog/menu JSON, and
+export preferences. The backend keeps actions bounded and converts them into
+profile patches or run overrides for the next executable run.
 
 Response:
 

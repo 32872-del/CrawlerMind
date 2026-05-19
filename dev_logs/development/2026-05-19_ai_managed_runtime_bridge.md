@@ -98,9 +98,13 @@ Added after the managed runtime bridge checkpoint.
   title selector fallback.
 - Added managed crawl action space:
   - `reanalyze_site`
+  - `discover_catalog`
+  - `probe_fields`
   - `inspect_access`
   - `repair_selectors`
   - `adjust_runtime`
+  - `evaluate_quality`
+  - `prepare_export`
   - `prepare_rerun`
 - Added `POST /runs/{task_id}/managed-actions`.
   - LLM can choose actions from the supported list.
@@ -109,6 +113,16 @@ Added after the managed runtime bridge checkpoint.
   - Executed actions return `profile_patch`, `run_overrides`, and
     `rerun_ready`.
   - Latest action overrides are consumed by `ai-rerun`.
+- Extended managed actions into a broader crawler tool space:
+  - catalog discovery repairs missing menu/category seeds
+  - field probing prepares target fields and selector fallbacks
+  - quality evaluation creates required-field and coverage gates
+  - export preparation preserves requested format/path/mapping for reruns
+- `ManagedActionsRequest.extra_context` can now carry workbench context such as
+  field goal, selected fields, imported catalog JSON, and export preferences.
+- The OpenAI-compatible managed-actions prompt now explains the full action
+  tool space, so compatible models can choose crawler operations rather than
+  only diagnose textually.
 
 Verification:
 
@@ -116,5 +130,6 @@ Verification:
 python -m unittest autonomous_crawler.tests.test_batch_runner autonomous_crawler.tests.test_profile_longrun autonomous_crawler.tests.test_product_workflow_api.StatusEndpointTests -v
 python -m unittest autonomous_crawler.tests.test_product_workflow_api.ManagedAIRunTests autonomous_crawler.tests.test_product_workflow_api.StatusEndpointTests autonomous_crawler.tests.test_batch_runner autonomous_crawler.tests.test_profile_longrun -v
 python -m unittest autonomous_crawler.tests.test_managed_actions autonomous_crawler.tests.test_openai_compatible_llm autonomous_crawler.tests.test_product_workflow_api.ManagedAIRunTests -v
+python -m unittest autonomous_crawler.tests.test_managed_actions autonomous_crawler.tests.test_product_workflow_api.ManagedAIRunTests autonomous_crawler.tests.test_openai_compatible_llm.OpenAICompatibleAdvisorTests.test_choose_managed_actions_returns_json_object autonomous_crawler.tests.test_openai_compatible_llm.OpenAICompatibleAdvisorTests.test_choose_managed_actions_prompt_lists_expanded_tool_space -v
 python -m compileall autonomous_crawler -q
 ```
