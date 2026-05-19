@@ -96,11 +96,25 @@ Added after the managed runtime bridge checkpoint.
   produce deterministic repair overrides: dynamic mode, networkidle wait, API
   capture, cookie acceptance, longer waits, DOM pagination, and conservative
   title selector fallback.
+- Added managed crawl action space:
+  - `reanalyze_site`
+  - `inspect_access`
+  - `repair_selectors`
+  - `adjust_runtime`
+  - `prepare_rerun`
+- Added `POST /runs/{task_id}/managed-actions`.
+  - LLM can choose actions from the supported list.
+  - Deterministic fallback builds actions from progress, diagnostics, and
+    supervision evidence.
+  - Executed actions return `profile_patch`, `run_overrides`, and
+    `rerun_ready`.
+  - Latest action overrides are consumed by `ai-rerun`.
 
 Verification:
 
 ```text
 python -m unittest autonomous_crawler.tests.test_batch_runner autonomous_crawler.tests.test_profile_longrun autonomous_crawler.tests.test_product_workflow_api.StatusEndpointTests -v
 python -m unittest autonomous_crawler.tests.test_product_workflow_api.ManagedAIRunTests autonomous_crawler.tests.test_product_workflow_api.StatusEndpointTests autonomous_crawler.tests.test_batch_runner autonomous_crawler.tests.test_profile_longrun -v
+python -m unittest autonomous_crawler.tests.test_managed_actions autonomous_crawler.tests.test_openai_compatible_llm autonomous_crawler.tests.test_product_workflow_api.ManagedAIRunTests -v
 python -m compileall autonomous_crawler -q
 ```

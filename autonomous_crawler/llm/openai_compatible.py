@@ -172,6 +172,33 @@ class OpenAICompatibleAdvisor:
         ]
         return self._chat_json(messages)
 
+    def choose_managed_actions(
+        self,
+        *,
+        target_url: str,
+        profile: dict[str, Any],
+        run_spec: dict[str, Any],
+        progress: dict[str, Any],
+        diagnostics: dict[str, Any],
+        supervision: dict[str, Any],
+        available_actions: list[str],
+    ) -> dict[str, Any]:
+        """Choose bounded managed crawler actions from the CLM tool space."""
+        payload = {
+            "target_url": target_url,
+            "profile": _bounded(profile, 7000),
+            "run_spec": _bounded(run_spec, 6000),
+            "progress": _bounded(progress, 4000),
+            "diagnostics": _bounded(diagnostics, 6000),
+            "supervision": _bounded(supervision, 5000),
+            "available_actions": list(available_actions),
+        }
+        messages = [
+            {"role": "system", "content": _MANAGED_ACTIONS_SYSTEM_PROMPT},
+            {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
+        ]
+        return self._chat_json(messages)
+
     def check_connection(self) -> dict[str, Any]:
         """Run a minimal provider check using the same JSON path as advisors."""
         messages = [
@@ -499,4 +526,25 @@ Allowed keys:
 
 Base your answer on the provided progress, quality, failures, and profile. Do
 not claim certainty when evidence is weak.
+"""
+
+
+_MANAGED_ACTIONS_SYSTEM_PROMPT = """You are the managed crawl tool planner for Crawler-Mind.
+Return only one JSON object. Do not include markdown or commentary.
+
+You may choose only actions listed in available_actions. These actions are
+executed by CLM's backend, not by you directly.
+
+Allowed output:
+- reasoning_summary: one short sentence
+- actions: array of objects with:
+  - action: one of available_actions
+  - priority: "low", "medium", or "high"
+  - reason: short practical reason
+  - params: object
+
+Prefer concrete repair actions when progress shows zero records, low field
+coverage, empty batches, access blocks, or selector failures. Do not invent
+site-specific code. Use reanalyze_site, inspect_access, repair_selectors,
+adjust_runtime, and prepare_rerun when they fit the evidence.
 """

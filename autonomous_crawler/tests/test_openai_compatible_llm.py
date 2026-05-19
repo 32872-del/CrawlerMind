@@ -213,6 +213,30 @@ class OpenAICompatibleAdvisorTests(unittest.TestCase):
         body = json.loads(requests[0].content.decode("utf-8"))
         self.assertIn("crawler-mind-llm-connection", body["messages"][1]["content"])
 
+    def test_choose_managed_actions_returns_json_object(self) -> None:
+        advisor = self._advisor_with_response(
+            json.dumps({
+                "reasoning_summary": "Need dynamic rerun.",
+                "actions": [
+                    {"action": "inspect_access", "priority": "high", "reason": "no records"},
+                    {"action": "repair_selectors", "priority": "high", "params": {"fields": ["title"]}},
+                ],
+            })
+        )
+
+        result = advisor.choose_managed_actions(
+            target_url="https://shop.test",
+            profile={"name": "shop"},
+            run_spec={"selected_fields": ["title"]},
+            progress={"records_saved": 0},
+            diagnostics={},
+            supervision={},
+            available_actions=["inspect_access", "repair_selectors", "prepare_rerun"],
+        )
+
+        self.assertEqual(result["actions"][0]["action"], "inspect_access")
+        self.assertEqual(result["actions"][1]["params"]["fields"], ["title"])
+
     def test_endpoint_property_returns_resolved_endpoint(self) -> None:
         advisor = OpenAICompatibleAdvisor(
             OpenAICompatibleConfig(

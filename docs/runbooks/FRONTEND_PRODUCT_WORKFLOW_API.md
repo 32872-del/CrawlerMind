@@ -314,6 +314,72 @@ The child run status also includes `parent_task_id`, `repair_source`, and
 `ai_patch_applications`, so the workbench can show exactly which AI suggestions
 were accepted or rejected.
 
+## 7.2 Managed Crawl Actions
+
+Endpoint:
+
+```text
+POST /runs/{task_id}/managed-actions
+```
+
+This endpoint gives managed mode a concrete crawler tool space. It can plan and
+optionally execute bounded actions, then store the action record on the run. The
+latest action result is also consumed by `/runs/{task_id}/ai-rerun`.
+
+Supported actions:
+
+```text
+reanalyze_site
+inspect_access
+repair_selectors
+adjust_runtime
+prepare_rerun
+```
+
+Body:
+
+```json
+{
+  "execute": true,
+  "use_llm": true,
+  "llm": {
+    "enabled": true,
+    "base_url": "https://api.example.com/v1",
+    "api_key": "sk-...",
+    "model": "model-name"
+  },
+  "extra_context": {}
+}
+```
+
+If `use_llm=true`, the model chooses from the supported action list. If the LLM
+is disabled, unavailable, or returns no usable actions, CLM builds a
+deterministic plan from progress, diagnostics, and supervision evidence.
+
+Response:
+
+```json
+{
+  "task_id": "abc123",
+  "created_at": "...",
+  "executed": true,
+  "result": {
+    "schema_version": "managed-action-result/v1",
+    "plan": {"source": "llm", "actions": []},
+    "results": [],
+    "profile_patch": {},
+    "run_overrides": {},
+    "rerun_ready": true
+  }
+}
+```
+
+Frontend behavior:
+
+- Show managed action records from `/runs/{task_id}/status.managed_actions`.
+- Show action timeline entries from `/runs/{task_id}/events`.
+- Enable a repair rerun button when `result.rerun_ready=true`.
+
 ## 8. Export
 
 Endpoint:

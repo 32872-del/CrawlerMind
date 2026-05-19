@@ -26,6 +26,12 @@ from ..runners.product_workflow import (
     resolve_fields,
     summarize_run_progress,
 )
+from ..runners.managed_actions import (
+    SUPPORTED_ACTIONS,
+    ManagedActionPlan,
+    build_deterministic_action_plan,
+    execute_managed_action_plan,
+)
 from ..runtime import NativeBrowserRuntime, NativeFetchRuntime
 from ..storage.batch_registry import BatchRegistry
 from ..llm.openai_compatible import (
@@ -164,6 +170,13 @@ class AIRerunRequest(BaseModel):
     apply_diagnostics: bool = True
     extra_overrides: dict[str, Any] = Field(default_factory=dict)
     managed_ai: ManagedAIConfig | None = None
+    llm: LLMConfig | None = None
+
+
+class ManagedActionsRequest(BaseModel):
+    execute: bool = True
+    use_llm: bool = True
+    extra_context: dict[str, Any] = Field(default_factory=dict)
     llm: LLMConfig | None = None
 
 
@@ -434,6 +447,56 @@ def _supervision_from_result(result: dict[str, Any]) -> dict[str, Any] | None:
         "event_count": len(events),
         "last_event": events[-1],
     }
+
+
+def _build_managed_action_plan_for_job(
+    *,
+    job: dict[str, Any],
+    request: ManagedActionsRequest,
+) -> tuple[ManagedActionPlan, OpenAICompatibleAdvisor | None]:
+    run_spec = job.get("product_run_spec") if isinstance(job.get("product_run_spec"), dict) else {}
+    profile = _product_run_payload_from_job(job).get("profile")
+    profile_data = profile if isinstance(profile, dict) else {}
+    progress = summarize_run_progress(job)
+    diagnostics = job.get("diagnostics") if isinstance(job.get("diagnostics"), dict) else {}
+    supervision = job.get("supervision") if isinstance(job.get("supervision"), dict) else {}
+    target_url = str(run_spec.get("target_url") or job.get("target_url") or "")
+    advisor = None
+    if request.use_llm and request.llm and request.llm.enabled:
+        advisor = _build_advisor_from_config(request.llm)
+        try:
+            raw = advisor.choose_managed_actions(
+                target_url=target_url,
+                profile=profile_data,
+                run_spec=run_spec,
+                progress=progress,
+                diagnostics=diagnostics,
+                supervision=supervision,
+                available_actions=sorted(SUPPORTED_ACTIONS),
+            )
+            plan = ManagedActionPlan.from_dict({
+                **raw,
+                "source": "llm",
+            })
+            if plan.actions:
+                return plan, advisor
+        except Exception:
+            advisor = None
+    return build_deterministic_action_plan(
+        target_url=target_url,
+        profile=profile_data,
+        run_spec=run_spec,
+        progress=progress,
+        diagnostics=diagnostics,
+        supervision=supervision,
+    ), advisor
+
+
+def _append_managed_action_record(task_id: str, record: dict[str, Any]) -> None:
+    job = _get_job(task_id) or {}
+    records = list(job.get("managed_actions") or [])
+    records.append(record)
+    _update_job(task_id, managed_actions=records[-50:])
 
 
 def _repair_overrides_from_supervision(supervision: dict[str, Any]) -> dict[str, Any]:
@@ -940,6 +1003,14 @@ def _background_profile_run(task_id: str, request: ProfileRunRequest) -> None:
         result = run_profile_longrun_workflow(request, task_id=task_id)
         if _is_cancelled(task_id):
             return
+        _update_job(
+            task_id,
+            item_count=int(result.get("product_stats", {}).get("total") or 0),
+            is_valid=bool(result.get("accepted")),
+            profile_run=result,
+            diagnostics=result.get("diagnostics") if isinstance(result.get("diagnostics"), dict) else None,
+            supervision=_supervision_from_result(result),
+        )
         auto_export = _auto_export_product_run(task_id, request, result)
         if _managed_ai_enabled(request.managed_ai, request.llm) and _managed_ai_wants_post_run(request.managed_ai):
             advisor = _build_advisor_from_config(request.llm)  # type: ignore[arg-type]
@@ -952,11 +1023,6 @@ def _background_profile_run(task_id: str, request: ProfileRunRequest) -> None:
         _update_job(
             task_id,
             status=result.get("status", "completed"),
-            item_count=int(result.get("product_stats", {}).get("total") or 0),
-            is_valid=bool(result.get("accepted")),
-            profile_run=result,
-            diagnostics=result.get("diagnostics") if isinstance(result.get("diagnostics"), dict) else None,
-            supervision=_supervision_from_result(result),
             export=auto_export or None,
         )
     except Exception as exc:
@@ -1137,6 +1203,7 @@ def _register_product_run_job(
         ai_diagnostics=None,
         ai_repair_suggestions=[],
         ai_patch_applications=[],
+        managed_actions=[],
     )
     if pre_decision is not None:
         _append_ai_decision(task_id, pre_decision)
@@ -1422,6 +1489,7 @@ def create_app() -> FastAPI:
             "ai_diagnostics": job.get("ai_diagnostics") or None,
             "ai_repair_suggestions": job.get("ai_repair_suggestions") or [],
             "ai_patch_applications": job.get("ai_patch_applications") or [],
+            "managed_actions": job.get("managed_actions") or [],
         }
 
     @app.get("/runs/{task_id}/events")
@@ -1431,6 +1499,45 @@ def create_app() -> FastAPI:
         if not job:
             raise HTTPException(status_code=404, detail="run not found")
         return {"task_id": task_id, "events": events_for_job(job)}
+
+    @app.post("/runs/{task_id}/managed-actions")
+    def product_managed_actions(task_id: str, request: ManagedActionsRequest) -> dict[str, Any]:
+        _cleanup_stale_jobs()
+        job = _get_job(task_id)
+        if not job:
+            raise HTTPException(status_code=404, detail="run not found")
+        if job.get("kind") not in {"product_test_run", "product_full_run"}:
+            raise HTTPException(status_code=400, detail="managed actions are only available for product runs")
+        try:
+            plan, advisor = _build_managed_action_plan_for_job(job=job, request=request)
+            payload = _product_run_payload_from_job(job)
+            result = (
+                execute_managed_action_plan(
+                    plan=plan,
+                    target_url=str(payload.get("target_url") or ""),
+                    profile=payload.get("profile") if isinstance(payload.get("profile"), dict) else {},
+                    run_spec=job.get("product_run_spec") if isinstance(job.get("product_run_spec"), dict) else {},
+                    advisor=advisor,
+                )
+                if request.execute
+                else {
+                    "schema_version": "managed-action-result/v1",
+                    "plan": plan.to_dict(),
+                    "results": [],
+                    "profile_patch": {},
+                    "run_overrides": {},
+                    "rerun_ready": False,
+                }
+            )
+        except LLMConfigurationError as exc:
+            raise HTTPException(status_code=400, detail=str(exc))
+        record = {
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "executed": bool(request.execute),
+            "result": result,
+        }
+        _append_managed_action_record(task_id, record)
+        return {"task_id": task_id, **record}
 
     @app.post("/runs/{task_id}/ai-rerun")
     def product_ai_rerun(task_id: str, request: AIRerunRequest) -> dict[str, Any]:
@@ -1451,6 +1558,13 @@ def create_app() -> FastAPI:
         )
         if request.apply_diagnostics and supervision_overrides:
             overrides = _deep_merge_dicts(overrides, supervision_overrides)
+        managed_records = job.get("managed_actions") if isinstance(job.get("managed_actions"), list) else []
+        if request.apply_diagnostics and managed_records:
+            latest = managed_records[-1] if isinstance(managed_records[-1], dict) else {}
+            result_payload = latest.get("result") if isinstance(latest.get("result"), dict) else {}
+            action_overrides = result_payload.get("run_overrides") if isinstance(result_payload.get("run_overrides"), dict) else {}
+            if action_overrides:
+                overrides = _deep_merge_dicts(overrides, action_overrides)
         overrides.update(dict(request.extra_overrides or {}))
 
         patched_spec, patched_profile, patch_result = _apply_managed_run_overrides(

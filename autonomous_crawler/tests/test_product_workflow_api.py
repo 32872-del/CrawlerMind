@@ -690,9 +690,14 @@ class StatusEndpointTests(unittest.TestCase):
                 },
             )
             task_id = resp.json()["task_id"]
-            time.sleep(0.4)
             status = client.get(f"/runs/{task_id}/status")
             events = client.get(f"/runs/{task_id}/events")
+            for _ in range(30):
+                if status.json().get("supervision"):
+                    break
+                time.sleep(0.05)
+                status = client.get(f"/runs/{task_id}/status")
+                events = client.get(f"/runs/{task_id}/events")
 
         self.assertEqual(status.status_code, 200)
         self.assertEqual(status.json()["supervision"]["recommended_next_action"], "ai_rerun")
@@ -1135,6 +1140,99 @@ class ManagedAIRunTests(unittest.TestCase):
         self.assertIn("title", child_profile["selectors"])
         self.assertIn("profile.access_config.mode", child_status["ai_patch_applications"][0]["accepted"])
 
+    def test_managed_actions_endpoint_executes_and_feeds_ai_rerun(self) -> None:
+        client = TestClient(create_app())
+        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+            mock_run.return_value = {
+                "run_id": "run-managed-actions",
+                "status": "completed",
+                "accepted": False,
+                "product_stats": {"total": 0},
+                "runner_summary": {"claimed": 1, "records_saved": 0},
+            }
+            response = client.post("/runs/test", json={
+                "target_url": "https://shop.test/",
+                "profile": {
+                    "name": "shop.test",
+                    "crawl_preferences": {"seed_urls": ["https://shop.test/list"], "seed_kind": "list"},
+                    "access_config": {"mode": "static"},
+                },
+                "selected_fields": ["title"],
+            })
+            self.assertEqual(response.status_code, 200)
+            task_id = response.json()["task_id"]
+            for _ in range(20):
+                status = client.get(f"/runs/{task_id}/status").json()
+                if status["status"] == "completed":
+                    break
+                time.sleep(0.05)
+
+            action_resp = client.post(f"/runs/{task_id}/managed-actions", json={"execute": True, "use_llm": False})
+            self.assertEqual(action_resp.status_code, 200)
+            action_body = action_resp.json()
+            self.assertTrue(action_body["result"]["rerun_ready"])
+
+            rerun = client.post(f"/runs/{task_id}/ai-rerun", json={"run_kind": "test"})
+            self.assertEqual(rerun.status_code, 200)
+            child_id = rerun.json()["task_id"]
+            for _ in range(20):
+                child_status = client.get(f"/runs/{child_id}/status").json()
+                if child_status["status"] == "completed":
+                    break
+                time.sleep(0.05)
+
+            events = client.get(f"/runs/{task_id}/events").json()["events"]
+
+        child_request = mock_run.call_args_list[-1].args[0]
+        child_profile = child_request.profile
+        self.assertEqual(child_profile["access_config"]["mode"], "dynamic")
+        self.assertTrue(child_profile["access_config"]["browser_config"]["capture_api"])
+        self.assertTrue(any(item["type"] == "managed_actions_executed" for item in events))
+        self.assertIn("profile.access_config.mode", child_status["ai_patch_applications"][0]["accepted"])
+
+    @patch("autonomous_crawler.api.app._build_advisor_from_config")
+    def test_managed_actions_endpoint_accepts_llm_action_plan(self, mock_build) -> None:
+        advisor = MagicMock()
+        advisor.choose_managed_actions.return_value = {
+            "reasoning_summary": "Switch runtime and repair title.",
+            "actions": [
+                {"action": "adjust_runtime", "priority": "high", "params": {"mode": "dynamic"}},
+                {"action": "repair_selectors", "priority": "high", "params": {"fields": ["title"]}},
+                {"action": "prepare_rerun", "priority": "medium"},
+            ],
+        }
+        mock_build.return_value = advisor
+        client = TestClient(create_app())
+        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+            mock_run.return_value = {
+                "run_id": "run-managed-actions-llm",
+                "status": "completed",
+                "accepted": False,
+                "product_stats": {"total": 0},
+            }
+            response = client.post("/runs/test", json={
+                "target_url": "https://shop.test/",
+                "profile": {"name": "shop.test", "crawl_preferences": {"seed_urls": ["https://shop.test/list"]}},
+                "selected_fields": ["title"],
+            })
+            task_id = response.json()["task_id"]
+            for _ in range(20):
+                status = client.get(f"/runs/{task_id}/status").json()
+                if status["status"] == "completed":
+                    break
+                time.sleep(0.05)
+            action_resp = client.post(f"/runs/{task_id}/managed-actions", json={
+                "execute": True,
+                "use_llm": True,
+                "llm": {"enabled": True, "base_url": "https://llm.example/v1", "model": "m"},
+            })
+
+        self.assertEqual(action_resp.status_code, 200)
+        plan = action_resp.json()["result"]["plan"]
+        self.assertEqual(plan["source"], "llm")
+        self.assertEqual(plan["actions"][0]["action"], "adjust_runtime")
+        advisor.choose_managed_actions.assert_called_once()
+
 
 class ProductWorkflowAPITests(unittest.TestCase):
     def setUp(self) -> None:
@@ -1278,9 +1376,14 @@ class ProductWorkflowAPITests(unittest.TestCase):
                 )
                 self.assertEqual(response.status_code, 200)
                 task_id = response.json()["task_id"]
-                time.sleep(0.4)
                 status = client.get(f"/runs/{task_id}/status")
                 events = client.get(f"/runs/{task_id}/events")
+                for _ in range(30):
+                    if status.json().get("export"):
+                        break
+                    time.sleep(0.05)
+                    status = client.get(f"/runs/{task_id}/status")
+                    events = client.get(f"/runs/{task_id}/events")
 
             self.assertEqual(status.status_code, 200)
             body = status.json()

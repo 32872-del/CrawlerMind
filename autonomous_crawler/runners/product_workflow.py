@@ -1333,6 +1333,18 @@ def events_for_job(job: dict[str, Any]) -> list[dict[str, Any]]:
             "message": summary,
             "data": decision,
         })
+    for record in list(job.get("managed_actions") or [])[:20]:
+        if not isinstance(record, dict):
+            continue
+        result = record.get("result") if isinstance(record.get("result"), dict) else {}
+        plan = result.get("plan") if isinstance(result.get("plan"), dict) else {}
+        actions = plan.get("actions") if isinstance(plan.get("actions"), list) else []
+        events.append({
+            "time": record.get("created_at") or job.get("updated_at", ""),
+            "type": "managed_actions_executed" if record.get("executed") else "managed_actions_planned",
+            "message": f"managed actions: {len(actions)}",
+            "data": record,
+        })
     supervision = job.get("supervision") if isinstance(job.get("supervision"), dict) else {}
     last_event = supervision.get("last_event") if isinstance(supervision.get("last_event"), dict) else {}
     if last_event:
