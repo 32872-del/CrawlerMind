@@ -167,7 +167,8 @@ Body:
     "enabled": true,
     "mode": "supervised",
     "pre_run_review": true,
-    "post_run_diagnosis": true
+    "post_run_diagnosis": true,
+    "auto_repair": false
   }
 }
 ```
@@ -200,6 +201,10 @@ Current backend behavior:
 - `full_managed` enables runtime supervision in managed mode. Consecutive empty
   batches, high failure rates, or very low yield can pause/abort the run and
   expose a recommended next action such as `ai_rerun`.
+- `full_managed` or `auto_repair=true` can automatically execute managed crawl
+  actions after a low-quality/paused/failed run and start one repaired child
+  run. The child run is started in `supervised` mode with `auto_repair=false`,
+  so the system does not loop forever.
 - Model decisions are recorded in job state and exposed through status/events.
 
 ## 6. Full Run
@@ -228,7 +233,8 @@ Status includes:
 status, record_count, accepted, progress.records_saved, progress.failed,
 progress.queued, progress.done, progress.completion, quality,
 managed_ai, ai_decisions, ai_diagnostics, ai_repair_suggestions,
-ai_patch_applications, diagnostics, supervision
+ai_patch_applications, diagnostics, supervision, managed_actions,
+managed_auto_repair
 ```
 
 Events include job lifecycle, failure snippets, export events, and AI decision
@@ -240,6 +246,8 @@ ai_post_run_diagnosis
 supervision_pause
 supervision_abort
 supervision_repair_after_run
+managed_auto_repair_started
+managed_auto_repair_skipped
 ```
 
 This is currently polling friendly. A future frontend can wrap it with
@@ -475,6 +483,42 @@ Response includes the new child run plus the executed managed action record:
 The workbench should use this endpoint for the "AI 托管修复并重跑" button on the
 task detail page. It should then switch the active task to the returned child
 `task_id` and keep polling `/runs/{child_task_id}/status`.
+
+## 7.4 Full Managed Auto Repair
+
+When a product run is launched with:
+
+```json
+{
+  "managed_ai": {
+    "enabled": true,
+    "mode": "full_managed",
+    "auto_repair": true
+  }
+}
+```
+
+the backend can automatically bridge from diagnosis to action:
+
+1. The profile runner finishes or pauses.
+2. Runtime supervision and/or quality metrics are written to job state.
+3. The LLM post-run diagnosis runs if configured.
+4. If the result is paused, failed, rejected, empty, or quality is unknown/fail,
+   the backend calls the managed action planner.
+5. The generated action patch is applied to a child rerun.
+6. `GET /runs/{task_id}/status` exposes:
+
+```text
+managed_auto_repair.attempted
+managed_auto_repair.reason
+managed_auto_repair.child_task_id
+managed_auto_repair.child_run_id
+managed_auto_repair.managed_action
+```
+
+The frontend should show this as an automatic handoff from the parent failed run
+to the repaired child run. The child run currently uses `supervised` mode and
+does not auto-repair again.
 
 ## 8. Export
 

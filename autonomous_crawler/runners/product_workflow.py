@@ -1355,6 +1355,16 @@ def events_for_job(job: dict[str, Any]) -> list[dict[str, Any]]:
             "message": str(last_event.get("reason") or action),
             "data": supervision,
         })
+    auto_repair = job.get("managed_auto_repair") if isinstance(job.get("managed_auto_repair"), dict) else {}
+    if auto_repair:
+        child_id = str(auto_repair.get("child_task_id") or "")
+        reason = str(auto_repair.get("reason") or "managed auto repair")
+        events.append({
+            "time": auto_repair.get("created_at") or job.get("updated_at", ""),
+            "type": "managed_auto_repair_started" if auto_repair.get("attempted") else "managed_auto_repair_skipped",
+            "message": f"{reason}: {child_id}" if child_id else reason,
+            "data": auto_repair,
+        })
     return events
 
 

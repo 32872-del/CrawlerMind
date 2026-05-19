@@ -634,8 +634,12 @@ class StatusEndpointTests(unittest.TestCase):
                 },
             )
             task_id = resp.json()["task_id"]
-            time.sleep(0.4)
             status = client.get(f"/runs/{task_id}/status")
+            for _ in range(30):
+                if status.json().get("status") == "completed":
+                    break
+                time.sleep(0.05)
+                status = client.get(f"/runs/{task_id}/status")
 
         self.assertEqual(status.status_code, 200)
         body = status.json()
@@ -1283,6 +1287,112 @@ class ManagedAIRunTests(unittest.TestCase):
         self.assertEqual(child_profile["quality_expectations"]["required_fields"], ["title", "colors"])
         child_status = client.get(f"/runs/{body['task_id']}/status").json()
         self.assertEqual(child_status["ai_patch_applications"][0]["source"], "ai_diagnostics.next_run_overrides")
+
+    def test_full_managed_auto_repair_starts_child_after_failed_quality(self) -> None:
+        client = TestClient(create_app())
+        calls = []
+
+        def fake_run(request, *, task_id):
+            calls.append((task_id, request))
+            if len(calls) == 1:
+                return {
+                    "run_id": "run-auto-parent",
+                    "status": "paused",
+                    "accepted": False,
+                    "product_stats": {"total": 0},
+                    "runner_summary": {
+                        "claimed": 2,
+                        "records_saved": 0,
+                        "succeeded": 2,
+                        "supervision_events": [{
+                            "action": "pause",
+                            "reason": "2 consecutive batches produced no records",
+                            "severity": "critical",
+                        }],
+                    },
+                    "diagnostics": {
+                        "supervision": {
+                            "enabled": True,
+                            "event_count": 1,
+                            "last_event": {
+                                "action": "pause",
+                                "reason": "2 consecutive batches produced no records",
+                                "severity": "critical",
+                            },
+                            "recommended_next_action": "ai_rerun",
+                        }
+                    },
+                }
+            return {
+                "run_id": "run-auto-child",
+                "status": "completed",
+                "accepted": True,
+                "product_stats": {"total": 3},
+                "runner_summary": {"claimed": 3, "records_saved": 3, "succeeded": 3},
+            }
+
+        with patch("autonomous_crawler.api.app._build_advisor_from_config") as mock_build, \
+                patch("autonomous_crawler.api.app.run_profile_longrun_workflow", side_effect=fake_run):
+            advisor = MagicMock()
+            advisor.provider = "test-provider"
+            advisor.model = "test-model"
+            advisor.review_run_plan.return_value = {}
+            advisor.diagnose_run_result.return_value = {
+                "status_assessment": "failed",
+                "reasoning_summary": "No records were extracted.",
+                "next_run_overrides": {"access_config": {"mode": "dynamic"}},
+            }
+            advisor.choose_managed_actions.return_value = {
+                "reasoning_summary": "Switch runtime and repair selectors.",
+                "actions": [
+                    {"action": "inspect_access", "priority": "high", "reason": "empty output"},
+                    {"action": "repair_selectors", "priority": "high", "reason": "selectors failed"},
+                    {"action": "prepare_rerun", "priority": "medium", "reason": "rerun"},
+                ],
+            }
+            mock_build.return_value = advisor
+            response = client.post("/runs/test", json={
+                "target_url": "https://shop.test/",
+                "profile": {
+                    "name": "shop.test",
+                    "crawl_preferences": {"seed_urls": ["https://shop.test/list"], "seed_kind": "list"},
+                    "access_config": {"mode": "static"},
+                },
+                "selected_fields": ["title"],
+                "llm": {
+                    "enabled": True,
+                    "base_url": "https://llm.example/v1",
+                    "model": "test-model",
+                },
+                "managed_ai": {
+                    "enabled": True,
+                    "mode": "full_managed",
+                    "auto_repair": True,
+                    "post_run_diagnosis": True,
+                },
+            })
+
+            self.assertEqual(response.status_code, 200)
+            task_id = response.json()["task_id"]
+
+            status = {}
+            for _ in range(30):
+                status = client.get(f"/runs/{task_id}/status").json()
+                auto_repair = status.get("managed_auto_repair") or {}
+                if auto_repair.get("child_task_id"):
+                    break
+                time.sleep(0.05)
+
+        self.assertTrue(status["managed_auto_repair"]["attempted"])
+        child_id = status["managed_auto_repair"]["child_task_id"]
+        self.assertTrue(child_id)
+        self.assertEqual(status["managed_actions"][0]["result"]["plan"]["source"], "llm")
+        child_status = client.get(f"/runs/{child_id}/status").json()
+        self.assertEqual(child_status["parent_task_id"], task_id)
+        self.assertEqual(child_status["managed_ai"]["mode"], "supervised")
+        self.assertFalse(child_status["managed_ai"]["auto_repair"])
+        events = client.get(f"/runs/{task_id}/events").json()["events"]
+        self.assertTrue(any(item["type"] == "managed_auto_repair_started" for item in events))
 
 
 class ProductWorkflowAPITests(unittest.TestCase):

@@ -172,6 +172,9 @@ export interface RunStatusResponse {
   ai_diagnostics?: unknown[];
   ai_repair_suggestions?: unknown[];
   managed_actions?: ManagedActionRecord[];
+  parent_task_id?: string;
+  repair_source?: string;
+  managed_auto_repair?: ManagedAutoRepairRecord | null;
 }
 
 export interface RunEvent {
@@ -229,6 +232,15 @@ export interface ManagedRepairRunResponse extends RunLaunchResponse {
   managed_action?: ManagedActionRecord & { task_id?: string };
 }
 
+export interface ManagedAutoRepairRecord {
+  attempted?: boolean;
+  reason?: string;
+  child_task_id?: string;
+  child_run_id?: string;
+  created_at?: string;
+  managed_action?: ManagedActionRecord & { task_id?: string };
+}
+
 export interface WorkbenchTask {
   task_id: string;
   run_id: string;
@@ -249,6 +261,9 @@ export interface WorkbenchTask {
   ai_diagnostics?: unknown[];
   ai_repair_suggestions?: unknown[];
   managed_actions?: ManagedActionRecord[];
+  parent_task_id?: string;
+  repair_source?: string;
+  managed_auto_repair?: ManagedAutoRepairRecord | null;
   error?: string;
 }
 

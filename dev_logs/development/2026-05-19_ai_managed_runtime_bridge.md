@@ -135,6 +135,16 @@ Added after the managed runtime bridge checkpoint.
   config, and managed AI config to the backend, then switches to the child run.
 - The frontend task detail page now displays managed action records from
   `status.managed_actions`.
+- Added `managed_ai.auto_repair`.
+  - `full_managed` implicitly wants auto repair.
+  - After a paused/failed/rejected/empty/unknown-quality run, the backend can
+    execute managed actions and start one repaired child run automatically.
+  - The child run is forced to `supervised` mode with `auto_repair=false` to
+    avoid infinite repair loops.
+  - Parent status now exposes `managed_auto_repair`, including child task/run
+    ids and the action record used for the repair.
+  - `/runs/{task_id}/events` now emits `managed_auto_repair_started` or
+    `managed_auto_repair_skipped`.
 
 Verification:
 
@@ -144,6 +154,7 @@ python -m unittest autonomous_crawler.tests.test_product_workflow_api.ManagedAIR
 python -m unittest autonomous_crawler.tests.test_managed_actions autonomous_crawler.tests.test_openai_compatible_llm autonomous_crawler.tests.test_product_workflow_api.ManagedAIRunTests -v
 python -m unittest autonomous_crawler.tests.test_managed_actions autonomous_crawler.tests.test_product_workflow_api.ManagedAIRunTests autonomous_crawler.tests.test_openai_compatible_llm.OpenAICompatibleAdvisorTests.test_choose_managed_actions_returns_json_object autonomous_crawler.tests.test_openai_compatible_llm.OpenAICompatibleAdvisorTests.test_choose_managed_actions_prompt_lists_expanded_tool_space -v
 python -m unittest autonomous_crawler.tests.test_product_workflow_api.ManagedAIRunTests autonomous_crawler.tests.test_managed_actions -v
+python -m unittest autonomous_crawler.tests.test_product_workflow_api.ManagedAIRunTests.test_full_managed_auto_repair_starts_child_after_failed_quality autonomous_crawler.tests.test_product_workflow_api.ManagedAIRunTests.test_managed_repair_run_executes_actions_and_starts_child_run -v
 python -m compileall autonomous_crawler -q
 npm --prefix frontend run build
 ```

@@ -63,6 +63,7 @@ class ManagedAIConfig(BaseModel):
     pre_run_review: bool = False
     post_run_diagnosis: bool = False
     apply_pre_run_patch: bool = False
+    auto_repair: bool = False
 
 
 class CrawlRequest(BaseModel):
@@ -332,9 +333,16 @@ def _managed_ai_public_config(config: ManagedAIConfig | None, llm: LLMConfig | N
         "pre_run_review": _managed_ai_wants_pre_run(config),
         "post_run_diagnosis": _managed_ai_wants_post_run(config),
         "apply_pre_run_patch": bool(config and config.enabled and config.apply_pre_run_patch),
+        "auto_repair": _managed_ai_wants_auto_repair(config),
         "model": llm.model if llm and llm.enabled else "",
         "provider": llm.provider if llm and llm.enabled else "",
     }
+
+
+def _managed_ai_wants_auto_repair(config: ManagedAIConfig | None) -> bool:
+    if not config or not config.enabled:
+        return False
+    return bool(config.auto_repair or _managed_ai_mode(config) == "full_managed")
 
 
 def _supervision_mode_for_managed_ai(config: ManagedAIConfig | None) -> str:
@@ -505,6 +513,143 @@ def _append_managed_action_record(task_id: str, record: dict[str, Any]) -> None:
     records = list(job.get("managed_actions") or [])
     records.append(record)
     _update_job(task_id, managed_actions=records[-50:])
+
+
+def _execute_managed_actions_for_job(
+    *,
+    task_id: str,
+    job: dict[str, Any],
+    request: ManagedActionsRequest,
+) -> dict[str, Any]:
+    plan, advisor = _build_managed_action_plan_for_job(job=job, request=request)
+    payload = _product_run_payload_from_job(job)
+    result = (
+        execute_managed_action_plan(
+            plan=plan,
+            target_url=str(payload.get("target_url") or ""),
+            profile=payload.get("profile") if isinstance(payload.get("profile"), dict) else {},
+            run_spec=job.get("product_run_spec") if isinstance(job.get("product_run_spec"), dict) else {},
+            advisor=advisor,
+            extra_context=request.extra_context,
+        )
+        if request.execute
+        else {
+            "schema_version": "managed-action-result/v1",
+            "plan": plan.to_dict(),
+            "results": [],
+            "profile_patch": {},
+            "run_overrides": {},
+            "rerun_ready": False,
+        }
+    )
+    record = {
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "executed": bool(request.execute),
+        "result": result,
+    }
+    _append_managed_action_record(task_id, record)
+    return {"task_id": task_id, **record}
+
+
+def _managed_run_depth(job: dict[str, Any]) -> int:
+    depth = 0
+    current = job
+    seen: set[str] = set()
+    while True:
+        parent_id = str(current.get("parent_task_id") or "")
+        if not parent_id or parent_id in seen:
+            return depth
+        seen.add(parent_id)
+        parent = _get_job(parent_id)
+        if not parent:
+            return depth + 1
+        depth += 1
+        current = parent
+
+
+def _run_needs_managed_repair(job: dict[str, Any], result: dict[str, Any]) -> bool:
+    status = str(result.get("status") or job.get("status") or "").lower()
+    if status in {"paused", "aborted", "failed", "partial"}:
+        return True
+    if result.get("accepted") is False:
+        return True
+    stats = result.get("product_stats") if isinstance(result.get("product_stats"), dict) else {}
+    if int(stats.get("total") or 0) <= 0:
+        return True
+    progress = summarize_run_progress({**job, "profile_run": result})
+    quality = str(progress.get("quality_indicator") or "").lower()
+    return quality in {"fail", "unknown"}
+
+
+def _auto_managed_repair_after_run(
+    *,
+    task_id: str,
+    request: ProfileRunRequest,
+    result: dict[str, Any],
+) -> dict[str, Any] | None:
+    job = _get_job(task_id) or {}
+    if not _managed_ai_enabled(request.managed_ai, request.llm):
+        return None
+    if not _managed_ai_wants_auto_repair(request.managed_ai):
+        return None
+    if _managed_run_depth(job) >= 1:
+        _update_job(task_id, managed_auto_repair={
+            "attempted": False,
+            "reason": "max_auto_repair_depth_reached",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+        return None
+    if not _run_needs_managed_repair(job, result):
+        _update_job(task_id, managed_auto_repair={
+            "attempted": False,
+            "reason": "quality_accepted",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+        return None
+
+    action_record = _execute_managed_actions_for_job(
+        task_id=task_id,
+        job=job,
+        request=ManagedActionsRequest(
+            execute=True,
+            use_llm=True,
+            extra_context={
+                "field_goal": ", ".join(
+                    str(item) for item in (job.get("product_run_spec") or {}).get("selected_fields", [])
+                ),
+                "selected_fields": (job.get("product_run_spec") or {}).get("selected_fields", []),
+                "export": (job.get("product_run_spec") or {}).get("export", {}),
+            },
+            llm=request.llm,
+        ),
+    )
+    repair = _start_managed_child_run(
+        task_id=task_id,
+        job=job,
+        request=AIRerunRequest(
+            run_kind="full" if job.get("kind") == "product_full_run" else "test",
+            apply_diagnostics=True,
+            managed_ai=ManagedAIConfig(
+                enabled=True,
+                mode="supervised",
+                pre_run_review=True,
+                post_run_diagnosis=True,
+                apply_pre_run_patch=bool(request.managed_ai and request.managed_ai.apply_pre_run_patch),
+                auto_repair=False,
+            ),
+            llm=request.llm,
+        ),
+    )
+    auto_repair = {
+        "attempted": True,
+        "reason": "full_managed_quality_repair",
+        "child_task_id": repair.get("task_id", ""),
+        "child_run_id": repair.get("run_id", ""),
+        "managed_action": action_record,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    _update_job(task_id, managed_auto_repair=auto_repair)
+    return auto_repair
 
 
 def _repair_overrides_from_supervision(supervision: dict[str, Any]) -> dict[str, Any]:
@@ -803,6 +948,67 @@ def _apply_managed_run_overrides(
     }
 
 
+def _start_managed_child_run(
+    *,
+    task_id: str,
+    job: dict[str, Any],
+    request: AIRerunRequest,
+) -> dict[str, Any]:
+    payload = _product_run_payload_from_job(job)
+    overrides: dict[str, Any] = {}
+    diagnostics = job.get("ai_diagnostics") if isinstance(job.get("ai_diagnostics"), dict) else {}
+    if request.apply_diagnostics and isinstance(diagnostics.get("next_run_overrides"), dict):
+        overrides.update(diagnostics.get("next_run_overrides") or {})
+    supervision_overrides = _repair_overrides_from_supervision(
+        job.get("supervision") if isinstance(job.get("supervision"), dict) else {}
+    )
+    if request.apply_diagnostics and supervision_overrides:
+        overrides = _deep_merge_dicts(overrides, supervision_overrides)
+    managed_records = job.get("managed_actions") if isinstance(job.get("managed_actions"), list) else []
+    if request.apply_diagnostics and managed_records:
+        latest = managed_records[-1] if isinstance(managed_records[-1], dict) else {}
+        result_payload = latest.get("result") if isinstance(latest.get("result"), dict) else {}
+        action_overrides = result_payload.get("run_overrides") if isinstance(result_payload.get("run_overrides"), dict) else {}
+        if action_overrides:
+            overrides = _deep_merge_dicts(overrides, action_overrides)
+    overrides.update(dict(request.extra_overrides or {}))
+
+    patched_spec, patched_profile, patch_result = _apply_managed_run_overrides(
+        payload,
+        payload.get("profile") if isinstance(payload.get("profile"), dict) else {},
+        overrides,
+    )
+    patched_spec["profile"] = patched_profile
+    spec = build_run_spec(patched_spec)
+    run_kind = _safe_choice(request.run_kind, {"test", "full"}, "")
+    if not run_kind:
+        run_kind = "full" if job.get("kind") == "product_full_run" else "test"
+    result = _register_product_run_job(
+        kind="product_full_run" if run_kind == "full" else "product_test_run",
+        run_payload=build_full_run_payload(spec) if run_kind == "full" else build_test_run_payload(spec),
+        spec=spec,
+        managed_ai=request.managed_ai,
+        llm=request.llm,
+    )
+    child_id = result["task_id"]
+    _update_job(
+        child_id,
+        parent_task_id=task_id,
+        repair_source="ai_rerun",
+        ai_patch_applications=[{
+            **patch_result,
+            "source_task_id": task_id,
+            "source": "ai_diagnostics.next_run_overrides",
+        }],
+    )
+    return {
+        **result,
+        "parent_task_id": task_id,
+        "repair_source": "ai_rerun",
+        "patch_application": patch_result,
+    }
+
+
 def _product_run_payload_from_job(job: dict[str, Any]) -> dict[str, Any]:
     spec = job.get("product_run_spec") if isinstance(job.get("product_run_spec"), dict) else {}
     result = job.get("profile_run") if isinstance(job.get("profile_run"), dict) else {}
@@ -1078,10 +1284,12 @@ def _background_profile_run(task_id: str, request: ProfileRunRequest) -> None:
                 request=request,
                 result=result,
             )
+        auto_repair = _auto_managed_repair_after_run(task_id=task_id, request=request, result=result)
         _update_job(
             task_id,
             status=result.get("status", "completed"),
             export=auto_export or None,
+            managed_auto_repair=auto_repair or (_get_job(task_id) or {}).get("managed_auto_repair"),
         )
     except Exception as exc:
         if _is_cancelled(task_id):
@@ -1548,6 +1756,7 @@ def create_app() -> FastAPI:
             "ai_repair_suggestions": job.get("ai_repair_suggestions") or [],
             "ai_patch_applications": job.get("ai_patch_applications") or [],
             "managed_actions": job.get("managed_actions") or [],
+            "managed_auto_repair": job.get("managed_auto_repair") or None,
         }
 
     @app.get("/runs/{task_id}/events")
@@ -1567,36 +1776,9 @@ def create_app() -> FastAPI:
         if job.get("kind") not in {"product_test_run", "product_full_run"}:
             raise HTTPException(status_code=400, detail="managed actions are only available for product runs")
         try:
-            plan, advisor = _build_managed_action_plan_for_job(job=job, request=request)
-            payload = _product_run_payload_from_job(job)
-            result = (
-                execute_managed_action_plan(
-                    plan=plan,
-                    target_url=str(payload.get("target_url") or ""),
-                    profile=payload.get("profile") if isinstance(payload.get("profile"), dict) else {},
-                    run_spec=job.get("product_run_spec") if isinstance(job.get("product_run_spec"), dict) else {},
-                    advisor=advisor,
-                    extra_context=request.extra_context,
-                )
-                if request.execute
-                else {
-                    "schema_version": "managed-action-result/v1",
-                    "plan": plan.to_dict(),
-                    "results": [],
-                    "profile_patch": {},
-                    "run_overrides": {},
-                    "rerun_ready": False,
-                }
-            )
+            return _execute_managed_actions_for_job(task_id=task_id, job=job, request=request)
         except LLMConfigurationError as exc:
             raise HTTPException(status_code=400, detail=str(exc))
-        record = {
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "executed": bool(request.execute),
-            "result": result,
-        }
-        _append_managed_action_record(task_id, record)
-        return {"task_id": task_id, **record}
 
     @app.post("/runs/{task_id}/managed-repair-run")
     def product_managed_repair_run(task_id: str, request: ManagedRepairRunRequest) -> dict[str, Any]:
@@ -1625,60 +1807,7 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=404, detail="run not found")
         if job.get("kind") not in {"product_test_run", "product_full_run"}:
             raise HTTPException(status_code=400, detail="ai rerun is only available for product runs")
-
-        payload = _product_run_payload_from_job(job)
-        overrides: dict[str, Any] = {}
-        diagnostics = job.get("ai_diagnostics") if isinstance(job.get("ai_diagnostics"), dict) else {}
-        if request.apply_diagnostics and isinstance(diagnostics.get("next_run_overrides"), dict):
-            overrides.update(diagnostics.get("next_run_overrides") or {})
-        supervision_overrides = _repair_overrides_from_supervision(
-            job.get("supervision") if isinstance(job.get("supervision"), dict) else {}
-        )
-        if request.apply_diagnostics and supervision_overrides:
-            overrides = _deep_merge_dicts(overrides, supervision_overrides)
-        managed_records = job.get("managed_actions") if isinstance(job.get("managed_actions"), list) else []
-        if request.apply_diagnostics and managed_records:
-            latest = managed_records[-1] if isinstance(managed_records[-1], dict) else {}
-            result_payload = latest.get("result") if isinstance(latest.get("result"), dict) else {}
-            action_overrides = result_payload.get("run_overrides") if isinstance(result_payload.get("run_overrides"), dict) else {}
-            if action_overrides:
-                overrides = _deep_merge_dicts(overrides, action_overrides)
-        overrides.update(dict(request.extra_overrides or {}))
-
-        patched_spec, patched_profile, patch_result = _apply_managed_run_overrides(
-            payload,
-            payload.get("profile") if isinstance(payload.get("profile"), dict) else {},
-            overrides,
-        )
-        patched_spec["profile"] = patched_profile
-        spec = build_run_spec(patched_spec)
-        run_kind = _safe_choice(request.run_kind, {"test", "full"}, "")
-        if not run_kind:
-            run_kind = "full" if job.get("kind") == "product_full_run" else "test"
-        result = _register_product_run_job(
-            kind="product_full_run" if run_kind == "full" else "product_test_run",
-            run_payload=build_full_run_payload(spec) if run_kind == "full" else build_test_run_payload(spec),
-            spec=spec,
-            managed_ai=request.managed_ai,
-            llm=request.llm,
-        )
-        child_id = result["task_id"]
-        _update_job(
-            child_id,
-            parent_task_id=task_id,
-            repair_source="ai_rerun",
-            ai_patch_applications=[{
-                **patch_result,
-                "source_task_id": task_id,
-                "source": "ai_diagnostics.next_run_overrides",
-            }],
-        )
-        return {
-            **result,
-            "parent_task_id": task_id,
-            "repair_source": "ai_rerun",
-            "patch_application": patch_result,
-        }
+        return _start_managed_child_run(task_id=task_id, job=job, request=request)
 
     @app.post("/exports")
     def product_export(request: ExportRequest) -> dict[str, Any]:
