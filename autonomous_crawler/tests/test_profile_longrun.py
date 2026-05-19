@@ -58,6 +58,39 @@ class ApiFixtureFetchRuntime:
         )
 
 
+EMPTY_LIST_PROFILE = SiteProfile.from_dict({
+    "name": "empty-list-shop",
+    "selectors": {
+        "item_container": ".product-card",
+        "detail_link": "a",
+        "title": "h1",
+    },
+    "crawl_preferences": {
+        "seed_urls": [
+            "https://empty-shop.local/list/1",
+            "https://empty-shop.local/list/2",
+            "https://empty-shop.local/list/3",
+        ],
+        "seed_kind": "list",
+    },
+    "pagination_hints": {"type": "none"},
+    "quality_expectations": {"required_fields": ["title"]},
+})
+
+
+class EmptyHtmlFetchRuntime:
+    name = "empty_html_fixture"
+
+    def fetch(self, request: RuntimeRequest) -> RuntimeResponse:
+        return RuntimeResponse(
+            ok=True,
+            final_url=request.url,
+            status_code=200,
+            text="<html><body><main>No products here</main></body></html>",
+            engine_result={"engine": self.name},
+        )
+
+
 class ProfileLongRunTests(unittest.TestCase):
     def test_profile_longrun_pauses_and_resumes_with_report(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -118,6 +151,27 @@ class ProfileLongRunTests(unittest.TestCase):
             for request in fetch.requests
         ]
         self.assertEqual(requested_pages, [1, 2, 3])
+
+    def test_profile_longrun_supervision_pauses_consecutive_empty_batches(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            result = run_profile_longrun(
+                profile=EMPTY_LIST_PROFILE,
+                config=ProfileLongRunConfig(
+                    run_id="profile-supervision-empty",
+                    batch_size=1,
+                    supervision_mode="managed",
+                    sample_limit=5,
+                ),
+                fetch_runtime=EmptyHtmlFetchRuntime(),
+                runtime_dir=tmp,
+            )
+
+        supervision = result.diagnostics["supervision"]
+        self.assertEqual(result.status, "paused")
+        self.assertTrue(supervision["enabled"])
+        self.assertEqual(supervision["recommended_next_action"], "ai_rerun")
+        self.assertEqual(supervision["last_event"]["action"], "pause")
+        self.assertIn("supervision_events", result.runner_summary.as_dict())
 
     def test_profile_longrun_temp_runtime_is_allowed_for_one_shot(self) -> None:
         profile = SiteProfile.load(API_PROFILE_PATH)

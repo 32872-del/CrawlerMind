@@ -195,6 +195,11 @@ Current backend behavior:
   exposed as `ai_patch_applications`.
 - `supervised` and `full_managed` run an LLM post-run diagnosis after the
   profile runner finishes.
+- `supervised` enables runtime supervision in observe mode. Batch-level health
+  events are recorded but do not stop the job by themselves.
+- `full_managed` enables runtime supervision in managed mode. Consecutive empty
+  batches, high failure rates, or very low yield can pause/abort the run and
+  expose a recommended next action such as `ai_rerun`.
 - Model decisions are recorded in job state and exposed through status/events.
 
 ## 6. Full Run
@@ -223,7 +228,7 @@ Status includes:
 status, record_count, accepted, progress.records_saved, progress.failed,
 progress.queued, progress.done, progress.completion, quality,
 managed_ai, ai_decisions, ai_diagnostics, ai_repair_suggestions,
-ai_patch_applications
+ai_patch_applications, diagnostics, supervision
 ```
 
 Events include job lifecycle, failure snippets, export events, and AI decision
@@ -232,6 +237,9 @@ events such as:
 ```text
 ai_pre_run_review
 ai_post_run_diagnosis
+supervision_pause
+supervision_abort
+supervision_repair_after_run
 ```
 
 This is currently polling friendly. A future frontend can wrap it with
@@ -248,6 +256,12 @@ POST /runs/{task_id}/ai-rerun
 Use this after a test/full product run has AI diagnostics. The backend reads
 `ai_diagnostics.next_run_overrides`, applies bounded run/profile changes, and
 starts a child product run.
+
+If the run has runtime `supervision` but no LLM `next_run_overrides`, the backend
+still builds a deterministic repair plan. For example, consecutive empty batches
+produce overrides that switch to dynamic browser mode, enable API capture,
+extend waits, and add conservative title selector fallback. Frontend users can
+then click one repair rerun button instead of rebuilding the task manually.
 
 Body:
 

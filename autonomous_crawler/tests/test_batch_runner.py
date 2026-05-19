@@ -12,6 +12,7 @@ from autonomous_crawler.runners.batch_runner import (
     BatchRunnerConfig,
     ItemProcessResult,
     ProductRecordCheckpoint,
+    RuleBasedBatchSupervisor,
 )
 from autonomous_crawler.storage.frontier import URLFrontier
 from autonomous_crawler.storage.product_store import ProductStore
@@ -230,6 +231,49 @@ class BatchRunnerTests(unittest.TestCase):
             BatchRunnerConfig(run_id="x", lease_seconds=-1)
         with self.assertRaises(ValueError):
             BatchRunnerConfig(run_id="x", item_workers=0)
+
+    def test_rule_based_supervisor_records_repair_warning_on_empty_batch(self) -> None:
+        self.frontier.add_urls(["https://example.test/list"])
+
+        summary = BatchRunner(
+            frontier=self.frontier,
+            processor=lambda item: ItemProcessResult.success(),
+            config=BatchRunnerConfig(run_id="run-supervise", max_batches=1),
+            supervisor=RuleBasedBatchSupervisor(),
+        ).run()
+
+        self.assertEqual(summary.status, "completed")
+        self.assertEqual(len(summary.supervision_events), 1)
+        self.assertEqual(summary.supervision_events[0]["action"], "repair_after_run")
+        self.assertIn("snapshot", summary.supervision_events[0])
+
+    def test_rule_based_supervisor_pauses_after_consecutive_empty_batches(self) -> None:
+        self.frontier.add_urls(["https://example.test/1", "https://example.test/2", "https://example.test/3"])
+
+        summary = BatchRunner(
+            frontier=self.frontier,
+            processor=lambda item: ItemProcessResult.success(),
+            config=BatchRunnerConfig(run_id="run-supervise-pause", batch_size=1),
+            supervisor=RuleBasedBatchSupervisor(zero_record_batches_before_pause=2),
+        ).run()
+
+        self.assertEqual(summary.status, "paused")
+        self.assertEqual(len(summary.supervision_events), 2)
+        self.assertEqual(summary.supervision_events[-1]["action"], "pause")
+        self.assertEqual(self.frontier.stats(), {"done": 2, "queued": 1})
+
+    def test_rule_based_supervisor_aborts_on_high_failure_rate(self) -> None:
+        self.frontier.add_urls(["https://example.test/1", "https://example.test/2"])
+
+        summary = BatchRunner(
+            frontier=self.frontier,
+            processor=lambda item: ItemProcessResult.failure("blocked"),
+            config=BatchRunnerConfig(run_id="run-supervise-abort", batch_size=2),
+            supervisor=RuleBasedBatchSupervisor(failure_rate_abort=0.5),
+        ).run()
+
+        self.assertEqual(summary.status, "aborted")
+        self.assertEqual(summary.supervision_events[-1]["action"], "abort")
 
 
 if __name__ == "__main__":

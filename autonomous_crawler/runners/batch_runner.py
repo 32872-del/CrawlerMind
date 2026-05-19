@@ -20,6 +20,7 @@ from .backpressure import BackpressureMonitor
 
 FrontierItem = dict[str, Any]
 ItemProcessor = Callable[[FrontierItem], "ItemProcessResult"]
+BatchSupervisor = Callable[["BatchRunnerSummary", "BatchSupervisorSnapshot"], "BatchSupervisorDecision"]
 
 
 class CheckpointSink(Protocol):
@@ -102,6 +103,7 @@ class BatchRunnerSummary:
     item_errors: list[dict[str, Any]] = field(default_factory=list)
     frontier_stats: dict[str, int] = field(default_factory=dict)
     backpressure: dict[str, Any] | None = None
+    supervision_events: list[dict[str, Any]] = field(default_factory=list)
 
     def as_dict(self) -> dict[str, Any]:
         result = {
@@ -120,7 +122,151 @@ class BatchRunnerSummary:
         }
         if self.backpressure is not None:
             result["backpressure"] = self.backpressure
+        if self.supervision_events:
+            result["supervision_events"] = list(self.supervision_events)
         return result
+
+
+@dataclass(frozen=True)
+class BatchSupervisorSnapshot:
+    """Per-batch execution snapshot for in-run supervision."""
+
+    batch_number: int
+    claimed: int
+    succeeded: int
+    failed: int
+    retried: int
+    checkpoint_errors: int
+    records_saved: int
+    discovered_urls: int
+    total_claimed: int
+    total_succeeded: int
+    total_failed: int
+    total_records_saved: int
+    frontier_stats: dict[str, int] = field(default_factory=dict)
+    backpressure: dict[str, Any] | None = None
+
+    @property
+    def success_rate(self) -> float:
+        total = self.succeeded + self.failed
+        return round(self.succeeded / total, 4) if total else 1.0
+
+    @property
+    def record_yield(self) -> float:
+        return round(self.records_saved / self.claimed, 4) if self.claimed else 0.0
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "batch_number": self.batch_number,
+            "claimed": self.claimed,
+            "succeeded": self.succeeded,
+            "failed": self.failed,
+            "retried": self.retried,
+            "checkpoint_errors": self.checkpoint_errors,
+            "records_saved": self.records_saved,
+            "discovered_urls": self.discovered_urls,
+            "success_rate": self.success_rate,
+            "record_yield": self.record_yield,
+            "total_claimed": self.total_claimed,
+            "total_succeeded": self.total_succeeded,
+            "total_failed": self.total_failed,
+            "total_records_saved": self.total_records_saved,
+            "frontier_stats": dict(self.frontier_stats),
+            "backpressure": self.backpressure,
+        }
+
+
+@dataclass(frozen=True)
+class BatchSupervisorDecision:
+    """Action returned by an in-run supervisor."""
+
+    action: str = "proceed"
+    reason: str = ""
+    severity: str = "info"
+    suggestions: list[dict[str, Any]] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        action = str(self.action or "proceed").strip().lower()
+        if action not in {"proceed", "slow_down", "pause", "abort", "repair_after_run"}:
+            action = "proceed"
+        severity = str(self.severity or "info").strip().lower()
+        if severity not in {"info", "warning", "critical"}:
+            severity = "info"
+        object.__setattr__(self, "action", action)
+        object.__setattr__(self, "severity", severity)
+
+    def as_dict(self, snapshot: BatchSupervisorSnapshot | None = None) -> dict[str, Any]:
+        payload = {
+            "action": self.action,
+            "reason": self.reason,
+            "severity": self.severity,
+            "suggestions": list(self.suggestions),
+            "metadata": dict(self.metadata),
+        }
+        if snapshot is not None:
+            payload["snapshot"] = snapshot.as_dict()
+        return payload
+
+
+@dataclass(frozen=True)
+class RuleBasedBatchSupervisor:
+    """Deterministic in-run supervisor for quality and progress failures."""
+
+    min_batch_success_rate: float = 0.6
+    min_record_yield: float = 0.05
+    zero_record_batches_before_pause: int = 2
+    failure_rate_abort: float = 0.85
+
+    def __call__(
+        self,
+        summary: BatchRunnerSummary,
+        snapshot: BatchSupervisorSnapshot,
+    ) -> BatchSupervisorDecision:
+        total = snapshot.succeeded + snapshot.failed
+        failure_rate = snapshot.failed / total if total else 0.0
+        if total and failure_rate >= self.failure_rate_abort:
+            return BatchSupervisorDecision(
+                action="abort",
+                severity="critical",
+                reason=f"batch failure rate {failure_rate:.0%} is too high",
+                suggestions=[{"action": "inspect_access_or_selectors", "priority": "high"}],
+            )
+        if snapshot.claimed and snapshot.records_saved == 0 and snapshot.discovered_urls == 0:
+            zero_batches = _count_recent_zero_record_batches(summary.supervision_events) + 1
+            if zero_batches >= self.zero_record_batches_before_pause:
+                return BatchSupervisorDecision(
+                    action="pause",
+                    severity="critical",
+                    reason=f"{zero_batches} consecutive batches produced no records or new URLs",
+                    suggestions=[
+                        {"action": "run_ai_rerun", "priority": "high"},
+                        {"action": "switch_runtime_or_repair_selectors", "priority": "high"},
+                    ],
+                    metadata={"zero_record_batches": zero_batches},
+                )
+            return BatchSupervisorDecision(
+                action="repair_after_run",
+                severity="warning",
+                reason="batch produced no records or new URLs",
+                suggestions=[{"action": "diagnose_selectors_or_pagination", "priority": "medium"}],
+                metadata={"zero_record_batches": zero_batches},
+            )
+        if total and snapshot.success_rate < self.min_batch_success_rate:
+            return BatchSupervisorDecision(
+                action="slow_down",
+                severity="warning",
+                reason=f"batch success rate {snapshot.success_rate:.0%} is below target",
+                suggestions=[{"action": "reduce_concurrency_or_rotate_proxy", "priority": "medium"}],
+            )
+        if snapshot.claimed and snapshot.record_yield < self.min_record_yield and snapshot.discovered_urls == 0:
+            return BatchSupervisorDecision(
+                action="repair_after_run",
+                severity="warning",
+                reason=f"batch record yield {snapshot.record_yield:.2f} is low",
+                suggestions=[{"action": "expand_link_discovery_or_api_capture", "priority": "medium"}],
+            )
+        return BatchSupervisorDecision(action="proceed", reason="batch healthy", severity="info")
 
 
 class ProductRecordCheckpoint:
@@ -150,12 +296,14 @@ class BatchRunner:
         config: BatchRunnerConfig,
         checkpoint: CheckpointSink | None = None,
         backpressure: BackpressureMonitor | None = None,
+        supervisor: BatchSupervisor | None = None,
     ) -> None:
         self.frontier = frontier
         self.processor = processor
         self.config = config
         self.checkpoint = checkpoint
         self.backpressure = backpressure
+        self.supervisor = supervisor
 
     def run(self) -> BatchRunnerSummary:
         summary = BatchRunnerSummary(run_id=self.config.run_id)
@@ -180,6 +328,8 @@ class BatchRunner:
             batch_failed_before = summary.failed
             batch_retried_before = summary.retried
             batch_ckpt_errors_before = summary.checkpoint_errors
+            batch_records_before = summary.records_saved
+            batch_discovered_before = summary.discovered_urls
 
             timer = self.backpressure.time_batch() if self.backpressure else None
             if timer:
@@ -203,6 +353,33 @@ class BatchRunner:
                     timer.retried = summary.retried - batch_retried_before
                     timer.checkpoint_errors = summary.checkpoint_errors - batch_ckpt_errors_before
                     timer.__exit__(None, None, None)
+
+            if self.supervisor:
+                snapshot = BatchSupervisorSnapshot(
+                    batch_number=summary.batches,
+                    claimed=len(batch),
+                    succeeded=summary.succeeded - batch_succeeded_before,
+                    failed=summary.failed - batch_failed_before,
+                    retried=summary.retried - batch_retried_before,
+                    checkpoint_errors=summary.checkpoint_errors - batch_ckpt_errors_before,
+                    records_saved=summary.records_saved - batch_records_before,
+                    discovered_urls=summary.discovered_urls - batch_discovered_before,
+                    total_claimed=summary.claimed,
+                    total_succeeded=summary.succeeded,
+                    total_failed=summary.failed,
+                    total_records_saved=summary.records_saved,
+                    frontier_stats=self.frontier.stats(),
+                    backpressure=self.backpressure.current_signals().as_dict() if self.backpressure else None,
+                )
+                decision = self.supervisor(summary, snapshot)
+                event = decision.as_dict(snapshot)
+                summary.supervision_events.append(event)
+                if decision.action == "abort":
+                    summary.status = "aborted"
+                    break
+                if decision.action == "pause":
+                    summary.status = "paused"
+                    break
 
             if self.backpressure:
                 signals = self.backpressure.current_signals()
@@ -329,3 +506,16 @@ def _payload_from_discovered_request(request: Any) -> dict[str, Any]:
     data.pop("canonical_url", None)
     data.pop("url", None)
     return data
+
+
+def _count_recent_zero_record_batches(events: list[dict[str, Any]]) -> int:
+    count = 0
+    for event in reversed(events):
+        snapshot = event.get("snapshot") if isinstance(event, dict) else {}
+        if not isinstance(snapshot, dict):
+            break
+        if int(snapshot.get("records_saved") or 0) == 0 and int(snapshot.get("discovered_urls") or 0) == 0:
+            count += 1
+            continue
+        break
+    return count

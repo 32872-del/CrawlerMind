@@ -1333,6 +1333,16 @@ def events_for_job(job: dict[str, Any]) -> list[dict[str, Any]]:
             "message": summary,
             "data": decision,
         })
+    supervision = job.get("supervision") if isinstance(job.get("supervision"), dict) else {}
+    last_event = supervision.get("last_event") if isinstance(supervision.get("last_event"), dict) else {}
+    if last_event:
+        action = str(last_event.get("action") or "supervision")
+        events.append({
+            "time": job.get("updated_at", ""),
+            "type": f"supervision_{action}",
+            "message": str(last_event.get("reason") or action),
+            "data": supervision,
+        })
     return events
 
 

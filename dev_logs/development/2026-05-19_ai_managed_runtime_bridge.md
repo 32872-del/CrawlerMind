@@ -68,3 +68,39 @@ OK
   decisions/diagnostics.
 - The next backend phase should add a controlled repair loop that can generate
   a revised run payload from failed/low-quality output.
+## Runtime Supervision Extension
+
+Added after the managed runtime bridge checkpoint.
+
+- Added batch-level runtime supervision in `BatchRunner`.
+- Added `BatchSupervisorSnapshot`, `BatchSupervisorDecision`, and
+  `RuleBasedBatchSupervisor`.
+- Supervision detects:
+  - consecutive batches with no records and no discovered URLs
+  - high batch failure rate
+  - low batch success rate
+  - low record yield
+- `ProfileLongRunConfig.supervision_mode` now supports:
+  - `off`
+  - `observe`
+  - `managed`
+- Product API maps managed AI modes to supervision modes:
+  - `supervised` -> `observe`
+  - `full_managed` -> `managed`
+- `/runs/{task_id}/status` now exposes `diagnostics` and `supervision`.
+- `/runs/{task_id}/events` now includes `supervision_*` events.
+- Full-managed runs can now pause/abort from runtime supervision and recommend
+  `ai_rerun`.
+- `POST /runs/{task_id}/ai-rerun` now also consumes runtime `supervision`.
+  When no LLM `next_run_overrides` exist, consecutive empty batches still
+  produce deterministic repair overrides: dynamic mode, networkidle wait, API
+  capture, cookie acceptance, longer waits, DOM pagination, and conservative
+  title selector fallback.
+
+Verification:
+
+```text
+python -m unittest autonomous_crawler.tests.test_batch_runner autonomous_crawler.tests.test_profile_longrun autonomous_crawler.tests.test_product_workflow_api.StatusEndpointTests -v
+python -m unittest autonomous_crawler.tests.test_product_workflow_api.ManagedAIRunTests autonomous_crawler.tests.test_product_workflow_api.StatusEndpointTests autonomous_crawler.tests.test_batch_runner autonomous_crawler.tests.test_profile_longrun -v
+python -m compileall autonomous_crawler -q
+```

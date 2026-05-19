@@ -21,7 +21,13 @@ from autonomous_crawler.storage.frontier import URLFrontier
 from autonomous_crawler.storage.product_store import ProductStore
 
 from .backpressure import BackpressureConfig, BackpressureMonitor, classify_bottlenecks, recommendation_text
-from .batch_runner import BatchRunner, BatchRunnerConfig, BatchRunnerSummary, ProductRecordCheckpoint
+from .batch_runner import (
+    BatchRunner,
+    BatchRunnerConfig,
+    BatchRunnerSummary,
+    ProductRecordCheckpoint,
+    RuleBasedBatchSupervisor,
+)
 from .multi_site_runner import MultiSiteRunner, MultiSiteRunnerConfig, MultiSiteRunSummary
 from .profile_ecommerce import (
     infer_pagination_stop_reason,
@@ -51,6 +57,7 @@ class ProfileLongRunConfig:
     category: str = ""
     sample_limit: int = 20
     output_report_path: str = ""
+    supervision_mode: str = "off"
 
     def __post_init__(self) -> None:
         if not str(self.run_id or "").strip():
@@ -65,6 +72,9 @@ class ProfileLongRunConfig:
             raise ValueError("sample_limit must be >= 0")
         if self.item_workers < 1:
             raise ValueError("item_workers must be >= 1")
+        mode = str(self.supervision_mode or "off").strip().lower()
+        if mode not in {"off", "observe", "managed"}:
+            raise ValueError("supervision_mode must be off, observe, or managed")
 
 
 @dataclass
@@ -178,6 +188,9 @@ class ProfileLongRunExecutor:
             ),
             checkpoint=ProductRecordCheckpoint(self.product_store),
             backpressure=backpressure_monitor,
+            supervisor=RuleBasedBatchSupervisor()
+            if config.supervision_mode in {"observe", "managed"}
+            else None,
         ).run()
 
         frontier_stats = self.frontier.stats()
@@ -214,6 +227,7 @@ class ProfileLongRunExecutor:
             "bottlenecks": bottlenecks,
             "recommendation": recommendation,
             "backpressure_signals": bp_signals.as_dict(),
+            "supervision": build_supervision_diagnostics(runner_summary),
         }
 
         report = build_profile_run_report(
@@ -490,6 +504,36 @@ def infer_stop_reason(
     if summary.discovered_urls:
         return "frontier_exhausted"
     return infer_pagination_stop_reason(profile, last_item_count=summary.records_saved, next_request_count=0)
+
+
+def build_supervision_diagnostics(summary: BatchRunnerSummary) -> dict[str, Any]:
+    events = list(summary.supervision_events or [])
+    action_counts: dict[str, int] = {}
+    highest = "info"
+    for event in events:
+        action = str(event.get("action") or "unknown")
+        action_counts[action] = action_counts.get(action, 0) + 1
+        severity = str(event.get("severity") or "info")
+        if severity == "critical":
+            highest = "critical"
+        elif severity == "warning" and highest != "critical":
+            highest = "warning"
+    last = events[-1] if events else {}
+    recommended_next_action = ""
+    if last:
+        action = str(last.get("action") or "")
+        if action in {"pause", "abort", "repair_after_run"}:
+            recommended_next_action = "ai_rerun"
+        elif action == "slow_down":
+            recommended_next_action = "reduce_concurrency"
+    return {
+        "enabled": bool(events),
+        "event_count": len(events),
+        "action_counts": action_counts,
+        "highest_severity": highest,
+        "last_event": last,
+        "recommended_next_action": recommended_next_action,
+    }
 
 
 def product_record_sample(record: ProductRecord) -> dict[str, Any]:

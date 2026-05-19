@@ -86,6 +86,7 @@ class ProfileRunRequest(BaseModel):
     category: str = ""
     output_report_path: str = ""
     runtime_dir: str = ""
+    supervision_mode: str = "off"
     managed_ai: ManagedAIConfig | None = None
     llm: LLMConfig | None = None
 
@@ -316,6 +317,17 @@ def _managed_ai_public_config(config: ManagedAIConfig | None, llm: LLMConfig | N
     }
 
 
+def _supervision_mode_for_managed_ai(config: ManagedAIConfig | None) -> str:
+    if not config or not config.enabled:
+        return "off"
+    mode = _managed_ai_mode(config)
+    if mode == "full_managed":
+        return "managed"
+    if mode == "supervised":
+        return "observe"
+    return "off"
+
+
 def _append_ai_decision(task_id: str, decision: dict[str, Any]) -> None:
     job = _get_job(task_id) or {}
     decisions = list(job.get("ai_decisions") or [])
@@ -406,6 +418,62 @@ def _ai_diagnostics_from_decision(decision: dict[str, Any]) -> dict[str, Any]:
         "next_run_overrides": decision.get("next_run_overrides") or {},
         "created_at": decision.get("created_at", ""),
     }
+
+
+def _supervision_from_result(result: dict[str, Any]) -> dict[str, Any] | None:
+    diagnostics = result.get("diagnostics") if isinstance(result.get("diagnostics"), dict) else {}
+    supervision = diagnostics.get("supervision") if isinstance(diagnostics.get("supervision"), dict) else {}
+    if supervision:
+        return supervision
+    runner = result.get("runner_summary") if isinstance(result.get("runner_summary"), dict) else {}
+    events = runner.get("supervision_events") if isinstance(runner.get("supervision_events"), list) else []
+    if not events:
+        return None
+    return {
+        "enabled": True,
+        "event_count": len(events),
+        "last_event": events[-1],
+    }
+
+
+def _repair_overrides_from_supervision(supervision: dict[str, Any]) -> dict[str, Any]:
+    if not isinstance(supervision, dict):
+        return {}
+    last = supervision.get("last_event") if isinstance(supervision.get("last_event"), dict) else {}
+    action = str(last.get("action") or "").strip().lower()
+    reason = str(last.get("reason") or "").lower()
+    suggestions = last.get("suggestions") if isinstance(last.get("suggestions"), list) else []
+    suggestion_actions = {
+        str(item.get("action") or "").strip().lower()
+        for item in suggestions
+        if isinstance(item, dict)
+    }
+    overrides: dict[str, Any] = {}
+    if action in {"pause", "abort", "repair_after_run"}:
+        overrides.setdefault("access_config", {})
+        overrides["access_config"].update({
+            "mode": "dynamic",
+            "wait_until": "networkidle",
+            "browser_config": {
+                "capture_api": True,
+                "auto_accept_cookies": True,
+                "render_time_ms": 3000,
+                "max_wait_ms": 30000,
+            },
+        })
+        overrides.setdefault("pagination_hints", {})
+        overrides["pagination_hints"].setdefault("type", "dom_links")
+    if action == "slow_down" or "reduce_concurrency_or_rotate_proxy" in suggestion_actions:
+        overrides["item_workers"] = 1
+        overrides.setdefault("access_config", {})
+        overrides["access_config"].setdefault("browser_config", {})
+        overrides["access_config"]["browser_config"]["max_wait_ms"] = 45000
+    if "empty" in reason or "no records" in reason or "switch_runtime_or_repair_selectors" in suggestion_actions:
+        overrides.setdefault("quality_expectations", {})
+        overrides["quality_expectations"]["required_fields"] = ["title"]
+        overrides.setdefault("selectors", {})
+        overrides["selectors"].setdefault("title", "h1, [class*='title'], [class*='name']")
+    return overrides
 
 
 def _apply_managed_profile_patch(
@@ -769,6 +837,16 @@ def _bounded_dict(value: Any, max_chars: int) -> dict[str, Any]:
     return value
 
 
+def _deep_merge_dicts(base: dict[str, Any], patch: dict[str, Any]) -> dict[str, Any]:
+    merged = dict(base or {})
+    for key, value in dict(patch or {}).items():
+        if isinstance(value, dict) and isinstance(merged.get(key), dict):
+            merged[key] = _deep_merge_dicts(dict(merged[key]), value)
+        else:
+            merged[key] = value
+    return merged
+
+
 def _background_crawl(
     task_id: str,
     user_goal: str,
@@ -844,6 +922,7 @@ def run_profile_longrun_workflow(request: ProfileRunRequest, *, task_id: str) ->
                 category=request.category,
                 output_report_path=request.output_report_path,
                 mode=_profile_runtime_mode(profile),
+                supervision_mode=request.supervision_mode,
             ),
             fetch_runtime=fetch_runtime,
             browser_runtime=browser_runtime,
@@ -876,6 +955,8 @@ def _background_profile_run(task_id: str, request: ProfileRunRequest) -> None:
             item_count=int(result.get("product_stats", {}).get("total") or 0),
             is_valid=bool(result.get("accepted")),
             profile_run=result,
+            diagnostics=result.get("diagnostics") if isinstance(result.get("diagnostics"), dict) else None,
+            supervision=_supervision_from_result(result),
             export=auto_export or None,
         )
     except Exception as exc:
@@ -1020,6 +1101,7 @@ def _register_product_run_job(
         max_batches=int(run_payload.get("max_batches") or 0),
         item_workers=int(run_payload.get("item_workers") or spec.item_workers),
         runtime_dir=str(run_payload.get("runtime_dir") or spec.runtime_dir),
+        supervision_mode=_supervision_mode_for_managed_ai(managed_ai),
         managed_ai=managed_ai,
         llm=llm,
     )
@@ -1048,6 +1130,7 @@ def _register_product_run_job(
                 "field_mapping": dict(spec.export.field_mapping),
             },
             "auto_export": bool(spec.export.output_path),
+            "supervision_mode": _supervision_mode_for_managed_ai(managed_ai),
         },
         managed_ai=_managed_ai_public_config(managed_ai, llm),
         ai_decisions=[],
@@ -1331,6 +1414,8 @@ def create_app() -> FastAPI:
             "last_error": progress.get("last_error", ""),
             "progress_summary": progress.get("progress_summary", ""),
             "quality_indicator": progress.get("quality_indicator", "unknown"),
+            "diagnostics": job.get("diagnostics") or None,
+            "supervision": job.get("supervision") or None,
             "export": job.get("export") or None,
             "managed_ai": job.get("managed_ai") or {"enabled": False},
             "ai_decisions": job.get("ai_decisions") or [],
@@ -1361,6 +1446,11 @@ def create_app() -> FastAPI:
         diagnostics = job.get("ai_diagnostics") if isinstance(job.get("ai_diagnostics"), dict) else {}
         if request.apply_diagnostics and isinstance(diagnostics.get("next_run_overrides"), dict):
             overrides.update(diagnostics.get("next_run_overrides") or {})
+        supervision_overrides = _repair_overrides_from_supervision(
+            job.get("supervision") if isinstance(job.get("supervision"), dict) else {}
+        )
+        if request.apply_diagnostics and supervision_overrides:
+            overrides = _deep_merge_dicts(overrides, supervision_overrides)
         overrides.update(dict(request.extra_overrides or {}))
 
         patched_spec, patched_profile, patch_result = _apply_managed_run_overrides(

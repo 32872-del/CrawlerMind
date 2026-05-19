@@ -4,9 +4,12 @@ from .backpressure import BackpressureConfig, BackpressureMonitor, BackpressureS
 from .batch_runner import (
     BatchRunner,
     BatchRunnerConfig,
+    BatchSupervisorDecision,
+    BatchSupervisorSnapshot,
     BatchRunnerSummary,
     ItemProcessResult,
     ProductRecordCheckpoint,
+    RuleBasedBatchSupervisor,
 )
 from .spider_models import (
     CrawlItemResult,
@@ -50,12 +53,15 @@ __all__ = [
     "classify_bottlenecks",
     "recommendation_text",
     "BatchRunnerConfig",
+    "BatchSupervisorDecision",
+    "BatchSupervisorSnapshot",
     "BatchRunnerSummary",
     "CrawlItemResult",
     "CrawlRequestEnvelope",
     "ItemProcessResult",
     "LangGraphBatchProcessor",
     "ProductRecordCheckpoint",
+    "RuleBasedBatchSupervisor",
     "MultiSiteRunner",
     "MultiSiteRunnerConfig",
     "MultiSiteRunSummary",

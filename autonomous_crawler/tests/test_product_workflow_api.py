@@ -647,6 +647,56 @@ class StatusEndpointTests(unittest.TestCase):
         self.assertIn("ai_decisions", body)
         self.assertIn("ai_repair_suggestions", body)
         self.assertIn("ai_patch_applications", body)
+        self.assertIn("supervision", body)
+
+    def test_status_and_events_include_runtime_supervision(self) -> None:
+        supervision = {
+            "enabled": True,
+            "event_count": 1,
+            "highest_severity": "critical",
+            "last_event": {
+                "action": "pause",
+                "reason": "2 consecutive batches produced no records",
+                "severity": "critical",
+            },
+            "recommended_next_action": "ai_rerun",
+        }
+        with patch("autonomous_crawler.api.app._build_advisor_from_config") as mock_build, \
+                patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+            advisor = MagicMock()
+            advisor.provider = "test-provider"
+            advisor.model = "test-model"
+            advisor.review_run_plan.return_value = {}
+            advisor.diagnose_run_result.return_value = {}
+            mock_build.return_value = advisor
+            mock_run.return_value = {
+                "accepted": False,
+                "status": "paused",
+                "run_id": "run-supervised-status",
+                "product_stats": {"total": 0},
+                "runner_summary": {"claimed": 2, "records_saved": 0, "succeeded": 2},
+                "frontier_stats": {"done": 2, "queued": 1},
+                "diagnostics": {"supervision": supervision},
+            }
+            client = TestClient(create_app())
+            resp = client.post(
+                "/runs/test",
+                json={
+                    "target_url": "https://shop.test",
+                    "profile": {"name": "shop-status", "crawl_preferences": {"seed_urls": ["https://shop.test/c"]}},
+                    "selected_fields": ["title"],
+                    "managed_ai": {"enabled": True, "mode": "full_managed"},
+                    "llm": {"enabled": True, "base_url": "https://llm.example/v1", "model": "m"},
+                },
+            )
+            task_id = resp.json()["task_id"]
+            time.sleep(0.4)
+            status = client.get(f"/runs/{task_id}/status")
+            events = client.get(f"/runs/{task_id}/events")
+
+        self.assertEqual(status.status_code, 200)
+        self.assertEqual(status.json()["supervision"]["recommended_next_action"], "ai_rerun")
+        self.assertTrue(any(item["type"] == "supervision_pause" for item in events.json()["events"]))
 
 
 class ManagedAIRunTests(unittest.TestCase):
@@ -1031,6 +1081,59 @@ class ManagedAIRunTests(unittest.TestCase):
         self.assertIn("profile.access_config.mode", child_status["ai_patch_applications"][0]["rejected"])
         self.assertIn("profile.selectors.title", child_status["ai_patch_applications"][0]["rejected"])
         self.assertNotIn("export.format", child_status["ai_patch_applications"][0]["accepted"])
+
+    def test_ai_rerun_uses_supervision_repair_overrides(self) -> None:
+        client = TestClient(create_app())
+        supervision = {
+            "enabled": True,
+            "last_event": {
+                "action": "pause",
+                "reason": "2 consecutive batches produced no records or new URLs",
+                "suggestions": [{"action": "switch_runtime_or_repair_selectors", "priority": "high"}],
+            },
+            "recommended_next_action": "ai_rerun",
+        }
+        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+            mock_run.return_value = {
+                "run_id": "run-supervision-rerun",
+                "status": "paused",
+                "accepted": False,
+                "product_stats": {"total": 0},
+                "diagnostics": {"supervision": supervision},
+            }
+            response = client.post("/runs/test", json={
+                "target_url": "https://shop.test/",
+                "profile": {
+                    "name": "shop.test",
+                    "crawl_preferences": {"seed_urls": ["https://shop.test/list"], "seed_kind": "list"},
+                    "access_config": {"mode": "static"},
+                },
+                "selected_fields": ["title"],
+            })
+            self.assertEqual(response.status_code, 200)
+            task_id = response.json()["task_id"]
+            for _ in range(20):
+                status = client.get(f"/runs/{task_id}/status").json()
+                if status["status"] == "paused":
+                    break
+                time.sleep(0.05)
+
+            rerun = client.post(f"/runs/{task_id}/ai-rerun", json={"run_kind": "test"})
+            self.assertEqual(rerun.status_code, 200)
+            child_id = rerun.json()["task_id"]
+            for _ in range(20):
+                child_status = client.get(f"/runs/{child_id}/status").json()
+                if child_status["status"] == "paused":
+                    break
+                time.sleep(0.05)
+
+        child_request = mock_run.call_args_list[-1].args[0]
+        child_profile = child_request.profile
+        self.assertEqual(child_profile["access_config"]["mode"], "dynamic")
+        self.assertTrue(child_profile["access_config"]["browser_config"]["capture_api"])
+        self.assertEqual(child_profile["access_config"]["wait_until"], "networkidle")
+        self.assertIn("title", child_profile["selectors"])
+        self.assertIn("profile.access_config.mode", child_status["ai_patch_applications"][0]["accepted"])
 
 
 class ProductWorkflowAPITests(unittest.TestCase):
