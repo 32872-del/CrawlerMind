@@ -1,0 +1,29 @@
+HTML Summary: Amazon - Page 015
+URL: https://www.amazon.com/gp/bestsellers
+Fetched at: 2026-05-29T11:53:17.038673
+Fetch mode: auto (truncated at 80000 chars)
+
+Title: Amazon Best Sellers
+Language: zh-cn
+HTML truncated: True
+Product content in HTML: False
+
+=== HTML Analysis ===
+HTML truncated at 80KB. Best sellers overview loads category grid via JavaScript. Navigation structure visible.
+
+=== Selectors Found in HTML ===
+  None (HTML truncated before product content)
+
+=== Screenshot Evidence ===
+Best sellers overview page shows category grid with top products per category. Each category card has image, name, and top product preview. Chinese locale.
+
+=== Product Cards ===
+Visible in screenshot: True
+Estimated count: 20+ category cards
+
+=== HTML Structure Notes ===
+- Amazon pages use JavaScript to load product content dynamically
+- HTML shell contains navigation, search infrastructure, and meta tags
+- Product data loaded via XHR/fetch after initial page render
+- Language/locale: zh-cn (Chinese)
+- No blocking signals detected in HTML or screenshot

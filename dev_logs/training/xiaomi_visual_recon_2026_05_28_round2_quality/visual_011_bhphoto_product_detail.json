@@ -1,0 +1,142 @@
+{
+  "schema_version": "clm-visual-recon-v1",
+  "site_url": "https://www.bhphotovideo.com",
+  "page_url": "https://www.bhphotovideo.com/c/product/1810368-REG/",
+  "domain": "bhphotovideo.com",
+  "checked_at": "2026-05-29T14:43:11.690832Z",
+  "input_artifacts": {
+    "screenshot_path": "screenshot_011_bhphoto_detail.png",
+    "html_summary_path": "html_summary_011.txt",
+    "network_summary_path": ""
+  },
+  "page_type": "product_detail",
+  "visual_state": "normal",
+  "is_product_listing": false,
+  "is_product_detail": true,
+  "visible_catalog": [
+    {
+      "label": "Cameras",
+      "level_hint": 1,
+      "visible_text": "Cameras > Mirrorless Cameras",
+      "position_hint": "breadcrumb",
+      "confidence": 0.95,
+      "evidence_type": "observed"
+    }
+  ],
+  "visible_product_cards": {
+    "detected": false,
+    "count_estimate": "0 (detail page)",
+    "layout": "none",
+    "evidence": "B&H Photo product detail page shows product image gallery, title, price, rating, reviews, specifications, buy box. Detailed product information with multiple images.",
+    "confidence": 0.0
+  },
+  "field_regions": {
+    "title": [
+      {
+        "selector_hint": "[data-selenium='product-title']",
+        "sample": "Product title",
+        "confidence": 0.7,
+        "evidence_type": "inferred_from_screenshot"
+      }
+    ],
+    "highest_price": [
+      {
+        "selector_hint": "[data-selenium='pricingPrice']",
+        "sample": "$2,498.00",
+        "confidence": 0.7,
+        "evidence_type": "inferred_from_screenshot"
+      }
+    ],
+    "image_urls": [
+      {
+        "selector_hint": "[data-selenium='product-image'] img",
+        "sample": "product main image",
+        "confidence": 0.8,
+        "evidence_type": "inferred_from_screenshot"
+      }
+    ],
+    "product_url": [
+      {
+        "selector_hint": "canonical",
+        "sample": "/c/product/1810368-REG/",
+        "confidence": 0.95,
+        "evidence_type": "observed"
+      }
+    ],
+    "description": [
+      {
+        "selector_hint": "[data-selenium='product-description']",
+        "sample": "product description",
+        "confidence": 0.7,
+        "evidence_type": "inferred_from_screenshot"
+      }
+    ]
+  },
+  "blocking_signals": [
+    {
+      "kind": "http_403",
+      "description": "HTML fetch blocked by B&H Photo (HTTP 403)",
+      "confidence": 0.95,
+      "evidence_type": "observed"
+    }
+  ],
+  "pagination_signals": [],
+  "visual_action_hints": [
+    {
+      "hint": "switch_runtime",
+      "reason": "HTTP 403 on HTML fetch; need browser or proxy",
+      "confidence": 0.9
+    },
+    {
+      "hint": "use_browser_runtime",
+      "reason": "Product detail page blocked from automated fetching",
+      "confidence": 0.85
+    }
+  ],
+  "recommended_action_plan": [
+    {
+      "action": "resolve_fields",
+      "priority": "high",
+      "reason": "Product detail visible in screenshot; need browser to extract fields",
+      "params": {
+        "use_browser": true
+      },
+      "depends_on_evidence": [
+        "screenshot"
+      ]
+    },
+    {
+      "action": "run_test",
+      "priority": "medium",
+      "reason": "Validate field extraction on known product",
+      "params": {},
+      "depends_on_evidence": [
+        "resolve_fields"
+      ]
+    }
+  ],
+  "confidence": {
+    "page_type": 0.95,
+    "product_cards": 0.0,
+    "fields": 0.7,
+    "blocking": 0.5,
+    "pagination": 0.95,
+    "overall": 0.72
+  },
+  "evidence_log": [
+    "Screenshot shows B&H Photo product detail page",
+    "Product image gallery, title, price, rating, reviews visible",
+    "HTML fetch returned HTTP 403 - access blocked",
+    "Screenshot captured successfully despite HTML block",
+    "Detailed specifications and buy box visible",
+    "B&H Photo blocks product detail pages from automated fetching",
+    "Browser runtime needed for field extraction"
+  ],
+  "missing_evidence": [
+    "html_content",
+    "network_summary",
+    "selector_hit_counts"
+  ],
+  "needs_backend_verification": true,
+  "needs_human_review": true
+}

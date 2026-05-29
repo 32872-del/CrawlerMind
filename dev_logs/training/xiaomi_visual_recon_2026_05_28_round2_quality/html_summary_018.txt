@@ -1,0 +1,21 @@
+HTML Summary: bestbuy.com - Page 018
+URL: https://www.bestbuy.com
+Fetched at: 2026-05-29T16:06:30.925221
+Fetch mode: auto (blocked)
+
+Title: Best Buy International: Select your Country - Best Buy
+Language: en
+
+=== Blocking Signals ===
+  - geo_redirect: Best Buy geo-redirect page for international visitors
+
+=== HTML Analysis ===
+Full HTML fetched (4.5KB). Best Buy shows geo-redirect page for international visitors. Country selection (Canada/US) with language options (English/French/Spanish). No product content - requires country selection first.
+
+=== Screenshot Evidence ===
+Best Buy geo-redirect page shows country selection (Canada/US) with language options. International visitors must select country before accessing store.
+
+=== Notes ===
+- This page is BLOCKED - no product content accessible
+- Screenshot captured for visual documentation
+- Need alternative approach (proxy, browser, human interaction)

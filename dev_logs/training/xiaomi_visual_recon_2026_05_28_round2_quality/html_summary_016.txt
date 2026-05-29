@@ -1,0 +1,28 @@
+HTML Summary: Newegg - Page 016
+URL: https://www.newegg.com/promotions/nid/landingpage/DealZone
+Fetched at: 2026-05-29T12:10:14.736410
+Fetch mode: auto (HTTP 404)
+
+Title: Newegg Deal Zone
+Language: en-us
+HTML truncated: False
+
+=== HTML Analysis ===
+HTML fetch returned HTTP 404 error. Page may have been moved or renamed. Screenshot captured successfully showing Deal Zone page content.
+
+=== Selectors Found in HTML ===
+  None (HTML truncated or 404)
+
+=== Screenshot Evidence ===
+Newegg Deal Zone page shows promotional deals with countdown timers, discount percentages, and product cards. Limited-time offers with special pricing.
+
+=== Product Cards ===
+Visible in screenshot: True
+Estimated count: 10-15
+
+=== HTML Structure Notes ===
+- Newegg pages use JavaScript (__initialState__) to load product content
+- HTML shell contains navigation, CSS, and JavaScript initialization
+- Product data loaded via XHR/fetch after initial page render
+- Language/locale: en-us
+- No blocking signals detected in screenshot

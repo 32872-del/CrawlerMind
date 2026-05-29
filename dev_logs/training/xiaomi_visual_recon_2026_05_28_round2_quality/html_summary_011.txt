@@ -1,0 +1,29 @@
+HTML Summary: B&H Photo - Page 011
+URL: https://www.bhphotovideo.com/c/product/1810368-REG/
+Fetched at: 2026-05-29T14:43:11.691318
+Fetch mode: auto (HTTP 403)
+
+Title: B&H Photo Product Detail
+Language: en
+HTML truncated: False
+Product content in HTML: False
+
+=== HTML Analysis ===
+HTML fetch returned HTTP 403 (access blocked). Screenshot captured successfully. B&H Photo blocks product detail pages from automated fetching.
+
+=== Selectors Found in HTML ===
+  None (HTTP 403 or truncated)
+
+=== Screenshot Evidence ===
+B&H Photo product detail page shows product image gallery, title, price, rating, reviews, specifications, buy box. Detailed product information with multiple images.
+
+=== Product Cards ===
+Visible in screenshot: False
+Estimated count: 0 (detail page)
+
+=== HTML Structure Notes ===
+- B&H Photo uses data-selenium attributes for product elements
+- Some pages blocked (HTTP 403) from automated fetching
+- Product data structured with miniProductPage* selectors
+- Language/locale: en
+- BLOCKING: HTTP 403 detected on this page

@@ -1,0 +1,28 @@
+HTML Summary: Newegg - Page 006
+URL: https://www.newegg.com/p/pl?d=laptop
+Fetched at: 2026-05-29T12:10:14.733171
+Fetch mode: auto (truncated at 80000 chars)
+
+Title: Laptops and Notebooks Computers
+Language: en-us
+HTML truncated: True
+
+=== HTML Analysis ===
+HTML truncated at 80KB. Newegg laptop listing loads product grid via JavaScript. Navigation structure visible.
+
+=== Selectors Found in HTML ===
+  None (HTML truncated or 404)
+
+=== Screenshot Evidence ===
+Newegg laptop listing page shows product grid with laptop cards. Each card has image, title, specs, price, rating, shipping. Left sidebar with filters for brand, CPU, RAM, etc.
+
+=== Product Cards ===
+Visible in screenshot: True
+Estimated count: 15-20
+
+=== HTML Structure Notes ===
+- Newegg pages use JavaScript (__initialState__) to load product content
+- HTML shell contains navigation, CSS, and JavaScript initialization
+- Product data loaded via XHR/fetch after initial page render
+- Language/locale: en-us
+- No blocking signals detected in screenshot

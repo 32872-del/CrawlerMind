@@ -1,0 +1,120 @@
+{
+  "schema_version": "clm-visual-recon-v1",
+  "site_url": "https://www.amazon.com",
+  "page_url": "https://www.amazon.com",
+  "domain": "amazon.com",
+  "checked_at": "2026-05-29T11:53:17.037744Z",
+  "input_artifacts": {
+    "screenshot_path": "screenshot_013_amazon_home.png",
+    "html_summary_path": "html_summary_013.txt",
+    "network_summary_path": ""
+  },
+  "page_type": "home",
+  "visual_state": "normal",
+  "is_product_listing": false,
+  "is_product_detail": false,
+  "visible_catalog": [
+    {
+      "label": "All",
+      "level_hint": 1,
+      "visible_text": "All Categories",
+      "position_hint": "top_nav",
+      "confidence": 0.95,
+      "evidence_type": "observed"
+    },
+    {
+      "label": "Today's Deals",
+      "level_hint": 1,
+      "visible_text": "Today's Deals",
+      "position_hint": "top_nav",
+      "confidence": 0.9,
+      "evidence_type": "observed"
+    }
+  ],
+  "visible_product_cards": {
+    "detected": false,
+    "count_estimate": "0 (homepage)",
+    "layout": "none",
+    "evidence": "Amazon homepage with search bar, category navigation, promotional banners, and category grid cards. No individual product cards with prices. Chinese locale.",
+    "confidence": 0.9
+  },
+  "field_regions": {
+    "title": [],
+    "highest_price": [],
+    "image_urls": [
+      {
+        "selector_hint": ".s-image",
+        "sample": "category card images",
+        "confidence": 0.6,
+        "evidence_type": "inferred_from_screenshot"
+      }
+    ],
+    "product_url": [
+      {
+        "selector_hint": ".a-link-normal",
+        "sample": "category links",
+        "confidence": 0.5,
+        "evidence_type": "inferred_from_screenshot"
+      }
+    ]
+  },
+  "blocking_signals": [],
+  "pagination_signals": [],
+  "visual_action_hints": [
+    {
+      "hint": "use_browser_runtime",
+      "reason": "Homepage has lazy-loaded category images",
+      "confidence": 0.7
+    },
+    {
+      "hint": "analyze_site",
+      "reason": "Homepage is category-based; need to identify product listing entry points",
+      "confidence": 0.85
+    }
+  ],
+  "recommended_action_plan": [
+    {
+      "action": "analyze_site",
+      "priority": "high",
+      "reason": "Homepage is category-based navigation; need to identify product listing entry points",
+      "params": {},
+      "depends_on_evidence": [
+        "screenshot"
+      ]
+    },
+    {
+      "action": "select_catalog",
+      "priority": "medium",
+      "reason": "Category grid cards provide catalog navigation structure",
+      "params": {},
+      "depends_on_evidence": [
+        "screenshot"
+      ]
+    }
+  ],
+  "confidence": {
+    "page_type": 0.95,
+    "product_cards": 0.9,
+    "fields": 0.0,
+    "blocking": 0.95,
+    "pagination": 0.9,
+    "overall": 0.65
+  },
+  "evidence_log": [
+    "Screenshot shows Amazon homepage with search bar and category navigation",
+    "Category grid cards visible (no individual product cards with prices)",
+    "Chinese locale detected (配送至: 荷兰)",
+    "HTML truncated at 80KB - homepage content loaded via JavaScript",
+    "Navigation bar structure visible in HTML shell",
+    "Promotional banners and personalized content visible in screenshot",
+    "No blocking signals detected"
+  ],
+  "missing_evidence": [
+    "network_summary",
+    "browser_rendered_html",
+    "product_listing_page",
+    "selector_hit_counts"
+  ],
+  "needs_backend_verification": true,
+  "needs_human_review": false
+}

@@ -1,0 +1,149 @@
+{
+  "schema_version": "clm-visual-recon-v1",
+  "site_url": "https://www.tatuum.com",
+  "page_url": "https://www.tatuum.com/Search-Show?q=dress",
+  "domain": "tatuum.com",
+  "checked_at": "2026-05-29T15:26:46.568310Z",
+  "input_artifacts": {
+    "screenshot_path": "screenshot_008_tatuum_search.png",
+    "html_summary_path": "html_summary_008.txt",
+    "network_summary_path": ""
+  },
+  "page_type": "product_listing",
+  "visual_state": "normal",
+  "is_product_listing": true,
+  "is_product_detail": false,
+  "visible_catalog": [
+    {
+      "label": "Dresses",
+      "level_hint": 1,
+      "visible_text": "Dresses All Dresses",
+      "position_hint": "breadcrumb",
+      "confidence": 0.9,
+      "evidence_type": "observed"
+    },
+    {
+      "label": "Filters",
+      "level_hint": 2,
+      "visible_text": "Size Color Price",
+      "position_hint": "left_sidebar",
+      "confidence": 0.85,
+      "evidence_type": "observed"
+    }
+  ],
+  "visible_product_cards": {
+    "detected": true,
+    "count_estimate": "10-15",
+    "layout": "grid",
+    "evidence": "Tatuum search results for 'dress'. Shows product grid with dress cards including images, titles, prices. Clean minimalist layout. European fashion retailer.",
+    "confidence": 0.8
+  },
+  "field_regions": {
+    "title": [
+      {
+        "selector_hint": ".product-name",
+        "sample": "Dress product name",
+        "confidence": 0.6,
+        "evidence_type": "inferred_from_screenshot"
+      }
+    ],
+    "highest_price": [
+      {
+        "selector_hint": ".product-price",
+        "sample": "€89.99",
+        "confidence": 0.6,
+        "evidence_type": "inferred_from_screenshot"
+      }
+    ],
+    "image_urls": [
+      {
+        "selector_hint": ".product-image img",
+        "sample": "product image",
+        "confidence": 0.7,
+        "evidence_type": "inferred_from_screenshot"
+      }
+    ],
+    "product_url": [
+      {
+        "selector_hint": ".product-link",
+        "sample": "/product/...",
+        "confidence": 0.6,
+        "evidence_type": "inferred_from_screenshot"
+      }
+    ]
+  },
+  "blocking_signals": [
+    {
+      "kind": "http_403",
+      "description": "HTTP 403 - access blocked by Tatuum",
+      "confidence": 0.95,
+      "evidence_type": "observed"
+    }
+  ],
+  "pagination_signals": [
+    {
+      "kind": "next_button",
+      "visible_text": "Next",
+      "position_hint": "bottom",
+      "confidence": 0.8,
+      "evidence_type": "inferred_from_screenshot"
+    }
+  ],
+  "visual_action_hints": [
+    {
+      "hint": "switch_runtime",
+      "reason": "HTTP 403 blocked; need browser or proxy",
+      "confidence": 0.9
+    },
+    {
+      "hint": "use_browser_runtime",
+      "reason": "Fashion retailer blocks automated access",
+      "confidence": 0.85
+    }
+  ],
+  "recommended_action_plan": [
+    {
+      "action": "resolve_fields",
+      "priority": "high",
+      "reason": "Product cards visible in screenshot; need browser to bypass 403",
+      "params": {
+        "use_browser": true
+      },
+      "depends_on_evidence": [
+        "screenshot"
+      ]
+    },
+    {
+      "action": "run_test",
+      "priority": "medium",
+      "reason": "Validate extraction on European fashion retailer",
+      "params": {},
+      "depends_on_evidence": [
+        "resolve_fields"
+      ]
+    }
+  ],
+  "confidence": {
+    "page_type": 0.85,
+    "product_cards": 0.8,
+    "fields": 0.6,
+    "blocking": 0.5,
+    "pagination": 0.8,
+    "overall": 0.72
+  },
+  "evidence_log": [
+    "Screenshot shows Tatuum search results for 'dress'",
+    "10-15 product cards visible with images, titles, prices",
+    "HTML fetch returned HTTP 403 - access blocked",
+    "Screenshot captured successfully despite HTML block",
+    "European fashion retailer with minimalist layout",
+    "Browser runtime needed to bypass 403 block"
+  ],
+  "missing_evidence": [
+    "html_content",
+    "network_summary",
+    "selector_hit_counts"
+  ],
+  "needs_backend_verification": true,
+  "needs_human_review": true
+}

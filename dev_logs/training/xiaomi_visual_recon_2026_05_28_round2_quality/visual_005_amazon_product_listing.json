@@ -1,0 +1,143 @@
+{
+  "schema_version": "clm-visual-recon-v1",
+  "site_url": "https://www.amazon.com",
+  "page_url": "https://www.amazon.com/gp/bestsellers/electronics",
+  "domain": "amazon.com",
+  "checked_at": "2026-05-29T11:53:17.036206Z",
+  "input_artifacts": {
+    "screenshot_path": "screenshot_005_amazon_bestsellers.png",
+    "html_summary_path": "html_summary_005.txt",
+    "network_summary_path": ""
+  },
+  "page_type": "product_listing",
+  "visual_state": "normal",
+  "is_product_listing": true,
+  "is_product_detail": false,
+  "visible_catalog": [
+    {
+      "label": "Electronics",
+      "level_hint": 1,
+      "visible_text": "Electronics Best Sellers",
+      "position_hint": "top_breadcrumb",
+      "confidence": 0.95,
+      "evidence_type": "observed"
+    },
+    {
+      "label": "Top 100",
+      "level_hint": 2,
+      "visible_text": "1-100 of results",
+      "position_hint": "main_content",
+      "confidence": 0.9,
+      "evidence_type": "observed"
+    }
+  ],
+  "visible_product_cards": {
+    "detected": true,
+    "count_estimate": "50+",
+    "layout": "grid",
+    "evidence": "Best sellers electronics page shows numbered product grid (1-100) with product cards. Each card has rank number, image, title, price, rating. Chinese locale.",
+    "confidence": 0.9
+  },
+  "field_regions": {
+    "title": [
+      {
+        "selector_hint": ".a-link-normal span",
+        "sample": "Best Seller in category",
+        "confidence": 0.7,
+        "evidence_type": "inferred_from_screenshot"
+      }
+    ],
+    "highest_price": [
+      {
+        "selector_hint": ".a-price .a-offscreen",
+        "sample": "$19.99",
+        "confidence": 0.7,
+        "evidence_type": "inferred_from_screenshot"
+      }
+    ],
+    "image_urls": [
+      {
+        "selector_hint": ".s-image",
+        "sample": "product image",
+        "confidence": 0.8,
+        "evidence_type": "inferred_from_screenshot"
+      }
+    ],
+    "product_url": [
+      {
+        "selector_hint": ".a-link-normal",
+        "sample": "/dp/B0D1XD1ZV3",
+        "confidence": 0.7,
+        "evidence_type": "inferred_from_screenshot"
+      }
+    ]
+  },
+  "blocking_signals": [],
+  "pagination_signals": [
+    {
+      "kind": "page_numbers",
+      "visible_text": "Page 1-10",
+      "position_hint": "bottom",
+      "confidence": 0.8,
+      "evidence_type": "inferred_from_screenshot"
+    }
+  ],
+  "visual_action_hints": [
+    {
+      "hint": "use_browser_runtime",
+      "reason": "Best sellers page requires JavaScript for product grid rendering",
+      "confidence": 0.9
+    },
+    {
+      "hint": "select_catalog",
+      "reason": "Numbered ranking system (1-100) provides structured catalog navigation",
+      "confidence": 0.85
+    }
+  ],
+  "recommended_action_plan": [
+    {
+      "action": "resolve_fields",
+      "priority": "high",
+      "reason": "Numbered product grid with clear structure; browser rendering needed for selectors",
+      "params": {
+        "use_browser": true
+      },
+      "depends_on_evidence": [
+        "screenshot"
+      ]
+    },
+    {
+      "action": "select_catalog",
+      "priority": "medium",
+      "reason": "Best sellers has category-based catalog structure worth exploring",
+      "params": {},
+      "depends_on_evidence": [
+        "screenshot"
+      ]
+    }
+  ],
+  "confidence": {
+    "page_type": 0.95,
+    "product_cards": 0.9,
+    "fields": 0.7,
+    "blocking": 0.95,
+    "pagination": 0.8,
+    "overall": 0.85
+  },
+  "evidence_log": [
+    "Screenshot shows Amazon Best Sellers electronics page",
+    "50+ numbered product cards (rank 1-100) with images, titles, prices, ratings",
+    "Chinese locale detected (配送至: 荷兰)",
+    "HTML truncated at 80KB - product grid loaded via JavaScript",
+    "Category navigation visible in HTML shell",
+    "Numbered ranking system provides structured product ordering",
+    "No blocking signals detected"
+  ],
+  "missing_evidence": [
+    "network_summary",
+    "browser_rendered_html",
+    "selector_hit_counts"
+  ],
+  "needs_backend_verification": true,
+  "needs_human_review": false
+}

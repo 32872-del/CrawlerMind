@@ -1,0 +1,28 @@
+HTML Summary: Newegg - Page 010
+URL: https://www.newegg.com/p/N82E16834156500
+Fetched at: 2026-05-29T12:10:14.733688
+Fetch mode: auto (truncated at 78700 chars)
+
+Title: MSI 15.6" AMD Ryzen 5 PRO 7530U 16GB Memory DDR4 3200 1TB NVMe SSD Windows 11 Home
+Language: en
+HTML truncated: True
+
+=== HTML Analysis ===
+HTML truncated at 78KB. Product detail page loads content via JavaScript. Page structure and meta tags visible.
+
+=== Selectors Found in HTML ===
+  None (HTML truncated or 404)
+
+=== Screenshot Evidence ===
+Newegg product detail page for MSI laptop. Shows product image gallery, title, specs, price, rating, reviews, buy box, similar products. Detailed specifications table.
+
+=== Product Cards ===
+Visible in screenshot: False
+Estimated count: 0 (detail page)
+
+=== HTML Structure Notes ===
+- Newegg pages use JavaScript (__initialState__) to load product content
+- HTML shell contains navigation, CSS, and JavaScript initialization
+- Product data loaded via XHR/fetch after initial page render
+- Language/locale: en
+- No blocking signals detected in screenshot

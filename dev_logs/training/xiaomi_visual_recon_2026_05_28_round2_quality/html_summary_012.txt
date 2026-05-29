@@ -1,0 +1,25 @@
+HTML Summary: thesting.com - Page 012
+URL: https://www.thesting.com/nl/p/blazer-met-hooggemengde-wol
+Fetched at: 2026-05-29T15:26:46.569517
+Fetch mode: auto (HTTP 410)
+
+Title: The Sting - Product Detail
+Language: nl
+
+=== HTML Analysis ===
+HTML fetch returned HTTP 410 (Gone - page no longer exists). Screenshot captured successfully. Product page has been removed or moved.
+
+=== Blocking Signals ===
+  - http_410: HTTP 410 Gone - product page no longer exists
+
+=== Screenshot Evidence ===
+The Sting product page shows 410 Gone error or redirect. Product may have been removed from catalog. Dutch fashion retailer.
+
+=== Product Cards ===
+Visible in screenshot: False
+Estimated count: 0 (detail page)
+
+=== Notes ===
+- Screenshot captured despite HTML fetch failure
+- Browser runtime may bypass access blocks
+- HTTP 410 indicates permanent page removal (not temporary)

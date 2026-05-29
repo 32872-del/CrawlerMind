@@ -1,0 +1,29 @@
+HTML Summary: Amazon - Page 009
+URL: https://www.amazon.com/dp/B0D1XD1ZV3
+Fetched at: 2026-05-29T11:53:17.037660
+Fetch mode: auto (truncated at 80000 chars)
+
+Title: Amazon.com: Apple AirPods Pro 2
+Language: zh-cn
+HTML truncated: True
+Product content in HTML: False
+
+=== HTML Analysis ===
+HTML truncated at 80KB. Product detail page loads content via JavaScript. Page structure and meta tags visible in HTML shell.
+
+=== Selectors Found in HTML ===
+  None (HTML truncated before product content)
+
+=== Screenshot Evidence ===
+Product detail page for Apple AirPods Pro 2. Shows product image gallery, title, price, rating, description, buy box, similar products. Chinese locale.
+
+=== Product Cards ===
+Visible in screenshot: False
+Estimated count: 0 (detail page)
+
+=== HTML Structure Notes ===
+- Amazon pages use JavaScript to load product content dynamically
+- HTML shell contains navigation, search infrastructure, and meta tags
+- Product data loaded via XHR/fetch after initial page render
+- Language/locale: zh-cn (Chinese)
+- No blocking signals detected in HTML or screenshot

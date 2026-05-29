@@ -1,0 +1,143 @@
+{
+  "schema_version": "clm-visual-recon-v1",
+  "site_url": "https://www.newegg.com",
+  "page_url": "https://www.newegg.com/p/pl?d=laptop",
+  "domain": "newegg.com",
+  "checked_at": "2026-05-29T12:10:14.732676Z",
+  "input_artifacts": {
+    "screenshot_path": "screenshot_006_newegg_laptop.png",
+    "html_summary_path": "html_summary_006.txt",
+    "network_summary_path": ""
+  },
+  "page_type": "product_listing",
+  "visual_state": "normal",
+  "is_product_listing": true,
+  "is_product_detail": false,
+  "visible_catalog": [
+    {
+      "label": "Laptops",
+      "level_hint": 1,
+      "visible_text": "Laptops and Notebooks",
+      "position_hint": "breadcrumb",
+      "confidence": 0.95,
+      "evidence_type": "observed"
+    },
+    {
+      "label": "Filters",
+      "level_hint": 2,
+      "visible_text": "Brand CPU RAM Storage Screen Size",
+      "position_hint": "left_sidebar",
+      "confidence": 0.85,
+      "evidence_type": "observed"
+    }
+  ],
+  "visible_product_cards": {
+    "detected": true,
+    "count_estimate": "15-20",
+    "layout": "grid",
+    "evidence": "Newegg laptop listing page shows product grid with laptop cards. Each card has image, title, specs, price, rating, shipping. Left sidebar with filters for brand, CPU, RAM, etc.",
+    "confidence": 0.85
+  },
+  "field_regions": {
+    "title": [
+      {
+        "selector_hint": ".item-title",
+        "sample": "Laptop 15.6\" AMD Ryzen 5",
+        "confidence": 0.7,
+        "evidence_type": "inferred_from_screenshot"
+      }
+    ],
+    "highest_price": [
+      {
+        "selector_hint": ".price-current",
+        "sample": "$599.99",
+        "confidence": 0.7,
+        "evidence_type": "inferred_from_screenshot"
+      }
+    ],
+    "image_urls": [
+      {
+        "selector_hint": ".item-img img",
+        "sample": "product image",
+        "confidence": 0.8,
+        "evidence_type": "inferred_from_screenshot"
+      }
+    ],
+    "product_url": [
+      {
+        "selector_hint": ".item-title a",
+        "sample": "/p/N82E16834...",
+        "confidence": 0.7,
+        "evidence_type": "inferred_from_screenshot"
+      }
+    ]
+  },
+  "blocking_signals": [],
+  "pagination_signals": [
+    {
+      "kind": "next_button",
+      "visible_text": "Next",
+      "position_hint": "bottom",
+      "confidence": 0.85,
+      "evidence_type": "inferred_from_screenshot"
+    }
+  ],
+  "visual_action_hints": [
+    {
+      "hint": "use_browser_runtime",
+      "reason": "Newegg product grid loaded via JavaScript",
+      "confidence": 0.9
+    },
+    {
+      "hint": "select_catalog",
+      "reason": "Laptop listing has rich filter options for catalog navigation",
+      "confidence": 0.8
+    }
+  ],
+  "recommended_action_plan": [
+    {
+      "action": "resolve_fields",
+      "priority": "high",
+      "reason": "Product cards visible; need browser rendering for selector extraction",
+      "params": {
+        "use_browser": true
+      },
+      "depends_on_evidence": [
+        "screenshot"
+      ]
+    },
+    {
+      "action": "select_catalog",
+      "priority": "medium",
+      "reason": "Rich filter sidebar provides catalog navigation structure",
+      "params": {},
+      "depends_on_evidence": [
+        "screenshot"
+      ]
+    }
+  ],
+  "confidence": {
+    "page_type": 0.9,
+    "product_cards": 0.85,
+    "fields": 0.7,
+    "blocking": 0.95,
+    "pagination": 0.85,
+    "overall": 0.82
+  },
+  "evidence_log": [
+    "Screenshot shows Newegg laptop listing page",
+    "15-20 product cards visible with images, titles, specs, prices, ratings",
+    "English locale (en-us) detected",
+    "HTML truncated at 80KB - product grid loaded via JavaScript",
+    "Rich filter sidebar with brand/CPU/RAM/storage options",
+    "Standard Newegg product listing layout",
+    "No blocking signals detected"
+  ],
+  "missing_evidence": [
+    "network_summary",
+    "browser_rendered_html",
+    "selector_hit_counts"
+  ],
+  "needs_backend_verification": true,
+  "needs_human_review": false
+}

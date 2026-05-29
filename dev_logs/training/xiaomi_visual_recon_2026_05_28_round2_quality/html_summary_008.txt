@@ -1,0 +1,25 @@
+HTML Summary: tatuum.com - Page 008
+URL: https://www.tatuum.com/Search-Show?q=dress
+Fetched at: 2026-05-29T15:26:46.568984
+Fetch mode: auto (HTTP 403)
+
+Title: Tatuum - Dress Search
+Language: en
+
+=== HTML Analysis ===
+HTML fetch returned HTTP 403 (access blocked). Screenshot captured successfully. Tatuum blocks automated fetching.
+
+=== Blocking Signals ===
+  - http_403: HTTP 403 - access blocked by Tatuum
+
+=== Screenshot Evidence ===
+Tatuum search results for 'dress'. Shows product grid with dress cards including images, titles, prices. Clean minimalist layout. European fashion retailer.
+
+=== Product Cards ===
+Visible in screenshot: True
+Estimated count: 10-15
+
+=== Notes ===
+- Screenshot captured despite HTML fetch failure
+- Browser runtime may bypass access blocks
+- HTTP 410 indicates permanent page removal (not temporary)
