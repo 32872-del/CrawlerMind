@@ -7,6 +7,7 @@ analysis, access tuning, selector repair, and executable rerun preparation.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 import json
 import os
 import re
@@ -419,15 +420,70 @@ def execute_managed_action_plan(
     advisor: Any = None,
     extra_context: dict[str, Any] | None = None,
     job: dict[str, Any] | None = None,
+    llm_decide: bool = False,
+    llm_decision_callback: Any = None,
+    llm_trace_callback: Any = None,
+    progress: dict[str, Any] | None = None,
+    diagnostics: dict[str, Any] | None = None,
+    supervision: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Execute bounded managed actions and return profile/run overrides."""
+    """Execute bounded managed actions and return profile/run overrides.
+
+    When *llm_decide* is ``True`` and an *advisor* is provided the advisor's
+    ``choose_managed_actions()`` method is called to let the AI choose which
+    actions to take.  The chosen plan replaces the caller-supplied *plan*.
+    If the LLM call fails the original deterministic plan is used as a
+    fallback.
+
+    Parameters
+    ----------
+    llm_decide:
+        When ``True``, ask the advisor to choose the action plan.
+    llm_decision_callback:
+        Optional callable ``(decision: dict) -> None`` invoked with each
+        recorded LLM decision.  Used to persist decisions in a job's
+        ``ai_decisions`` array.
+    llm_trace_callback:
+        Optional callable ``(trace: dict) -> None`` invoked with each
+        LLM trace record.  Used to persist traces in a job's
+        ``llm_traces`` array.
+    progress:
+        Current run progress dict (used by advisor when *llm_decide*).
+    diagnostics:
+        Current diagnostics dict (used by advisor when *llm_decide*).
+    supervision:
+        Current supervision dict (used by advisor when *llm_decide*).
+    """
     run_spec = run_spec if isinstance(run_spec, dict) else {}
     extra_context = extra_context if isinstance(extra_context, dict) else {}
+    progress = progress if isinstance(progress, dict) else {}
+    diagnostics = diagnostics if isinstance(diagnostics, dict) else {}
+    supervision = supervision if isinstance(supervision, dict) else {}
     results: list[dict[str, Any]] = []
     profile_patch: dict[str, Any] = {}
     run_overrides: dict[str, Any] = {}
 
-    for action in plan.actions:
+    # ------------------------------------------------------------------
+    # LLM decision phase: let the advisor choose the action plan
+    # ------------------------------------------------------------------
+    effective_plan = plan
+    llm_plan_source = "deterministic"
+    if llm_decide and advisor is not None:
+        effective_plan, llm_plan_source = _try_llm_plan_selection(
+            advisor=advisor,
+            fallback_plan=plan,
+            target_url=target_url,
+            profile=profile,
+            run_spec=run_spec,
+            progress=progress,
+            diagnostics=diagnostics,
+            supervision=supervision,
+            job=job,
+            llm_decision_callback=llm_decision_callback,
+            llm_trace_callback=llm_trace_callback,
+        )
+
+    for action in effective_plan.actions:
         if action.action == "reanalyze_site":
             result = _execute_reanalyze_site(action, target_url=target_url, advisor=advisor, extra_context=extra_context)
         elif action.action == "discover_catalog":
@@ -465,7 +521,9 @@ def execute_managed_action_plan(
     ]
     return {
         "schema_version": "managed-action-result/v1",
-        "plan": plan.to_dict(),
+        "plan": effective_plan.to_dict(),
+        "plan_source": llm_plan_source,
+        "llm_decide": llm_decide,
         "results": results,
         "evidence": _merge_action_evidence(results),
         "api_replay_promotions": api_replay_promotions,
@@ -474,6 +532,129 @@ def execute_managed_action_plan(
         "run_overrides": run_overrides,
         "rerun_ready": bool(profile_patch or run_overrides),
     }
+
+
+
+def _try_llm_plan_selection(
+    *,
+    advisor: Any,
+    fallback_plan: ManagedActionPlan,
+    target_url: str,
+    profile: dict[str, Any],
+    run_spec: dict[str, Any],
+    progress: dict[str, Any],
+    diagnostics: dict[str, Any],
+    supervision: dict[str, Any],
+    job: dict[str, Any] | None,
+    llm_decision_callback: Any,
+    llm_trace_callback: Any,
+) -> tuple[ManagedActionPlan, str]:
+    """Ask the advisor to choose the action plan.
+
+    Returns ``(plan, source)`` where *source* is ``"llm"`` on success or
+    ``"deterministic_fallback"`` when the LLM call fails.
+    """
+    import time as _time
+
+    started_at = _time.perf_counter()
+    input_payload = {
+        "target_url": target_url,
+        "profile": profile,
+        "run_spec": run_spec,
+        "progress": progress,
+        "diagnostics": diagnostics,
+        "supervision": supervision,
+        "available_actions": sorted(SUPPORTED_ACTIONS),
+    }
+    try:
+        raw = advisor.choose_managed_actions(
+            target_url=target_url,
+            profile=profile,
+            run_spec=run_spec,
+            progress=progress,
+            diagnostics=diagnostics,
+            supervision=supervision,
+            available_actions=sorted(SUPPORTED_ACTIONS),
+        )
+        plan = ManagedActionPlan.from_dict(raw, source="llm")
+
+        # Record the LLM decision
+        decision = {
+            "stage": "managed_action_plan",
+            "enabled": True,
+            "fallback_used": False,
+            "provider": getattr(advisor, "provider", "unknown"),
+            "model": getattr(advisor, "model", "unknown"),
+            "reasoning_summary": str(raw.get("reasoning_summary") or "")[:1000],
+            "action_count": len(plan.actions),
+            "actions": [a.action for a in plan.actions],
+            "plan_source": "llm",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+        if llm_decision_callback is not None:
+            try:
+                llm_decision_callback(decision)
+            except Exception:
+                pass
+
+        trace = {
+            "stage": "managed_action_plan",
+            "status": "ok",
+            "provider": getattr(advisor, "provider", "unknown"),
+            "model": getattr(advisor, "model", "unknown"),
+            "duration_ms": int((_time.perf_counter() - started_at) * 1000),
+            "input_summary": {
+                "target_url": target_url,
+                "action_count": len(plan.actions),
+            },
+            "output_summary": {
+                "actions": [a.action for a in plan.actions],
+                "reasoning_summary": str(raw.get("reasoning_summary") or "")[:500],
+            },
+            "error": "",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+        if llm_trace_callback is not None:
+            try:
+                llm_trace_callback(trace)
+            except Exception:
+                pass
+
+        return plan, "llm"
+    except Exception as exc:
+        # Record the failed LLM attempt
+        trace = {
+            "stage": "managed_action_plan",
+            "status": "error",
+            "provider": getattr(advisor, "provider", "unknown"),
+            "model": getattr(advisor, "model", "unknown"),
+            "duration_ms": int((_time.perf_counter() - started_at) * 1000),
+            "input_summary": {"target_url": target_url},
+            "output_summary": {},
+            "error": str(exc)[:1000],
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+        if llm_trace_callback is not None:
+            try:
+                llm_trace_callback(trace)
+            except Exception:
+                pass
+
+        decision = {
+            "stage": "managed_action_plan",
+            "enabled": True,
+            "fallback_used": True,
+            "error": str(exc)[:500],
+            "plan_source": "deterministic_fallback",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+        if llm_decision_callback is not None:
+            try:
+                llm_decision_callback(decision)
+            except Exception:
+                pass
+
+        return fallback_plan, "deterministic_fallback"
 
 
 def _execute_reanalyze_site(

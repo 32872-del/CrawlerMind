@@ -281,6 +281,38 @@ export interface ManagedAutoRepairRecord {
   managed_action?: ManagedActionRecord & { task_id?: string };
 }
 
+export interface FailureDiagnosis {
+  category: string;
+  severity: 'critical' | 'warning' | 'info';
+  evidence: string;
+  affected_fields: string[];
+  repair_actions: string[];
+  confidence: number;
+}
+
+export interface DiagnosisReport {
+  diagnoses: FailureDiagnosis[];
+  overall_health: 'healthy' | 'degraded' | 'critical';
+  recommended_focus: string[];
+  auto_repairable: boolean;
+}
+
+export interface AutoRepairCycle {
+  cycle: number;
+  diagnosis: DiagnosisReport;
+  actions_taken: string[];
+  health_before: string;
+  health_after: string;
+  improved: boolean;
+}
+
+export interface AutoRepairLoopResult {
+  total_cycles: number;
+  converged: boolean;
+  final_health: 'healthy' | 'degraded' | 'critical';
+  cycles: AutoRepairCycle[];
+}
+
 export interface WorkbenchTask {
   task_id: string;
   run_id: string;

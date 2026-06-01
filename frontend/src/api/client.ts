@@ -1,5 +1,7 @@
 import type {
+  AutoRepairLoopResult,
   CatalogNode,
+  DiagnosisReport,
   ExportConfig,
   ExportPathStatus,
   ExportResult,
@@ -273,5 +275,80 @@ export async function resolveExportPath(settings: SettingsState, directory: stri
           source: 'local'
         })
       : undefined
+  );
+}
+
+export async function diagnoseRun(settings: SettingsState, taskId: string, executionResult?: Record<string, unknown>): Promise<DiagnosisReport> {
+  return requestJson(
+    settings,
+    `/runs/${taskId}/auto-repair-diagnose`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ execution_result: executionResult || {} })
+    },
+    () => ({
+      diagnoses: [
+        {
+          category: 'field_extraction',
+          severity: 'warning' as const,
+          evidence: '模拟诊断：部分字段覆盖率不足 80%。',
+          affected_fields: ['colors', 'sizes'],
+          repair_actions: ['repair_selectors', 'probe_fields'],
+          confidence: 0.85
+        }
+      ],
+      overall_health: 'degraded' as const,
+      recommended_focus: ['field_extraction', 'access'],
+      auto_repairable: true
+    })
+  );
+}
+
+export async function runAutoRepairLoop(settings: SettingsState, taskId: string, maxCycles?: number, llm?: Partial<import('../types/workflow').LlmConfig> & { enabled?: boolean }): Promise<AutoRepairLoopResult> {
+  return requestJson(
+    settings,
+    `/runs/${taskId}/auto-repair-loop`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        max_cycles: maxCycles ?? 3,
+        llm: llm || {
+          enabled: Boolean(settings.llm.base_url && settings.llm.model),
+          provider: settings.llm.provider,
+          base_url: settings.llm.base_url,
+          api_key: settings.llm.api_key,
+          model: settings.llm.model
+        }
+      })
+    },
+    () => ({
+      total_cycles: 1,
+      converged: true,
+      final_health: 'healthy' as const,
+      cycles: [
+        {
+          cycle: 1,
+          diagnosis: {
+            diagnoses: [
+              {
+                category: 'field_extraction',
+                severity: 'warning' as const,
+                evidence: '模拟：字段覆盖率不足。',
+                affected_fields: ['colors'],
+                repair_actions: ['repair_selectors'],
+                confidence: 0.8
+              }
+            ],
+            overall_health: 'degraded' as const,
+            recommended_focus: ['field_extraction'],
+            auto_repairable: true
+          },
+          actions_taken: ['repair_selectors'],
+          health_before: 'degraded',
+          health_after: 'healthy',
+          improved: true
+        }
+      ]
+    })
   );
 }

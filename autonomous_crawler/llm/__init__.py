@@ -13,6 +13,13 @@ from .openai_compatible import (
     build_advisor_from_env,
     parse_json_object,
 )
+from .provider_registry import (
+    LLMProviderConfig,
+    LLMProviderRegistry,
+    PROVIDER_PRESETS,
+    build_registry_from_config,
+    build_registry_from_env,
+)
 
 __all__ = [
     "PlanningAdvisor",
@@ -26,4 +33,9 @@ __all__ = [
     "OpenAICompatibleConfig",
     "build_advisor_from_env",
     "parse_json_object",
+    "LLMProviderConfig",
+    "LLMProviderRegistry",
+    "PROVIDER_PRESETS",
+    "build_registry_from_config",
+    "build_registry_from_env",
 ]

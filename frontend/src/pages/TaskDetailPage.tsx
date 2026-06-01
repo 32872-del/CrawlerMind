@@ -2,6 +2,7 @@ import { Alert, Button, Card, Descriptions, Empty, Input, List, Popconfirm, Prog
 import { useEffect, useMemo, useState, type ChangeEvent } from 'react';
 import { cancelRun, deleteRun, exportRun, fetchRunEvents, fetchRunStatus, managedRepairRun, managedStep } from '../api/client';
 import { AiManagedPanel } from '../components/AiManagedPanel';
+import { DiagnosisPanel } from '../components/DiagnosisPanel';
 import { EventTimeline } from '../components/EventTimeline';
 import { MetricStrip } from '../components/MetricStrip';
 import { StatusPill } from '../components/StatusPill';
@@ -505,6 +506,18 @@ export function TaskDetailPage() {
         onManagedStep={triggerManagedStep}
         repairLoading={busy}
         repairDisabled={isRunning}
+      />
+
+      <DiagnosisPanel
+        settings={settings}
+        taskId={task.task_id}
+        llm={{
+          enabled: Boolean(settings.llm.base_url && settings.llm.model),
+          provider: settings.llm.provider,
+          base_url: settings.llm.base_url,
+          api_key: settings.llm.api_key,
+          model: settings.llm.model
+        }}
       />
 
       <ManagedActionTable records={managedActions} />
