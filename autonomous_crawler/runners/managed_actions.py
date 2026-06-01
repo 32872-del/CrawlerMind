@@ -55,6 +55,8 @@ SUPPORTED_ACTIONS = {
     "prepare_export",
     "prepare_rerun",
     "extract_from_contract",
+    "follow_pagination",
+    "render_with_browser",
 }
 
 EXECUTABLE_ACTIONS = {
@@ -69,6 +71,8 @@ EXECUTABLE_ACTIONS = {
     "prepare_rerun",
     "patch_profile",
     "extract_from_contract",
+    "follow_pagination",
+    "render_with_browser",
 }
 
 ACTION_ALIASES = {
@@ -119,6 +123,8 @@ ACTION_ALLOWED_PARAMS = {
     "prepare_rerun": {"run_kind", "apply_profile_patch", "reason"},
     "patch_profile": {"profile_patch", "patch", "overrides"},
     "extract_from_contract": {"contract", "evidence", "source_url", "max_items"},
+    "follow_pagination": {"html", "max_pages", "current_url"},
+    "render_with_browser": {"target_url", "wait_until", "timeout_ms", "max_items", "screenshot"},
 }
 
 SAFE_PROFILE_PATCH_KEYS = {
@@ -505,6 +511,14 @@ def execute_managed_action_plan(
         elif action.action == "extract_from_contract":
             result = _execute_extract_from_contract(
                 _hydrate_extract_from_contract_action(action, extra_context)
+            )
+        elif action.action == "follow_pagination":
+            result = _execute_follow_pagination(
+                action, target_url=target_url, profile=profile, extra_context=extra_context
+            )
+        elif action.action == "render_with_browser":
+            result = _execute_render_with_browser(
+                action, target_url=target_url, profile=profile
             )
         else:
             result = {"action": action.action, "ok": True, "patch": {}, "overrides": {}}
@@ -1291,6 +1305,124 @@ def _execute_patch_profile(action: ManagedCrawlAction) -> dict[str, Any]:
         "patch": safe_patch,
         "overrides": safe_patch,
     }
+
+
+def _execute_follow_pagination(
+    action: ManagedCrawlAction,
+    *,
+    target_url: str,
+    profile: dict[str, Any],
+    extra_context: dict[str, Any],
+) -> dict[str, Any]:
+    """Detect and follow pagination links from the current page.
+
+    Uses HTML pagination detection to find next-page URLs and adds them
+    to the crawl queue.
+    """
+    from ..tools.pagination import detect_pagination_links
+
+    html = str(action.params.get("html") or extra_context.get("html") or "")
+    max_pages = int(action.params.get("max_pages") or profile.get("max_pages") or 5)
+
+    if not html:
+        return {
+            "action": "follow_pagination",
+            "ok": False,
+            "error": "No HTML provided for pagination detection",
+            "patch": {},
+            "overrides": {},
+        }
+
+    try:
+        next_urls = detect_pagination_links(html, target_url, max_pages=max_pages)
+        if next_urls:
+            return {
+                "action": "follow_pagination",
+                "ok": True,
+                "patch": {
+                    "pagination_urls": next_urls,
+                    "pagination_detected": True,
+                },
+                "overrides": {
+                    "follow_pagination": True,
+                    "pagination_urls": next_urls,
+                },
+            }
+        else:
+            return {
+                "action": "follow_pagination",
+                "ok": True,
+                "patch": {"pagination_detected": False},
+                "overrides": {},
+            }
+    except Exception as exc:
+        return {
+            "action": "follow_pagination",
+            "ok": False,
+            "error": str(exc)[:500],
+            "patch": {},
+            "overrides": {},
+        }
+
+
+def _execute_render_with_browser(
+    action: ManagedCrawlAction,
+    *,
+    target_url: str,
+    profile: dict[str, Any],
+) -> dict[str, Any]:
+    """Render a page with Playwright browser and extract content.
+
+    Used for SPA/JS-heavy sites that don't work with static fetch.
+    """
+    from ..runtime.native_browser import NativeBrowserConfig
+
+    url = str(action.params.get("target_url") or target_url)
+    wait_until = str(action.params.get("wait_until") or "networkidle")
+    timeout_ms = int(action.params.get("timeout_ms") or 30000)
+    max_items = int(action.params.get("max_items") or 0)
+
+    try:
+        config = NativeBrowserConfig(
+            headless=True,
+            wait_until=wait_until,
+            timeout_ms=timeout_ms,
+        )
+        runtime = NativeBrowserRuntime(config=config)
+        request = RuntimeRequest(
+            url=url,
+            mode="browser",
+            wait_until=wait_until,
+            timeout_ms=timeout_ms,
+            max_items=max_items,
+        )
+        response = runtime.render(request)
+        runtime.close()
+
+        html = response.html or ""
+        items = response.items or []
+        return {
+            "action": "render_with_browser",
+            "ok": bool(html),
+            "patch": {
+                "browser_rendered": True,
+                "browser_html_length": len(html),
+                "browser_items_count": len(items),
+            },
+            "overrides": {
+                "browser_html": html[:50000],
+                "browser_items": items[:max_items] if max_items else items,
+                "use_browser": True,
+            },
+        }
+    except Exception as exc:
+        return {
+            "action": "render_with_browser",
+            "ok": False,
+            "error": str(exc)[:500],
+            "patch": {},
+            "overrides": {},
+        }
 
 
 def _execute_extract_from_contract(action: ManagedCrawlAction) -> dict[str, Any]:
