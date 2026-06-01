@@ -1,0 +1,24 @@
+{
+  "site": "batch1_jsonplaceholder_posts",
+  "url": "https://jsonplaceholder.typicode.com/posts",
+  "goal": "extract all posts with userId, id, title, body from JSON API",
+  "batch": 1,
+  "difficulty": "easy",
+  "status": "completed",
+  "records": 100,
+  "field_coverage": 70.0,
+  "quality": "pass",
+  "failures": [],
+  "repair_actions": [],
+  "elapsed_seconds": 4.27,
+  "notes": [
+    "Sample fields: ['userId', 'id', 'title', 'body', 'link', 'image', 'hot_score', 'summary', 'rank', 'index']"
+  ],
+  "raw_state": {
+    "status": "completed",
+    "retries": 0,
+    "llm_enabled": false,
+    "visited_urls": 1,
+    "has_api_responses": true
+  }
+}

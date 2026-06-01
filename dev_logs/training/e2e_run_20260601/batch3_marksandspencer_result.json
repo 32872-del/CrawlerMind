@@ -1,0 +1,20 @@
+{
+  "site": "batch3_marksandspencer",
+  "url": "https://www.marksandspencer.com/",
+  "goal": "extract product names, prices, and categories from the homepage or product listings",
+  "batch": 3,
+  "difficulty": "hard",
+  "status": "error",
+  "records": 0,
+  "field_coverage": 0.0,
+  "quality": "fail",
+  "failures": [
+    "Exception: UnicodeEncodeError: 'gbk' codec can't encode character '\\xa3' in position 4: illegal multibyte sequence"
+  ],
+  "repair_actions": [],
+  "elapsed_seconds": 6.16,
+  "notes": [
+    "Traceback: Traceback (most recent call last):\n  File \"F:\\datawork\\agent\\run_e2e_training_20260601.py\", line 130, in run_single_site\n    final_state = run_crawl(\n        goal_with_limit,\n    ...<2 lines>...\n        advisor=advisor,\n    )\n  File \"F:\\datawork\\agent\\run_skeleton.py\", line 103, in run_crawl\n    print(f\"  - {title}: {price} | {image}\")\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nUnicodeEncodeError: 'gbk' codec can't encode character '\\xa3' in position 4: illegal multibyte sequence\n"
+  ],
+  "raw_state": null
+}

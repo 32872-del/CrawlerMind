@@ -1,0 +1,10 @@
+{
+  "site": "batch3_marksandspencer",
+  "url": "https://www.marksandspencer.com/",
+  "status": "completed",
+  "records": 10,
+  "field_coverage": 100.0,
+  "quality": "pass",
+  "elapsed_seconds": 6.26,
+  "error_log": []
+}

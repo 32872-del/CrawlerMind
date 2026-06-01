@@ -1,0 +1,10 @@
+{
+  "site": "batch3_nike",
+  "url": "https://www.nike.com/",
+  "status": "failed",
+  "records": 1,
+  "field_coverage": 100.0,
+  "quality": "fail",
+  "elapsed_seconds": 3.61,
+  "error_log": []
+}

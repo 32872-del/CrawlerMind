@@ -1,0 +1,24 @@
+{
+  "site": "batch3_superdry",
+  "url": "https://www.superdry.com/",
+  "goal": "extract product names, prices, and categories from product listings",
+  "batch": 3,
+  "difficulty": "hard",
+  "status": "completed",
+  "records": 4,
+  "field_coverage": 100.0,
+  "quality": "pass",
+  "failures": [],
+  "repair_actions": [],
+  "elapsed_seconds": 7.28,
+  "notes": [
+    "Sample fields: ['url', 'index', 'title', 'price', 'image', 'link']"
+  ],
+  "raw_state": {
+    "status": "completed",
+    "retries": 0,
+    "llm_enabled": false,
+    "visited_urls": 1,
+    "has_api_responses": false
+  }
+}

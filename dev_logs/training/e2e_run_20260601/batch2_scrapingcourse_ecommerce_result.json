@@ -1,0 +1,24 @@
+{
+  "site": "batch2_scrapingcourse_ecommerce",
+  "url": "https://www.scrapingcourse.com/ecommerce/",
+  "goal": "extract product names, prices, images, and URLs from ecommerce product listings",
+  "batch": 2,
+  "difficulty": "medium",
+  "status": "completed",
+  "records": 16,
+  "field_coverage": 100.0,
+  "quality": "pass",
+  "failures": [],
+  "repair_actions": [],
+  "elapsed_seconds": 5.74,
+  "notes": [
+    "Sample fields: ['url', 'index', 'title', 'price', 'image', 'link']"
+  ],
+  "raw_state": {
+    "status": "completed",
+    "retries": 0,
+    "llm_enabled": false,
+    "visited_urls": 1,
+    "has_api_responses": false
+  }
+}
