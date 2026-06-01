@@ -726,12 +726,21 @@ def _execute_managed_actions_for_job(
     payload = _product_run_payload_from_job(job)
     profile_data = payload.get("profile") if isinstance(payload.get("profile"), dict) else {}
     extra_context = _managed_extra_context_from_profile(profile_data, request.extra_context)
+    progress = summarize_run_progress(job)
+    diagnostics = job.get("diagnostics") if isinstance(job.get("diagnostics"), dict) else {}
+    supervision = job.get("supervision") if isinstance(job.get("supervision"), dict) else {}
     result = (
         execute_managed_action_plan(
             plan=plan, target_url=str(payload.get("target_url") or ""),
             profile=profile_data,
             run_spec=job.get("product_run_spec") if isinstance(job.get("product_run_spec"), dict) else {},
             advisor=advisor, extra_context=extra_context, job=job,
+            llm_decide=bool(request.llm_decide and advisor is not None),
+            llm_decision_callback=lambda decision: append_ai_decision(task_id, decision),
+            llm_trace_callback=lambda trace: append_llm_trace(task_id, trace),
+            progress=progress,
+            diagnostics=diagnostics,
+            supervision=supervision,
         )
         if request.execute
         else {

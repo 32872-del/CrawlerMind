@@ -307,10 +307,13 @@ class OpenAICompatibleAdvisor:
         headers: dict[str, str],
         body: dict[str, Any],
     ) -> httpx.Response:
+        # Serialize with ensure_ascii=False to support Unicode (GBP, CJK, etc.)
+        content = json.dumps(body, ensure_ascii=False).encode("utf-8")
+        headers = {**headers, "Content-Type": "application/json; charset=utf-8"}
         if self._client is not None:
-            return self._client.post(endpoint, headers=headers, json=body)
+            return self._client.post(endpoint, headers=headers, content=content)
         with httpx.Client(timeout=self.config.timeout_seconds) as client:
-            return client.post(endpoint, headers=headers, json=body)
+            return client.post(endpoint, headers=headers, content=content)
 
 
 def build_advisor_from_env() -> OpenAICompatibleAdvisor | None:
@@ -416,15 +419,22 @@ def _response_shape_hint(raw: Any) -> str:
 
 
 def _safe_response_preview(response: httpx.Response) -> str:
-    text = response.text[:MAX_PREVIEW_LENGTH]
+    try:
+        text = response.text[:MAX_PREVIEW_LENGTH]
+    except (UnicodeDecodeError, UnicodeEncodeError):
+        text = response.content[:MAX_PREVIEW_LENGTH].decode("utf-8", errors="replace")
     redacted, _ = redact_preview(text)
     return redacted
 
 
 def _decode_chat_response(response: httpx.Response) -> Any:
     content_type = response.headers.get("content-type", "").lower()
-    if "text/event-stream" in content_type or response.text.lstrip().startswith("data:"):
-        content = extract_stream_chat_content(response.text)
+    try:
+        text = response.text
+    except (UnicodeDecodeError, UnicodeEncodeError):
+        text = response.content.decode("utf-8", errors="replace")
+    if "text/event-stream" in content_type or text.lstrip().startswith("data:"):
+        content = extract_stream_chat_content(text)
         return {"choices": [{"message": {"content": content}}]}
     return response.json()
 

@@ -1,0 +1,4451 @@
+{
+  "user_goal": "extract product names and prices limit 10",
+  "target_url": "https://dummyjson.com/products",
+  "recon_report": {
+    "target_fields": [
+      "title",
+      "price"
+    ],
+    "task_type": "product_list",
+    "constraints": {},
+    "target_url": "https://dummyjson.com/products",
+    "frontend_framework": "api",
+    "rendering": "api",
+    "anti_bot": {
+      "detected": false,
+      "type": "none",
+      "severity": "low",
+      "indicators": []
+    },
+    "api_endpoints": [
+      "https://dummyjson.com/products"
+    ],
+    "api_candidates": [
+      {
+        "url": "https://dummyjson.com/products",
+        "method": "GET",
+        "score": 60,
+        "reason": "target_url_is_json"
+      }
+    ],
+    "dom_structure": {
+      "is_product_list": false,
+      "has_pagination": false,
+      "pagination_type": "none",
+      "product_selector": "",
+      "item_count": 0,
+      "field_selectors": {},
+      "candidates": []
+    },
+    "access_diagnostics": {
+      "ok": true,
+      "findings": [],
+      "signals": {
+        "url": "https://dummyjson.com/products",
+        "html_chars": 44089,
+        "text_chars": 44089,
+        "script_count": 0,
+        "app_root_count": 0,
+        "target_selector": "",
+        "target_count": 0,
+        "selector_error": "",
+        "challenge": "",
+        "challenge_details": {
+          "detected": false,
+          "kind": "none",
+          "vendor": "none",
+          "severity": "low",
+          "primary_marker": "",
+          "markers": [],
+          "status_code": null,
+          "requires_manual_handoff": false
+        },
+        "structured_data": {
+          "json_ld_count": 0,
+          "next_data": false,
+          "nuxt_data": false,
+          "sample_types": []
+        },
+        "api_hints": []
+      },
+      "recommendations": [
+        {
+          "type": "standard",
+          "reason": "No strong access risk or browser-rendering signal was found.",
+          "action": {
+            "mode": "http"
+          }
+        }
+      ],
+      "access_decision": {
+        "action": "standard_http",
+        "risk_level": "low",
+        "allowed": true,
+        "reasons": [
+          "no_access_block_detected"
+        ],
+        "safeguards": [
+          "respect configured rate limits",
+          "record access decision"
+        ],
+        "requires_authorized_session": false,
+        "requires_manual_review": false
+      }
+    },
+    "fetch": {
+      "status_code": 200,
+      "html_chars": 44089,
+      "selected_mode": "requests",
+      "selected_score": 95
+    },
+    "fetch_trace": {
+      "selected_mode": "requests",
+      "selected_url": "https://dummyjson.com/products",
+      "selected_score": 95,
+      "attempts": [
+        {
+          "mode": "requests",
+          "url": "https://dummyjson.com/products",
+          "status_code": 200,
+          "response_headers": {
+            "date": "Mon, 01 Jun 2026 09:41:08 GMT",
+            "content-type": "application/json; charset=utf-8",
+            "transfer-encoding": "chunked",
+            "connection": "keep-alive",
+            "access-control-allow-credentials": "true",
+            "content-encoding": "br",
+            "etag": "W/\"ac3a-uk0FDUI0X0lS5liyUbIxqA7L7F4\"",
+            "strict-transport-security": "max-age=15552000; includeSubDomains",
+            "vary": "Origin, Accept-Encoding",
+            "x-content-type-options": "nosniff",
+            "x-dns-prefetch-control": "off",
+            "x-download-options": "noopen",
+            "x-frame-options": "SAMEORIGIN",
+            "x-ratelimit-limit": "100",
+            "x-ratelimit-remaining": "99",
+            "x-ratelimit-reset": "1779283678",
+            "x-xss-protection": "1; mode=block",
+            "age": "185112",
+            "cache-control": "no-store",
+            "cf-cache-status": "HIT",
+            "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+            "server-timing": "cfCacheStatus;desc=\"HIT\", cfEdge;dur=10,cfOrigin;dur=0",
+            "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=wmXXnieG48w4FNfGFFukCoKzoh%2F4eyic5WChAp%2BItmJMgq3EngXAehm8yifwXXdtBcAlcN2fNrh%2BXCYn%2FmMq38BCEkf%2BWLirJd8qwLHtc8SMxpLFCk%2FuUGfCS5sYthso\"}]}",
+            "server": "cloudflare",
+            "cf-ray": "a04d42c7bdf576ff-LHR"
+          },
+          "http_version": "HTTP/1.1",
+          "error": "",
+          "html_chars": 44089,
+          "score": 95,
+          "reasons": [
+            "status_ok",
+            "html_size_ok",
+            "text_content_ok",
+            "json_payload"
+          ],
+          "diagnostics": {
+            "ok": true,
+            "findings": [],
+            "signals": {
+              "url": "https://dummyjson.com/products",
+              "html_chars": 44089,
+              "text_chars": 44089,
+              "script_count": 0,
+              "app_root_count": 0,
+              "target_selector": "",
+              "target_count": 0,
+              "selector_error": "",
+              "challenge": "",
+              "challenge_details": {
+                "detected": false,
+                "kind": "none",
+                "vendor": "none",
+                "severity": "low",
+                "primary_marker": "",
+                "markers": [],
+                "status_code": 200,
+                "requires_manual_handoff": false
+              },
+              "structured_data": {
+                "json_ld_count": 0,
+                "next_data": false,
+                "nuxt_data": false,
+                "sample_types": []
+              },
+              "api_hints": []
+            },
+            "recommendations": [
+              {
+                "type": "standard",
+                "reason": "No strong access risk or browser-rendering signal was found.",
+                "action": {
+                  "mode": "http"
+                }
+              }
+            ],
+            "access_decision": {
+              "action": "standard_http",
+              "risk_level": "low",
+              "allowed": true,
+              "reasons": [
+                "no_access_block_detected"
+              ],
+              "safeguards": [
+                "respect configured rate limits",
+                "record access decision"
+              ],
+              "requires_authorized_session": false,
+              "requires_manual_review": false
+            }
+          },
+          "access_context": {
+            "session": {
+              "name": "default",
+              "allowed_domains": [],
+              "global_scope": true,
+              "headers": {},
+              "cookies": {},
+              "storage_state_path": "",
+              "errors": [
+                "allowed_domains is empty; session applies to all domains"
+              ]
+            },
+            "proxy": {
+              "enabled": false,
+              "selected": false,
+              "proxy": "",
+              "source": "none",
+              "errors": [],
+              "pool": {
+                "enabled": false,
+                "provider": "static",
+                "strategy": "round_robin",
+                "domain_affinity": true,
+                "max_failures": 3,
+                "endpoints": []
+              }
+            },
+            "rate_limit": {
+              "domain": "dummyjson.com",
+              "delay_seconds": 1.0,
+              "max_retries": 3,
+              "should_retry": false,
+              "reason": "standard",
+              "metadata": {}
+            },
+            "browser_context": {
+              "headless": true,
+              "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+              "viewport": {
+                "width": 1365,
+                "height": 768
+              },
+              "locale": "en-US",
+              "timezone_id": "UTC",
+              "extra_http_headers": {},
+              "storage_state_path": "",
+              "proxy_url": "",
+              "java_script_enabled": true,
+              "ignore_https_errors": false,
+              "color_scheme": "light"
+            }
+          },
+          "rate_limit_event": {
+            "domain": "dummyjson.com",
+            "requested_delay_seconds": 1.0,
+            "slept_seconds": 0.0,
+            "reason": "fetch:requests"
+          }
+        }
+      ],
+      "error": ""
+    },
+    "access_config": {
+      "session": {
+        "name": "default",
+        "allowed_domains": [],
+        "global_scope": true,
+        "headers": {},
+        "cookies": {},
+        "storage_state_path": "",
+        "errors": [
+          "allowed_domains is empty; session applies to all domains"
+        ]
+      },
+      "proxy": {
+        "enabled": false,
+        "selected": false,
+        "proxy": "",
+        "source": "none",
+        "errors": [],
+        "pool": {
+          "enabled": false,
+          "provider": "static",
+          "strategy": "round_robin",
+          "domain_affinity": true,
+          "max_failures": 3,
+          "endpoints": []
+        }
+      },
+      "rate_limit": {
+        "domain": "dummyjson.com",
+        "delay_seconds": 1.0,
+        "max_retries": 3,
+        "should_retry": false,
+        "reason": "standard",
+        "metadata": {}
+      },
+      "browser_context": {
+        "headless": true,
+        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+        "viewport": {
+          "width": 1365,
+          "height": 768
+        },
+        "locale": "en-US",
+        "timezone_id": "UTC",
+        "extra_http_headers": {},
+        "storage_state_path": "",
+        "proxy_url": "",
+        "java_script_enabled": true,
+        "ignore_https_errors": false,
+        "color_scheme": "light"
+      }
+    },
+    "js_evidence": {
+      "items": [],
+      "inventory_summary": {
+        "total_assets": 0,
+        "scored_assets": 0,
+        "top_assets": [],
+        "all_endpoint_candidates": [],
+        "all_keyword_hits": [],
+        "all_graphql_strings": [],
+        "all_websocket_urls": [],
+        "all_sourcemap_refs": []
+      },
+      "top_endpoints": [],
+      "top_suspicious_calls": [],
+      "top_crypto_signals": [],
+      "recommendations": [
+        "No strong JS reverse-engineering clue found"
+      ]
+    },
+    "artifact_manifest": {
+      "target_url": "https://dummyjson.com/products",
+      "stage": "recon",
+      "created_at": "2026-06-01T09:41:08.296852+00:00",
+      "final_url": "https://dummyjson.com/products",
+      "fetch_mode": "requests",
+      "browser_context": {
+        "headless": true,
+        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+        "viewport": {
+          "width": 1365,
+          "height": 768
+        },
+        "locale": "en-US",
+        "timezone_id": "UTC",
+        "extra_http_headers": {},
+        "storage_state_path": "",
+        "proxy_url": "",
+        "java_script_enabled": true,
+        "ignore_https_errors": false,
+        "color_scheme": "light"
+      },
+      "screenshot_path": "",
+      "html_path": "F:\\datawork\\agent\\autonomous_crawler\\tools\\runtime\\artifacts\\c2f13722\\snapshot.html",
+      "network_trace_path": "",
+      "access_decision": {
+        "action": "standard_http",
+        "risk_level": "low",
+        "allowed": true,
+        "reasons": [
+          "no_access_block_detected"
+        ],
+        "safeguards": [
+          "respect configured rate limits",
+          "record access decision"
+        ],
+        "requires_authorized_session": false,
+        "requires_manual_review": false
+      },
+      "notes": [
+        "attempts=1"
+      ],
+      "manifest_path": "F:\\datawork\\agent\\autonomous_crawler\\tools\\runtime\\artifacts\\c2f13722\\manifest.json"
+    }
+  },
+  "crawl_strategy": {
+    "mode": "api_intercept",
+    "extraction_method": "api_json",
+    "api_endpoint": "https://dummyjson.com/products",
+    "api_method": "GET",
+    "api_candidates": [
+      {
+        "url": "https://dummyjson.com/products",
+        "method": "GET",
+        "score": 60,
+        "reason": "target_url_is_json"
+      }
+    ],
+    "graphql_query": "",
+    "graphql_variables": {},
+    "selectors": {},
+    "pagination": {
+      "type": "api_offset",
+      "param": "offset"
+    },
+    "headers": {
+      "Accept": "application/json"
+    },
+    "max_items": 0,
+    "rationale": "API endpoint discovered, using direct API access",
+    "strategy_evidence": {
+      "signals": [
+        {
+          "code": "api_candidate",
+          "source": "api",
+          "confidence": "medium",
+          "score": 60,
+          "details": {
+            "url": "https://dummyjson.com/products",
+            "method": "GET",
+            "kind": "",
+            "status_code": "",
+            "reason": "target_url_is_json"
+          }
+        }
+      ],
+      "dominant_sources": [
+        "api"
+      ],
+      "warnings": [],
+      "action_hints": {}
+    },
+    "strategy_scorecard": {
+      "recommended": "api_intercept",
+      "executable_recommended_mode": "api_intercept",
+      "confidence": "medium",
+      "guardrails": [
+        "evidence_only_no_bypass"
+      ],
+      "candidates": [
+        {
+          "name": "api_intercept",
+          "score": 50,
+          "reasons": [
+            "API candidate available"
+          ],
+          "penalties": []
+        },
+        {
+          "name": "http",
+          "score": 0,
+          "reasons": [],
+          "penalties": []
+        },
+        {
+          "name": "browser",
+          "score": 0,
+          "reasons": [],
+          "penalties": []
+        },
+        {
+          "name": "deeper_recon",
+          "score": 0,
+          "reasons": [],
+          "penalties": []
+        },
+        {
+          "name": "manual_handoff",
+          "score": 0,
+          "reasons": [],
+          "penalties": []
+        }
+      ]
+    },
+    "anti_bot_report": {
+      "detected": true,
+      "risk_level": "low",
+      "risk_score": 8,
+      "recommended_action": "api_intercept",
+      "categories": [
+        "challenge"
+      ],
+      "findings": [
+        {
+          "code": "access_none",
+          "category": "challenge",
+          "severity": "low",
+          "source": "access_diagnostics",
+          "summary": "Challenge, CAPTCHA, login gate, or access block signal detected.",
+          "evidence": {
+            "marker": "none",
+            "kind": "none",
+            "vendor": "none",
+            "requires_manual_handoff": false,
+            "findings": []
+          }
+        }
+      ],
+      "next_steps": [
+        "Preserve challenge evidence and use authorized/manual review before retrying."
+      ],
+      "guardrails": [
+        "diagnostic_only_no_bypass",
+        "no_captcha_solving",
+        "no_login_bypass",
+        "redact_credentials",
+        "challenge_requires_authorized_or_manual_review"
+      ],
+      "evidence_sources": [
+        "access_diagnostics"
+      ]
+    },
+    "strategy_guardrails": [
+      "evidence_only_no_bypass"
+    ],
+    "site_spec_draft": {
+      "version": "1.0",
+      "site": "dummyjson_com",
+      "goal": "extract product names and prices limit 10",
+      "mode": "api_intercept",
+      "start_urls": [
+        {
+          "url": "https://dummyjson.com/products"
+        }
+      ],
+      "pagination": {
+        "max_pages": 1
+      },
+      "list": {
+        "item_container": "",
+        "item_link": "a@href"
+      },
+      "detail": {
+        "title": "h1, h2, h3",
+        "price": ".price",
+        "image_src": "img@src"
+      },
+      "variants": {},
+      "wait_selector": "",
+      "sleep_time": 0,
+      "scroll_count": 0,
+      "scroll_delay": 1.0,
+      "dedupe": [
+        "url"
+      ],
+      "required_fields": [
+        "handle",
+        "title",
+        "image_src",
+        "price"
+      ],
+      "source": "autonomous_crawler.strategy"
+    }
+  },
+  "visited_urls": [
+    "https://dummyjson.com/products"
+  ],
+  "raw_html": {},
+  "api_responses": [
+    {
+      "ok": true,
+      "url": "https://dummyjson.com/products",
+      "data": {
+        "products": [
+          {
+            "id": 1,
+            "title": "Essence Mascara Lash Princess",
+            "description": "The Essence Mascara Lash Princess is a popular mascara known for its volumizing and lengthening effects. Achieve dramatic lashes with this long-lasting and cruelty-free formula.",
+            "category": "beauty",
+            "price": 9.99,
+            "discountPercentage": 10.48,
+            "rating": 2.56,
+            "stock": 99,
+            "tags": [
+              "beauty",
+              "mascara"
+            ],
+            "brand": "Essence",
+            "sku": "BEA-ESS-ESS-001",
+            "weight": 4,
+            "dimensions": {
+              "width": 15.14,
+              "height": 13.08,
+              "depth": 22.99
+            },
+            "warrantyInformation": "1 week warranty",
+            "shippingInformation": "Ships in 3-5 business days",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 3,
+                "comment": "Would not recommend!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Eleanor Collins",
+                "reviewerEmail": "eleanor.collins@x.dummyjson.com"
+              },
+              {
+                "rating": 4,
+                "comment": "Very satisfied!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Lucas Gordon",
+                "reviewerEmail": "lucas.gordon@x.dummyjson.com"
+              },
+              {
+                "rating": 5,
+                "comment": "Highly impressed!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Eleanor Collins",
+                "reviewerEmail": "eleanor.collins@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "No return policy",
+            "minimumOrderQuantity": 48,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "5784719087687",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/1.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/thumbnail.webp"
+          },
+          {
+            "id": 2,
+            "title": "Eyeshadow Palette with Mirror",
+            "description": "The Eyeshadow Palette with Mirror offers a versatile range of eyeshadow shades for creating stunning eye looks. With a built-in mirror, it's convenient for on-the-go makeup application.",
+            "category": "beauty",
+            "price": 19.99,
+            "discountPercentage": 18.19,
+            "rating": 2.86,
+            "stock": 34,
+            "tags": [
+              "beauty",
+              "eyeshadow"
+            ],
+            "brand": "Glamour Beauty",
+            "sku": "BEA-GLA-EYE-002",
+            "weight": 9,
+            "dimensions": {
+              "width": 9.26,
+              "height": 22.47,
+              "depth": 27.67
+            },
+            "warrantyInformation": "1 year warranty",
+            "shippingInformation": "Ships in 2 weeks",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 5,
+                "comment": "Great product!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Savannah Gomez",
+                "reviewerEmail": "savannah.gomez@x.dummyjson.com"
+              },
+              {
+                "rating": 4,
+                "comment": "Awesome product!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Christian Perez",
+                "reviewerEmail": "christian.perez@x.dummyjson.com"
+              },
+              {
+                "rating": 1,
+                "comment": "Poor quality!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Nicholas Bailey",
+                "reviewerEmail": "nicholas.bailey@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "7 days return policy",
+            "minimumOrderQuantity": 20,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "9170275171413",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/1.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/thumbnail.webp"
+          },
+          {
+            "id": 3,
+            "title": "Powder Canister",
+            "description": "The Powder Canister is a finely milled setting powder designed to set makeup and control shine. With a lightweight and translucent formula, it provides a smooth and matte finish.",
+            "category": "beauty",
+            "price": 14.99,
+            "discountPercentage": 9.84,
+            "rating": 4.64,
+            "stock": 89,
+            "tags": [
+              "beauty",
+              "face powder"
+            ],
+            "brand": "Velvet Touch",
+            "sku": "BEA-VEL-POW-003",
+            "weight": 8,
+            "dimensions": {
+              "width": 29.27,
+              "height": 27.93,
+              "depth": 20.59
+            },
+            "warrantyInformation": "3 months warranty",
+            "shippingInformation": "Ships in 1-2 business days",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 4,
+                "comment": "Would buy again!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Alexander Jones",
+                "reviewerEmail": "alexander.jones@x.dummyjson.com"
+              },
+              {
+                "rating": 5,
+                "comment": "Highly impressed!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Elijah Cruz",
+                "reviewerEmail": "elijah.cruz@x.dummyjson.com"
+              },
+              {
+                "rating": 1,
+                "comment": "Very dissatisfied!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Avery Perez",
+                "reviewerEmail": "avery.perez@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "No return policy",
+            "minimumOrderQuantity": 22,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "8418883906837",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/beauty/powder-canister/1.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/beauty/powder-canister/thumbnail.webp"
+          },
+          {
+            "id": 4,
+            "title": "Red Lipstick",
+            "description": "The Red Lipstick is a classic and bold choice for adding a pop of color to your lips. With a creamy and pigmented formula, it provides a vibrant and long-lasting finish.",
+            "category": "beauty",
+            "price": 12.99,
+            "discountPercentage": 12.16,
+            "rating": 4.36,
+            "stock": 91,
+            "tags": [
+              "beauty",
+              "lipstick"
+            ],
+            "brand": "Chic Cosmetics",
+            "sku": "BEA-CHI-LIP-004",
+            "weight": 1,
+            "dimensions": {
+              "width": 18.11,
+              "height": 28.38,
+              "depth": 22.17
+            },
+            "warrantyInformation": "3 year warranty",
+            "shippingInformation": "Ships in 1 week",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 4,
+                "comment": "Great product!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Liam Garcia",
+                "reviewerEmail": "liam.garcia@x.dummyjson.com"
+              },
+              {
+                "rating": 5,
+                "comment": "Great product!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Ruby Andrews",
+                "reviewerEmail": "ruby.andrews@x.dummyjson.com"
+              },
+              {
+                "rating": 5,
+                "comment": "Would buy again!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Clara Berry",
+                "reviewerEmail": "clara.berry@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "7 days return policy",
+            "minimumOrderQuantity": 40,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "9467746727219",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/beauty/red-lipstick/1.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/beauty/red-lipstick/thumbnail.webp"
+          },
+          {
+            "id": 5,
+            "title": "Red Nail Polish",
+            "description": "The Red Nail Polish offers a rich and glossy red hue for vibrant and polished nails. With a quick-drying formula, it provides a salon-quality finish at home.",
+            "category": "beauty",
+            "price": 8.99,
+            "discountPercentage": 11.44,
+            "rating": 4.32,
+            "stock": 79,
+            "tags": [
+              "beauty",
+              "nail polish"
+            ],
+            "brand": "Nail Couture",
+            "sku": "BEA-NAI-NAI-005",
+            "weight": 8,
+            "dimensions": {
+              "width": 21.63,
+              "height": 16.48,
+              "depth": 29.84
+            },
+            "warrantyInformation": "1 month warranty",
+            "shippingInformation": "Ships overnight",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 2,
+                "comment": "Poor quality!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Benjamin Wilson",
+                "reviewerEmail": "benjamin.wilson@x.dummyjson.com"
+              },
+              {
+                "rating": 5,
+                "comment": "Great product!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Liam Smith",
+                "reviewerEmail": "liam.smith@x.dummyjson.com"
+              },
+              {
+                "rating": 1,
+                "comment": "Very unhappy with my purchase!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Clara Berry",
+                "reviewerEmail": "clara.berry@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "No return policy",
+            "minimumOrderQuantity": 22,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "4063010628104",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/beauty/red-nail-polish/1.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/beauty/red-nail-polish/thumbnail.webp"
+          },
+          {
+            "id": 6,
+            "title": "Calvin Klein CK One",
+            "description": "CK One by Calvin Klein is a classic unisex fragrance, known for its fresh and clean scent. It's a versatile fragrance suitable for everyday wear.",
+            "category": "fragrances",
+            "price": 49.99,
+            "discountPercentage": 1.89,
+            "rating": 4.37,
+            "stock": 29,
+            "tags": [
+              "fragrances",
+              "perfumes"
+            ],
+            "brand": "Calvin Klein",
+            "sku": "FRA-CAL-CAL-006",
+            "weight": 7,
+            "dimensions": {
+              "width": 29.36,
+              "height": 27.76,
+              "depth": 20.72
+            },
+            "warrantyInformation": "1 week warranty",
+            "shippingInformation": "Ships overnight",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 2,
+                "comment": "Very disappointed!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Layla Young",
+                "reviewerEmail": "layla.young@x.dummyjson.com"
+              },
+              {
+                "rating": 4,
+                "comment": "Fast shipping!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Daniel Cook",
+                "reviewerEmail": "daniel.cook@x.dummyjson.com"
+              },
+              {
+                "rating": 3,
+                "comment": "Not as described!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Jacob Cooper",
+                "reviewerEmail": "jacob.cooper@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "90 days return policy",
+            "minimumOrderQuantity": 9,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "2451534060749",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/1.webp",
+              "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/2.webp",
+              "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/3.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/thumbnail.webp"
+          },
+          {
+            "id": 7,
+            "title": "Chanel Coco Noir Eau De",
+            "description": "Coco Noir by Chanel is an elegant and mysterious fragrance, featuring notes of grapefruit, rose, and sandalwood. Perfect for evening occasions.",
+            "category": "fragrances",
+            "price": 129.99,
+            "discountPercentage": 16.51,
+            "rating": 4.26,
+            "stock": 58,
+            "tags": [
+              "fragrances",
+              "perfumes"
+            ],
+            "brand": "Chanel",
+            "sku": "FRA-CHA-CHA-007",
+            "weight": 7,
+            "dimensions": {
+              "width": 24.5,
+              "height": 25.7,
+              "depth": 25.98
+            },
+            "warrantyInformation": "3 year warranty",
+            "shippingInformation": "Ships overnight",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 4,
+                "comment": "Highly impressed!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Ruby Andrews",
+                "reviewerEmail": "ruby.andrews@x.dummyjson.com"
+              },
+              {
+                "rating": 5,
+                "comment": "Awesome product!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Leah Henderson",
+                "reviewerEmail": "leah.henderson@x.dummyjson.com"
+              },
+              {
+                "rating": 5,
+                "comment": "Very happy with my purchase!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Xavier Wright",
+                "reviewerEmail": "xavier.wright@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "No return policy",
+            "minimumOrderQuantity": 1,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "4091737746820",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/1.webp",
+              "https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/2.webp",
+              "https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/3.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/thumbnail.webp"
+          },
+          {
+            "id": 8,
+            "title": "Dior J'adore",
+            "description": "J'adore by Dior is a luxurious and floral fragrance, known for its blend of ylang-ylang, rose, and jasmine. It embodies femininity and sophistication.",
+            "category": "fragrances",
+            "price": 89.99,
+            "discountPercentage": 14.72,
+            "rating": 3.8,
+            "stock": 98,
+            "tags": [
+              "fragrances",
+              "perfumes"
+            ],
+            "brand": "Dior",
+            "sku": "FRA-DIO-DIO-008",
+            "weight": 4,
+            "dimensions": {
+              "width": 27.67,
+              "height": 28.28,
+              "depth": 11.83
+            },
+            "warrantyInformation": "1 week warranty",
+            "shippingInformation": "Ships in 2 weeks",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 5,
+                "comment": "Great value for money!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Nicholas Bailey",
+                "reviewerEmail": "nicholas.bailey@x.dummyjson.com"
+              },
+              {
+                "rating": 4,
+                "comment": "Great value for money!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Penelope Harper",
+                "reviewerEmail": "penelope.harper@x.dummyjson.com"
+              },
+              {
+                "rating": 4,
+                "comment": "Great product!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Emma Miller",
+                "reviewerEmail": "emma.miller@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "7 days return policy",
+            "minimumOrderQuantity": 10,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "1445086097250",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/fragrances/dior-j'adore/1.webp",
+              "https://cdn.dummyjson.com/product-images/fragrances/dior-j'adore/2.webp",
+              "https://cdn.dummyjson.com/product-images/fragrances/dior-j'adore/3.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/fragrances/dior-j'adore/thumbnail.webp"
+          },
+          {
+            "id": 9,
+            "title": "Dolce Shine Eau de",
+            "description": "Dolce Shine by Dolce & Gabbana is a vibrant and fruity fragrance, featuring notes of mango, jasmine, and blonde woods. It's a joyful and youthful scent.",
+            "category": "fragrances",
+            "price": 69.99,
+            "discountPercentage": 0.62,
+            "rating": 3.96,
+            "stock": 4,
+            "tags": [
+              "fragrances",
+              "perfumes"
+            ],
+            "brand": "Dolce & Gabbana",
+            "sku": "FRA-DOL-DOL-009",
+            "weight": 6,
+            "dimensions": {
+              "width": 27.28,
+              "height": 29.88,
+              "depth": 18.3
+            },
+            "warrantyInformation": "3 year warranty",
+            "shippingInformation": "Ships in 1 month",
+            "availabilityStatus": "Low Stock",
+            "reviews": [
+              {
+                "rating": 4,
+                "comment": "Would buy again!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Mateo Bennett",
+                "reviewerEmail": "mateo.bennett@x.dummyjson.com"
+              },
+              {
+                "rating": 4,
+                "comment": "Highly recommended!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Nolan Gonzalez",
+                "reviewerEmail": "nolan.gonzalez@x.dummyjson.com"
+              },
+              {
+                "rating": 5,
+                "comment": "Very happy with my purchase!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Aurora Lawson",
+                "reviewerEmail": "aurora.lawson@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "7 days return policy",
+            "minimumOrderQuantity": 2,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "3023868210708",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/fragrances/dolce-shine-eau-de/1.webp",
+              "https://cdn.dummyjson.com/product-images/fragrances/dolce-shine-eau-de/2.webp",
+              "https://cdn.dummyjson.com/product-images/fragrances/dolce-shine-eau-de/3.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/fragrances/dolce-shine-eau-de/thumbnail.webp"
+          },
+          {
+            "id": 10,
+            "title": "Gucci Bloom Eau de",
+            "description": "Gucci Bloom by Gucci is a floral and captivating fragrance, with notes of tuberose, jasmine, and Rangoon creeper. It's a modern and romantic scent.",
+            "category": "fragrances",
+            "price": 79.99,
+            "discountPercentage": 14.39,
+            "rating": 2.74,
+            "stock": 91,
+            "tags": [
+              "fragrances",
+              "perfumes"
+            ],
+            "brand": "Gucci",
+            "sku": "FRA-GUC-GUC-010",
+            "weight": 7,
+            "dimensions": {
+              "width": 20.92,
+              "height": 21.68,
+              "depth": 11.2
+            },
+            "warrantyInformation": "6 months warranty",
+            "shippingInformation": "Ships overnight",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 1,
+                "comment": "Very dissatisfied!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Cameron Perez",
+                "reviewerEmail": "cameron.perez@x.dummyjson.com"
+              },
+              {
+                "rating": 5,
+                "comment": "Very happy with my purchase!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Daniel Cook",
+                "reviewerEmail": "daniel.cook@x.dummyjson.com"
+              },
+              {
+                "rating": 4,
+                "comment": "Highly impressed!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Addison Wright",
+                "reviewerEmail": "addison.wright@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "No return policy",
+            "minimumOrderQuantity": 2,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "3170832177880",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/fragrances/gucci-bloom-eau-de/1.webp",
+              "https://cdn.dummyjson.com/product-images/fragrances/gucci-bloom-eau-de/2.webp",
+              "https://cdn.dummyjson.com/product-images/fragrances/gucci-bloom-eau-de/3.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/fragrances/gucci-bloom-eau-de/thumbnail.webp"
+          },
+          {
+            "id": 11,
+            "title": "Annibale Colombo Bed",
+            "description": "The Annibale Colombo Bed is a luxurious and elegant bed frame, crafted with high-quality materials for a comfortable and stylish bedroom.",
+            "category": "furniture",
+            "price": 1899.99,
+            "discountPercentage": 8.57,
+            "rating": 4.77,
+            "stock": 88,
+            "tags": [
+              "furniture",
+              "beds"
+            ],
+            "brand": "Annibale Colombo",
+            "sku": "FUR-ANN-ANN-011",
+            "weight": 10,
+            "dimensions": {
+              "width": 28.16,
+              "height": 25.36,
+              "depth": 17.28
+            },
+            "warrantyInformation": "1 year warranty",
+            "shippingInformation": "Ships in 1 month",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 2,
+                "comment": "Would not recommend!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Christopher West",
+                "reviewerEmail": "christopher.west@x.dummyjson.com"
+              },
+              {
+                "rating": 4,
+                "comment": "Highly impressed!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Vivian Carter",
+                "reviewerEmail": "vivian.carter@x.dummyjson.com"
+              },
+              {
+                "rating": 1,
+                "comment": "Poor quality!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Mason Wright",
+                "reviewerEmail": "mason.wright@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "No return policy",
+            "minimumOrderQuantity": 1,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "3610757456581",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-bed/1.webp",
+              "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-bed/2.webp",
+              "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-bed/3.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-bed/thumbnail.webp"
+          },
+          {
+            "id": 12,
+            "title": "Annibale Colombo Sofa",
+            "description": "The Annibale Colombo Sofa is a sophisticated and comfortable seating option, featuring exquisite design and premium upholstery for your living room.",
+            "category": "furniture",
+            "price": 2499.99,
+            "discountPercentage": 14.4,
+            "rating": 3.92,
+            "stock": 60,
+            "tags": [
+              "furniture",
+              "sofas"
+            ],
+            "brand": "Annibale Colombo",
+            "sku": "FUR-ANN-ANN-012",
+            "weight": 6,
+            "dimensions": {
+              "width": 12.75,
+              "height": 20.55,
+              "depth": 19.06
+            },
+            "warrantyInformation": "Lifetime warranty",
+            "shippingInformation": "Ships in 1 week",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 3,
+                "comment": "Very unhappy with my purchase!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Christian Perez",
+                "reviewerEmail": "christian.perez@x.dummyjson.com"
+              },
+              {
+                "rating": 5,
+                "comment": "Fast shipping!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Lillian Bishop",
+                "reviewerEmail": "lillian.bishop@x.dummyjson.com"
+              },
+              {
+                "rating": 1,
+                "comment": "Poor quality!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Lillian Simmons",
+                "reviewerEmail": "lillian.simmons@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "7 days return policy",
+            "minimumOrderQuantity": 1,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "1777662847736",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-sofa/1.webp",
+              "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-sofa/2.webp",
+              "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-sofa/3.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-sofa/thumbnail.webp"
+          },
+          {
+            "id": 13,
+            "title": "Bedside Table African Cherry",
+            "description": "The Bedside Table in African Cherry is a stylish and functional addition to your bedroom, providing convenient storage space and a touch of elegance.",
+            "category": "furniture",
+            "price": 299.99,
+            "discountPercentage": 19.09,
+            "rating": 2.87,
+            "stock": 64,
+            "tags": [
+              "furniture",
+              "bedside tables"
+            ],
+            "brand": "Furniture Co.",
+            "sku": "FUR-FUR-BED-013",
+            "weight": 2,
+            "dimensions": {
+              "width": 13.47,
+              "height": 24.99,
+              "depth": 27.35
+            },
+            "warrantyInformation": "5 year warranty",
+            "shippingInformation": "Ships overnight",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 4,
+                "comment": "Excellent quality!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Aaliyah Hanson",
+                "reviewerEmail": "aaliyah.hanson@x.dummyjson.com"
+              },
+              {
+                "rating": 4,
+                "comment": "Excellent quality!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Liam Smith",
+                "reviewerEmail": "liam.smith@x.dummyjson.com"
+              },
+              {
+                "rating": 4,
+                "comment": "Highly recommended!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Avery Barnes",
+                "reviewerEmail": "avery.barnes@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "7 days return policy",
+            "minimumOrderQuantity": 3,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "6441287925979",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/furniture/bedside-table-african-cherry/1.webp",
+              "https://cdn.dummyjson.com/product-images/furniture/bedside-table-african-cherry/2.webp",
+              "https://cdn.dummyjson.com/product-images/furniture/bedside-table-african-cherry/3.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/furniture/bedside-table-african-cherry/thumbnail.webp"
+          },
+          {
+            "id": 14,
+            "title": "Knoll Saarinen Executive Conference Chair",
+            "description": "The Knoll Saarinen Executive Conference Chair is a modern and ergonomic chair, perfect for your office or conference room with its timeless design.",
+            "category": "furniture",
+            "price": 499.99,
+            "discountPercentage": 2.01,
+            "rating": 4.88,
+            "stock": 26,
+            "tags": [
+              "furniture",
+              "office chairs"
+            ],
+            "brand": "Knoll",
+            "sku": "FUR-KNO-KNO-014",
+            "weight": 10,
+            "dimensions": {
+              "width": 13.81,
+              "height": 7.5,
+              "depth": 5.62
+            },
+            "warrantyInformation": "2 year warranty",
+            "shippingInformation": "Ships overnight",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 2,
+                "comment": "Waste of money!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Ella Cook",
+                "reviewerEmail": "ella.cook@x.dummyjson.com"
+              },
+              {
+                "rating": 2,
+                "comment": "Very dissatisfied!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Clara Berry",
+                "reviewerEmail": "clara.berry@x.dummyjson.com"
+              },
+              {
+                "rating": 5,
+                "comment": "Would buy again!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Elena Long",
+                "reviewerEmail": "elena.long@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "60 days return policy",
+            "minimumOrderQuantity": 5,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "8919386859966",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/furniture/knoll-saarinen-executive-conference-chair/1.webp",
+              "https://cdn.dummyjson.com/product-images/furniture/knoll-saarinen-executive-conference-chair/2.webp",
+              "https://cdn.dummyjson.com/product-images/furniture/knoll-saarinen-executive-conference-chair/3.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/furniture/knoll-saarinen-executive-conference-chair/thumbnail.webp"
+          },
+          {
+            "id": 15,
+            "title": "Wooden Bathroom Sink With Mirror",
+            "description": "The Wooden Bathroom Sink with Mirror is a unique and stylish addition to your bathroom, featuring a wooden sink countertop and a matching mirror.",
+            "category": "furniture",
+            "price": 799.99,
+            "discountPercentage": 8.8,
+            "rating": 3.59,
+            "stock": 7,
+            "tags": [
+              "furniture",
+              "bathroom"
+            ],
+            "brand": "Bath Trends",
+            "sku": "FUR-BAT-WOO-015",
+            "weight": 10,
+            "dimensions": {
+              "width": 7.98,
+              "height": 8.88,
+              "depth": 28.46
+            },
+            "warrantyInformation": "3 year warranty",
+            "shippingInformation": "Ships in 3-5 business days",
+            "availabilityStatus": "Low Stock",
+            "reviews": [
+              {
+                "rating": 4,
+                "comment": "Fast shipping!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Logan Torres",
+                "reviewerEmail": "logan.torres@x.dummyjson.com"
+              },
+              {
+                "rating": 5,
+                "comment": "Very pleased!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Aria Parker",
+                "reviewerEmail": "aria.parker@x.dummyjson.com"
+              },
+              {
+                "rating": 3,
+                "comment": "Poor quality!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Dylan Wells",
+                "reviewerEmail": "dylan.wells@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "60 days return policy",
+            "minimumOrderQuantity": 2,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "1958104402873",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/1.webp",
+              "https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/2.webp",
+              "https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/3.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/thumbnail.webp"
+          },
+          {
+            "id": 16,
+            "title": "Apple",
+            "description": "Fresh and crisp apples, perfect for snacking or incorporating into various recipes.",
+            "category": "groceries",
+            "price": 1.99,
+            "discountPercentage": 12.62,
+            "rating": 4.19,
+            "stock": 8,
+            "tags": [
+              "fruits"
+            ],
+            "sku": "GRO-BRD-APP-016",
+            "weight": 9,
+            "dimensions": {
+              "width": 13.66,
+              "height": 11.01,
+              "depth": 9.73
+            },
+            "warrantyInformation": "3 year warranty",
+            "shippingInformation": "Ships in 2 weeks",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 5,
+                "comment": "Very satisfied!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Sophia Brown",
+                "reviewerEmail": "sophia.brown@x.dummyjson.com"
+              },
+              {
+                "rating": 1,
+                "comment": "Very dissatisfied!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Scarlett Bowman",
+                "reviewerEmail": "scarlett.bowman@x.dummyjson.com"
+              },
+              {
+                "rating": 3,
+                "comment": "Very unhappy with my purchase!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "William Gonzalez",
+                "reviewerEmail": "william.gonzalez@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "90 days return policy",
+            "minimumOrderQuantity": 7,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "7962803553314",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/groceries/apple/1.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/apple/thumbnail.webp"
+          },
+          {
+            "id": 17,
+            "title": "Beef Steak",
+            "description": "High-quality beef steak, great for grilling or cooking to your preferred level of doneness.",
+            "category": "groceries",
+            "price": 12.99,
+            "discountPercentage": 9.61,
+            "rating": 4.47,
+            "stock": 86,
+            "tags": [
+              "meat"
+            ],
+            "sku": "GRO-BRD-BEE-017",
+            "weight": 10,
+            "dimensions": {
+              "width": 18.9,
+              "height": 5.77,
+              "depth": 18.57
+            },
+            "warrantyInformation": "3 year warranty",
+            "shippingInformation": "Ships overnight",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 3,
+                "comment": "Would not recommend!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Eleanor Tyler",
+                "reviewerEmail": "eleanor.tyler@x.dummyjson.com"
+              },
+              {
+                "rating": 4,
+                "comment": "Fast shipping!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Alexander Jones",
+                "reviewerEmail": "alexander.jones@x.dummyjson.com"
+              },
+              {
+                "rating": 5,
+                "comment": "Great value for money!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Natalie Harris",
+                "reviewerEmail": "natalie.harris@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "60 days return policy",
+            "minimumOrderQuantity": 43,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "5640063409695",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/groceries/beef-steak/1.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/beef-steak/thumbnail.webp"
+          },
+          {
+            "id": 18,
+            "title": "Cat Food",
+            "description": "Nutritious cat food formulated to meet the dietary needs of your feline friend.",
+            "category": "groceries",
+            "price": 8.99,
+            "discountPercentage": 9.58,
+            "rating": 3.13,
+            "stock": 46,
+            "tags": [
+              "pet supplies",
+              "cat food"
+            ],
+            "sku": "GRO-BRD-FOO-018",
+            "weight": 10,
+            "dimensions": {
+              "width": 18.08,
+              "height": 9.26,
+              "depth": 21.86
+            },
+            "warrantyInformation": "1 year warranty",
+            "shippingInformation": "Ships overnight",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 3,
+                "comment": "Would not recommend!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Noah Lewis",
+                "reviewerEmail": "noah.lewis@x.dummyjson.com"
+              },
+              {
+                "rating": 3,
+                "comment": "Very unhappy with my purchase!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Ruby Andrews",
+                "reviewerEmail": "ruby.andrews@x.dummyjson.com"
+              },
+              {
+                "rating": 2,
+                "comment": "Very disappointed!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Ethan Thompson",
+                "reviewerEmail": "ethan.thompson@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "No return policy",
+            "minimumOrderQuantity": 18,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "1483991328610",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/groceries/cat-food/1.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/cat-food/thumbnail.webp"
+          },
+          {
+            "id": 19,
+            "title": "Chicken Meat",
+            "description": "Fresh and tender chicken meat, suitable for various culinary preparations.",
+            "category": "groceries",
+            "price": 9.99,
+            "discountPercentage": 13.7,
+            "rating": 3.19,
+            "stock": 97,
+            "tags": [
+              "meat"
+            ],
+            "sku": "GRO-BRD-CHI-019",
+            "weight": 1,
+            "dimensions": {
+              "width": 11.03,
+              "height": 22.11,
+              "depth": 16.01
+            },
+            "warrantyInformation": "1 year warranty",
+            "shippingInformation": "Ships in 1 month",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 5,
+                "comment": "Great product!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Mateo Bennett",
+                "reviewerEmail": "mateo.bennett@x.dummyjson.com"
+              },
+              {
+                "rating": 4,
+                "comment": "Highly recommended!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Jackson Evans",
+                "reviewerEmail": "jackson.evans@x.dummyjson.com"
+              },
+              {
+                "rating": 3,
+                "comment": "Not worth the price!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Sadie Morales",
+                "reviewerEmail": "sadie.morales@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "7 days return policy",
+            "minimumOrderQuantity": 22,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "8829514594521",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/groceries/chicken-meat/1.webp",
+              "https://cdn.dummyjson.com/product-images/groceries/chicken-meat/2.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/chicken-meat/thumbnail.webp"
+          },
+          {
+            "id": 20,
+            "title": "Cooking Oil",
+            "description": "Versatile cooking oil suitable for frying, sautéing, and various culinary applications.",
+            "category": "groceries",
+            "price": 4.99,
+            "discountPercentage": 9.33,
+            "rating": 4.8,
+            "stock": 10,
+            "tags": [
+              "cooking essentials"
+            ],
+            "sku": "GRO-BRD-COO-020",
+            "weight": 5,
+            "dimensions": {
+              "width": 19.95,
+              "height": 27.54,
+              "depth": 24.86
+            },
+            "warrantyInformation": "Lifetime warranty",
+            "shippingInformation": "Ships in 1-2 business days",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 5,
+                "comment": "Very happy with my purchase!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Victoria McDonald",
+                "reviewerEmail": "victoria.mcdonald@x.dummyjson.com"
+              },
+              {
+                "rating": 2,
+                "comment": "Would not recommend!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Hazel Evans",
+                "reviewerEmail": "hazel.evans@x.dummyjson.com"
+              },
+              {
+                "rating": 5,
+                "comment": "Would buy again!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Zoe Bennett",
+                "reviewerEmail": "zoe.bennett@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "30 days return policy",
+            "minimumOrderQuantity": 46,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "4874727824518",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/groceries/cooking-oil/1.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/cooking-oil/thumbnail.webp"
+          },
+          {
+            "id": 21,
+            "title": "Cucumber",
+            "description": "Crisp and hydrating cucumbers, ideal for salads, snacks, or as a refreshing side.",
+            "category": "groceries",
+            "price": 1.49,
+            "discountPercentage": 0.16,
+            "rating": 4.07,
+            "stock": 84,
+            "tags": [
+              "vegetables"
+            ],
+            "sku": "GRO-BRD-CUC-021",
+            "weight": 4,
+            "dimensions": {
+              "width": 12.8,
+              "height": 28.38,
+              "depth": 21.34
+            },
+            "warrantyInformation": "2 year warranty",
+            "shippingInformation": "Ships in 1-2 business days",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 4,
+                "comment": "Great product!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Lincoln Kelly",
+                "reviewerEmail": "lincoln.kelly@x.dummyjson.com"
+              },
+              {
+                "rating": 4,
+                "comment": "Great value for money!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Savannah Gomez",
+                "reviewerEmail": "savannah.gomez@x.dummyjson.com"
+              },
+              {
+                "rating": 2,
+                "comment": "Poor quality!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "James Davis",
+                "reviewerEmail": "james.davis@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "7 days return policy",
+            "minimumOrderQuantity": 2,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "5300066378225",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/groceries/cucumber/1.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/cucumber/thumbnail.webp"
+          },
+          {
+            "id": 22,
+            "title": "Dog Food",
+            "description": "Specially formulated dog food designed to provide essential nutrients for your canine companion.",
+            "category": "groceries",
+            "price": 10.99,
+            "discountPercentage": 10.27,
+            "rating": 4.55,
+            "stock": 71,
+            "tags": [
+              "pet supplies",
+              "dog food"
+            ],
+            "sku": "GRO-BRD-FOO-022",
+            "weight": 10,
+            "dimensions": {
+              "width": 16.93,
+              "height": 27.15,
+              "depth": 9.29
+            },
+            "warrantyInformation": "No warranty",
+            "shippingInformation": "Ships in 1-2 business days",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 5,
+                "comment": "Excellent quality!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Nicholas Edwards",
+                "reviewerEmail": "nicholas.edwards@x.dummyjson.com"
+              },
+              {
+                "rating": 5,
+                "comment": "Awesome product!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Zachary Lee",
+                "reviewerEmail": "zachary.lee@x.dummyjson.com"
+              },
+              {
+                "rating": 4,
+                "comment": "Great product!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Nova Cooper",
+                "reviewerEmail": "nova.cooper@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "60 days return policy",
+            "minimumOrderQuantity": 43,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "5906686116469",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/groceries/dog-food/1.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/dog-food/thumbnail.webp"
+          },
+          {
+            "id": 23,
+            "title": "Eggs",
+            "description": "Fresh eggs, a versatile ingredient for baking, cooking, or breakfast.",
+            "category": "groceries",
+            "price": 2.99,
+            "discountPercentage": 11.05,
+            "rating": 2.53,
+            "stock": 9,
+            "tags": [
+              "dairy"
+            ],
+            "sku": "GRO-BRD-EGG-023",
+            "weight": 2,
+            "dimensions": {
+              "width": 11.42,
+              "height": 7.44,
+              "depth": 16.95
+            },
+            "warrantyInformation": "1 week warranty",
+            "shippingInformation": "Ships in 1 week",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 3,
+                "comment": "Disappointing product!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Penelope King",
+                "reviewerEmail": "penelope.king@x.dummyjson.com"
+              },
+              {
+                "rating": 3,
+                "comment": "Poor quality!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Eleanor Tyler",
+                "reviewerEmail": "eleanor.tyler@x.dummyjson.com"
+              },
+              {
+                "rating": 4,
+                "comment": "Very pleased!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Benjamin Foster",
+                "reviewerEmail": "benjamin.foster@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "No return policy",
+            "minimumOrderQuantity": 32,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "3478638588469",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/groceries/eggs/1.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/eggs/thumbnail.webp"
+          },
+          {
+            "id": 24,
+            "title": "Fish Steak",
+            "description": "Quality fish steak, suitable for grilling, baking, or pan-searing.",
+            "category": "groceries",
+            "price": 14.99,
+            "discountPercentage": 4.23,
+            "rating": 3.78,
+            "stock": 74,
+            "tags": [
+              "seafood"
+            ],
+            "sku": "GRO-BRD-FIS-024",
+            "weight": 6,
+            "dimensions": {
+              "width": 14.95,
+              "height": 26.31,
+              "depth": 11.27
+            },
+            "warrantyInformation": "1 month warranty",
+            "shippingInformation": "Ships in 3-5 business days",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 2,
+                "comment": "Would not buy again!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Caleb Perkins",
+                "reviewerEmail": "caleb.perkins@x.dummyjson.com"
+              },
+              {
+                "rating": 5,
+                "comment": "Excellent quality!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Isabella Jackson",
+                "reviewerEmail": "isabella.jackson@x.dummyjson.com"
+              },
+              {
+                "rating": 4,
+                "comment": "Great value for money!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Nathan Dixon",
+                "reviewerEmail": "nathan.dixon@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "60 days return policy",
+            "minimumOrderQuantity": 50,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "9595036192098",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/groceries/fish-steak/1.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/fish-steak/thumbnail.webp"
+          },
+          {
+            "id": 25,
+            "title": "Green Bell Pepper",
+            "description": "Fresh and vibrant green bell pepper, perfect for adding color and flavor to your dishes.",
+            "category": "groceries",
+            "price": 1.29,
+            "discountPercentage": 0.16,
+            "rating": 3.25,
+            "stock": 33,
+            "tags": [
+              "vegetables"
+            ],
+            "sku": "GRO-BRD-GRE-025",
+            "weight": 2,
+            "dimensions": {
+              "width": 15.33,
+              "height": 26.65,
+              "depth": 14.44
+            },
+            "warrantyInformation": "1 month warranty",
+            "shippingInformation": "Ships in 1 week",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 4,
+                "comment": "Highly recommended!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Avery Carter",
+                "reviewerEmail": "avery.carter@x.dummyjson.com"
+              },
+              {
+                "rating": 3,
+                "comment": "Would not recommend!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Henry Hill",
+                "reviewerEmail": "henry.hill@x.dummyjson.com"
+              },
+              {
+                "rating": 5,
+                "comment": "Excellent quality!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Addison Wright",
+                "reviewerEmail": "addison.wright@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "30 days return policy",
+            "minimumOrderQuantity": 12,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "2365227493323",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/groceries/green-bell-pepper/1.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/green-bell-pepper/thumbnail.webp"
+          },
+          {
+            "id": 26,
+            "title": "Green Chili Pepper",
+            "description": "Spicy green chili pepper, ideal for adding heat to your favorite recipes.",
+            "category": "groceries",
+            "price": 0.99,
+            "discountPercentage": 1,
+            "rating": 3.66,
+            "stock": 3,
+            "tags": [
+              "vegetables"
+            ],
+            "sku": "GRO-BRD-GRE-026",
+            "weight": 7,
+            "dimensions": {
+              "width": 15.38,
+              "height": 18.12,
+              "depth": 19.92
+            },
+            "warrantyInformation": "2 year warranty",
+            "shippingInformation": "Ships in 1 week",
+            "availabilityStatus": "Low Stock",
+            "reviews": [
+              {
+                "rating": 4,
+                "comment": "Great product!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Luna Russell",
+                "reviewerEmail": "luna.russell@x.dummyjson.com"
+              },
+              {
+                "rating": 1,
+                "comment": "Waste of money!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Noah Lewis",
+                "reviewerEmail": "noah.lewis@x.dummyjson.com"
+              },
+              {
+                "rating": 3,
+                "comment": "Very disappointed!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Clara Berry",
+                "reviewerEmail": "clara.berry@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "30 days return policy",
+            "minimumOrderQuantity": 39,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "9335000538563",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/groceries/green-chili-pepper/1.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/green-chili-pepper/thumbnail.webp"
+          },
+          {
+            "id": 27,
+            "title": "Honey Jar",
+            "description": "Pure and natural honey in a convenient jar, perfect for sweetening beverages or drizzling over food.",
+            "category": "groceries",
+            "price": 6.99,
+            "discountPercentage": 14.4,
+            "rating": 3.97,
+            "stock": 34,
+            "tags": [
+              "condiments"
+            ],
+            "sku": "GRO-BRD-HON-027",
+            "weight": 2,
+            "dimensions": {
+              "width": 9.28,
+              "height": 21.72,
+              "depth": 17.74
+            },
+            "warrantyInformation": "1 month warranty",
+            "shippingInformation": "Ships in 1-2 business days",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 1,
+                "comment": "Very disappointed!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Autumn Gomez",
+                "reviewerEmail": "autumn.gomez@x.dummyjson.com"
+              },
+              {
+                "rating": 4,
+                "comment": "Highly impressed!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Benjamin Wilson",
+                "reviewerEmail": "benjamin.wilson@x.dummyjson.com"
+              },
+              {
+                "rating": 2,
+                "comment": "Very disappointed!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Nicholas Edwards",
+                "reviewerEmail": "nicholas.edwards@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "90 days return policy",
+            "minimumOrderQuantity": 47,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "6354306346329",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/groceries/honey-jar/1.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/honey-jar/thumbnail.webp"
+          },
+          {
+            "id": 28,
+            "title": "Ice Cream",
+            "description": "Creamy and delicious ice cream, available in various flavors for a delightful treat.",
+            "category": "groceries",
+            "price": 5.49,
+            "discountPercentage": 8.69,
+            "rating": 3.39,
+            "stock": 27,
+            "tags": [
+              "desserts"
+            ],
+            "sku": "GRO-BRD-CRE-028",
+            "weight": 1,
+            "dimensions": {
+              "width": 14.83,
+              "height": 15.07,
+              "depth": 24.2
+            },
+            "warrantyInformation": "1 month warranty",
+            "shippingInformation": "Ships in 2 weeks",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 5,
+                "comment": "Very pleased!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Elijah Cruz",
+                "reviewerEmail": "elijah.cruz@x.dummyjson.com"
+              },
+              {
+                "rating": 4,
+                "comment": "Excellent quality!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Jace Smith",
+                "reviewerEmail": "jace.smith@x.dummyjson.com"
+              },
+              {
+                "rating": 5,
+                "comment": "Highly impressed!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Sadie Morales",
+                "reviewerEmail": "sadie.morales@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "No return policy",
+            "minimumOrderQuantity": 42,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "0788954559076",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/groceries/ice-cream/1.webp",
+              "https://cdn.dummyjson.com/product-images/groceries/ice-cream/2.webp",
+              "https://cdn.dummyjson.com/product-images/groceries/ice-cream/3.webp",
+              "https://cdn.dummyjson.com/product-images/groceries/ice-cream/4.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/ice-cream/thumbnail.webp"
+          },
+          {
+            "id": 29,
+            "title": "Juice",
+            "description": "Refreshing fruit juice, packed with vitamins and great for staying hydrated.",
+            "category": "groceries",
+            "price": 3.99,
+            "discountPercentage": 12.06,
+            "rating": 3.94,
+            "stock": 50,
+            "tags": [
+              "beverages"
+            ],
+            "sku": "GRO-BRD-JUI-029",
+            "weight": 1,
+            "dimensions": {
+              "width": 18.56,
+              "height": 21.46,
+              "depth": 28.02
+            },
+            "warrantyInformation": "6 months warranty",
+            "shippingInformation": "Ships in 1 week",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 5,
+                "comment": "Excellent quality!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Nolan Gonzalez",
+                "reviewerEmail": "nolan.gonzalez@x.dummyjson.com"
+              },
+              {
+                "rating": 4,
+                "comment": "Would buy again!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Bella Grant",
+                "reviewerEmail": "bella.grant@x.dummyjson.com"
+              },
+              {
+                "rating": 5,
+                "comment": "Awesome product!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Aria Flores",
+                "reviewerEmail": "aria.flores@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "No return policy",
+            "minimumOrderQuantity": 25,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "6936112580956",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/groceries/juice/1.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/juice/thumbnail.webp"
+          },
+          {
+            "id": 30,
+            "title": "Kiwi",
+            "description": "Nutrient-rich kiwi, perfect for snacking or adding a tropical twist to your dishes.",
+            "category": "groceries",
+            "price": 2.49,
+            "discountPercentage": 15.22,
+            "rating": 4.93,
+            "stock": 99,
+            "tags": [
+              "fruits"
+            ],
+            "sku": "GRO-BRD-KIW-030",
+            "weight": 5,
+            "dimensions": {
+              "width": 19.4,
+              "height": 18.67,
+              "depth": 17.13
+            },
+            "warrantyInformation": "6 months warranty",
+            "shippingInformation": "Ships overnight",
+            "availabilityStatus": "In Stock",
+            "reviews": [
+              {
+                "rating": 4,
+                "comment": "Highly recommended!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Emily Brown",
+                "reviewerEmail": "emily.brown@x.dummyjson.com"
+              },
+              {
+                "rating": 2,
+                "comment": "Would not buy again!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Jackson Morales",
+                "reviewerEmail": "jackson.morales@x.dummyjson.com"
+              },
+              {
+                "rating": 4,
+                "comment": "Fast shipping!",
+                "date": "2025-04-30T09:41:02.053Z",
+                "reviewerName": "Nora Russell",
+                "reviewerEmail": "nora.russell@x.dummyjson.com"
+              }
+            ],
+            "returnPolicy": "7 days return policy",
+            "minimumOrderQuantity": 30,
+            "meta": {
+              "createdAt": "2025-04-30T09:41:02.053Z",
+              "updatedAt": "2025-04-30T09:41:02.053Z",
+              "barcode": "2530169917252",
+              "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+            },
+            "images": [
+              "https://cdn.dummyjson.com/product-images/groceries/kiwi/1.webp"
+            ],
+            "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/kiwi/thumbnail.webp"
+          }
+        ],
+        "total": 194,
+        "skip": 0,
+        "limit": 30
+      },
+      "status_code": 200
+    }
+  ],
+  "extracted_data": {
+    "items": [
+      {
+        "id": 1,
+        "title": "Essence Mascara Lash Princess",
+        "description": "The Essence Mascara Lash Princess is a popular mascara known for its volumizing and lengthening effects. Achieve dramatic lashes with this long-lasting and cruelty-free formula.",
+        "category": "beauty",
+        "price": 9.99,
+        "discountPercentage": 10.48,
+        "rating": 2.56,
+        "stock": 99,
+        "tags": [
+          "beauty",
+          "mascara"
+        ],
+        "brand": "Essence",
+        "sku": "BEA-ESS-ESS-001",
+        "weight": 4,
+        "dimensions": {
+          "width": 15.14,
+          "height": 13.08,
+          "depth": 22.99
+        },
+        "warrantyInformation": "1 week warranty",
+        "shippingInformation": "Ships in 3-5 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 3,
+            "comment": "Would not recommend!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Eleanor Collins",
+            "reviewerEmail": "eleanor.collins@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Very satisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Lucas Gordon",
+            "reviewerEmail": "lucas.gordon@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Highly impressed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Eleanor Collins",
+            "reviewerEmail": "eleanor.collins@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 48,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "5784719087687",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/thumbnail.webp",
+        "hot_score": 2.56,
+        "summary": "The Essence Mascara Lash Princess is a popular mascara known for its volumizing and lengthening effects. Achieve dramatic lashes with this long-lasting and cruelty-free formula.",
+        "rank": 1,
+        "index": 0
+      },
+      {
+        "id": 2,
+        "title": "Eyeshadow Palette with Mirror",
+        "description": "The Eyeshadow Palette with Mirror offers a versatile range of eyeshadow shades for creating stunning eye looks. With a built-in mirror, it's convenient for on-the-go makeup application.",
+        "category": "beauty",
+        "price": 19.99,
+        "discountPercentage": 18.19,
+        "rating": 2.86,
+        "stock": 34,
+        "tags": [
+          "beauty",
+          "eyeshadow"
+        ],
+        "brand": "Glamour Beauty",
+        "sku": "BEA-GLA-EYE-002",
+        "weight": 9,
+        "dimensions": {
+          "width": 9.26,
+          "height": 22.47,
+          "depth": 27.67
+        },
+        "warrantyInformation": "1 year warranty",
+        "shippingInformation": "Ships in 2 weeks",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Great product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Savannah Gomez",
+            "reviewerEmail": "savannah.gomez@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Awesome product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Christian Perez",
+            "reviewerEmail": "christian.perez@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Poor quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nicholas Bailey",
+            "reviewerEmail": "nicholas.bailey@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 20,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "9170275171413",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/thumbnail.webp",
+        "hot_score": 2.86,
+        "summary": "The Eyeshadow Palette with Mirror offers a versatile range of eyeshadow shades for creating stunning eye looks. With a built-in mirror, it's convenient for on-the-go makeup application.",
+        "rank": 2,
+        "index": 1
+      },
+      {
+        "id": 3,
+        "title": "Powder Canister",
+        "description": "The Powder Canister is a finely milled setting powder designed to set makeup and control shine. With a lightweight and translucent formula, it provides a smooth and matte finish.",
+        "category": "beauty",
+        "price": 14.99,
+        "discountPercentage": 9.84,
+        "rating": 4.64,
+        "stock": 89,
+        "tags": [
+          "beauty",
+          "face powder"
+        ],
+        "brand": "Velvet Touch",
+        "sku": "BEA-VEL-POW-003",
+        "weight": 8,
+        "dimensions": {
+          "width": 29.27,
+          "height": 27.93,
+          "depth": 20.59
+        },
+        "warrantyInformation": "3 months warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Alexander Jones",
+            "reviewerEmail": "alexander.jones@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Highly impressed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Elijah Cruz",
+            "reviewerEmail": "elijah.cruz@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Very dissatisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Avery Perez",
+            "reviewerEmail": "avery.perez@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 22,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "8418883906837",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/beauty/powder-canister/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/beauty/powder-canister/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/beauty/powder-canister/thumbnail.webp",
+        "hot_score": 4.64,
+        "summary": "The Powder Canister is a finely milled setting powder designed to set makeup and control shine. With a lightweight and translucent formula, it provides a smooth and matte finish.",
+        "rank": 3,
+        "index": 2
+      },
+      {
+        "id": 4,
+        "title": "Red Lipstick",
+        "description": "The Red Lipstick is a classic and bold choice for adding a pop of color to your lips. With a creamy and pigmented formula, it provides a vibrant and long-lasting finish.",
+        "category": "beauty",
+        "price": 12.99,
+        "discountPercentage": 12.16,
+        "rating": 4.36,
+        "stock": 91,
+        "tags": [
+          "beauty",
+          "lipstick"
+        ],
+        "brand": "Chic Cosmetics",
+        "sku": "BEA-CHI-LIP-004",
+        "weight": 1,
+        "dimensions": {
+          "width": 18.11,
+          "height": 28.38,
+          "depth": 22.17
+        },
+        "warrantyInformation": "3 year warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Great product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Liam Garcia",
+            "reviewerEmail": "liam.garcia@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Great product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ruby Andrews",
+            "reviewerEmail": "ruby.andrews@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Clara Berry",
+            "reviewerEmail": "clara.berry@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 40,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "9467746727219",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/beauty/red-lipstick/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/beauty/red-lipstick/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/beauty/red-lipstick/thumbnail.webp",
+        "hot_score": 4.36,
+        "summary": "The Red Lipstick is a classic and bold choice for adding a pop of color to your lips. With a creamy and pigmented formula, it provides a vibrant and long-lasting finish.",
+        "rank": 4,
+        "index": 3
+      },
+      {
+        "id": 5,
+        "title": "Red Nail Polish",
+        "description": "The Red Nail Polish offers a rich and glossy red hue for vibrant and polished nails. With a quick-drying formula, it provides a salon-quality finish at home.",
+        "category": "beauty",
+        "price": 8.99,
+        "discountPercentage": 11.44,
+        "rating": 4.32,
+        "stock": 79,
+        "tags": [
+          "beauty",
+          "nail polish"
+        ],
+        "brand": "Nail Couture",
+        "sku": "BEA-NAI-NAI-005",
+        "weight": 8,
+        "dimensions": {
+          "width": 21.63,
+          "height": 16.48,
+          "depth": 29.84
+        },
+        "warrantyInformation": "1 month warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 2,
+            "comment": "Poor quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Benjamin Wilson",
+            "reviewerEmail": "benjamin.wilson@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Great product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Liam Smith",
+            "reviewerEmail": "liam.smith@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Very unhappy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Clara Berry",
+            "reviewerEmail": "clara.berry@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 22,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "4063010628104",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/beauty/red-nail-polish/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/beauty/red-nail-polish/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/beauty/red-nail-polish/thumbnail.webp",
+        "hot_score": 4.32,
+        "summary": "The Red Nail Polish offers a rich and glossy red hue for vibrant and polished nails. With a quick-drying formula, it provides a salon-quality finish at home.",
+        "rank": 5,
+        "index": 4
+      },
+      {
+        "id": 6,
+        "title": "Calvin Klein CK One",
+        "description": "CK One by Calvin Klein is a classic unisex fragrance, known for its fresh and clean scent. It's a versatile fragrance suitable for everyday wear.",
+        "category": "fragrances",
+        "price": 49.99,
+        "discountPercentage": 1.89,
+        "rating": 4.37,
+        "stock": 29,
+        "tags": [
+          "fragrances",
+          "perfumes"
+        ],
+        "brand": "Calvin Klein",
+        "sku": "FRA-CAL-CAL-006",
+        "weight": 7,
+        "dimensions": {
+          "width": 29.36,
+          "height": 27.76,
+          "depth": 20.72
+        },
+        "warrantyInformation": "1 week warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 2,
+            "comment": "Very disappointed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Layla Young",
+            "reviewerEmail": "layla.young@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Daniel Cook",
+            "reviewerEmail": "daniel.cook@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Not as described!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Jacob Cooper",
+            "reviewerEmail": "jacob.cooper@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "90 days return policy",
+        "minimumOrderQuantity": 9,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "2451534060749",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/1.webp",
+          "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/2.webp",
+          "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/3.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/thumbnail.webp",
+        "hot_score": 4.37,
+        "summary": "CK One by Calvin Klein is a classic unisex fragrance, known for its fresh and clean scent. It's a versatile fragrance suitable for everyday wear.",
+        "rank": 6,
+        "index": 5
+      },
+      {
+        "id": 7,
+        "title": "Chanel Coco Noir Eau De",
+        "description": "Coco Noir by Chanel is an elegant and mysterious fragrance, featuring notes of grapefruit, rose, and sandalwood. Perfect for evening occasions.",
+        "category": "fragrances",
+        "price": 129.99,
+        "discountPercentage": 16.51,
+        "rating": 4.26,
+        "stock": 58,
+        "tags": [
+          "fragrances",
+          "perfumes"
+        ],
+        "brand": "Chanel",
+        "sku": "FRA-CHA-CHA-007",
+        "weight": 7,
+        "dimensions": {
+          "width": 24.5,
+          "height": 25.7,
+          "depth": 25.98
+        },
+        "warrantyInformation": "3 year warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Highly impressed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ruby Andrews",
+            "reviewerEmail": "ruby.andrews@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Awesome product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Leah Henderson",
+            "reviewerEmail": "leah.henderson@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very happy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Xavier Wright",
+            "reviewerEmail": "xavier.wright@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 1,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "4091737746820",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/1.webp",
+          "https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/2.webp",
+          "https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/3.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/thumbnail.webp",
+        "hot_score": 4.26,
+        "summary": "Coco Noir by Chanel is an elegant and mysterious fragrance, featuring notes of grapefruit, rose, and sandalwood. Perfect for evening occasions.",
+        "rank": 7,
+        "index": 6
+      },
+      {
+        "id": 8,
+        "title": "Dior J'adore",
+        "description": "J'adore by Dior is a luxurious and floral fragrance, known for its blend of ylang-ylang, rose, and jasmine. It embodies femininity and sophistication.",
+        "category": "fragrances",
+        "price": 89.99,
+        "discountPercentage": 14.72,
+        "rating": 3.8,
+        "stock": 98,
+        "tags": [
+          "fragrances",
+          "perfumes"
+        ],
+        "brand": "Dior",
+        "sku": "FRA-DIO-DIO-008",
+        "weight": 4,
+        "dimensions": {
+          "width": 27.67,
+          "height": 28.28,
+          "depth": 11.83
+        },
+        "warrantyInformation": "1 week warranty",
+        "shippingInformation": "Ships in 2 weeks",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Great value for money!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nicholas Bailey",
+            "reviewerEmail": "nicholas.bailey@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Great value for money!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Penelope Harper",
+            "reviewerEmail": "penelope.harper@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Great product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Emma Miller",
+            "reviewerEmail": "emma.miller@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 10,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "1445086097250",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/fragrances/dior-j'adore/1.webp",
+          "https://cdn.dummyjson.com/product-images/fragrances/dior-j'adore/2.webp",
+          "https://cdn.dummyjson.com/product-images/fragrances/dior-j'adore/3.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/fragrances/dior-j'adore/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/fragrances/dior-j'adore/thumbnail.webp",
+        "hot_score": 3.8,
+        "summary": "J'adore by Dior is a luxurious and floral fragrance, known for its blend of ylang-ylang, rose, and jasmine. It embodies femininity and sophistication.",
+        "rank": 8,
+        "index": 7
+      },
+      {
+        "id": 9,
+        "title": "Dolce Shine Eau de",
+        "description": "Dolce Shine by Dolce & Gabbana is a vibrant and fruity fragrance, featuring notes of mango, jasmine, and blonde woods. It's a joyful and youthful scent.",
+        "category": "fragrances",
+        "price": 69.99,
+        "discountPercentage": 0.62,
+        "rating": 3.96,
+        "stock": 4,
+        "tags": [
+          "fragrances",
+          "perfumes"
+        ],
+        "brand": "Dolce & Gabbana",
+        "sku": "FRA-DOL-DOL-009",
+        "weight": 6,
+        "dimensions": {
+          "width": 27.28,
+          "height": 29.88,
+          "depth": 18.3
+        },
+        "warrantyInformation": "3 year warranty",
+        "shippingInformation": "Ships in 1 month",
+        "availabilityStatus": "Low Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Mateo Bennett",
+            "reviewerEmail": "mateo.bennett@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Highly recommended!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nolan Gonzalez",
+            "reviewerEmail": "nolan.gonzalez@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very happy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Aurora Lawson",
+            "reviewerEmail": "aurora.lawson@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 2,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "3023868210708",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/fragrances/dolce-shine-eau-de/1.webp",
+          "https://cdn.dummyjson.com/product-images/fragrances/dolce-shine-eau-de/2.webp",
+          "https://cdn.dummyjson.com/product-images/fragrances/dolce-shine-eau-de/3.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/fragrances/dolce-shine-eau-de/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/fragrances/dolce-shine-eau-de/thumbnail.webp",
+        "hot_score": 3.96,
+        "summary": "Dolce Shine by Dolce & Gabbana is a vibrant and fruity fragrance, featuring notes of mango, jasmine, and blonde woods. It's a joyful and youthful scent.",
+        "rank": 9,
+        "index": 8
+      },
+      {
+        "id": 10,
+        "title": "Gucci Bloom Eau de",
+        "description": "Gucci Bloom by Gucci is a floral and captivating fragrance, with notes of tuberose, jasmine, and Rangoon creeper. It's a modern and romantic scent.",
+        "category": "fragrances",
+        "price": 79.99,
+        "discountPercentage": 14.39,
+        "rating": 2.74,
+        "stock": 91,
+        "tags": [
+          "fragrances",
+          "perfumes"
+        ],
+        "brand": "Gucci",
+        "sku": "FRA-GUC-GUC-010",
+        "weight": 7,
+        "dimensions": {
+          "width": 20.92,
+          "height": 21.68,
+          "depth": 11.2
+        },
+        "warrantyInformation": "6 months warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 1,
+            "comment": "Very dissatisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Cameron Perez",
+            "reviewerEmail": "cameron.perez@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very happy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Daniel Cook",
+            "reviewerEmail": "daniel.cook@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Highly impressed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Addison Wright",
+            "reviewerEmail": "addison.wright@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 2,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "3170832177880",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/fragrances/gucci-bloom-eau-de/1.webp",
+          "https://cdn.dummyjson.com/product-images/fragrances/gucci-bloom-eau-de/2.webp",
+          "https://cdn.dummyjson.com/product-images/fragrances/gucci-bloom-eau-de/3.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/fragrances/gucci-bloom-eau-de/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/fragrances/gucci-bloom-eau-de/thumbnail.webp",
+        "hot_score": 2.74,
+        "summary": "Gucci Bloom by Gucci is a floral and captivating fragrance, with notes of tuberose, jasmine, and Rangoon creeper. It's a modern and romantic scent.",
+        "rank": 10,
+        "index": 9
+      },
+      {
+        "id": 11,
+        "title": "Annibale Colombo Bed",
+        "description": "The Annibale Colombo Bed is a luxurious and elegant bed frame, crafted with high-quality materials for a comfortable and stylish bedroom.",
+        "category": "furniture",
+        "price": 1899.99,
+        "discountPercentage": 8.57,
+        "rating": 4.77,
+        "stock": 88,
+        "tags": [
+          "furniture",
+          "beds"
+        ],
+        "brand": "Annibale Colombo",
+        "sku": "FUR-ANN-ANN-011",
+        "weight": 10,
+        "dimensions": {
+          "width": 28.16,
+          "height": 25.36,
+          "depth": 17.28
+        },
+        "warrantyInformation": "1 year warranty",
+        "shippingInformation": "Ships in 1 month",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 2,
+            "comment": "Would not recommend!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Christopher West",
+            "reviewerEmail": "christopher.west@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Highly impressed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Vivian Carter",
+            "reviewerEmail": "vivian.carter@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Poor quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Mason Wright",
+            "reviewerEmail": "mason.wright@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 1,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "3610757456581",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-bed/1.webp",
+          "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-bed/2.webp",
+          "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-bed/3.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-bed/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-bed/thumbnail.webp",
+        "hot_score": 4.77,
+        "summary": "The Annibale Colombo Bed is a luxurious and elegant bed frame, crafted with high-quality materials for a comfortable and stylish bedroom.",
+        "rank": 11,
+        "index": 10
+      },
+      {
+        "id": 12,
+        "title": "Annibale Colombo Sofa",
+        "description": "The Annibale Colombo Sofa is a sophisticated and comfortable seating option, featuring exquisite design and premium upholstery for your living room.",
+        "category": "furniture",
+        "price": 2499.99,
+        "discountPercentage": 14.4,
+        "rating": 3.92,
+        "stock": 60,
+        "tags": [
+          "furniture",
+          "sofas"
+        ],
+        "brand": "Annibale Colombo",
+        "sku": "FUR-ANN-ANN-012",
+        "weight": 6,
+        "dimensions": {
+          "width": 12.75,
+          "height": 20.55,
+          "depth": 19.06
+        },
+        "warrantyInformation": "Lifetime warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 3,
+            "comment": "Very unhappy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Christian Perez",
+            "reviewerEmail": "christian.perez@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Lillian Bishop",
+            "reviewerEmail": "lillian.bishop@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Poor quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Lillian Simmons",
+            "reviewerEmail": "lillian.simmons@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 1,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "1777662847736",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-sofa/1.webp",
+          "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-sofa/2.webp",
+          "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-sofa/3.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-sofa/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-sofa/thumbnail.webp",
+        "hot_score": 3.92,
+        "summary": "The Annibale Colombo Sofa is a sophisticated and comfortable seating option, featuring exquisite design and premium upholstery for your living room.",
+        "rank": 12,
+        "index": 11
+      },
+      {
+        "id": 13,
+        "title": "Bedside Table African Cherry",
+        "description": "The Bedside Table in African Cherry is a stylish and functional addition to your bedroom, providing convenient storage space and a touch of elegance.",
+        "category": "furniture",
+        "price": 299.99,
+        "discountPercentage": 19.09,
+        "rating": 2.87,
+        "stock": 64,
+        "tags": [
+          "furniture",
+          "bedside tables"
+        ],
+        "brand": "Furniture Co.",
+        "sku": "FUR-FUR-BED-013",
+        "weight": 2,
+        "dimensions": {
+          "width": 13.47,
+          "height": 24.99,
+          "depth": 27.35
+        },
+        "warrantyInformation": "5 year warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Aaliyah Hanson",
+            "reviewerEmail": "aaliyah.hanson@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Liam Smith",
+            "reviewerEmail": "liam.smith@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Highly recommended!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Avery Barnes",
+            "reviewerEmail": "avery.barnes@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 3,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "6441287925979",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/furniture/bedside-table-african-cherry/1.webp",
+          "https://cdn.dummyjson.com/product-images/furniture/bedside-table-african-cherry/2.webp",
+          "https://cdn.dummyjson.com/product-images/furniture/bedside-table-african-cherry/3.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/furniture/bedside-table-african-cherry/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/furniture/bedside-table-african-cherry/thumbnail.webp",
+        "hot_score": 2.87,
+        "summary": "The Bedside Table in African Cherry is a stylish and functional addition to your bedroom, providing convenient storage space and a touch of elegance.",
+        "rank": 13,
+        "index": 12
+      },
+      {
+        "id": 14,
+        "title": "Knoll Saarinen Executive Conference Chair",
+        "description": "The Knoll Saarinen Executive Conference Chair is a modern and ergonomic chair, perfect for your office or conference room with its timeless design.",
+        "category": "furniture",
+        "price": 499.99,
+        "discountPercentage": 2.01,
+        "rating": 4.88,
+        "stock": 26,
+        "tags": [
+          "furniture",
+          "office chairs"
+        ],
+        "brand": "Knoll",
+        "sku": "FUR-KNO-KNO-014",
+        "weight": 10,
+        "dimensions": {
+          "width": 13.81,
+          "height": 7.5,
+          "depth": 5.62
+        },
+        "warrantyInformation": "2 year warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 2,
+            "comment": "Waste of money!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ella Cook",
+            "reviewerEmail": "ella.cook@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Very dissatisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Clara Berry",
+            "reviewerEmail": "clara.berry@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Elena Long",
+            "reviewerEmail": "elena.long@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "60 days return policy",
+        "minimumOrderQuantity": 5,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "8919386859966",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/furniture/knoll-saarinen-executive-conference-chair/1.webp",
+          "https://cdn.dummyjson.com/product-images/furniture/knoll-saarinen-executive-conference-chair/2.webp",
+          "https://cdn.dummyjson.com/product-images/furniture/knoll-saarinen-executive-conference-chair/3.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/furniture/knoll-saarinen-executive-conference-chair/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/furniture/knoll-saarinen-executive-conference-chair/thumbnail.webp",
+        "hot_score": 4.88,
+        "summary": "The Knoll Saarinen Executive Conference Chair is a modern and ergonomic chair, perfect for your office or conference room with its timeless design.",
+        "rank": 14,
+        "index": 13
+      },
+      {
+        "id": 15,
+        "title": "Wooden Bathroom Sink With Mirror",
+        "description": "The Wooden Bathroom Sink with Mirror is a unique and stylish addition to your bathroom, featuring a wooden sink countertop and a matching mirror.",
+        "category": "furniture",
+        "price": 799.99,
+        "discountPercentage": 8.8,
+        "rating": 3.59,
+        "stock": 7,
+        "tags": [
+          "furniture",
+          "bathroom"
+        ],
+        "brand": "Bath Trends",
+        "sku": "FUR-BAT-WOO-015",
+        "weight": 10,
+        "dimensions": {
+          "width": 7.98,
+          "height": 8.88,
+          "depth": 28.46
+        },
+        "warrantyInformation": "3 year warranty",
+        "shippingInformation": "Ships in 3-5 business days",
+        "availabilityStatus": "Low Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Logan Torres",
+            "reviewerEmail": "logan.torres@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very pleased!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Aria Parker",
+            "reviewerEmail": "aria.parker@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Poor quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Dylan Wells",
+            "reviewerEmail": "dylan.wells@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "60 days return policy",
+        "minimumOrderQuantity": 2,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "1958104402873",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/1.webp",
+          "https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/2.webp",
+          "https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/3.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/thumbnail.webp",
+        "hot_score": 3.59,
+        "summary": "The Wooden Bathroom Sink with Mirror is a unique and stylish addition to your bathroom, featuring a wooden sink countertop and a matching mirror.",
+        "rank": 15,
+        "index": 14
+      },
+      {
+        "id": 16,
+        "title": "Apple",
+        "description": "Fresh and crisp apples, perfect for snacking or incorporating into various recipes.",
+        "category": "groceries",
+        "price": 1.99,
+        "discountPercentage": 12.62,
+        "rating": 4.19,
+        "stock": 8,
+        "tags": [
+          "fruits"
+        ],
+        "sku": "GRO-BRD-APP-016",
+        "weight": 9,
+        "dimensions": {
+          "width": 13.66,
+          "height": 11.01,
+          "depth": 9.73
+        },
+        "warrantyInformation": "3 year warranty",
+        "shippingInformation": "Ships in 2 weeks",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Very satisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Sophia Brown",
+            "reviewerEmail": "sophia.brown@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Very dissatisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Scarlett Bowman",
+            "reviewerEmail": "scarlett.bowman@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Very unhappy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "William Gonzalez",
+            "reviewerEmail": "william.gonzalez@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "90 days return policy",
+        "minimumOrderQuantity": 7,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "7962803553314",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/apple/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/apple/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/groceries/apple/thumbnail.webp",
+        "hot_score": 4.19,
+        "summary": "Fresh and crisp apples, perfect for snacking or incorporating into various recipes.",
+        "rank": 16,
+        "index": 15
+      },
+      {
+        "id": 17,
+        "title": "Beef Steak",
+        "description": "High-quality beef steak, great for grilling or cooking to your preferred level of doneness.",
+        "category": "groceries",
+        "price": 12.99,
+        "discountPercentage": 9.61,
+        "rating": 4.47,
+        "stock": 86,
+        "tags": [
+          "meat"
+        ],
+        "sku": "GRO-BRD-BEE-017",
+        "weight": 10,
+        "dimensions": {
+          "width": 18.9,
+          "height": 5.77,
+          "depth": 18.57
+        },
+        "warrantyInformation": "3 year warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 3,
+            "comment": "Would not recommend!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Eleanor Tyler",
+            "reviewerEmail": "eleanor.tyler@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Alexander Jones",
+            "reviewerEmail": "alexander.jones@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Great value for money!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Natalie Harris",
+            "reviewerEmail": "natalie.harris@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "60 days return policy",
+        "minimumOrderQuantity": 43,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "5640063409695",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/beef-steak/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/beef-steak/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/groceries/beef-steak/thumbnail.webp",
+        "hot_score": 4.47,
+        "summary": "High-quality beef steak, great for grilling or cooking to your preferred level of doneness.",
+        "rank": 17,
+        "index": 16
+      },
+      {
+        "id": 18,
+        "title": "Cat Food",
+        "description": "Nutritious cat food formulated to meet the dietary needs of your feline friend.",
+        "category": "groceries",
+        "price": 8.99,
+        "discountPercentage": 9.58,
+        "rating": 3.13,
+        "stock": 46,
+        "tags": [
+          "pet supplies",
+          "cat food"
+        ],
+        "sku": "GRO-BRD-FOO-018",
+        "weight": 10,
+        "dimensions": {
+          "width": 18.08,
+          "height": 9.26,
+          "depth": 21.86
+        },
+        "warrantyInformation": "1 year warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 3,
+            "comment": "Would not recommend!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Noah Lewis",
+            "reviewerEmail": "noah.lewis@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Very unhappy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ruby Andrews",
+            "reviewerEmail": "ruby.andrews@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Very disappointed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ethan Thompson",
+            "reviewerEmail": "ethan.thompson@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 18,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "1483991328610",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/cat-food/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/cat-food/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/groceries/cat-food/thumbnail.webp",
+        "hot_score": 3.13,
+        "summary": "Nutritious cat food formulated to meet the dietary needs of your feline friend.",
+        "rank": 18,
+        "index": 17
+      },
+      {
+        "id": 19,
+        "title": "Chicken Meat",
+        "description": "Fresh and tender chicken meat, suitable for various culinary preparations.",
+        "category": "groceries",
+        "price": 9.99,
+        "discountPercentage": 13.7,
+        "rating": 3.19,
+        "stock": 97,
+        "tags": [
+          "meat"
+        ],
+        "sku": "GRO-BRD-CHI-019",
+        "weight": 1,
+        "dimensions": {
+          "width": 11.03,
+          "height": 22.11,
+          "depth": 16.01
+        },
+        "warrantyInformation": "1 year warranty",
+        "shippingInformation": "Ships in 1 month",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Great product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Mateo Bennett",
+            "reviewerEmail": "mateo.bennett@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Highly recommended!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Jackson Evans",
+            "reviewerEmail": "jackson.evans@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Not worth the price!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Sadie Morales",
+            "reviewerEmail": "sadie.morales@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 22,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "8829514594521",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/chicken-meat/1.webp",
+          "https://cdn.dummyjson.com/product-images/groceries/chicken-meat/2.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/chicken-meat/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/groceries/chicken-meat/thumbnail.webp",
+        "hot_score": 3.19,
+        "summary": "Fresh and tender chicken meat, suitable for various culinary preparations.",
+        "rank": 19,
+        "index": 18
+      },
+      {
+        "id": 20,
+        "title": "Cooking Oil",
+        "description": "Versatile cooking oil suitable for frying, sautéing, and various culinary applications.",
+        "category": "groceries",
+        "price": 4.99,
+        "discountPercentage": 9.33,
+        "rating": 4.8,
+        "stock": 10,
+        "tags": [
+          "cooking essentials"
+        ],
+        "sku": "GRO-BRD-COO-020",
+        "weight": 5,
+        "dimensions": {
+          "width": 19.95,
+          "height": 27.54,
+          "depth": 24.86
+        },
+        "warrantyInformation": "Lifetime warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Very happy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Victoria McDonald",
+            "reviewerEmail": "victoria.mcdonald@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Would not recommend!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Hazel Evans",
+            "reviewerEmail": "hazel.evans@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Zoe Bennett",
+            "reviewerEmail": "zoe.bennett@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "30 days return policy",
+        "minimumOrderQuantity": 46,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "4874727824518",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/cooking-oil/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/cooking-oil/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/groceries/cooking-oil/thumbnail.webp",
+        "hot_score": 4.8,
+        "summary": "Versatile cooking oil suitable for frying, sautéing, and various culinary applications.",
+        "rank": 20,
+        "index": 19
+      },
+      {
+        "id": 21,
+        "title": "Cucumber",
+        "description": "Crisp and hydrating cucumbers, ideal for salads, snacks, or as a refreshing side.",
+        "category": "groceries",
+        "price": 1.49,
+        "discountPercentage": 0.16,
+        "rating": 4.07,
+        "stock": 84,
+        "tags": [
+          "vegetables"
+        ],
+        "sku": "GRO-BRD-CUC-021",
+        "weight": 4,
+        "dimensions": {
+          "width": 12.8,
+          "height": 28.38,
+          "depth": 21.34
+        },
+        "warrantyInformation": "2 year warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Great product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Lincoln Kelly",
+            "reviewerEmail": "lincoln.kelly@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Great value for money!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Savannah Gomez",
+            "reviewerEmail": "savannah.gomez@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Poor quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "James Davis",
+            "reviewerEmail": "james.davis@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 2,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "5300066378225",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/cucumber/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/cucumber/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/groceries/cucumber/thumbnail.webp",
+        "hot_score": 4.07,
+        "summary": "Crisp and hydrating cucumbers, ideal for salads, snacks, or as a refreshing side.",
+        "rank": 21,
+        "index": 20
+      },
+      {
+        "id": 22,
+        "title": "Dog Food",
+        "description": "Specially formulated dog food designed to provide essential nutrients for your canine companion.",
+        "category": "groceries",
+        "price": 10.99,
+        "discountPercentage": 10.27,
+        "rating": 4.55,
+        "stock": 71,
+        "tags": [
+          "pet supplies",
+          "dog food"
+        ],
+        "sku": "GRO-BRD-FOO-022",
+        "weight": 10,
+        "dimensions": {
+          "width": 16.93,
+          "height": 27.15,
+          "depth": 9.29
+        },
+        "warrantyInformation": "No warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nicholas Edwards",
+            "reviewerEmail": "nicholas.edwards@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Awesome product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Zachary Lee",
+            "reviewerEmail": "zachary.lee@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Great product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nova Cooper",
+            "reviewerEmail": "nova.cooper@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "60 days return policy",
+        "minimumOrderQuantity": 43,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "5906686116469",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/dog-food/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/dog-food/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/groceries/dog-food/thumbnail.webp",
+        "hot_score": 4.55,
+        "summary": "Specially formulated dog food designed to provide essential nutrients for your canine companion.",
+        "rank": 22,
+        "index": 21
+      },
+      {
+        "id": 23,
+        "title": "Eggs",
+        "description": "Fresh eggs, a versatile ingredient for baking, cooking, or breakfast.",
+        "category": "groceries",
+        "price": 2.99,
+        "discountPercentage": 11.05,
+        "rating": 2.53,
+        "stock": 9,
+        "tags": [
+          "dairy"
+        ],
+        "sku": "GRO-BRD-EGG-023",
+        "weight": 2,
+        "dimensions": {
+          "width": 11.42,
+          "height": 7.44,
+          "depth": 16.95
+        },
+        "warrantyInformation": "1 week warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 3,
+            "comment": "Disappointing product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Penelope King",
+            "reviewerEmail": "penelope.king@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Poor quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Eleanor Tyler",
+            "reviewerEmail": "eleanor.tyler@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Very pleased!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Benjamin Foster",
+            "reviewerEmail": "benjamin.foster@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 32,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "3478638588469",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/eggs/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/eggs/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/groceries/eggs/thumbnail.webp",
+        "hot_score": 2.53,
+        "summary": "Fresh eggs, a versatile ingredient for baking, cooking, or breakfast.",
+        "rank": 23,
+        "index": 22
+      },
+      {
+        "id": 24,
+        "title": "Fish Steak",
+        "description": "Quality fish steak, suitable for grilling, baking, or pan-searing.",
+        "category": "groceries",
+        "price": 14.99,
+        "discountPercentage": 4.23,
+        "rating": 3.78,
+        "stock": 74,
+        "tags": [
+          "seafood"
+        ],
+        "sku": "GRO-BRD-FIS-024",
+        "weight": 6,
+        "dimensions": {
+          "width": 14.95,
+          "height": 26.31,
+          "depth": 11.27
+        },
+        "warrantyInformation": "1 month warranty",
+        "shippingInformation": "Ships in 3-5 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 2,
+            "comment": "Would not buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Caleb Perkins",
+            "reviewerEmail": "caleb.perkins@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Isabella Jackson",
+            "reviewerEmail": "isabella.jackson@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Great value for money!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nathan Dixon",
+            "reviewerEmail": "nathan.dixon@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "60 days return policy",
+        "minimumOrderQuantity": 50,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "9595036192098",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/fish-steak/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/fish-steak/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/groceries/fish-steak/thumbnail.webp",
+        "hot_score": 3.78,
+        "summary": "Quality fish steak, suitable for grilling, baking, or pan-searing.",
+        "rank": 24,
+        "index": 23
+      },
+      {
+        "id": 25,
+        "title": "Green Bell Pepper",
+        "description": "Fresh and vibrant green bell pepper, perfect for adding color and flavor to your dishes.",
+        "category": "groceries",
+        "price": 1.29,
+        "discountPercentage": 0.16,
+        "rating": 3.25,
+        "stock": 33,
+        "tags": [
+          "vegetables"
+        ],
+        "sku": "GRO-BRD-GRE-025",
+        "weight": 2,
+        "dimensions": {
+          "width": 15.33,
+          "height": 26.65,
+          "depth": 14.44
+        },
+        "warrantyInformation": "1 month warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Highly recommended!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Avery Carter",
+            "reviewerEmail": "avery.carter@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Would not recommend!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Henry Hill",
+            "reviewerEmail": "henry.hill@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Addison Wright",
+            "reviewerEmail": "addison.wright@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "30 days return policy",
+        "minimumOrderQuantity": 12,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "2365227493323",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/green-bell-pepper/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/green-bell-pepper/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/groceries/green-bell-pepper/thumbnail.webp",
+        "hot_score": 3.25,
+        "summary": "Fresh and vibrant green bell pepper, perfect for adding color and flavor to your dishes.",
+        "rank": 25,
+        "index": 24
+      },
+      {
+        "id": 26,
+        "title": "Green Chili Pepper",
+        "description": "Spicy green chili pepper, ideal for adding heat to your favorite recipes.",
+        "category": "groceries",
+        "price": 0.99,
+        "discountPercentage": 1,
+        "rating": 3.66,
+        "stock": 3,
+        "tags": [
+          "vegetables"
+        ],
+        "sku": "GRO-BRD-GRE-026",
+        "weight": 7,
+        "dimensions": {
+          "width": 15.38,
+          "height": 18.12,
+          "depth": 19.92
+        },
+        "warrantyInformation": "2 year warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "Low Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Great product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Luna Russell",
+            "reviewerEmail": "luna.russell@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Waste of money!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Noah Lewis",
+            "reviewerEmail": "noah.lewis@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Very disappointed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Clara Berry",
+            "reviewerEmail": "clara.berry@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "30 days return policy",
+        "minimumOrderQuantity": 39,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "9335000538563",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/green-chili-pepper/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/green-chili-pepper/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/groceries/green-chili-pepper/thumbnail.webp",
+        "hot_score": 3.66,
+        "summary": "Spicy green chili pepper, ideal for adding heat to your favorite recipes.",
+        "rank": 26,
+        "index": 25
+      },
+      {
+        "id": 27,
+        "title": "Honey Jar",
+        "description": "Pure and natural honey in a convenient jar, perfect for sweetening beverages or drizzling over food.",
+        "category": "groceries",
+        "price": 6.99,
+        "discountPercentage": 14.4,
+        "rating": 3.97,
+        "stock": 34,
+        "tags": [
+          "condiments"
+        ],
+        "sku": "GRO-BRD-HON-027",
+        "weight": 2,
+        "dimensions": {
+          "width": 9.28,
+          "height": 21.72,
+          "depth": 17.74
+        },
+        "warrantyInformation": "1 month warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 1,
+            "comment": "Very disappointed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Autumn Gomez",
+            "reviewerEmail": "autumn.gomez@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Highly impressed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Benjamin Wilson",
+            "reviewerEmail": "benjamin.wilson@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Very disappointed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nicholas Edwards",
+            "reviewerEmail": "nicholas.edwards@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "90 days return policy",
+        "minimumOrderQuantity": 47,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "6354306346329",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/honey-jar/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/honey-jar/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/groceries/honey-jar/thumbnail.webp",
+        "hot_score": 3.97,
+        "summary": "Pure and natural honey in a convenient jar, perfect for sweetening beverages or drizzling over food.",
+        "rank": 27,
+        "index": 26
+      },
+      {
+        "id": 28,
+        "title": "Ice Cream",
+        "description": "Creamy and delicious ice cream, available in various flavors for a delightful treat.",
+        "category": "groceries",
+        "price": 5.49,
+        "discountPercentage": 8.69,
+        "rating": 3.39,
+        "stock": 27,
+        "tags": [
+          "desserts"
+        ],
+        "sku": "GRO-BRD-CRE-028",
+        "weight": 1,
+        "dimensions": {
+          "width": 14.83,
+          "height": 15.07,
+          "depth": 24.2
+        },
+        "warrantyInformation": "1 month warranty",
+        "shippingInformation": "Ships in 2 weeks",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Very pleased!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Elijah Cruz",
+            "reviewerEmail": "elijah.cruz@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Jace Smith",
+            "reviewerEmail": "jace.smith@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Highly impressed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Sadie Morales",
+            "reviewerEmail": "sadie.morales@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 42,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "0788954559076",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/ice-cream/1.webp",
+          "https://cdn.dummyjson.com/product-images/groceries/ice-cream/2.webp",
+          "https://cdn.dummyjson.com/product-images/groceries/ice-cream/3.webp",
+          "https://cdn.dummyjson.com/product-images/groceries/ice-cream/4.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/ice-cream/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/groceries/ice-cream/thumbnail.webp",
+        "hot_score": 3.39,
+        "summary": "Creamy and delicious ice cream, available in various flavors for a delightful treat.",
+        "rank": 28,
+        "index": 27
+      },
+      {
+        "id": 29,
+        "title": "Juice",
+        "description": "Refreshing fruit juice, packed with vitamins and great for staying hydrated.",
+        "category": "groceries",
+        "price": 3.99,
+        "discountPercentage": 12.06,
+        "rating": 3.94,
+        "stock": 50,
+        "tags": [
+          "beverages"
+        ],
+        "sku": "GRO-BRD-JUI-029",
+        "weight": 1,
+        "dimensions": {
+          "width": 18.56,
+          "height": 21.46,
+          "depth": 28.02
+        },
+        "warrantyInformation": "6 months warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nolan Gonzalez",
+            "reviewerEmail": "nolan.gonzalez@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Bella Grant",
+            "reviewerEmail": "bella.grant@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Awesome product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Aria Flores",
+            "reviewerEmail": "aria.flores@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 25,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "6936112580956",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/juice/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/juice/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/groceries/juice/thumbnail.webp",
+        "hot_score": 3.94,
+        "summary": "Refreshing fruit juice, packed with vitamins and great for staying hydrated.",
+        "rank": 29,
+        "index": 28
+      },
+      {
+        "id": 30,
+        "title": "Kiwi",
+        "description": "Nutrient-rich kiwi, perfect for snacking or adding a tropical twist to your dishes.",
+        "category": "groceries",
+        "price": 2.49,
+        "discountPercentage": 15.22,
+        "rating": 4.93,
+        "stock": 99,
+        "tags": [
+          "fruits"
+        ],
+        "sku": "GRO-BRD-KIW-030",
+        "weight": 5,
+        "dimensions": {
+          "width": 19.4,
+          "height": 18.67,
+          "depth": 17.13
+        },
+        "warrantyInformation": "6 months warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Highly recommended!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Emily Brown",
+            "reviewerEmail": "emily.brown@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Would not buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Jackson Morales",
+            "reviewerEmail": "jackson.morales@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nora Russell",
+            "reviewerEmail": "nora.russell@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 30,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "2530169917252",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/kiwi/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/kiwi/thumbnail.webp",
+        "link": null,
+        "image": "https://cdn.dummyjson.com/product-images/groceries/kiwi/thumbnail.webp",
+        "hot_score": 4.93,
+        "summary": "Nutrient-rich kiwi, perfect for snacking or adding a tropical twist to your dishes.",
+        "rank": 30,
+        "index": 29
+      }
+    ],
+    "fields_found": [
+      "availabilityStatus",
+      "brand",
+      "category",
+      "description",
+      "dimensions",
+      "discountPercentage",
+      "hot_score",
+      "id",
+      "image",
+      "images",
+      "index",
+      "meta",
+      "minimumOrderQuantity",
+      "price",
+      "rank",
+      "rating",
+      "returnPolicy",
+      "reviews",
+      "shippingInformation",
+      "sku",
+      "stock",
+      "summary",
+      "tags",
+      "thumbnail",
+      "title",
+      "warrantyInformation",
+      "weight"
+    ],
+    "confidence": 1.0,
+    "item_count": 30
+  },
+  "validation_result": {
+    "is_valid": true,
+    "completeness": 1.0,
+    "anomalies": [],
+    "needs_retry": false
+  },
+  "retries": 0,
+  "max_retries": 3,
+  "status": "completed",
+  "error_log": [],
+  "messages": [
+    "[Planner] Goal: extract product names and prices limit 10",
+    "[Planner] Advisor failed, using deterministic fallback",
+    "[Recon] Analyzed https://dummyjson.com/products - framework=api, items=0, anti_bot=False, fetch_mode=requests, js_evidence=0",
+    "[Strategy] Mode=api_intercept, Method=api_json, Rationale=API endpoint discovered, using direct API access",
+    "[Executor] Mode=api_intercept, fetched https://dummyjson.com/products, rows=30",
+    "[Extractor] Reused structured executor data, items=30",
+    "[Validator] PASSED - 30 items, completeness=100%"
+  ],
+  "task_id": "c2f13722",
+  "llm_enabled": true,
+  "llm_decisions": [
+    {
+      "node": "planner",
+      "provider": "openai-compatible",
+      "model": "mimo-v2.5-pro",
+      "input_summary": "goal=extract product names and prices limit 10 url=https://dummyjson.com/products",
+      "raw_response_preview": "\"'ascii' codec can't encode character '\\\\u2026' in position 13: ordinal not in range(128)\"",
+      "secrets_redacted": false,
+      "parsed_decision": {},
+      "accepted_fields": [],
+      "rejected_fields": [
+        "task_type",
+        "reasoning_summary",
+        "target_fields",
+        "crawl_preferences",
+        "constraints",
+        "max_items"
+      ],
+      "fallback_used": true,
+      "created_at": "2026-06-01T09:41:06.812761+00:00"
+    },
+    {
+      "node": "strategy",
+      "provider": "openai-compatible",
+      "model": "mimo-v2.5-pro",
+      "input_summary": "task_type=product_list",
+      "raw_response_preview": "\"'ascii' codec can't encode character '\\\\u2026' in position 13: ordinal not in range(128)\"",
+      "secrets_redacted": false,
+      "parsed_decision": {},
+      "accepted_fields": [],
+      "rejected_fields": [
+        "api_method",
+        "mode",
+        "graphql_variables",
+        "api_endpoint",
+        "engine",
+        "selectors",
+        "wait_selector",
+        "reasoning_summary",
+        "max_items",
+        "wait_until",
+        "graphql_query"
+      ],
+      "fallback_used": true,
+      "created_at": "2026-06-01T09:41:08.442541+00:00"
+    }
+  ],
+  "llm_errors": [
+    "[LLM_RESPONSE_INVALID] planner advisor: 'ascii' codec can't encode character '\\u2026' in position 13: ordinal not in range(128)",
+    "[LLM_RESPONSE_INVALID] strategy advisor: 'ascii' codec can't encode character '\\u2026' in position 13: ordinal not in range(128)"
+  ],
+  "proxy_trace": {
+    "selected": false,
+    "proxy": "",
+    "source": "disabled"
+  }
+}

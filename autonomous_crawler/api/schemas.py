@@ -143,6 +143,7 @@ class AIRerunRequest(BaseModel):
 class ManagedActionsRequest(BaseModel):
     execute: bool = True
     use_llm: bool = True
+    llm_decide: bool = False
     extra_context: dict[str, Any] = Field(default_factory=dict)
     llm: LLMConfig | None = None
 

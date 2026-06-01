@@ -33,14 +33,28 @@ def load_simple_config(path: Path = CONFIG_PATH) -> dict[str, Any]:
 
 
 def build_simple_advisor(config: dict[str, Any]) -> OpenAICompatibleAdvisor | None:
-    """Build an LLM advisor from clm_config.json if enabled."""
+    """Build an LLM advisor from clm_config.json if enabled.
+
+    Supports both single-provider (base_url/model) and multi-provider
+    (providers/default_provider) config formats.
+    """
     llm = config.get("llm") or {}
     if not llm.get("enabled", False):
         return None
 
-    base_url = str(llm.get("base_url", "")).strip()
-    model = str(llm.get("model", "")).strip()
-    api_key = str(llm.get("api_key", "")).strip()
+    # Multi-provider format: use default_provider or first provider
+    providers = llm.get("providers") or {}
+    default_name = llm.get("default_provider", "")
+    if providers:
+        prov = providers.get(default_name) or next(iter(providers.values()), {})
+        base_url = str(prov.get("base_url", "")).strip()
+        model = str(prov.get("model", "")).strip()
+        api_key = str(prov.get("api_key", "")).strip()
+    else:
+        # Single-provider format (backward compatible)
+        base_url = str(llm.get("base_url", "")).strip()
+        model = str(llm.get("model", "")).strip()
+        api_key = str(llm.get("api_key", "")).strip()
 
     if not base_url:
         raise SystemExit("clm_config.json missing llm.base_url")
