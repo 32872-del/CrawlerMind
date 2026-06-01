@@ -25,6 +25,7 @@ import httpx
 from autonomous_crawler.llm import OpenAICompatibleAdvisor
 from autonomous_crawler.models.product import ProductRecord
 from autonomous_crawler.storage.product_store import ProductStore
+from autonomous_crawler.tools.extraction_contracts import discover_extraction_contracts
 from autonomous_crawler.tools.html_recon import build_recon_report, fetch_best_html
 
 from .site_profile import SiteProfile
@@ -42,6 +43,8 @@ DEFAULT_PRODUCT_FIELDS = [
     "category_level_2",
     "category_level_3",
 ]
+
+MAX_ANALYSIS_EXTRACTION_EVIDENCE_CHARS = 500_000
 
 FIELD_ALIASES = {
     "title": {"title", "name", "product_name", "商品标题", "标题", "名称"},
@@ -184,6 +187,10 @@ def analyze_site_for_product_workflow(
     html = fetch.html or ""
     final_url = fetch.url or url
     recon = build_recon_report(final_url, html) if html else _empty_recon(final_url)
+    extraction_contract_discovery = _discover_analysis_extraction_contracts(
+        html,
+        final_url=final_url,
+    )
     discovered_catalog = discover_catalog_tree(html, base_url=final_url)
     if not discovered_catalog:
         discovered_catalog = discover_catalog_from_site_fallbacks(final_url, html)
@@ -199,6 +206,10 @@ def analyze_site_for_product_workflow(
         discovered_catalog = _catalog_from_llm_result(llm_result["catalog_tree"], fallback_source="llm") or discovered_catalog
     catalog_nodes = _enrich_catalog_with_discovered_metadata(imported_nodes or discovered_catalog, discovered_catalog)
     field_candidates = discover_field_candidates(recon, field_goal=field_goal)
+    field_candidates = _merge_contract_field_candidates(
+        field_candidates,
+        extraction_contract_discovery,
+    )
     field_candidates = _merge_llm_field_candidates(field_candidates, llm_result)
     profile = site_profile_from_analysis(
         url=final_url,
@@ -207,6 +218,12 @@ def analyze_site_for_product_workflow(
         field_candidates=field_candidates,
     )
     profile_data = profile.to_dict()
+    profile_data = _attach_extraction_contract_to_profile(
+        profile_data,
+        extraction_contract_discovery,
+        evidence=html,
+        final_url=final_url,
+    )
     if isinstance(llm_result.get("crawl_preferences"), dict):
         prefs = dict(profile_data.get("crawl_preferences") or {})
         llm_prefs = dict(llm_result.get("crawl_preferences") or {})
@@ -238,6 +255,13 @@ def analyze_site_for_product_workflow(
         "field_candidates": [field.to_dict() for field in field_candidates],
         "profile": profile_data,
         "llm_analysis": llm_result,
+        "extraction_contract_discovery": _public_extraction_contract_discovery(
+            extraction_contract_discovery,
+        ),
+        "extraction_context": _analysis_extraction_context(
+            extraction_contract_discovery,
+            has_evidence=bool(html),
+        ),
         "recon_summary": {
             "framework": recon.get("frontend_framework"),
             "rendering": recon.get("rendering"),
@@ -247,6 +271,173 @@ def analyze_site_for_product_workflow(
             "product_selector": recon.get("dom_structure", {}).get("product_selector", ""),
         },
     }
+
+
+def _discover_analysis_extraction_contracts(html: str, *, final_url: str) -> dict[str, Any]:
+    if not html:
+        return {
+            "schema_version": "extraction-contract-discovery/v1",
+            "source_url": final_url,
+            "site": urlparse(final_url).netloc.lower().removeprefix("www."),
+            "candidate_count": 0,
+            "best_contract": None,
+            "best_confidence": 0.0,
+            "best_sample_count": 0,
+            "candidates": [],
+            "warnings": ["No HTML evidence available for extraction contract discovery."],
+        }
+    return discover_extraction_contracts(
+        html,
+        source_url=final_url,
+        site=urlparse(final_url).netloc.lower().removeprefix("www."),
+        sample_items=5,
+    )
+
+
+def _attach_extraction_contract_to_profile(
+    profile_data: dict[str, Any],
+    discovery: dict[str, Any],
+    *,
+    evidence: str,
+    final_url: str,
+) -> dict[str, Any]:
+    best_contract = discovery.get("best_contract") if isinstance(discovery, dict) else None
+    if not isinstance(best_contract, dict) or not best_contract:
+        return profile_data
+    updated = dict(profile_data or {})
+    constraints = dict(updated.get("constraints") or {})
+    constraints["extraction_contract"] = best_contract
+    constraints["extraction_contract_discovery"] = _public_extraction_contract_discovery(discovery)
+    constraints["extraction_evidence"] = str(evidence or "")[:MAX_ANALYSIS_EXTRACTION_EVIDENCE_CHARS]
+    constraints["extraction_evidence_source_url"] = final_url
+    constraints["extraction_evidence_type"] = "html"
+    updated["constraints"] = constraints
+    strategy = best_contract.get("parser_strategy") if isinstance(best_contract.get("parser_strategy"), dict) else {}
+    updated["training_notes"] = _append_training_notes(
+        updated.get("training_notes"),
+        [
+            (
+                "extraction_contract:"
+                f"{strategy.get('name', 'unknown')};"
+                f"samples={int(discovery.get('best_sample_count') or 0)}"
+            )
+        ],
+    )
+    return updated
+
+
+def _public_extraction_contract_discovery(discovery: dict[str, Any]) -> dict[str, Any]:
+    if not isinstance(discovery, dict):
+        return {}
+
+    def clean_candidate(candidate: Any) -> dict[str, Any]:
+        if not isinstance(candidate, dict):
+            return {}
+        output = dict(candidate)
+        samples = output.get("sample_items") if isinstance(output.get("sample_items"), list) else []
+        output["sample_items"] = samples[:3]
+        return output
+
+    return {
+        "schema_version": discovery.get("schema_version", "extraction-contract-discovery/v1"),
+        "source_url": discovery.get("source_url", ""),
+        "site": discovery.get("site", ""),
+        "candidate_count": int(discovery.get("candidate_count") or 0),
+        "best_contract": discovery.get("best_contract") if isinstance(discovery.get("best_contract"), dict) else None,
+        "best_confidence": float(discovery.get("best_confidence") or 0.0),
+        "best_sample_count": int(discovery.get("best_sample_count") or 0),
+        "candidates": [
+            item for item in (clean_candidate(candidate) for candidate in list(discovery.get("candidates") or [])[:6])
+            if item
+        ],
+        "warnings": [str(item) for item in list(discovery.get("warnings") or [])[:10]],
+    }
+
+
+def _analysis_extraction_context(discovery: dict[str, Any], *, has_evidence: bool) -> dict[str, Any]:
+    best_contract = discovery.get("best_contract") if isinstance(discovery, dict) else None
+    strategy = best_contract.get("parser_strategy") if isinstance(best_contract, dict) and isinstance(best_contract.get("parser_strategy"), dict) else {}
+    return {
+        "schema_version": "analysis-extraction-context/v1",
+        "has_contract": bool(best_contract),
+        "parser_strategy": strategy.get("name", "") if strategy else "",
+        "recommended_runtime": best_contract.get("recommended_clm_runtime", "") if isinstance(best_contract, dict) else "",
+        "sample_count": int(discovery.get("best_sample_count") or 0) if isinstance(discovery, dict) else 0,
+        "confidence": float(discovery.get("best_confidence") or 0.0) if isinstance(discovery, dict) else 0.0,
+        "has_evidence": bool(has_evidence),
+        "can_execute_extract_from_contract": bool(best_contract and has_evidence),
+    }
+
+
+def _merge_contract_field_candidates(
+    candidates: list[FieldCandidate],
+    discovery: dict[str, Any],
+) -> list[FieldCandidate]:
+    best_contract = discovery.get("best_contract") if isinstance(discovery, dict) else None
+    if not isinstance(best_contract, dict):
+        return candidates
+    strategy = best_contract.get("parser_strategy") if isinstance(best_contract.get("parser_strategy"), dict) else {}
+    field_paths = best_contract.get("field_paths") if isinstance(best_contract.get("field_paths"), dict) else {}
+    if not field_paths:
+        return candidates
+    by_name = {field.name: field for field in candidates}
+    confidence = max(0.55, min(float(discovery.get("best_confidence") or best_contract.get("confidence") or 0.55), 0.95))
+    reason = f"available from extraction contract {strategy.get('name', 'unknown')}"
+    for raw_name, raw_spec in field_paths.items():
+        name = _normalize_contract_field_name(str(raw_name))
+        if not name or name not in DEFAULT_PRODUCT_FIELDS:
+            continue
+        spec = raw_spec if isinstance(raw_spec, dict) else {}
+        path = str(spec.get("path") or "")
+        current = by_name.get(name)
+        if current is None:
+            by_name[name] = FieldCandidate(
+                name=name,
+                label=_field_label(name),
+                selected=bool(spec.get("required", True)) or name in {"title", "highest_price"},
+                source="contract",
+                api_path=path,
+                confidence=confidence,
+                reason=reason,
+            )
+        else:
+            by_name[name] = FieldCandidate(
+                name=current.name,
+                label=current.label,
+                selected=current.selected,
+                source="contract" if not current.selector else current.source,
+                selector=current.selector,
+                api_path=current.api_path or path,
+                confidence=max(current.confidence, confidence),
+                reason=current.reason or reason,
+            )
+    ordered: list[FieldCandidate] = []
+    seen: set[str] = set()
+    for field in candidates:
+        ordered.append(by_name[field.name])
+        seen.add(field.name)
+    for name in DEFAULT_PRODUCT_FIELDS:
+        if name in by_name and name not in seen:
+            ordered.append(by_name[name])
+            seen.add(name)
+    for name, field in by_name.items():
+        if name not in seen:
+            ordered.append(field)
+    return ordered
+
+
+def _normalize_contract_field_name(name: str) -> str:
+    aliases = {
+        "color": "colors",
+        "colour": "colors",
+        "size": "sizes",
+        "image_url": "image_urls",
+        "images": "image_urls",
+        "product_url": "canonical_url",
+        "url": "canonical_url",
+    }
+    normalized = _normalize_field_name(name)
+    return aliases.get(normalized, normalized)
 
 
 def _run_site_analysis_advisor(
@@ -1174,6 +1365,7 @@ def summarize_run_progress(job: dict[str, Any]) -> dict[str, Any]:
     claimed = int(summary.get("claimed") or 0)
     saved = int(summary.get("records_saved") or product_stats.get("total") or job.get("item_count") or 0)
     failed = int(summary.get("failed") or frontier.get("failed") or 0)
+    failure_buckets = summary.get("failure_buckets") if isinstance(summary.get("failure_buckets"), dict) else {}
     queued = int(frontier.get("queued") or 0)
     done = int(frontier.get("done") or summary.get("succeeded") or 0)
     total_known = max(done + queued + failed, claimed, saved)
@@ -1203,10 +1395,172 @@ def summarize_run_progress(job: dict[str, Any]) -> dict[str, Any]:
         "completion": completion,
         "estimated_remaining_seconds": None,
         "quality": quality,
+        "failure_buckets": dict(failure_buckets),
         "current_stage": current_stage,
         "last_error": last_error,
         "progress_summary": progress_summary,
         "quality_indicator": quality_indicator,
+    }
+
+
+def build_run_evidence_pack(job: dict[str, Any]) -> dict[str, Any]:
+    """Build a compact, actionable evidence pack for managed decisions."""
+    profile_run = job.get("profile_run") if isinstance(job.get("profile_run"), dict) else {}
+    run_spec = job.get("product_run_spec") if isinstance(job.get("product_run_spec"), dict) else {}
+    profile = _extract_profile_from_job(job, profile_run)
+    target_url = str(run_spec.get("target_url") or job.get("target_url") or "")
+    progress = summarize_run_progress(job)
+    quality = progress.get("quality") if isinstance(progress.get("quality"), dict) else {}
+    diagnostics = job.get("diagnostics") if isinstance(job.get("diagnostics"), dict) else {}
+    supervision = job.get("supervision") if isinstance(job.get("supervision"), dict) else {}
+    runner = profile_run.get("runner_summary") if isinstance(profile_run.get("runner_summary"), dict) else {}
+    frontier = profile_run.get("frontier_stats") if isinstance(profile_run.get("frontier_stats"), dict) else {}
+    product_stats = profile_run.get("product_stats") if isinstance(profile_run.get("product_stats"), dict) else {}
+
+    return {
+        "schema_version": "run-evidence-pack/v1",
+        "task": {
+            "task_id": job.get("task_id", ""),
+            "kind": job.get("kind", ""),
+            "status": job.get("status", ""),
+            "target_url": run_spec.get("target_url") or job.get("target_url") or "",
+            "run_id": job.get("run_id", ""),
+        },
+        "progress": progress,
+        "run_spec_summary": {
+            "selected_fields": list(run_spec.get("selected_fields") or []),
+            "catalog_node_count": len(run_spec.get("catalog_nodes") or []) if isinstance(run_spec.get("catalog_nodes"), list) else 0,
+            "item_workers": run_spec.get("item_workers"),
+            "test_limit": run_spec.get("test_limit"),
+            "runtime_dir": run_spec.get("runtime_dir", ""),
+            "export": run_spec.get("export") if isinstance(run_spec.get("export"), dict) else {},
+        },
+        "profile_summary": _profile_evidence_summary(profile),
+        "quality_gaps": _quality_gap_evidence(quality, run_spec),
+        "access_evidence": build_access_evidence_snapshot(job),
+        "failure_evidence": {
+            "failure_buckets": dict(progress.get("failure_buckets") or {}),
+            "last_error": progress.get("last_error", ""),
+            "recent_failures": _recent_failure_evidence(profile_run),
+            "runner": {
+                "claimed": runner.get("claimed", 0),
+                "succeeded": runner.get("succeeded", 0),
+                "failed": runner.get("failed", 0),
+                "records_saved": runner.get("records_saved", product_stats.get("total", 0)),
+                "checkpoint_errors": runner.get("checkpoint_errors", 0),
+            },
+            "frontier": dict(frontier),
+        },
+        "diagnostics": _compact_dict({
+            "runner_summary": diagnostics.get("runner_summary") if isinstance(diagnostics, dict) else {},
+            "backpressure": diagnostics.get("backpressure") if isinstance(diagnostics, dict) else {},
+            "supervision": supervision,
+            "coverage_report": diagnostics.get("coverage_report") if isinstance(diagnostics, dict) else {},
+            "throughput": diagnostics.get("throughput") if isinstance(diagnostics, dict) else {},
+        }, max_items=30),
+        "managed_history": {
+            "ai_decision_count": len(job.get("ai_decisions") or []) if isinstance(job.get("ai_decisions"), list) else 0,
+            "llm_trace_count": len(job.get("llm_traces") or []) if isinstance(job.get("llm_traces"), list) else 0,
+            "managed_action_count": len(job.get("managed_actions") or []) if isinstance(job.get("managed_actions"), list) else 0,
+            "managed_step_count": len(job.get("managed_steps") or []) if isinstance(job.get("managed_steps"), list) else 0,
+            "managed_control_loop_count": len(job.get("managed_control_loops") or []) if isinstance(job.get("managed_control_loops"), list) else 0,
+            "latest_llm_errors": _latest_llm_error_evidence(job),
+        },
+        "recommended_focus": _recommended_focus(progress, quality, supervision),
+    }
+
+
+def build_access_evidence_snapshot(job: dict[str, Any]) -> dict[str, Any]:
+    """Extract compact access/runtime evidence already produced by the backend.
+
+    This is intentionally a sampler, not another crawler. It turns profile-run
+    diagnostics, runtime events, failure buckets, browser/XHR artifacts, and
+    recent failures into a small packet that an LLM can reason over without
+    reading full raw job state.
+    """
+    profile_run = job.get("profile_run") if isinstance(job.get("profile_run"), dict) else {}
+    run_spec = job.get("product_run_spec") if isinstance(job.get("product_run_spec"), dict) else {}
+    profile = _extract_profile_from_job(job, profile_run)
+    target_url = str(run_spec.get("target_url") or job.get("target_url") or "")
+    progress = summarize_run_progress(job)
+    recent_failures = _recent_failure_evidence(profile_run)
+    profile_summary = _profile_evidence_summary(profile)
+    runtime_events = _runtime_event_samples(profile_run)
+    xhr_samples = _xhr_evidence_samples(profile_run)
+    artifact_samples = _artifact_evidence_samples(profile_run)
+    probe_snapshot = _latest_access_probe_snapshot(job)
+    probe_runtime_events = _runtime_event_samples_from_probe(probe_snapshot)
+    probe_xhr_samples = _xhr_evidence_samples_from_probe(probe_snapshot)
+    probe_artifact_samples = _artifact_evidence_samples_from_probe(probe_snapshot)
+    if probe_runtime_events:
+        runtime_events = _merge_samples(runtime_events, probe_runtime_events, key_fields=("type", "url", "message"))[:30]
+    if probe_xhr_samples:
+        xhr_samples = _merge_samples(xhr_samples, probe_xhr_samples, key_fields=("method", "url", "status"))[:30]
+    if probe_artifact_samples:
+        artifact_samples = _merge_samples(artifact_samples, probe_artifact_samples, key_fields=("kind", "path", "url"))[:30]
+    bucket_names = sorted(str(key) for key in (progress.get("failure_buckets") or {}).keys())
+    challenge_hits = [
+        item for item in recent_failures
+        if _text_has_challenge_signals(" ".join(str(value) for value in item.values()))
+    ]
+    if probe_snapshot and bool(probe_snapshot.get("summary", {}).get("challenge_like")):
+        challenge_hits.append({
+            "url": str(probe_snapshot.get("final_url") or probe_snapshot.get("target_url") or ""),
+            "bucket": "challenge_like",
+            "error": str(probe_snapshot.get("error") or probe_snapshot.get("summary", {}).get("framework") or "")[:300],
+        })
+    if any(name in {"challenge_like", "captcha", "managed_challenge", "http_blocked"} for name in bucket_names):
+        challenge_hits.append({
+            "url": target_url,
+            "bucket": "challenge_like",
+            "error": "challenge-like failure bucket present",
+        })
+    challenge_like = bool(challenge_hits) or any(
+        name in {"challenge_like", "captcha", "managed_challenge", "http_blocked"}
+        for name in bucket_names
+    )
+    recommended_runtime = _recommended_access_runtime(
+        challenge_like=challenge_like,
+        xhr_samples=xhr_samples,
+        profile_summary=profile_summary,
+        records_saved=int(progress.get("records_saved") or 0),
+    )
+    missing_evidence = []
+    if not runtime_events:
+        missing_evidence.append("runtime_events")
+    if not xhr_samples:
+        missing_evidence.append("xhr_or_api_samples")
+    if not artifact_samples:
+        missing_evidence.append("browser_artifacts")
+    if int(progress.get("records_saved") or 0) == 0 and not recent_failures:
+        missing_evidence.append("recent_failures")
+    return {
+        "schema_version": "access-evidence/v1",
+        "target_url": target_url,
+        "status": job.get("status", ""),
+        "summary": {
+            "challenge_like": challenge_like,
+            "failure_buckets": dict(progress.get("failure_buckets") or {}),
+            "records_saved": int(progress.get("records_saved") or 0),
+            "failed": int(progress.get("failed") or 0),
+            "access_mode": profile_summary.get("access_mode", ""),
+            "recommended_runtime": recommended_runtime,
+            "missing_evidence": missing_evidence,
+        },
+        "profile": profile_summary,
+        "recent_failures": recent_failures[:5],
+        "challenge_evidence": challenge_hits[:5],
+        "runtime_events": runtime_events[:12],
+        "xhr_samples": xhr_samples[:10],
+        "artifact_samples": artifact_samples[:10],
+        "probe_snapshot": probe_snapshot,
+        "decision_hints": _access_decision_hints(
+            challenge_like=challenge_like,
+            xhr_samples=xhr_samples,
+            artifact_samples=artifact_samples,
+            progress=progress,
+            profile_summary=profile_summary,
+        ),
     }
 
 
@@ -1290,6 +1644,402 @@ def _derive_quality_indicator(quality: dict[str, Any], saved: int, failed: int) 
     return "fail"
 
 
+def _extract_profile_from_job(job: dict[str, Any], profile_run: dict[str, Any]) -> dict[str, Any]:
+    checkpoint = profile_run.get("checkpoint_latest") if isinstance(profile_run.get("checkpoint_latest"), dict) else {}
+    metadata = checkpoint.get("metadata") if isinstance(checkpoint.get("metadata"), dict) else {}
+    if isinstance(metadata.get("profile"), dict):
+        return metadata["profile"]
+    run_spec = job.get("product_run_spec") if isinstance(job.get("product_run_spec"), dict) else {}
+    if isinstance(run_spec.get("profile"), dict):
+        return run_spec["profile"]
+    report = profile_run.get("report") if isinstance(profile_run.get("report"), dict) else {}
+    if isinstance(report.get("profile"), dict):
+        return report["profile"]
+    return {}
+
+
+def _profile_evidence_summary(profile: dict[str, Any]) -> dict[str, Any]:
+    prefs = profile.get("crawl_preferences") if isinstance(profile.get("crawl_preferences"), dict) else {}
+    selectors = profile.get("selectors") if isinstance(profile.get("selectors"), dict) else {}
+    detail = selectors.get("detail") if isinstance(selectors.get("detail"), dict) else selectors
+    access = profile.get("access_config") if isinstance(profile.get("access_config"), dict) else {}
+    browser = access.get("browser_config") if isinstance(access.get("browser_config"), dict) else {}
+    seed_urls = prefs.get("seed_urls") if isinstance(prefs.get("seed_urls"), list) else []
+    return {
+        "name": profile.get("name", ""),
+        "seed_kind": prefs.get("seed_kind", ""),
+        "seed_url_count": len(seed_urls),
+        "seed_url_samples": [str(item) for item in seed_urls[:5]],
+        "target_fields": list(profile.get("target_fields") or []),
+        "selector_keys": sorted(str(key) for key in detail.keys())[:50] if isinstance(detail, dict) else [],
+        "access_mode": access.get("mode", ""),
+        "wait_until": access.get("wait_until", ""),
+        "browser": {
+            "capture_api": bool(browser.get("capture_api")),
+            "persistent_context": bool(browser.get("persistent_context")),
+            "pool_enabled": bool(browser.get("pool_enabled")),
+            "max_wait_ms": browser.get("max_wait_ms"),
+        },
+    }
+
+
+def _quality_gap_evidence(quality: dict[str, Any], run_spec: dict[str, Any]) -> list[dict[str, Any]]:
+    gaps: list[dict[str, Any]] = []
+    selected = [str(item) for item in run_spec.get("selected_fields") or [] if str(item).strip()]
+    completeness = quality.get("field_completeness") if isinstance(quality.get("field_completeness"), dict) else {}
+    for field in selected:
+        value = completeness.get(field)
+        if isinstance(value, (int, float)) and value < 0.8:
+            gaps.append({"field": field, "coverage": round(float(value), 4), "kind": "field_coverage"})
+        elif field and field not in completeness and quality:
+            gaps.append({"field": field, "coverage": None, "kind": "missing_coverage_metric"})
+    if int(quality.get("total_records") or 0) == 0:
+        gaps.append({"kind": "zero_records", "field": "", "coverage": 0.0})
+    return gaps[:50]
+
+
+def _recent_failure_evidence(profile_run: dict[str, Any]) -> list[dict[str, Any]]:
+    failures = profile_run.get("failures") if isinstance(profile_run.get("failures"), list) else []
+    out: list[dict[str, Any]] = []
+    for item in failures[-10:]:
+        if not isinstance(item, dict):
+            out.append({"error": str(item)[:300]})
+            continue
+        out.append({
+            "url": str(item.get("url") or item.get("target_url") or "")[:500],
+            "bucket": str(item.get("bucket") or item.get("failure_bucket") or "")[:80],
+            "error": str(item.get("error") or item.get("message") or "")[:300],
+            "status": item.get("status") or item.get("status_code"),
+        })
+    return out
+
+
+def _latest_llm_error_evidence(job: dict[str, Any]) -> list[dict[str, Any]]:
+    traces = job.get("llm_traces") if isinstance(job.get("llm_traces"), list) else []
+    errors: list[dict[str, Any]] = []
+    for trace in traces[-10:]:
+        if not isinstance(trace, dict) or not trace.get("error"):
+            continue
+        errors.append({
+            "stage": trace.get("stage", ""),
+            "model": trace.get("model", ""),
+            "duration_ms": trace.get("duration_ms"),
+            "error": str(trace.get("error") or "")[:300],
+        })
+    return errors
+
+
+def _runtime_event_samples(profile_run: dict[str, Any]) -> list[dict[str, Any]]:
+    samples: list[dict[str, Any]] = []
+    for event in _walk_dict_values(profile_run, keys={"runtime_events", "events", "request_events"}):
+        if isinstance(event, list):
+            for item in event:
+                sample = _runtime_event_sample(item)
+                if sample:
+                    samples.append(sample)
+        else:
+            sample = _runtime_event_sample(event)
+            if sample:
+                samples.append(sample)
+    return _dedupe_dict_samples(samples, key_fields=("type", "url", "message"))[:30]
+
+
+def _runtime_event_sample(value: Any) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        return {}
+    event_type = str(value.get("type") or value.get("event") or value.get("name") or "")[:120]
+    message = str(value.get("message") or value.get("error") or value.get("reason") or "")[:300]
+    url = str(value.get("url") or value.get("target_url") or value.get("final_url") or "")[:500]
+    status = value.get("status") or value.get("status_code")
+    bucket = str(value.get("bucket") or value.get("failure_bucket") or value.get("classification") or "")[:120]
+    if not any([event_type, message, url, status, bucket]):
+        return {}
+    return {
+        "type": event_type,
+        "url": url,
+        "status": status,
+        "bucket": bucket,
+        "message": message,
+    }
+
+
+def _xhr_evidence_samples(profile_run: dict[str, Any]) -> list[dict[str, Any]]:
+    samples: list[dict[str, Any]] = []
+    keys = {"captured_xhr", "xhr", "xhr_samples", "api_candidates", "network_observation", "browser_interception"}
+    for value in _walk_dict_values(profile_run, keys=keys):
+        for candidate in _flatten_listish(value):
+            sample = _xhr_evidence_sample(candidate)
+            if sample:
+                samples.append(sample)
+    return _dedupe_dict_samples(samples, key_fields=("method", "url", "status"))[:30]
+
+
+def _xhr_evidence_sample(value: Any) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        return {}
+    url = str(value.get("url") or value.get("request_url") or value.get("endpoint") or "")[:500]
+    method = str(value.get("method") or value.get("request_method") or "GET").upper()[:12]
+    status = value.get("status") or value.get("status_code")
+    content_type = str(value.get("content_type") or value.get("mime_type") or value.get("resource_type") or "")[:120]
+    kind = str(value.get("kind") or value.get("type") or value.get("candidate_type") or "")[:120]
+    score = value.get("score")
+    preview = value.get("preview") or value.get("body_preview") or value.get("json_preview")
+    post_data = value.get("post_data") or value.get("post_data_preview") or value.get("request_body")
+    if isinstance(preview, (dict, list)):
+        preview_text = json.dumps(preview, ensure_ascii=False, default=str)
+    else:
+        preview_text = str(preview or "")
+    if isinstance(post_data, (dict, list)):
+        post_data_text = json.dumps(post_data, ensure_ascii=False, default=str)
+    else:
+        post_data_text = str(post_data or "")
+    if not any([url, status, content_type, kind, preview_text]):
+        return {}
+    sample = {
+        "method": method,
+        "url": url,
+        "status": status,
+        "content_type": content_type,
+        "kind": kind,
+        "score": score,
+        "preview": _redact_sensitive_text(preview_text[:500]),
+    }
+    if post_data_text.strip():
+        sample["post_data_preview"] = _redact_sensitive_text(post_data_text[:2000])
+    if isinstance(value.get("request_headers"), dict):
+        sample["request_headers"] = _safe_xhr_headers(value.get("request_headers") or {})
+    return sample
+
+
+def _safe_xhr_headers(headers: dict[str, Any]) -> dict[str, str]:
+    allowed = {
+        "accept", "accept-language", "content-type", "origin", "referer",
+        "x-requested-with", "x-csrf-token", "x-xsrf-token", "x-magento-cache-id",
+        "x-store", "store",
+    }
+    output: dict[str, str] = {}
+    for key, value in dict(headers or {}).items():
+        name = str(key).strip()
+        lowered = name.lower()
+        if lowered in allowed or lowered.startswith("x-"):
+            text = str(value or "").strip()
+            if text and len(text) <= 1000 and "\x00" not in text:
+                output[name] = text
+    return output
+
+
+def _artifact_evidence_samples(profile_run: dict[str, Any]) -> list[dict[str, Any]]:
+    samples: list[dict[str, Any]] = []
+    for value in _walk_dict_values(profile_run, keys={"artifacts", "runtime_artifacts", "artifact_manifest"}):
+        for artifact in _flatten_listish(value):
+            sample = _artifact_evidence_sample(artifact)
+            if sample:
+                samples.append(sample)
+    return _dedupe_dict_samples(samples, key_fields=("kind", "path", "url"))[:30]
+
+
+def _artifact_evidence_sample(value: Any) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        return {}
+    kind = str(value.get("kind") or value.get("type") or value.get("artifact_type") or "")[:80]
+    path = str(value.get("path") or value.get("file_path") or "")[:500]
+    url = str(value.get("url") or value.get("source_url") or "")[:500]
+    summary = str(value.get("summary") or value.get("message") or value.get("description") or "")[:300]
+    if not any([kind, path, url, summary]):
+        return {}
+    return {
+        "kind": kind,
+        "path": path,
+        "url": url,
+        "summary": summary,
+    }
+
+
+def _latest_access_probe_snapshot(job: dict[str, Any]) -> dict[str, Any]:
+    latest = job.get("latest_access_probe") if isinstance(job.get("latest_access_probe"), dict) else {}
+    for direct_key in ("probe_snapshot", "snapshot"):
+        direct_snapshot = latest.get(direct_key) if isinstance(latest.get(direct_key), dict) else {}
+        if direct_snapshot.get("schema_version") == "access-probe/v1":
+            return direct_snapshot
+    for key in ("managed_steps", "managed_actions", "access_probes", "access_probe_history"):
+        values = job.get(key)
+        if not isinstance(values, list):
+            continue
+        for item in reversed(values):
+            if not isinstance(item, dict):
+                continue
+            result = item.get("result") if isinstance(item.get("result"), dict) else item
+            for direct_key in ("probe_snapshot", "snapshot"):
+                direct_snapshot = result.get(direct_key) if isinstance(result.get(direct_key), dict) else {}
+                if direct_snapshot.get("schema_version") == "access-probe/v1":
+                    return direct_snapshot
+            evidence = result.get("evidence") if isinstance(result.get("evidence"), dict) else {}
+            snapshot = evidence.get("snapshot") if isinstance(evidence.get("snapshot"), dict) else {}
+            if snapshot.get("schema_version") == "access-probe/v1":
+                return snapshot
+    return {}
+
+
+def _runtime_event_samples_from_probe(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
+    events = snapshot.get("runtime_events") if isinstance(snapshot.get("runtime_events"), list) else []
+    return [_runtime_event_sample(item) for item in events if isinstance(item, dict) and _runtime_event_sample(item)]
+
+
+def _xhr_evidence_samples_from_probe(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
+    samples = snapshot.get("xhr_samples") if isinstance(snapshot.get("xhr_samples"), list) else []
+    return [_xhr_evidence_sample(item) for item in samples if isinstance(item, dict) and _xhr_evidence_sample(item)]
+
+
+def _artifact_evidence_samples_from_probe(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
+    samples = snapshot.get("artifact_samples") if isinstance(snapshot.get("artifact_samples"), list) else []
+    return [_artifact_evidence_sample(item) for item in samples if isinstance(item, dict) and _artifact_evidence_sample(item)]
+
+
+def _merge_samples(samples_a: list[dict[str, Any]], samples_b: list[dict[str, Any]], *, key_fields: tuple[str, ...]) -> list[dict[str, Any]]:
+    return _dedupe_dict_samples([*samples_a, *samples_b], key_fields=key_fields)
+
+
+def _access_decision_hints(
+    *,
+    challenge_like: bool,
+    xhr_samples: list[dict[str, Any]],
+    artifact_samples: list[dict[str, Any]],
+    progress: dict[str, Any],
+    profile_summary: dict[str, Any],
+) -> list[str]:
+    hints: list[str] = []
+    if challenge_like:
+        hints.append("use_protected_browser_profile")
+        hints.append("persist_browser_session")
+        hints.append("lower_concurrency_and_prepare_proxy_rotation")
+    if xhr_samples:
+        hints.append("prefer_api_or_xhr_replay_if_product_payload_is_visible")
+    if any("screenshot" in str(item.get("kind") or "").lower() for item in artifact_samples):
+        hints.append("use_screenshot_for_visual_or_challenge_review")
+    if int(progress.get("records_saved") or 0) == 0:
+        hints.append("collect_small_browser_sample_before_bulk_rerun")
+    browser = profile_summary.get("browser") if isinstance(profile_summary.get("browser"), dict) else {}
+    if not browser.get("capture_api"):
+        hints.append("enable_api_capture")
+    return list(dict.fromkeys(hints))[:10]
+
+
+def _recommended_access_runtime(
+    *,
+    challenge_like: bool,
+    xhr_samples: list[dict[str, Any]],
+    profile_summary: dict[str, Any],
+    records_saved: int,
+) -> str:
+    if challenge_like:
+        return "protected_browser"
+    if xhr_samples and records_saved == 0:
+        return "api_replay_or_browser_network"
+    mode = str(profile_summary.get("access_mode") or "").lower()
+    if mode in {"dynamic", "browser", "protected"}:
+        return mode
+    if records_saved == 0:
+        return "dynamic_browser_probe"
+    return mode or "static_or_profile_default"
+
+
+def _walk_dict_values(value: Any, *, keys: set[str]) -> list[Any]:
+    found: list[Any] = []
+    if isinstance(value, dict):
+        for key, item in value.items():
+            if str(key) in keys:
+                found.append(item)
+            if isinstance(item, (dict, list)):
+                found.extend(_walk_dict_values(item, keys=keys))
+    elif isinstance(value, list):
+        for item in value[:200]:
+            if isinstance(item, (dict, list)):
+                found.extend(_walk_dict_values(item, keys=keys))
+    return found
+
+
+def _flatten_listish(value: Any) -> list[Any]:
+    if isinstance(value, list):
+        out: list[Any] = []
+        for item in value[:200]:
+            out.extend(_flatten_listish(item) if isinstance(item, list) else [item])
+        return out
+    if isinstance(value, dict):
+        for key in ("items", "candidates", "responses", "requests", "entries", "artifacts"):
+            if isinstance(value.get(key), list):
+                return _flatten_listish(value[key])
+        return [value]
+    return []
+
+
+def _dedupe_dict_samples(samples: list[dict[str, Any]], *, key_fields: tuple[str, ...]) -> list[dict[str, Any]]:
+    seen: set[tuple[str, ...]] = set()
+    out: list[dict[str, Any]] = []
+    for sample in samples:
+        key = tuple(str(sample.get(field) or "") for field in key_fields)
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(sample)
+    return out
+
+
+def _text_has_challenge_signals(text: str) -> bool:
+    lowered = text.lower()
+    return any(token in lowered for token in (
+        "captcha",
+        "recaptcha",
+        "challenge",
+        "cloudflare",
+        "datadome",
+        "perimeterx",
+        "blocked",
+        "403",
+        "429",
+    ))
+
+
+def _redact_sensitive_text(text: str) -> str:
+    text = re.sub(r"(?i)(api[_-]?key|authorization|cookie|password|secret|token)=([^&\s]+)", r"\1=[REDACTED]", text)
+    text = re.sub(r"(?i)(bearer\s+)[a-z0-9._\-]+", r"\1[REDACTED]", text)
+    return text
+
+
+def _recommended_focus(progress: dict[str, Any], quality: dict[str, Any], supervision: dict[str, Any]) -> list[str]:
+    focus: list[str] = []
+    buckets = progress.get("failure_buckets") if isinstance(progress.get("failure_buckets"), dict) else {}
+    if any(key in buckets for key in ("challenge_like", "captcha", "managed_challenge", "http_blocked")):
+        focus.append("access_challenge")
+    if int(progress.get("records_saved") or 0) == 0:
+        focus.append("zero_records")
+    if str(progress.get("quality_indicator") or "").lower() in {"fail", "unknown"}:
+        focus.append("quality_repair")
+    completeness = quality.get("field_completeness") if isinstance(quality.get("field_completeness"), dict) else {}
+    if any(isinstance(value, (int, float)) and value < 0.8 for value in completeness.values()):
+        focus.append("field_coverage")
+    last = supervision.get("last_event") if isinstance(supervision.get("last_event"), dict) else {}
+    if last.get("action"):
+        focus.append(f"supervision_{last.get('action')}")
+    return list(dict.fromkeys(focus))[:10]
+
+
+def _compact_dict(value: Any, *, max_items: int) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        return {}
+    output: dict[str, Any] = {}
+    for index, (key, item) in enumerate(value.items()):
+        if index >= max_items:
+            output["_truncated"] = True
+            break
+        if isinstance(item, dict):
+            output[str(key)] = _compact_dict(item, max_items=max_items)
+        elif isinstance(item, list):
+            output[str(key)] = item[:10]
+        else:
+            output[str(key)] = item
+    return output
+
+
 def events_for_job(job: dict[str, Any]) -> list[dict[str, Any]]:
     events = [
         {
@@ -1333,6 +2083,18 @@ def events_for_job(job: dict[str, Any]) -> list[dict[str, Any]]:
             "message": summary,
             "data": decision,
         })
+    for trace in list(job.get("llm_traces") or [])[:100]:
+        if not isinstance(trace, dict):
+            continue
+        stage = str(trace.get("stage") or "llm")
+        status = str(trace.get("status") or "")
+        duration = trace.get("duration_ms")
+        events.append({
+            "time": trace.get("created_at") or job.get("updated_at", ""),
+            "type": f"llm_trace_{stage}",
+            "message": f"{stage} {status} ({duration}ms)",
+            "data": trace,
+        })
     for record in list(job.get("managed_actions") or [])[:20]:
         if not isinstance(record, dict):
             continue
@@ -1344,6 +2106,49 @@ def events_for_job(job: dict[str, Any]) -> list[dict[str, Any]]:
             "type": "managed_actions_executed" if record.get("executed") else "managed_actions_planned",
             "message": f"managed actions: {len(actions)}",
             "data": record,
+        })
+    for step in list(job.get("managed_steps") or [])[:20]:
+        if not isinstance(step, dict):
+            continue
+        action_record = step.get("action_record") if isinstance(step.get("action_record"), dict) else {}
+        result = action_record.get("result") if isinstance(action_record.get("result"), dict) else {}
+        plan = result.get("plan") if isinstance(result.get("plan"), dict) else {}
+        actions = plan.get("actions") if isinstance(plan.get("actions"), list) else []
+        child_run = step.get("child_run") if isinstance(step.get("child_run"), dict) else {}
+        message = f"managed step {step.get('stage', 'unknown')}: {len(actions)} actions"
+        if child_run.get("task_id"):
+            message += f", child={child_run.get('task_id')}"
+        events.append({
+            "time": step.get("created_at") or job.get("updated_at", ""),
+            "type": "managed_step_executed",
+            "message": message,
+            "data": step,
+        })
+    for probe in list(job.get("access_probe_history") or [])[:20]:
+        if not isinstance(probe, dict):
+            continue
+        snapshot = probe.get("snapshot") if isinstance(probe.get("snapshot"), dict) else {}
+        summary = snapshot.get("summary") if isinstance(snapshot.get("summary"), dict) else {}
+        runtime = str(summary.get("recommended_runtime") or "")
+        events.append({
+            "time": probe.get("created_at") or job.get("updated_at", ""),
+            "type": "access_probe_completed",
+            "message": f"access probe completed{': ' + runtime if runtime else ''}",
+            "data": probe,
+        })
+    for control in list(job.get("managed_control_loops") or [])[:20]:
+        if not isinstance(control, dict):
+            continue
+        timeline = control.get("timeline") if isinstance(control.get("timeline"), list) else []
+        child_run = control.get("child_run") if isinstance(control.get("child_run"), dict) else {}
+        message = f"managed control loop: {len(timeline)} stages"
+        if child_run.get("task_id"):
+            message += f", child={child_run.get('task_id')}"
+        events.append({
+            "time": control.get("created_at") or job.get("updated_at", ""),
+            "type": "managed_control_loop_completed",
+            "message": message,
+            "data": control,
         })
     supervision = job.get("supervision") if isinstance(job.get("supervision"), dict) else {}
     last_event = supervision.get("last_event") if isinstance(supervision.get("last_event"), dict) else {}

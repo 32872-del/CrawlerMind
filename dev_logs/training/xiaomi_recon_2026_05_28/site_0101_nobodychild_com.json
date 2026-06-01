@@ -1,0 +1,37 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.nobodychild.com",
+  "domain": "nobodychild.com",
+  "checked_at": "2026-05-28T11:45:00Z",
+  "site_type": "ecommerce",
+  "language": "en",
+  "currency": "GBP",
+  "rendering": "hybrid",
+  "access_status": {
+    "reachable": true,
+    "status_code": 200,
+    "final_url": "https://www.nobodychild.com",
+    "redirects": [],
+    "blocked_signals": [],
+    "notes": "Accessible across all modes. requests 15KB (JS shell), curl_cffi 66KB, browser 66KB. js_shell category. 0 API hints."
+  },
+  "catalog_candidates": [],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {"type": "", "params": {}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "Not determined", "evidence_type": "guessed"},
+  "api_candidates": [],
+  "selector_candidates": {},
+  "field_quality_expectation": {},
+  "difficulty_signals": [],
+  "recommended_action_plan": [
+    {"action": "analyze_site", "priority": "medium", "reason": "curl_cffi and browser both get 66KB - explore category pages", "params": {}, "depends_on_evidence": ["access_status"]}
+  ],
+  "confidence": {"catalog": 0.2, "api": 0.1, "selectors": 0.1, "pagination": 0.1, "overall": 0.15},
+  "evidence_log": [
+    {"ts": "2026-05-28T11:45:01Z", "type": "observed", "detail": "requests: 200 OK, 15KB (JS shell)"},
+    {"ts": "2026-05-28T11:45:03Z", "type": "observed", "detail": "curl_cffi: 200 OK, 66KB"},
+    {"ts": "2026-05-28T11:45:05Z", "type": "observed", "detail": "browser: 200 OK, 66KB"}
+  ],
+  "missing_evidence": ["product_selectors", "catalog_urls", "api_candidates", "pagination_pattern"],
+  "needs_human_review": false
+}

@@ -1,0 +1,46 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.boohoo.com",
+  "domain": "boohoo.com",
+  "checked_at": "2026-05-28T10:47:00Z",
+  "site_type": "ecommerce",
+  "language": "en",
+  "currency": "GBP",
+  "rendering": "hybrid",
+  "access_status": {
+    "reachable": true,
+    "status_code": 200,
+    "final_url": "https://www.boohoo.com",
+    "redirects": [],
+    "blocked_signals": ["region_block"],
+    "notes": "Accessible via requests mode. 80KB HTML truncated. 80 API hints found. Region block detected. Categories with faceted URLs found."
+  },
+  "catalog_candidates": [
+    {"url": "https://www.boohoo.com/categories/sale", "type": "category", "evidence_type": "observed", "confidence": 0.7},
+    {"url": "https://www.boohoo.com/categories/womens-sale-dresses/facet/priceRange/0-10", "type": "category_faceted", "evidence_type": "observed", "confidence": 0.6}
+  ],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {"type": "", "params": {}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "Not determined - need to explore category pages", "evidence_type": "guessed"},
+  "api_candidates": [
+    {"method": "GET", "url": "https://www.boohoo.com/search?text={search_term_string}", "content_type": "", "items_path": "", "pagination_hints": {}, "field_mapping": {}, "request_body_hint": {}, "headers_hint": {}, "source": "script", "evidence_type": "observed", "confidence": 0.6, "risks": ["search_endpoint"]}
+  ],
+  "selector_candidates": {},
+  "field_quality_expectation": {},
+  "difficulty_signals": [
+    {"kind": "js_rendering", "evidence": "80KB HTML truncated. Platform may require browser for full content.", "impact": "Some content may require browser rendering", "suggested_handling": "Try requests first, fall back to browser if needed", "confidence": 0.5},
+    {"kind": "geo_redirect", "evidence": "Region block detected. May need locale-specific URL or proxy.", "impact": "May get different content based on geo", "suggested_handling": "Use locale-specific URL or proxy", "confidence": 0.5}
+  ],
+  "recommended_action_plan": [
+    {"action": "analyze_site", "priority": "high", "reason": "Explore category pages with faceted URLs for product lists", "params": {}, "depends_on_evidence": ["catalog_candidates"]},
+    {"action": "resolve_fields", "priority": "medium", "reason": "Verify selectors on product detail pages", "params": {}, "depends_on_evidence": []}
+  ],
+  "confidence": {"catalog": 0.5, "api": 0.4, "selectors": 0.2, "pagination": 0.2, "overall": 0.35},
+  "evidence_log": [
+    {"ts": "2026-05-28T10:47:01Z", "type": "observed", "detail": "requests: 200 OK, 80KB HTML truncated"},
+    {"ts": "2026-05-28T10:47:05Z", "type": "observed", "detail": "80 API hints found including category faceted URLs"},
+    {"ts": "2026-05-28T10:47:08Z", "type": "observed", "detail": "Region block detected"}
+  ],
+  "missing_evidence": ["product_list_page", "price_sample", "detail_page_sample"],
+  "needs_human_review": false
+}

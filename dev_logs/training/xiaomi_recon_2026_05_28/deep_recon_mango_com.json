@@ -1,0 +1,92 @@
+{
+  "schema_version": "clm-deep-recon-v1",
+  "site_url": "https://www.mango.com",
+  "domain": "mango.com",
+  "checked_at": "2026-05-29T03:30:00Z",
+  "phase": "deep_recon_phase_2",
+  "platform": "Mango Proprietary (api.shop.mango.com)",
+
+  "catalog_url": {
+    "url": "https://www.mango.com/gb/women/shop-by-product/trousers",
+    "accessible": true,
+    "status_code": 200,
+    "rendering": "server_side",
+    "notes": "Category pages accessible via requests. 80KB HTML returned. Geo-redirect possible (Spanish content observed)."
+  },
+
+  "list_page_url": {
+    "url": "https://www.mango.com/gb/women/shop-by-product/trousers",
+    "accessible": true,
+    "product_count": 0,
+    "rendering_mode": "requests",
+    "notes": "HTML returned but product data not visible in first 80KB. Geo-redirect to Spanish locale observed in some tests."
+  },
+
+  "detail_url_pattern": {
+    "pattern": "Unknown - no product links discovered in listing page",
+    "example": "N/A",
+    "product_id_field": "N/A",
+    "product_id_format": "N/A",
+    "notes": "Product links not found in truncated HTML. API hints suggest api.shop.mango.com has product endpoints."
+  },
+
+  "pagination": {
+    "type": "unknown",
+    "mechanism": "Unknown",
+    "notes": "Pagination mechanism not discovered."
+  },
+
+  "api_response_sample": {
+    "source": "None - API not tested",
+    "format": "N/A",
+    "api_endpoints_found": [
+      "api.shop.mango.com",
+      "/es/es/search/mujer (search endpoint)"
+    ],
+    "notes": "2 API hints discovered. api.shop.mango.com likely has product listing endpoints. Not tested."
+  },
+
+  "field_evidence": {
+    "title": {"selector": "N/A", "type": "unknown", "confidence": 0.0},
+    "price": {"selector": "N/A", "type": "unknown", "confidence": 0.0},
+    "image": {
+      "selector": "media.mango.com (IS image service)",
+      "type": "inferred",
+      "domain": "media.mango.com",
+      "confidence": 0.5
+    },
+    "color": {"selector": "N/A", "type": "unknown", "confidence": 0.0},
+    "size": {"selector": "N/A", "type": "unknown", "confidence": 0.0},
+    "description": {"selector": "N/A", "type": "unknown", "confidence": 0.0}
+  },
+
+  "clm_suitability": {
+    "verdict": "not_suitable",
+    "confidence": 0.15,
+    "reasons": [
+      "Category pages accessible but product data not in HTML",
+      "API endpoints discovered but not tested",
+      "Geo-redirect issues with locale"
+    ],
+    "limitations": [
+      "Product data not visible in initial HTML",
+      "Geo-redirect to non-target locale",
+      "API not tested"
+    ],
+    "recommended_approach": "Test api.shop.mango.com endpoints. Try with locale-specific cookies."
+  },
+
+  "failure_diagnosis": {
+    "status": "partial_success",
+    "blocking_issues": [
+      "Product data not in initial HTML (possibly JS-loaded)",
+      "Geo-redirect to Spanish locale"
+    ],
+    "next_steps": [
+      "Test api.shop.mango.com product listing endpoints",
+      "Try with GB locale cookies",
+      "Use browser mode with locale override",
+      "Check for __NEXT_DATA__ or similar SSR data"
+    ]
+  }
+}

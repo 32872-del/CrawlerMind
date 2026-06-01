@@ -10,6 +10,10 @@ export interface LlmConfig {
   base_url: string;
   api_key: string;
   model: string;
+  reasoning_effort?: 'low' | 'medium' | 'high' | 'xhigh';
+  stream?: boolean;
+  timeout_seconds?: number;
+  max_tokens?: number;
 }
 
 export interface ManagedAiConfig {
@@ -169,12 +173,15 @@ export interface RunStatusResponse {
   managed_mode?: ManagedAiMode | string;
   managed_ai?: ManagedAiPayload | Record<string, unknown>;
   ai_decisions?: unknown[];
-  ai_diagnostics?: unknown[];
+  ai_diagnostics?: unknown[] | Record<string, unknown> | null;
   ai_repair_suggestions?: unknown[];
   managed_actions?: ManagedActionRecord[];
+  managed_steps?: ManagedStepRecord[];
   parent_task_id?: string;
   repair_source?: string;
   managed_auto_repair?: ManagedAutoRepairRecord | null;
+  llm_traces?: LlmTraceRecord[];
+  evidence_pack?: Record<string, unknown>;
 }
 
 export interface RunEvent {
@@ -208,6 +215,10 @@ export interface ManagedActionRequest {
   llm?: Partial<LlmConfig> & { enabled?: boolean };
 }
 
+export interface ManagedStepRequest extends ManagedActionRequest {
+  start_child_run?: boolean;
+}
+
 export interface ManagedActionRecord {
   created_at?: string;
   executed?: boolean;
@@ -219,10 +230,39 @@ export interface ManagedActionRecord {
       actions?: Array<Record<string, unknown>>;
     };
     results?: Array<Record<string, unknown>>;
+    evidence?: Record<string, unknown>;
     profile_patch?: Record<string, unknown>;
     run_overrides?: Record<string, unknown>;
     rerun_ready?: boolean;
   };
+}
+
+export interface ManagedStepRecord {
+  schema_version?: string;
+  created_at?: string;
+  stage?: string;
+  status_before?: string;
+  progress?: Record<string, unknown>;
+  evidence_pack?: Record<string, unknown>;
+  evidence?: Record<string, unknown>;
+  action_record?: ManagedActionRecord & { task_id?: string };
+  child_run?: RunLaunchResponse | null;
+}
+
+export interface ManagedStepResponse extends ManagedStepRecord {
+  task_id: string;
+}
+
+export interface LlmTraceRecord {
+  stage?: string;
+  status?: string;
+  provider?: string;
+  model?: string;
+  duration_ms?: number;
+  input_summary?: Record<string, unknown>;
+  output_summary?: Record<string, unknown>;
+  error?: string;
+  created_at?: string;
 }
 
 export interface ManagedRepairRunResponse extends RunLaunchResponse {
@@ -258,12 +298,15 @@ export interface WorkbenchTask {
   managed_mode?: ManagedAiMode | string;
   managed_ai?: ManagedAiPayload | Record<string, unknown>;
   ai_decisions?: unknown[];
-  ai_diagnostics?: unknown[];
+  ai_diagnostics?: unknown[] | Record<string, unknown> | null;
   ai_repair_suggestions?: unknown[];
   managed_actions?: ManagedActionRecord[];
+  managed_steps?: ManagedStepRecord[];
   parent_task_id?: string;
   repair_source?: string;
   managed_auto_repair?: ManagedAutoRepairRecord | null;
+  llm_traces?: LlmTraceRecord[];
+  evidence_pack?: Record<string, unknown>;
   error?: string;
 }
 

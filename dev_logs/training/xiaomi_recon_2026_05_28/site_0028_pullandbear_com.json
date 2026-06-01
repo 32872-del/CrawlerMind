@@ -1,0 +1,44 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.pullandbear.com",
+  "domain": "pullandbear.com",
+  "checked_at": "2026-05-28T10:35:00Z",
+  "site_type": "ecommerce",
+  "language": "en",
+  "currency": "EUR",
+  "rendering": "spa",
+  "access_status": {
+    "reachable": true,
+    "status_code": 200,
+    "final_url": "https://www.pullandbear.com",
+    "redirects": [],
+    "blocked_signals": [],
+    "notes": "Pure SPA with minimal shell (2136 bytes). Same pattern as zara.com, massimodutti.com, bershka.com - Inditex group."
+  },
+  "catalog_candidates": [],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {"type": "page_param_guess", "params": {"page": "2"}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "Common page param guess", "evidence_type": "guessed"},
+  "api_candidates": [],
+  "selector_candidates": {
+    "title": [{"selector": "h1", "selector_type": "css", "scope": "detail", "sample_value": "", "evidence_type": "guessed", "confidence": 0.2}],
+    "highest_price": [{"selector": "[class*=price], [itemprop=price], meta[itemprop=price]", "selector_type": "css", "scope": "detail", "sample_value": "", "evidence_type": "guessed", "confidence": 0.2}],
+    "colors": [], "sizes": [],
+    "description": [], "image_urls": [], "product_url": [], "category_level_1": [], "category_level_2": [], "category_level_3": []
+  },
+  "field_quality_expectation": {},
+  "difficulty_signals": [
+    {"kind": "js_rendering", "evidence": "Only 2136 bytes returned - minimal SPA shell. Same pattern as zara.com, massimodutti.com, bershka.com (Inditex group).", "impact": "Complete SPA - all content loaded via JS", "suggested_handling": "Must use browser rendering with networkidle wait", "confidence": 0.95}
+  ],
+  "recommended_action_plan": [
+    {"action": "switch_runtime", "priority": "high", "reason": "Pure SPA, must use browser rendering", "params": {"mode": "browser", "wait_until": "networkidle"}, "depends_on_evidence": []},
+    {"action": "analyze_site", "priority": "high", "reason": "Need browser-based analysis to discover structure", "params": {"mode": "browser"}, "depends_on_evidence": []}
+  ],
+  "confidence": {"catalog": 0.1, "api": 0.1, "selectors": 0.1, "pagination": 0.1, "overall": 0.15},
+  "evidence_log": [
+    {"ts": "2026-05-28T10:35:01Z", "type": "observed", "detail": "requests: 200 OK, 2136 bytes - minimal shell"},
+    {"ts": "2026-05-28T10:35:05Z", "type": "inferred", "detail": "Inditex group SPA pattern, same as zara.com, massimodutti.com, bershka.com"}
+  ],
+  "missing_evidence": ["everything"],
+  "needs_human_review": true
+}

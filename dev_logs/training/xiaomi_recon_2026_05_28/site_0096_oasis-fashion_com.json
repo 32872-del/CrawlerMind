@@ -1,0 +1,39 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.oasis-fashion.com",
+  "domain": "oasis-fashion.com",
+  "checked_at": "2026-05-28T11:40:00Z",
+  "site_type": "ecommerce",
+  "language": "en",
+  "currency": "GBP",
+  "rendering": "unknown",
+  "access_status": {
+    "reachable": false,
+    "status_code": 0,
+    "final_url": "",
+    "redirects": [],
+    "blocked_signals": ["tls_error"],
+    "notes": "All modes fail. requests: SSL UNEXPECTED_EOF_WHILE_READING. curl_cffi: TLS connect error. browser: ERR_CONNECTION_CLOSED. TLS handshake fails on all modes."
+  },
+  "catalog_candidates": [],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {"type": "", "params": {}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "N/A", "evidence_type": "guessed"},
+  "api_candidates": [],
+  "selector_candidates": {},
+  "field_quality_expectation": {},
+  "difficulty_signals": [
+    {"kind": "tls_error", "evidence": "SSL UNEXPECTED_EOF_WHILE_READING on requests, TLS connect error on curl_cffi, ERR_CONNECTION_CLOSED on browser", "impact": "Cannot establish HTTPS connection at all", "suggested_handling": "Site may be down or blocking via TLS fingerprinting. Try proxy or check if domain is active.", "confidence": 0.95}
+  ],
+  "recommended_action_plan": [
+    {"action": "switch_runtime", "priority": "low", "reason": "TLS error on all modes - site may be defunct or geo-blocked", "params": {"target": "proxy"}, "depends_on_evidence": ["access_status"]}
+  ],
+  "confidence": {"catalog": 0.0, "api": 0.0, "selectors": 0.0, "pagination": 0.0, "overall": 0.0},
+  "evidence_log": [
+    {"ts": "2026-05-28T11:40:01Z", "type": "observed", "detail": "requests: SSL UNEXPECTED_EOF_WHILE_READING"},
+    {"ts": "2026-05-28T11:40:03Z", "type": "observed", "detail": "curl_cffi: TLS connect error"},
+    {"ts": "2026-05-28T11:40:05Z", "type": "observed", "detail": "browser: ERR_CONNECTION_CLOSED"}
+  ],
+  "missing_evidence": ["all"],
+  "needs_human_review": false
+}

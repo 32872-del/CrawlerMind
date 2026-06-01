@@ -19,6 +19,7 @@ from autonomous_crawler.llm.openai_compatible import (
     build_chat_completions_endpoint,
     build_advisor_from_env,
     extract_chat_content,
+    extract_stream_chat_content,
     parse_json_object,
 )
 from autonomous_crawler.llm.protocols import PlanningAdvisor, StrategyAdvisor
@@ -266,6 +267,7 @@ class OpenAICompatibleAdvisorTests(unittest.TestCase):
         self.assertIn("discover_catalog", prompt)
         self.assertIn("probe_fields", prompt)
         self.assertIn("prepare_export", prompt)
+        self.assertIn("extract_from_contract", prompt)
         self.assertEqual(result["actions"][0]["action"], "discover_catalog")
 
     def test_endpoint_property_returns_resolved_endpoint(self) -> None:
@@ -386,6 +388,76 @@ class OpenAICompatibleAdvisorTests(unittest.TestCase):
         self.assertIn("response_format", first_body)
         self.assertNotIn("response_format", second_body)
 
+    def test_reasoning_effort_unsupported_retries_without_optional_params(self) -> None:
+        requests: list[httpx.Request] = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            requests.append(request)
+            if len(requests) == 1:
+                return httpx.Response(
+                    400,
+                    json={"error": {"message": "unknown parameter: reasoning_effort"}},
+                )
+            return httpx.Response(
+                200,
+                json={
+                    "choices": [
+                        {"message": {"content": '{"task_type": "product_list"}'}},
+                    ],
+                },
+            )
+
+        client = httpx.Client(transport=httpx.MockTransport(handler))
+        advisor = OpenAICompatibleAdvisor(
+            OpenAICompatibleConfig(
+                base_url="https://llm.example/v1",
+                model="test-model",
+                reasoning_effort="high",
+            ),
+            client=client,
+        )
+
+        result = advisor.plan("collect", "https://example.com")
+
+        self.assertEqual(result["task_type"], "product_list")
+        self.assertEqual(len(requests), 2)
+        first_body = json.loads(requests[0].content.decode("utf-8"))
+        second_body = json.loads(requests[1].content.decode("utf-8"))
+        self.assertEqual(first_body["reasoning_effort"], "high")
+        self.assertNotIn("reasoning_effort", second_body)
+
+    def test_streaming_sse_response_is_supported(self) -> None:
+        requests: list[httpx.Request] = []
+        sse = "\n".join([
+            'data: {"choices":[{"delta":{"content":"{\\"task_type\\":"}}]}',
+            'data: {"choices":[{"delta":{"content":" \\"product_list\\"}"}}]}',
+            "data: [DONE]",
+        ])
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            requests.append(request)
+            return httpx.Response(
+                200,
+                headers={"content-type": "text/event-stream"},
+                content=sse.encode("utf-8"),
+            )
+
+        client = httpx.Client(transport=httpx.MockTransport(handler))
+        advisor = OpenAICompatibleAdvisor(
+            OpenAICompatibleConfig(
+                base_url="https://llm.example/v1",
+                model="test-model",
+                stream=True,
+            ),
+            client=client,
+        )
+
+        result = advisor.plan("collect", "https://example.com")
+
+        self.assertEqual(result["task_type"], "product_list")
+        body = json.loads(requests[0].content.decode("utf-8"))
+        self.assertTrue(body["stream"])
+
     def test_text_choice_response_is_supported(self) -> None:
         def handler(request: httpx.Request) -> httpx.Response:
             return httpx.Response(
@@ -416,6 +488,15 @@ class OpenAICompatibleAdvisorTests(unittest.TestCase):
             extract_chat_content({"choices": [{"message": {"content": content}}]}),
             '{"task_type": "ranking_list"}',
         )
+
+    def test_extract_stream_chat_content(self) -> None:
+        text = "\n".join([
+            'data: {"choices":[{"delta":{"content":"{\\"ok\\":"}}]}',
+            'data: {"choices":[{"delta":{"content":" true}"}}]}',
+            "data: [DONE]",
+        ])
+
+        self.assertEqual(extract_stream_chat_content(text), '{"ok": true}')
 
 
 class EndpointBuilderTests(unittest.TestCase):

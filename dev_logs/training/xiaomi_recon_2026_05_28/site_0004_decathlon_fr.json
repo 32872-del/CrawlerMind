@@ -1,0 +1,35 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.decathlon.fr",
+  "domain": "decathlon.fr",
+  "checked_at": "2026-05-28T10:05:00Z",
+  "site_type": "ecommerce",
+  "language": "fr",
+  "currency": "EUR",
+  "rendering": "spa",
+  "access_status": {
+    "reachable": false,
+    "status_code": 403,
+    "final_url": "https://www.decathlon.fr/",
+    "redirects": [],
+    "blocked_signals": ["cloudflare_challenge", "403_forbidden", "security_verification_page"],
+    "notes": "All 3 modes returned 403. Browser showed '安全验证' challenge page."
+  },
+  "catalog_candidates": [],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {"type": "", "params": {}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "Cannot determine - blocked", "evidence_type": "guessed"},
+  "api_candidates": [],
+  "selector_candidates": {},
+  "field_quality_expectation": {},
+  "difficulty_signals": [{"kind": "cloudflare", "evidence": "All modes 403, browser shows security verification", "impact": "Complete access block", "suggested_handling": "Requires proxy + cookie session", "confidence": 0.95}],
+  "recommended_action_plan": [{"action": "analyze_site", "priority": "high", "reason": "Re-analyze with proxy", "params": {"use_proxy": true}, "depends_on_evidence": []}],
+  "confidence": {"catalog": 0.0, "api": 0.0, "selectors": 0.0, "pagination": 0.0, "overall": 0.05},
+  "evidence_log": [
+    {"ts": "2026-05-28T10:05:01Z", "type": "observed", "detail": "requests: 403 Forbidden"},
+    {"ts": "2026-05-28T10:05:10Z", "type": "observed", "detail": "curl_cffi: HTTP Error 403"},
+    {"ts": "2026-05-28T10:05:15Z", "type": "observed", "detail": "browser: HTTP 403, challenge '安全验证'"}
+  ],
+  "missing_evidence": ["catalog_tree", "product_list_page", "detail_page_sample", "api_endpoints", "pagination_type", "selector_candidates"],
+  "needs_human_review": true
+}

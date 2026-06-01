@@ -1,0 +1,55 @@
+HTML Summary - Page 006
+==================================================
+URL: https://www.amazon.com/s?k=books
+Domain: amazon.com
+Page Type: search_results
+HTTP Status: 200
+Confidence: 0.76
+Checked At: 2026-05-30T10:30:01.954848
+
+HTML Content Analysis:
+  Title: (not found)
+  Language: zh-cn
+  Total HTML Tags: 95
+  Scripts: 27
+  Images: 1
+  Links: 0 product links
+  Forms: 0
+  Nav Elements: 1
+  Articles: 0
+  Structured Data: No
+
+Top CSS Selectors (by frequency):
+  span.nav-assistant-card-font: 15 occurrences
+  span.shortcut-key: 11 occurrences
+  span.plus-sign-color: 7 occurrences
+  li.nav-assistant-list-item: 6 occurrences
+  a.nav-assistant-menu-item: 5 occurrences
+  a.nav-assistant-link-item: 4 occurrences
+  div.keyboard-shortcut-container: 4 occurrences
+  span.shortcut-name: 4 occurrences
+  div.shortcut-keys-container: 4 occurrences
+  h2.nav-assistant-heading: 2 occurrences
+  h2.nav-assistant-headers-font: 2 occurrences
+  html.a-ws: 1 occurrences
+  html.a-js: 1 occurrences
+  #kindle-reader-api: 1 occurrences
+  body.a-m-us: 1 occurrences
+
+Prices Detected (5):
+  $,
+  $,
+  $,
+  $,
+  $,
+
+Text Sample (first 500 chars):
+  var aPageStart = (new Date()).getTime(); var ue_t0=ue_t0||+new Date(); window.ue_ihb = (window.ue_ihb || window.ueinit || 0) + 1;
+if (window.ue_ihb === 1) {
+
+var ue_csm = window,
+    ue_hob = +new Date();
+(function(d){var e=d.ue=d.ue||{},f=Date.now||function(){return+new Date};e.d=function(b){return f()-(b?0:d.ue_t0)};e.stub=function(b,a){if(!b[a]){var c=[];b[a]=function(){c.push([c.slice.call(arguments),e.d(),d.ue_id])};b[a].replay=function(b){for(var a;a=c.shift();)b(a[0],a[1],a[2])};b[a].isS
+
+HTML File Size: 82,941 bytes
+NOTE: HTML truncated at ~80KB. Product content may load via JavaScript after truncation point.

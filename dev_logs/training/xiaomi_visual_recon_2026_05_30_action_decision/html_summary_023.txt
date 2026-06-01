@@ -1,0 +1,14 @@
+HTML Summary - Page 023
+==================================================
+URL: https://www.etsy.com/
+Domain: etsy.com
+Page Type: home
+HTTP Status: 403
+Confidence: 0.12
+Checked At: 2026-05-30T10:30:02.005909
+
+STATUS: HTTP 403 - Access Denied
+The server returned a 403 Forbidden response.
+This indicates anti-bot protection or geo-blocking.
+
+RECOMMENDATION: Use switch_runtime with browser + stealth mode

@@ -299,6 +299,40 @@ export function SettingsPage() {
             />
             {modelError ? <Alert className="section-gap-small" type="warning" showIcon message={modelError} /> : null}
           </Form.Item>
+          <Form.Item label="模型推理强度">
+            <Select
+              value={settings.llm.reasoning_effort || 'medium'}
+              options={[
+                { value: 'low', label: '低：更快，适合简单站点' },
+                { value: 'medium', label: '中：默认平衡' },
+                { value: 'high', label: '高：更适合复杂站点诊断' },
+                { value: 'xhigh', label: '极高：深度排障，耗时和费用更高' }
+              ]}
+              onChange={(reasoning_effort) => setSettings((current) => ({ ...current, llm: { ...current.llm, reasoning_effort } }))}
+            />
+          </Form.Item>
+          <Form.Item label="流式输出">
+            <Switch
+              checked={Boolean(settings.llm.stream)}
+              onChange={(stream) => setSettings((current) => ({ ...current, llm: { ...current.llm, stream } }))}
+            />
+          </Form.Item>
+          <Form.Item label="模型超时（秒）">
+            <InputNumber
+              min={5}
+              max={300}
+              value={settings.llm.timeout_seconds || 60}
+              onChange={(timeout_seconds) => setSettings((current) => ({ ...current, llm: { ...current.llm, timeout_seconds: Number(timeout_seconds || 60) } }))}
+            />
+          </Form.Item>
+          <Form.Item label="最大输出 Token">
+            <InputNumber
+              min={200}
+              max={8000}
+              value={settings.llm.max_tokens || 1200}
+              onChange={(max_tokens) => setSettings((current) => ({ ...current, llm: { ...current.llm, max_tokens: Number(max_tokens || 1200) } }))}
+            />
+          </Form.Item>
           <Alert
             type="info"
             showIcon

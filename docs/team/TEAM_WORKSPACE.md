@@ -1,5 +1,25 @@
 # LLM Team Workspace
 
+## Development Startup Rule
+
+Before any employee or supervisor starts a development task, they must read:
+
+```text
+PLAN.md
+docs/plans/2026-05-20_AI_MANAGED_CRAWL_LOOP_V2_SHORT_TERM_PLAN.md
+```
+
+The full rule is recorded at:
+
+```text
+docs/process/DEVELOPMENT_STARTUP_RULE.md
+```
+
+All development must serve the current AI Managed Crawl Loop v2 priority and
+finish as a complete loop: implementation, verification, documentation/log, and
+clear statement of where the work lands in the product workflow. Do not branch
+into isolated modules unless they directly connect back to the current loop.
+
 ## Purpose
 
 This workspace turns the project into a supervised team workflow:
@@ -15,9 +35,11 @@ verification, and supervisor acceptance record.
 ## Daily Operating Flow
 
 1. Supervisor reads:
+   - `PLAN.md`
+   - `docs/plans/2026-05-20_AI_MANAGED_CRAWL_LOOP_V2_SHORT_TERM_PLAN.md`
+   - `docs/process/DEVELOPMENT_STARTUP_RULE.md`
    - `PROJECT_STATUS.md`
    - latest `docs/reports/*_DAILY_REPORT.md`
-   - `docs/plans/2026-05-05_SHORT_TERM_PLAN.md`
    - open assignments in `docs/team/assignments/`
 2. Supervisor assigns work using an assignment document.
 3. Worker reads:

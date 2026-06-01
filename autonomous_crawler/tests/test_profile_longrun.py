@@ -172,6 +172,9 @@ class ProfileLongRunTests(unittest.TestCase):
         self.assertEqual(supervision["recommended_next_action"], "ai_rerun")
         self.assertEqual(supervision["last_event"]["action"], "pause")
         self.assertIn("supervision_events", result.runner_summary.as_dict())
+        self.assertIn("coverage_report", result.diagnostics)
+        self.assertEqual(result.coverage_report["schema_version"], "coverage-report/v1")
+        self.assertIn("recommended_recovery", result.coverage_report)
 
     def test_profile_longrun_temp_runtime_is_allowed_for_one_shot(self) -> None:
         profile = SiteProfile.load(API_PROFILE_PATH)
@@ -262,7 +265,7 @@ class ProfileDraftToLongRunSmokeTests(unittest.TestCase):
         self.assertEqual(profile.api_items_path(), "data.products")
 
         # 3. Verify initial_requests_from_profile produces a seed request
-        from autonomous_crawler.runners.profile_ecommerce import initial_requests_from_profile
+        from autonomous_crawler.runners.profile_longrun import initial_requests_from_profile
         requests = initial_requests_from_profile(profile, run_id="draft-smoke")
         self.assertEqual(len(requests), 1)
         self.assertIn("page=1", requests[0].url)
@@ -335,7 +338,7 @@ class ProfileDraftToLongRunSmokeTests(unittest.TestCase):
         self.assertEqual(profile.name, "mixed-shop")
         self.assertEqual(profile.pagination_type(), "page")
 
-        from autonomous_crawler.runners.profile_ecommerce import initial_requests_from_profile
+        from autonomous_crawler.runners.profile_longrun import initial_requests_from_profile
         requests = initial_requests_from_profile(profile, run_id="mixed-smoke")
         self.assertGreaterEqual(len(requests), 1)
 

@@ -1,0 +1,171 @@
+{
+  "schema_version": "clm-visual-recon-v1",
+  "site_url": "https://www.newegg.com",
+  "page_url": "https://www.newegg.com/p/pl?d=laptop",
+  "domain": "newegg.com",
+  "checked_at": "2026-05-28T10:13:00Z",
+  "input_artifacts": {
+    "screenshot_path": "screenshot_b90799d7.png",
+    "html_summary_path": "",
+    "network_summary_path": ""
+  },
+  "page_type": "product_listing",
+  "visual_state": "normal",
+  "is_product_listing": true,
+  "is_product_detail": false,
+  "visible_catalog": [
+    {
+      "label": "Department filter",
+      "level_hint": 2,
+      "visible_text": "Any Category | All Laptops | Gaming Laptops | Business Laptops | 2 in 1 Laptops",
+      "position_hint": "side_nav",
+      "confidence": 0.9,
+      "evidence_type": "observed"
+    },
+    {
+      "label": "Brand filter",
+      "level_hint": 2,
+      "visible_text": "HP | Lenovo | ASUS | Acer | Alien America | MSI",
+      "position_hint": "side_nav",
+      "confidence": 0.85,
+      "evidence_type": "observed"
+    }
+  ],
+  "visible_product_cards": {
+    "detected": true,
+    "count_estimate": 2,
+    "layout": "vertical_list",
+    "evidence": "Search results show laptop product cards with images, titles, specs, prices, and 'ADD TO CART' buttons",
+    "confidence": 0.9
+  },
+  "field_regions": {
+    "title": [
+      {
+        "region_id": "product_title_1",
+        "scope": "list",
+        "position_hint": "product_card_middle",
+        "visible_text_sample": "HP ProBook 4 G11 14\" FHD+ Display, Intel Core Ultra 5 125U, 32GB RAM, 512GB SSD...",
+        "nearby_visual_clues": ["specs", "price", "image"],
+        "selector_hint": ".item-title",
+        "confidence": 0.65,
+        "evidence_type": "observed"
+      }
+    ],
+    "highest_price": [
+      {
+        "region_id": "product_price_1",
+        "scope": "list",
+        "position_hint": "product_card_right",
+        "visible_text_sample": "$1,199.99",
+        "nearby_visual_clues": ["add_to_cart", "product_title"],
+        "selector_hint": ".price-current",
+        "confidence": 0.7,
+        "evidence_type": "observed"
+      }
+    ],
+    "colors": [],
+    "sizes": [],
+    "description": [
+      {
+        "region_id": "product_specs_1",
+        "scope": "list",
+        "position_hint": "product_card_middle",
+        "visible_text_sample": "CPU: Intel Core Ultra 5 125U | GPU: Intel integrated Graphics | RAM: 32GB DDR5 | Storage: 512GB SSD",
+        "nearby_visual_clues": ["title", "price"],
+        "selector_hint": ".item-properties",
+        "confidence": 0.6,
+        "evidence_type": "observed"
+      }
+    ],
+    "image_urls": [
+      {
+        "region_id": "product_image_1",
+        "scope": "list",
+        "position_hint": "product_card_top",
+        "visible_text_sample": "",
+        "nearby_visual_clues": ["title", "specs"],
+        "selector_hint": ".item-img img",
+        "confidence": 0.65,
+        "evidence_type": "observed"
+      }
+    ],
+    "product_url": [
+      {
+        "region_id": "product_link_1",
+        "scope": "list",
+        "position_hint": "product_card_top",
+        "visible_text_sample": "",
+        "nearby_visual_clues": ["image", "title"],
+        "selector_hint": ".item-img a",
+        "confidence": 0.65,
+        "evidence_type": "observed"
+      }
+    ]
+  },
+  "blocking_signals": [],
+  "pagination_signals": [
+    {
+      "kind": "page_numbers",
+      "visible_text": "Page 1/28",
+      "position_hint": "top_right",
+      "confidence": 0.9,
+      "evidence_type": "observed"
+    },
+    {
+      "kind": "filter_sort_panel",
+      "visible_text": "Sort By: Featured Items | Filter: All Laptops | Gaming Laptops | Business Laptops",
+      "position_hint": "top",
+      "confidence": 0.85,
+      "evidence_type": "observed"
+    }
+  ],
+  "visual_action_hints": [
+    {
+      "hint": "wait_for_product_cards",
+      "reason": "Product cards clearly visible with structured specs and pricing",
+      "confidence": 0.9
+    },
+    {
+      "hint": "extract_breadcrumb_categories",
+      "reason": "Department and Brand filters visible in sidebar",
+      "confidence": 0.85
+    }
+  ],
+  "recommended_action_plan": [
+    {
+      "action": "resolve_fields",
+      "priority": "high",
+      "reason": "Rich product cards with title, specs, price, image clearly visible",
+      "params": {"fields": ["title", "price", "image", "specs", "url"]},
+      "depends_on_evidence": ["product_cards_detected"]
+    },
+    {
+      "action": "run_test",
+      "priority": "medium",
+      "reason": "Test extraction on Newegg search results",
+      "params": {},
+      "depends_on_evidence": ["product_cards_detected"]
+    }
+  ],
+  "confidence": {
+    "page_type": 0.95,
+    "product_cards": 0.9,
+    "fields": 0.7,
+    "blocking": 0.95,
+    "pagination": 0.85,
+    "overall": 0.6
+  },
+  "evidence_log": [
+    "Newegg header with search bar showing 'laptop'",
+    "Department filter: Any Category, All Laptops, Gaming, Business, 2-in-1",
+    "Brand filter: HP, Lenovo, ASUS, Acer, Alien America, MSI",
+    "Product 1: HP ProBook 4 G11 - $1,199.99 with detailed specs",
+    "Product 2: MSI Ventus 16 AI - $849.00 with specs",
+    "Each card: image, title, specs list, price, ADD TO CART button",
+    "Page indicator: Page 1/28",
+    "Sort By dropdown visible"
+  ],
+  "missing_evidence": ["html_summary", "network_summary", "pagination_next_page"],
+  "needs_backend_verification": true,
+  "needs_human_review": false
+}

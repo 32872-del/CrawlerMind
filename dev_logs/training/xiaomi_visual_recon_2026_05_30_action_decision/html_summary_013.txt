@@ -1,0 +1,43 @@
+HTML Summary - Page 013
+==================================================
+URL: https://www.newegg.com/
+Domain: newegg.com
+Page Type: home
+HTTP Status: 200
+Confidence: 0.73
+Checked At: 2026-05-30T10:30:01.985314
+
+HTML Content Analysis:
+  Title: Electronics Store: Tech, PC Parts, AI PC & More | Newegg
+  Language: en-us
+  Total HTML Tags: 132
+  Scripts: 15
+  Images: 0
+  Links: 0 product links
+  Forms: 0
+  Nav Elements: 0
+  Articles: 0
+  Structured Data: No
+
+Meta Description: Shop Newegg today for all of your gaming, PC & technology needs. Don’t miss today’s best electronics deals with fast shipping & great customer service!
+
+Top CSS Selectors (by frequency):
+  html.show-tab-store: 1 occurrences
+  html.show-img-bg: 1 occurrences
+  style.vjs-styles-defaults: 1 occurrences
+  #www-widgetapi-script: 1 occurrences
+  #nrtvTag: 1 occurrences
+  #NewTemplate: 1 occurrences
+
+Prices Detected (5):
+  $747673771
+  $747673771
+  $747673771
+  $747673771
+  $747673771
+
+Text Sample (first 500 chars):
+  <!----> <!--?lit$747673771$-->:export{fadeTransitionTime:700ms;slideTransitionTime:400ms}.osano-cm-window{font-size:16px;font-family:Helvetica,Arial,"Hiragino Sans GB",STXihei,"Microsoft YaHei","WenQuanYi Micro Hei",Hind,"MS Gothic","Apple SD Gothic Neo",NanumBarunGothic,sans-serif;font-smooth:always;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothingz:auto;display:block;position:absolute;left:0;top:0;z-index:2147483638;line-height:1;width:100%}.osano-cm-window--context_amp{height:100%}.
+
+HTML File Size: 80,894 bytes
+NOTE: HTML truncated at ~80KB. Product content may load via JavaScript after truncation point.

@@ -1,0 +1,43 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.next.co.uk",
+  "domain": "next.co.uk",
+  "checked_at": "2026-05-28T11:15:00Z",
+  "site_type": "ecommerce",
+  "language": "en",
+  "currency": "GBP",
+  "rendering": "spa",
+  "access_status": {
+    "reachable": true,
+    "status_code": 200,
+    "final_url": "https://www.next.co.uk",
+    "redirects": [],
+    "blocked_signals": ["403_forbidden"],
+    "notes": "Accessible via requests and curl_cffi (80KB HTML). Browser returns 403. JS shell detected. Dedicated API domain: api.e.next.co.uk."
+  },
+  "catalog_candidates": [],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {"type": "", "params": {}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "Not determined - JS shell", "evidence_type": "guessed"},
+  "api_candidates": [
+    {"url": "https://api.e.next.co.uk", "source": "script", "confidence": 0.7, "evidence_type": "observed"}
+  ],
+  "selector_candidates": {},
+  "field_quality_expectation": {},
+  "difficulty_signals": [
+    {"kind": "js_rendering", "evidence": "80KB HTML likely JS shell. Browser returns 403 but requests/curl_cffi get 80KB.", "impact": "Product data likely loaded via API, not in initial HTML", "suggested_handling": "Investigate api.e.next.co.uk for product data endpoints", "confidence": 0.7}
+  ],
+  "recommended_action_plan": [
+    {"action": "promote_xhr_to_api", "priority": "high", "reason": "api.e.next.co.uk detected - investigate for product endpoints", "params": {}, "depends_on_evidence": ["api_candidates"]},
+    {"action": "analyze_site", "priority": "medium", "reason": "Explore API domain for structured data", "params": {}, "depends_on_evidence": ["access_status"]}
+  ],
+  "confidence": {"catalog": 0.2, "api": 0.5, "selectors": 0.1, "pagination": 0.1, "overall": 0.3},
+  "evidence_log": [
+    {"ts": "2026-05-28T11:15:01Z", "type": "observed", "detail": "requests: 200 OK, 80KB HTML"},
+    {"ts": "2026-05-28T11:15:03Z", "type": "observed", "detail": "curl_cffi: 200 OK, 80KB HTML"},
+    {"ts": "2026-05-28T11:15:05Z", "type": "observed", "detail": "browser: 403 Forbidden"},
+    {"ts": "2026-05-28T11:15:06Z", "type": "observed", "detail": "api.e.next.co.uk found in script src"}
+  ],
+  "missing_evidence": ["api_endpoints", "product_selectors", "catalog_urls"],
+  "needs_human_review": false
+}

@@ -1,0 +1,156 @@
+{
+  "schema_version": "clm-action-decision-v1",
+  "page_id": 5,
+  "site_url": "https://www.amazon.com",
+  "page_url": "https://www.amazon.com/s?k=laptop",
+  "domain": "amazon.com",
+  "checked_at": "2026-05-30T10:30:01.949792",
+  "input_artifacts": {
+    "screenshot_path": "screenshot_005.png",
+    "html_summary_path": "html_summary_005.txt",
+    "network_summary_path": "network_summary_005.txt"
+  },
+  "page_type": "search_results",
+  "visual_state": "visible",
+  "is_product_listing": true,
+  "is_product_detail": false,
+  "http_status": "200",
+  "field_regions": [
+    {
+      "selector": "html.a-ws",
+      "hit_count": 1,
+      "sample_values": [],
+      "field_type": "unknown"
+    },
+    {
+      "selector": "html.a-js",
+      "hit_count": 1,
+      "sample_values": [],
+      "field_type": "unknown"
+    },
+    {
+      "selector": "#optimistic-ax-qs-animation",
+      "hit_count": 1,
+      "sample_values": [],
+      "field_type": "unknown"
+    },
+    {
+      "selector": "#non-optimistic-ax-qs-animation",
+      "hit_count": 1,
+      "sample_values": [],
+      "field_type": "unknown"
+    },
+    {
+      "selector": "body.a-m-us",
+      "hit_count": 1,
+      "sample_values": [],
+      "field_type": "unknown"
+    }
+  ],
+  "blocking_signals": [],
+  "pagination_signals": [],
+  "recommended_action_plan": [
+    {
+      "action": "analyze_site",
+      "priority": 1,
+      "reason": "Search results page but product cards not found in HTML (JS-loaded?)",
+      "params": {
+        "url": "https://www.amazon.com/s?k=laptop",
+        "focus": "js_content"
+      },
+      "depends_on_evidence": "html_structure"
+    },
+    {
+      "action": "patch_selector",
+      "priority": 2,
+      "reason": "Adjust selectors to match search result card structure",
+      "params": {
+        "url": "https://www.amazon.com/s?k=laptop",
+        "selector_type": "search_card"
+      },
+      "depends_on_evidence": "html_structure"
+    },
+    {
+      "action": "export_results",
+      "priority": 3,
+      "reason": "Export extracted data to database/output",
+      "params": {
+        "format": "json"
+      },
+      "depends_on_evidence": "resolved_fields"
+    }
+  ],
+  "confidence": {
+    "screenshot": 0.15,
+    "html_content": 0.2,
+    "selectors": 0.1,
+    "prices": 0.0,
+    "product_cards": 0.0,
+    "blocking": 0.1,
+    "pagination": 0.0,
+    "overall": 0.6
+  },
+  "evidence_log": [
+    {
+      "type": "screenshot",
+      "status": "captured",
+      "path": "screenshot_75123d49.png"
+    },
+    {
+      "type": "html",
+      "status": "captured",
+      "truncated": false
+    },
+    {
+      "type": "network",
+      "status": "not_captured",
+      "reason": "observe_browser_network not called"
+    }
+  ],
+  "missing_evidence": [
+    "network_evidence",
+    "price_data",
+    "product_card_validation"
+  ],
+  "needs_backend_verification": true,
+  "needs_human_review": false,
+  "rejected_actions": [
+    {
+      "action": "switch_runtime",
+      "reason": "HTML content accessible; browser not needed for search results",
+      "what_evidence_would_change_decision": "Search results only rendering via JavaScript"
+    }
+  ],
+  "evidence_files": {
+    "screenshot": {
+      "path": "screenshot_005.png",
+      "exists": true,
+      "is_placeholder": false
+    },
+    "html_summary": {
+      "path": "html_summary_005.txt",
+      "exists": true
+    },
+    "network_summary": {
+      "path": "network_summary_005.txt",
+      "exists": true
+    }
+  },
+  "site": "amazon.com",
+  "evidence_summary": {
+    "screenshot": "captured for amazon.com search_results page",
+    "html_summary": "available - summary generated from HTML content",
+    "network_summary": "not captured (observe_browser_network not called)",
+    "overall": "Partial evidence: screenshot OK, HTML available, network not captured (observe_browser_network not called)"
+  },
+  "observed_capabilities": [
+    "html_available",
+    "screenshot_captured",
+    "network_missing",
+    "product_cards_potentially_visible",
+    "selectors_detected"
+  ],
+  "difficulty_signals": [
+    "html_likely_truncated_at_80kb"
+  ]
+}

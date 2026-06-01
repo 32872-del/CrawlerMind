@@ -189,7 +189,7 @@ class LLModelsEndpointTests(unittest.TestCase):
     def setUp(self) -> None:
         _clear_jobs()
 
-    @patch("autonomous_crawler.api.app.fetch_model_list")
+    @patch("autonomous_crawler.api.routers.llm.fetch_model_list")
     def test_models_endpoint_success(self, mock_fetch: MagicMock) -> None:
         mock_fetch.return_value = ModelListResult(
             provider="openai-compatible",
@@ -216,7 +216,7 @@ class LLMHealthEndpointTests(unittest.TestCase):
     def setUp(self) -> None:
         _clear_jobs()
 
-    @patch("autonomous_crawler.api.app.check_provider_health")
+    @patch("autonomous_crawler.api.routers.llm.check_provider_health")
     def test_health_endpoint_ok(self, mock_check: MagicMock) -> None:
         mock_check.return_value = {"status": "ok", "latency_ms": 150.0, "normalized_url": "https://api.test.com"}
         client = TestClient(create_app())

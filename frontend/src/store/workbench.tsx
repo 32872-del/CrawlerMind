@@ -51,7 +51,11 @@ const defaultSettings: SettingsState = {
     provider: 'openai-compatible',
     base_url: '',
     api_key: '',
-    model: ''
+    model: '',
+    reasoning_effort: 'medium',
+    stream: false,
+    timeout_seconds: 60,
+    max_tokens: 1200
   },
   managed_ai: {
     enabled: false,
@@ -227,7 +231,10 @@ export function WorkbenchProvider({ children }: { children: React.ReactNode }) {
                 ai_diagnostics: status.ai_diagnostics || task.ai_diagnostics,
                 ai_repair_suggestions: status.ai_repair_suggestions || task.ai_repair_suggestions,
                 managed_actions: status.managed_actions || task.managed_actions,
+                managed_steps: status.managed_steps || task.managed_steps,
                 managed_auto_repair: status.managed_auto_repair || task.managed_auto_repair,
+                llm_traces: status.llm_traces || task.llm_traces,
+                evidence_pack: status.evidence_pack || task.evidence_pack,
                 parent_task_id: status.parent_task_id || task.parent_task_id,
                 repair_source: status.repair_source || task.repair_source,
                 error: status.error || '',

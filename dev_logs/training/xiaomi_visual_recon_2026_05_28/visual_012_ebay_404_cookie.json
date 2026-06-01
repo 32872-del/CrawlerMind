@@ -1,0 +1,93 @@
+{
+  "schema_version": "clm-visual-recon-v1",
+  "site_url": "https://www.ebay.com",
+  "page_url": "https://www.ebay.com/itm/265735897664",
+  "domain": "ebay.com",
+  "checked_at": "2026-05-28T10:11:00Z",
+  "input_artifacts": {
+    "screenshot_path": "screenshot_e5a0dc83.png",
+    "html_summary_path": "",
+    "network_summary_path": ""
+  },
+  "page_type": "error",
+  "visual_state": "cookie_banner",
+  "is_product_listing": false,
+  "is_product_detail": false,
+  "visible_catalog": [],
+  "visible_product_cards": {
+    "detected": false,
+    "count_estimate": 0,
+    "layout": "",
+    "evidence": "404 error page with cookie consent banner at bottom",
+    "confidence": 0.95
+  },
+  "field_regions": {
+    "title": [],
+    "highest_price": [],
+    "colors": [],
+    "sizes": [],
+    "description": [],
+    "image_urls": [],
+    "product_url": []
+  },
+  "blocking_signals": [
+    {
+      "kind": "cookie_banner",
+      "visible_text": "We use cookies and other technologies that are essential to provide you our service... Accept All | Reject All | Customize my cookies",
+      "evidence": "Cookie consent banner at bottom of 404 page with Accept All/Reject All/Customize options",
+      "impact": "Minor - banner does not block content but may affect tracking",
+      "suggested_handling": "Accept cookies to proceed normally",
+      "confidence": 0.9
+    },
+    {
+      "kind": "unknown",
+      "visible_text": "We looked everywhere! Looks like this page is missing.",
+      "evidence": "404 error for specific product listing",
+      "impact": "Product not found",
+      "suggested_handling": "Try alternative URL or search",
+      "confidence": 0.95
+    }
+  ],
+  "pagination_signals": [],
+  "visual_action_hints": [
+    {
+      "hint": "accept_cookie_banner",
+      "reason": "Cookie banner visible, should accept to proceed",
+      "confidence": 0.85
+    }
+  ],
+  "recommended_action_plan": [
+    {
+      "action": "patch_profile",
+      "priority": "medium",
+      "reason": "Cookie consent needed to access eBay content normally",
+      "params": {"accept_cookies": true},
+      "depends_on_evidence": ["cookie_banner_detected"]
+    },
+    {
+      "action": "analyze_site",
+      "priority": "high",
+      "reason": "Product listing URL returns 404, need valid product pages",
+      "params": {},
+      "depends_on_evidence": ["404_error_detected"]
+    }
+  ],
+  "confidence": {
+    "page_type": 0.95,
+    "product_cards": 0.95,
+    "fields": 0.0,
+    "blocking": 0.85,
+    "pagination": 0.95,
+    "overall": 0.6
+  },
+  "evidence_log": [
+    "eBay header with search bar",
+    "404 illustration (woman with TV)",
+    "Cookie banner at bottom with detailed privacy text",
+    "Accept All / Reject All / Customize buttons",
+    "Footer links visible"
+  ],
+  "missing_evidence": ["html_summary", "network_summary", "valid_product_page"],
+  "needs_backend_verification": true,
+  "needs_human_review": false
+}

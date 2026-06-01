@@ -1,0 +1,13 @@
+HTML Summary - Page 030
+==================================================
+URL: https://www.ebay.com/sch/i.html?_nkw=laptop+deal
+Domain: ebay.com
+Page Type: search_results
+HTTP Status: robots.txt
+Confidence: 0.12
+Checked At: 2026-05-30T10:30:02.023426
+
+STATUS: robots.txt Blocked
+The site's robots.txt disallows crawling of this URL.
+
+RECOMMENDATION: Use respect_robots=False override or switch_runtime

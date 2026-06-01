@@ -3,6 +3,7 @@ __pycache__/
 .pytest_cache/
 .claude/
 .vscode/
+.idea/
 .venv/
 venv/
 .env
@@ -24,7 +25,12 @@ agent_packages/
 *.tmp
 *.log
 ~$*.xlsx
+control-loop.csv
+fixed.csv
+managed-step.csv
+out.xlsx
 clm_config.json
 
 frontend/node_modules/
 frontend/dist/
+output/

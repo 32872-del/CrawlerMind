@@ -13,9 +13,11 @@ from autonomous_crawler.api.app import create_app, _clear_jobs
 from autonomous_crawler.models.product import ProductRecord
 from autonomous_crawler.runtime import RuntimeRequest, RuntimeResponse
 from autonomous_crawler.runners import ProfileLongRunConfig, run_profile_longrun
+from autonomous_crawler.runners.managed_state import build_managed_crawl_state, compact_managed_state_for_llm
 from autonomous_crawler.runners.product_workflow import (
     ExportSpec,
     ExportTemplate,
+    analyze_site_for_product_workflow,
     _build_progress_summary,
     _derive_current_stage,
     _derive_quality_indicator,
@@ -30,7 +32,25 @@ from autonomous_crawler.runners.product_workflow import (
     resolve_fields,
     summarize_run_progress,
 )
+from autonomous_crawler.tools.fetch_policy import BestFetchResult, FetchAttempt
 from autonomous_crawler.storage.product_store import ProductStore
+
+
+EXTRACTOR_FIXTURE_ROOT = (
+    Path(__file__).resolve().parents[2]
+    / "dev_logs"
+    / "training"
+    / "xiaomi_recon_2026_05_28"
+    / "fixtures"
+)
+
+
+def _read_extractor_fixture_text(*parts: str) -> str:
+    return EXTRACTOR_FIXTURE_ROOT.joinpath(*parts).read_text(encoding="utf-8")
+
+
+def _read_extractor_fixture_json(*parts: str):
+    return json.loads(_read_extractor_fixture_text(*parts))
 
 
 class HtmlFixtureFetchRuntime:
@@ -348,6 +368,37 @@ class ProductWorkflowCoreTests(unittest.TestCase):
         self.assertEqual(profile.crawl_preferences["seed_kind"], "api")
         self.assertEqual(profile.crawl_preferences["seed_urls"], ["https://romet.pl/graphql"])
 
+    def test_site_analysis_discovers_executable_extraction_contract_from_html(self) -> None:
+        html = _read_extractor_fixture_text("superdry_com", "raw_evidence_list_page.html")
+        fetch = BestFetchResult(
+            url="https://www.superdry.com/mens/t-shirts",
+            html=html,
+            status_code=200,
+            mode="requests",
+            score=90,
+            attempts=[FetchAttempt(mode="requests", url="https://www.superdry.com/mens/t-shirts", html=html, status_code=200)],
+        )
+
+        with patch("autonomous_crawler.runners.product_workflow.fetch_best_html", return_value=fetch):
+            analysis = analyze_site_for_product_workflow("https://www.superdry.com/mens/t-shirts")
+
+        discovery = analysis["extraction_contract_discovery"]
+        context = analysis["extraction_context"]
+        constraints = analysis["profile"]["constraints"]
+        fields = {item["name"]: item for item in analysis["field_candidates"]}
+
+        self.assertEqual(discovery["best_contract"]["parser_strategy"]["name"], "gtm_data_attribute_extractor")
+        self.assertGreater(discovery["best_sample_count"], 0)
+        self.assertTrue(context["can_execute_extract_from_contract"])
+        self.assertEqual(
+            constraints["extraction_contract"]["parser_strategy"]["name"],
+            "gtm_data_attribute_extractor",
+        )
+        self.assertIn("extraction_evidence", constraints)
+        self.assertTrue(fields["title"]["api_path"])
+        self.assertTrue(fields["highest_price"]["api_path"])
+        self.assertGreaterEqual(fields["title"]["confidence"], 0.5)
+
     def test_export_product_records_writes_json_with_field_mapping(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -614,7 +665,7 @@ class StatusEndpointTests(unittest.TestCase):
         _clear_jobs()
 
     def test_status_includes_new_fields(self) -> None:
-        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
             mock_run.return_value = {
                 "accepted": True,
                 "status": "completed",
@@ -649,6 +700,7 @@ class StatusEndpointTests(unittest.TestCase):
         self.assertIn("last_error", body)
         self.assertIn("managed_ai", body)
         self.assertIn("ai_decisions", body)
+        self.assertIn("llm_traces", body)
         self.assertIn("ai_repair_suggestions", body)
         self.assertIn("ai_patch_applications", body)
         self.assertIn("supervision", body)
@@ -665,8 +717,8 @@ class StatusEndpointTests(unittest.TestCase):
             },
             "recommended_next_action": "ai_rerun",
         }
-        with patch("autonomous_crawler.api.app._build_advisor_from_config") as mock_build, \
-                patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+        with patch("autonomous_crawler.api.routers.runs.build_advisor_from_config") as mock_build, \
+                patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
             advisor = MagicMock()
             advisor.provider = "test-provider"
             advisor.model = "test-model"
@@ -714,7 +766,7 @@ class ManagedAIRunTests(unittest.TestCase):
 
     def test_product_run_without_managed_ai_has_empty_ai_state(self) -> None:
         client = TestClient(create_app())
-        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
             mock_run.return_value = {
                 "run_id": "run-no-ai",
                 "status": "completed",
@@ -741,7 +793,7 @@ class ManagedAIRunTests(unittest.TestCase):
         self.assertEqual(status["ai_decisions"], [])
         self.assertEqual(status["ai_repair_suggestions"], [])
 
-    @patch("autonomous_crawler.api.app._build_advisor_from_config")
+    @patch("autonomous_crawler.api.routers.runs.build_advisor_from_config")
     def test_managed_ai_pre_and_post_decisions_are_queryable(self, mock_build) -> None:
         advisor = MagicMock()
         advisor.provider = "test-provider"
@@ -763,7 +815,7 @@ class ManagedAIRunTests(unittest.TestCase):
         }
         mock_build.return_value = advisor
         client = TestClient(create_app())
-        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
             mock_run.return_value = {
                 "run_id": "run-ai",
                 "status": "completed",
@@ -807,6 +859,11 @@ class ManagedAIRunTests(unittest.TestCase):
         stages = [item["stage"] for item in status["ai_decisions"]]
         self.assertIn("pre_run_review", stages)
         self.assertIn("post_run_diagnosis", stages)
+        trace_stages = [item["stage"] for item in status["llm_traces"]]
+        self.assertIn("pre_run_review", trace_stages)
+        self.assertIn("post_run_diagnosis", trace_stages)
+        self.assertEqual(status["llm_traces"][0]["status"], "ok")
+        self.assertIn("input_summary", status["llm_traces"][0])
         self.assertEqual(status["ai_diagnostics"]["status_assessment"], "good")
         self.assertEqual(status["ai_repair_suggestions"][0]["action"], "Continue with full run")
 
@@ -814,8 +871,10 @@ class ManagedAIRunTests(unittest.TestCase):
         event_types = [event["type"] for event in events]
         self.assertIn("ai_pre_run_review", event_types)
         self.assertIn("ai_post_run_diagnosis", event_types)
+        self.assertIn("llm_trace_pre_run_review", event_types)
+        self.assertIn("llm_trace_post_run_diagnosis", event_types)
 
-    @patch("autonomous_crawler.api.app._build_advisor_from_config")
+    @patch("autonomous_crawler.api.routers.runs.build_advisor_from_config")
     def test_managed_ai_can_apply_allowlisted_pre_run_profile_patch(self, mock_build) -> None:
         advisor = MagicMock()
         advisor.provider = "test-provider"
@@ -843,7 +902,7 @@ class ManagedAIRunTests(unittest.TestCase):
         advisor.diagnose_run_result.return_value = {}
         mock_build.return_value = advisor
         client = TestClient(create_app())
-        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
             mock_run.return_value = {
                 "run_id": "run-ai-patch",
                 "status": "completed",
@@ -891,7 +950,214 @@ class ManagedAIRunTests(unittest.TestCase):
         self.assertTrue(status["ai_patch_applications"][0]["applied"])
         self.assertIn("crawl_preferences.seed_urls", status["ai_patch_applications"][0]["accepted"])
 
-    @patch("autonomous_crawler.api.app._build_advisor_from_config")
+    @patch("autonomous_crawler.api.routers.runs.build_advisor_from_config")
+    def test_managed_ai_can_apply_api_replay_profile_patch(self, mock_build) -> None:
+        advisor = MagicMock()
+        advisor.provider = "test-provider"
+        advisor.model = "test-model"
+        advisor.review_run_plan.return_value = {
+            "approved": True,
+            "risk_level": "low",
+            "reasoning_summary": "Promote observed product API.",
+            "profile_patch": {
+                "api_hints": {
+                    "endpoint": "https://shop.test/api/products",
+                    "method": "GET",
+                    "format": "json",
+                    "items_path": "data.items",
+                    "field_mapping": {"title": "name", "highest_price": "price"},
+                },
+                "pagination_hints": {
+                    "type": "page",
+                    "page_param": "page",
+                    "page_size_param": "limit",
+                    "page_size": 20,
+                },
+                "crawl_preferences": {
+                    "seed_kind": "api",
+                    "seed_urls": ["https://shop.test/api/products"],
+                },
+            },
+        }
+        advisor.diagnose_run_result.return_value = {}
+        mock_build.return_value = advisor
+        client = TestClient(create_app())
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
+            mock_run.return_value = {
+                "run_id": "run-api-patch",
+                "status": "completed",
+                "accepted": True,
+                "product_stats": {"total": 1},
+            }
+            response = client.post("/runs/test", json={
+                "target_url": "https://shop.test/list",
+                "profile": {
+                    "name": "shop.test",
+                    "crawl_preferences": {"seed_urls": ["https://shop.test/list"], "seed_kind": "list"},
+                },
+                "selected_fields": ["title", "highest_price"],
+                "test_limit": 1,
+                "llm": {
+                    "enabled": True,
+                    "base_url": "https://llm.example/v1",
+                    "model": "test-model",
+                },
+                "managed_ai": {
+                    "enabled": True,
+                    "mode": "supervised",
+                    "pre_run_review": True,
+                    "apply_pre_run_patch": True,
+                },
+            })
+        self.assertEqual(response.status_code, 200)
+        task_id = response.json()["task_id"]
+
+        status = {}
+        for _ in range(20):
+            status = client.get(f"/runs/{task_id}/status").json()
+            if status["status"] == "completed":
+                break
+            time.sleep(0.05)
+
+        request = mock_run.call_args.args[0]
+        profile = request.profile
+        self.assertEqual(profile["api_hints"]["endpoint"], "https://shop.test/api/products")
+        self.assertEqual(profile["api_hints"]["items_path"], "data.items")
+        self.assertEqual(profile["api_hints"]["field_mapping"]["title"], "name")
+        self.assertEqual(profile["pagination_hints"]["type"], "page")
+        self.assertEqual(profile["crawl_preferences"]["seed_kind"], "api")
+        self.assertIn("api_hints.endpoint", status["ai_patch_applications"][0]["accepted"])
+        self.assertIn("api_hints.field_mapping", status["ai_patch_applications"][0]["accepted"])
+
+    @patch("autonomous_crawler.api.routers.runs.build_advisor_from_config")
+    def test_managed_ai_can_apply_post_graphql_replay_profile_patch(self, mock_build) -> None:
+        advisor = MagicMock()
+        advisor.provider = "test-provider"
+        advisor.model = "test-model"
+        advisor.review_run_plan.return_value = {
+            "approved": True,
+            "risk_level": "low",
+            "reasoning_summary": "Replay captured GraphQL product listing.",
+            "profile_patch": {
+                "api_hints": {
+                    "endpoint": "https://shop.test/graphql",
+                    "method": "POST",
+                    "format": "graphql",
+                    "kind": "graphql",
+                    "items_path": "data.products.items",
+                    "field_mapping": {"title": "name", "highest_price": "price"},
+                    "headers": {
+                        "content-type": "application/json",
+                        "x-store": "nl",
+                    },
+                    "post_json": {
+                        "operationName": "CategoryProducts",
+                        "query": "query CategoryProducts { products { items { name price } } }",
+                        "variables": {"currentPage": 1, "pageSize": 24},
+                    },
+                    "replay_diagnostics": {
+                        "schema_version": "replay-diagnostics/v1",
+                        "replay_required": True,
+                        "risk_level": "low",
+                        "dynamic_inputs": [
+                            {
+                                "name": "requestId",
+                                "location": "json",
+                                "path": "variables.requestId",
+                                "generation_method": "random_hex_16",
+                                "refresh_each_request": True,
+                                "required": True,
+                            }
+                        ],
+                        "signed_components": [
+                            {"location": "header", "name": "x-signature", "kind": "signature_or_token"}
+                        ],
+                    },
+                    "replay_runtime": {
+                        "hook_name": "api_request_signature",
+                        "secret_key": "fixture-secret",
+                        "output_bindings": [
+                            {
+                                "source": "api_request_signature",
+                                "location": "header",
+                                "path": "x-signature",
+                                "value_type": "hook",
+                            }
+                        ],
+                    },
+                },
+                "pagination_hints": {
+                    "type": "page",
+                    "json_page_path": "variables.currentPage",
+                    "json_page_size_path": "variables.pageSize",
+                    "page_size": 24,
+                },
+                "crawl_preferences": {
+                    "seed_kind": "api",
+                    "seed_urls": ["https://shop.test/graphql"],
+                },
+            },
+        }
+        advisor.diagnose_run_result.return_value = {}
+        mock_build.return_value = advisor
+        client = TestClient(create_app())
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
+            mock_run.return_value = {
+                "run_id": "run-graphql-patch",
+                "status": "completed",
+                "accepted": True,
+                "product_stats": {"total": 1},
+            }
+            response = client.post("/runs/test", json={
+                "target_url": "https://shop.test/list",
+                "profile": {
+                    "name": "shop.test",
+                    "crawl_preferences": {"seed_urls": ["https://shop.test/list"], "seed_kind": "list"},
+                },
+                "selected_fields": ["title", "highest_price"],
+                "test_limit": 1,
+                "llm": {
+                    "enabled": True,
+                    "base_url": "https://llm.example/v1",
+                    "model": "test-model",
+                },
+                "managed_ai": {
+                    "enabled": True,
+                    "mode": "supervised",
+                    "pre_run_review": True,
+                    "apply_pre_run_patch": True,
+                },
+            })
+        self.assertEqual(response.status_code, 200)
+        task_id = response.json()["task_id"]
+
+        status = {}
+        for _ in range(20):
+            status = client.get(f"/runs/{task_id}/status").json()
+            if status["status"] == "completed":
+                break
+            time.sleep(0.05)
+
+        request = mock_run.call_args.args[0]
+        profile = request.profile
+        self.assertEqual(profile["api_hints"]["endpoint"], "https://shop.test/graphql")
+        self.assertEqual(profile["api_hints"]["method"], "POST")
+        self.assertEqual(profile["api_hints"]["format"], "graphql")
+        self.assertEqual(profile["api_hints"]["kind"], "graphql")
+        self.assertEqual(profile["api_hints"]["headers"]["x-store"], "nl")
+        self.assertEqual(profile["api_hints"]["post_json"]["variables"]["currentPage"], 1)
+        self.assertTrue(profile["api_hints"]["replay_diagnostics"]["replay_required"])
+        self.assertEqual(profile["api_hints"]["replay_runtime"]["hook_name"], "api_request_signature")
+        self.assertEqual(profile["pagination_hints"]["json_page_path"], "variables.currentPage")
+        self.assertEqual(profile["pagination_hints"]["json_page_size_path"], "variables.pageSize")
+        accepted = status["ai_patch_applications"][0]["accepted"]
+        self.assertIn("api_hints.headers", accepted)
+        self.assertIn("api_hints.post_json", accepted)
+        self.assertIn("api_hints.replay_diagnostics", accepted)
+        self.assertIn("api_hints.replay_runtime", accepted)
+        self.assertIn("pagination_hints.json_page_path", accepted)
+
+    @patch("autonomous_crawler.api.routers.runs.build_advisor_from_config")
     def test_managed_ai_rejects_unsafe_pre_run_profile_patch_values(self, mock_build) -> None:
         advisor = MagicMock()
         advisor.provider = "test-provider"
@@ -907,7 +1173,7 @@ class ManagedAIRunTests(unittest.TestCase):
         }
         mock_build.return_value = advisor
         client = TestClient(create_app())
-        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
             mock_run.return_value = {
                 "run_id": "run-ai-reject",
                 "status": "completed",
@@ -961,7 +1227,7 @@ class ManagedAIRunTests(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("managed_ai requires llm.enabled=true", response.text)
 
-    @patch("autonomous_crawler.api.app._build_advisor_from_config")
+    @patch("autonomous_crawler.api.routers.runs.build_advisor_from_config")
     def test_ai_rerun_turns_diagnostics_into_executable_child_run(self, mock_build) -> None:
         advisor = MagicMock()
         advisor.provider = "test-provider"
@@ -983,7 +1249,7 @@ class ManagedAIRunTests(unittest.TestCase):
         mock_build.return_value = advisor
         client = TestClient(create_app())
 
-        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
             mock_run.return_value = {
                 "run_id": "run-ai-rerun",
                 "status": "completed",
@@ -1043,7 +1309,7 @@ class ManagedAIRunTests(unittest.TestCase):
 
     def test_ai_rerun_rejects_invalid_override_values(self) -> None:
         client = TestClient(create_app())
-        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
             mock_run.return_value = {
                 "run_id": "run-ai-rerun-invalid",
                 "status": "completed",
@@ -1102,7 +1368,7 @@ class ManagedAIRunTests(unittest.TestCase):
             },
             "recommended_next_action": "ai_rerun",
         }
-        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
             mock_run.return_value = {
                 "run_id": "run-supervision-rerun",
                 "status": "paused",
@@ -1146,7 +1412,7 @@ class ManagedAIRunTests(unittest.TestCase):
 
     def test_managed_actions_endpoint_executes_and_feeds_ai_rerun(self) -> None:
         client = TestClient(create_app())
-        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
             mock_run.return_value = {
                 "run_id": "run-managed-actions",
                 "status": "completed",
@@ -1194,7 +1460,7 @@ class ManagedAIRunTests(unittest.TestCase):
         self.assertTrue(any(item["type"] == "managed_actions_executed" for item in events))
         self.assertIn("profile.access_config.mode", child_status["ai_patch_applications"][0]["accepted"])
 
-    @patch("autonomous_crawler.api.app._build_advisor_from_config")
+    @patch("autonomous_crawler.api.routers.runs.build_advisor_from_config")
     def test_managed_actions_endpoint_accepts_llm_action_plan(self, mock_build) -> None:
         advisor = MagicMock()
         advisor.choose_managed_actions.return_value = {
@@ -1207,7 +1473,7 @@ class ManagedAIRunTests(unittest.TestCase):
         }
         mock_build.return_value = advisor
         client = TestClient(create_app())
-        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
             mock_run.return_value = {
                 "run_id": "run-managed-actions-llm",
                 "status": "completed",
@@ -1235,11 +1501,179 @@ class ManagedAIRunTests(unittest.TestCase):
         plan = action_resp.json()["result"]["plan"]
         self.assertEqual(plan["source"], "llm")
         self.assertEqual(plan["actions"][0]["action"], "adjust_runtime")
+        self.assertEqual(plan["protocol_validation"]["schema_version"], "managed-action-plan/v2")
         advisor.choose_managed_actions.assert_called_once()
+
+    @patch("autonomous_crawler.api.routers.runs.build_advisor_from_config")
+    def test_managed_actions_llm_receives_compact_managed_state(self, mock_build) -> None:
+        advisor = MagicMock()
+        advisor.choose_managed_actions.return_value = {
+            "reasoning_summary": "Need catalog repair.",
+            "actions": [
+                {"action": "select_catalog", "priority": "high", "params": {"target_url": "https://shop.test/list"}},
+                {"action": "resolve_fields", "priority": "high", "params": {"fields": ["title", "colors"]}},
+                {"action": "export_results", "priority": "low", "params": {"format": "csv"}},
+            ],
+        }
+        mock_build.return_value = advisor
+        client = TestClient(create_app())
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
+            mock_run.return_value = {
+                "run_id": "run-managed-actions-state",
+                "status": "completed",
+                "accepted": False,
+                "product_stats": {"total": 0},
+            }
+            response = client.post("/runs/test", json={
+                "target_url": "https://shop.test/",
+                "profile": {"name": "shop.test", "crawl_preferences": {"seed_urls": ["https://shop.test/list"]}},
+                "selected_fields": ["title", "colors"],
+            })
+            task_id = response.json()["task_id"]
+            for _ in range(20):
+                status = client.get(f"/runs/{task_id}/status").json()
+                if status["status"] == "completed":
+                    break
+                time.sleep(0.05)
+            action_resp = client.post(f"/runs/{task_id}/managed-actions", json={
+                "execute": False,
+                "use_llm": True,
+                "llm": {"enabled": True, "base_url": "https://llm.example/v1", "model": "m"},
+            })
+
+        self.assertEqual(action_resp.status_code, 200)
+        call_kwargs = advisor.choose_managed_actions.call_args.kwargs
+        self.assertIn("managed_llm_context", call_kwargs["diagnostics"])
+        self.assertEqual(call_kwargs["run_spec"]["schema_version"], "managed-crawl-llm-context/v1")
+        self.assertIn("workflow", call_kwargs["run_spec"])
+        self.assertEqual(call_kwargs["diagnostics"]["managed_state"]["workflow"]["loop_name"], "AI Managed Crawl Loop v2")
+
+    @patch("autonomous_crawler.api.routers.runs.build_advisor_from_config")
+    def test_managed_actions_llm_can_drive_contract_extraction_from_extra_context(self, mock_build) -> None:
+        advisor = MagicMock()
+        advisor.choose_managed_actions.return_value = {
+            "schema_version": "managed-action-plan/v2",
+            "reasoning_summary": "A fixture extraction contract is available.",
+            "actions": [
+                {"action": "extract_from_contract", "priority": "high", "reason": "structured evidence is ready"},
+            ],
+        }
+        mock_build.return_value = advisor
+        contract = _read_extractor_fixture_json("superdry_com", "extraction_contract.json")
+        html = _read_extractor_fixture_text("superdry_com", "raw_evidence_list_page.html")
+        client = TestClient(create_app())
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
+            mock_run.return_value = {
+                "run_id": "run-managed-actions-contract",
+                "status": "completed",
+                "accepted": False,
+                "product_stats": {"total": 0},
+            }
+            response = client.post("/runs/test", json={
+                "target_url": "https://www.superdry.com/womens/tops",
+                "profile": {
+                    "name": "superdry",
+                    "crawl_preferences": {"seed_urls": ["https://www.superdry.com/womens/tops"]},
+                },
+                "selected_fields": ["title", "highest_price", "color"],
+            })
+            task_id = response.json()["task_id"]
+            for _ in range(20):
+                status = client.get(f"/runs/{task_id}/status").json()
+                if status["status"] == "completed":
+                    break
+                time.sleep(0.05)
+            action_resp = client.post(f"/runs/{task_id}/managed-actions", json={
+                "execute": True,
+                "use_llm": True,
+                "llm": {"enabled": True, "base_url": "https://llm.example/v1", "model": "m"},
+                "extra_context": {
+                    "extraction_contract": contract,
+                    "extraction_evidence": html,
+                    "source_url": "https://www.superdry.com/womens/tops",
+                    "max_items": 3,
+                },
+            })
+            status_after = client.get(f"/runs/{task_id}/status").json()
+            events = client.get(f"/runs/{task_id}/events").json()["events"]
+
+        self.assertEqual(action_resp.status_code, 200)
+        body = action_resp.json()
+        extraction = body["result"]["run_overrides"]["extraction_result"]
+        self.assertEqual(extraction["item_count"], 3)
+        self.assertEqual(extraction["site"], "superdry.com")
+        self.assertEqual(extraction["items"][0]["title"], "Athletic Essentials Stripe Jersey Polo Shirt")
+        self.assertTrue(body["result"]["rerun_ready"])
+        self.assertEqual(status_after["managed_actions"][-1]["result"]["run_overrides"]["extraction_result"]["item_count"], 3)
+        self.assertEqual(status_after["managed_state"]["extraction_context"]["latest_extraction"]["item_count"], 3)
+        self.assertTrue(any(item["type"] == "managed_actions_executed" for item in events))
+        call_kwargs = advisor.choose_managed_actions.call_args.kwargs
+        self.assertTrue(call_kwargs["run_spec"]["extraction_context"]["can_execute_extract_from_contract"])
+        self.assertEqual(call_kwargs["run_spec"]["extraction_context"]["parser_strategy"], "gtm_data_attribute_extractor")
+
+    def test_analyzed_profile_feeds_contract_extraction_without_manual_extra_context(self) -> None:
+        html = _read_extractor_fixture_text("superdry_com", "raw_evidence_list_page.html")
+        fetch = BestFetchResult(
+            url="https://www.superdry.com/womens/tops",
+            html=html,
+            status_code=200,
+            mode="requests",
+            score=90,
+            attempts=[FetchAttempt(mode="requests", url="https://www.superdry.com/womens/tops", html=html, status_code=200)],
+        )
+        client = TestClient(create_app())
+
+        with patch("autonomous_crawler.runners.product_workflow.fetch_best_html", return_value=fetch):
+            analysis_resp = client.post("/site/analyze", json={
+                "target_url": "https://www.superdry.com/womens/tops",
+                "field_goal": "title price color image",
+            })
+        self.assertEqual(analysis_resp.status_code, 200)
+        profile = analysis_resp.json()["profile"]
+
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
+            mock_run.return_value = {
+                "run_id": "run-analyzed-contract",
+                "status": "completed",
+                "accepted": False,
+                "product_stats": {"total": 0},
+            }
+            response = client.post("/runs/test", json={
+                "target_url": "https://www.superdry.com/womens/tops",
+                "profile": profile,
+                "selected_fields": ["title", "highest_price", "colors"],
+                "test_limit": 5,
+            })
+            self.assertEqual(response.status_code, 200)
+            task_id = response.json()["task_id"]
+            for _ in range(20):
+                status = client.get(f"/runs/{task_id}/status").json()
+                if status["status"] == "completed":
+                    break
+                time.sleep(0.05)
+            action_resp = client.post(f"/runs/{task_id}/managed-actions", json={
+                "execute": True,
+                "use_llm": False,
+            })
+            status_after = client.get(f"/runs/{task_id}/status").json()
+
+        self.assertEqual(action_resp.status_code, 200)
+        result = action_resp.json()["result"]
+        self.assertEqual(result["plan"]["actions"][0]["action"], "extract_from_contract")
+        extraction = result["run_overrides"]["extraction_result"]
+        self.assertEqual(extraction["item_count"], 3)
+        self.assertEqual(extraction["items"][0]["title"], "Athletic Essentials Stripe Jersey Polo Shirt")
+        self.assertTrue(
+            status_after["managed_state"]["extraction_context"]["can_execute_extract_from_contract"]
+        )
+        self.assertEqual(
+            status_after["managed_state"]["extraction_context"]["parser_strategy"],
+            "gtm_data_attribute_extractor",
+        )
 
     def test_managed_repair_run_executes_actions_and_starts_child_run(self) -> None:
         client = TestClient(create_app())
-        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
             mock_run.return_value = {
                 "run_id": "run-managed-repair",
                 "status": "completed",
@@ -1331,8 +1765,8 @@ class ManagedAIRunTests(unittest.TestCase):
                 "runner_summary": {"claimed": 3, "records_saved": 3, "succeeded": 3},
             }
 
-        with patch("autonomous_crawler.api.app._build_advisor_from_config") as mock_build, \
-                patch("autonomous_crawler.api.app.run_profile_longrun_workflow", side_effect=fake_run):
+        with patch("autonomous_crawler.api.routers.runs.build_advisor_from_config") as mock_build, \
+                patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow", side_effect=fake_run):
             advisor = MagicMock()
             advisor.provider = "test-provider"
             advisor.model = "test-model"
@@ -1394,6 +1828,309 @@ class ManagedAIRunTests(unittest.TestCase):
         events = client.get(f"/runs/{task_id}/events").json()["events"]
         self.assertTrue(any(item["type"] == "managed_auto_repair_started" for item in events))
 
+    def test_managed_step_executes_actions_and_can_start_child_run(self) -> None:
+        client = TestClient(create_app())
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
+            mock_run.return_value = {
+                "run_id": "run-managed-step",
+                "status": "completed",
+                "accepted": False,
+                "product_stats": {"total": 0},
+                "runner_summary": {"claimed": 2, "records_saved": 0, "failed": 2},
+            }
+            response = client.post("/runs/test", json={
+                "target_url": "https://shop.test/",
+                "profile": {
+                    "name": "shop.test",
+                    "crawl_preferences": {"seed_urls": ["https://shop.test/list"], "seed_kind": "list"},
+                    "access_config": {"mode": "static"},
+                },
+                "selected_fields": ["title"],
+            })
+            self.assertEqual(response.status_code, 200)
+            task_id = response.json()["task_id"]
+            for _ in range(20):
+                status = client.get(f"/runs/{task_id}/status").json()
+                if status["status"] == "completed":
+                    break
+                time.sleep(0.05)
+
+            step = client.post(f"/runs/{task_id}/managed-step", json={
+                "execute": True,
+                "use_llm": False,
+                "start_child_run": True,
+                "run_kind": "test",
+                "extra_context": {
+                    "selected_fields": ["title", "highest_price"],
+                    "export": {"format": "csv", "output_path": "managed-step.csv"},
+                },
+            })
+
+        self.assertEqual(step.status_code, 200)
+        body = step.json()
+        self.assertEqual(body["schema_version"], "managed-step/v1")
+        self.assertEqual(body["stage"], "quality_review")
+        self.assertTrue(body["action_record"]["result"]["rerun_ready"])
+        self.assertTrue(body["child_run"]["task_id"])
+        status = client.get(f"/runs/{task_id}/status").json()
+        self.assertEqual(len(status["managed_steps"]), 1)
+        events = client.get(f"/runs/{task_id}/events").json()["events"]
+        self.assertTrue(any(item["type"] == "managed_step_executed" for item in events))
+
+    def test_managed_control_loop_runs_probe_actions_and_child_rerun(self) -> None:
+        client = TestClient(create_app())
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
+            mock_run.return_value = {
+                "run_id": "run-control-loop",
+                "status": "completed",
+                "accepted": False,
+                "product_stats": {"total": 0},
+                "runner_summary": {"claimed": 2, "records_saved": 0, "failed": 2},
+            }
+            response = client.post("/runs/test", json={
+                "target_url": "https://shop.test/",
+                "profile": {
+                    "name": "shop.test",
+                    "crawl_preferences": {"seed_urls": ["https://shop.test/list"], "seed_kind": "list"},
+                    "access_config": {"mode": "static"},
+                },
+                "selected_fields": ["title"],
+            })
+            self.assertEqual(response.status_code, 200)
+            task_id = response.json()["task_id"]
+            for _ in range(20):
+                status = client.get(f"/runs/{task_id}/status").json()
+                if status["status"] == "completed":
+                    break
+                time.sleep(0.05)
+
+            with patch("autonomous_crawler.api.routers.runs._execute_inspect_access") as mock_probe:
+                mock_probe.return_value = {
+                    "action": "inspect_access",
+                    "ok": True,
+                    "summary": "runtime access knobs and evidence snapshot prepared",
+                    "evidence": {
+                        "target_url": "https://shop.test/",
+                        "access_mode": "dynamic",
+                        "browser_config": {"capture_api": True},
+                        "sample_limit": 3,
+                        "signals": ["xhr"],
+                        "profile_summary": {"name": "shop.test", "target_fields": ["title"]},
+                        "request": {"target_url": "https://shop.test/"},
+                        "snapshot": {
+                            "schema_version": "access-evidence/v1",
+                            "summary": {"recommended_runtime": "dynamic_browser_probe"},
+                        },
+                        "base_snapshot": {
+                            "schema_version": "access-evidence/v1",
+                            "summary": {"recommended_runtime": "dynamic_browser_probe"},
+                        },
+                        "live_probe": False,
+                    },
+                    "patch": {"access_config": {"mode": "dynamic"}},
+                    "overrides": {"access_config": {"mode": "dynamic"}},
+                }
+                loop = client.post(f"/runs/{task_id}/managed-control-loop", json={
+                    "execute": True,
+                    "use_llm": False,
+                    "include_access_probe": True,
+                    "start_child_run": True,
+                    "run_kind": "test",
+                    "extra_context": {
+                        "selected_fields": ["title", "highest_price"],
+                        "export": {"format": "csv", "output_path": "control-loop.csv"},
+                    },
+                })
+
+        self.assertEqual(loop.status_code, 200)
+        body = loop.json()
+        self.assertEqual(body["schema_version"], "managed-control-loop/v1")
+        self.assertEqual([item["stage"] for item in body["timeline"]], ["observe", "access_probe", "plan_act", "repair_rerun"])
+        self.assertTrue(body["action_record"]["result"]["rerun_ready"])
+        self.assertTrue(body["child_run"]["task_id"])
+        status = client.get(f"/runs/{task_id}/status").json()
+        self.assertEqual(status["latest_managed_control_loop"]["schema_version"], "managed-control-loop/v1")
+        self.assertEqual(len(status["managed_control_loops"]), 1)
+        self.assertEqual(len(status["access_probe_history"]), 1)
+        events = client.get(f"/runs/{task_id}/events").json()["events"]
+        self.assertTrue(any(item["type"] == "managed_control_loop_completed" for item in events))
+        self.assertTrue(any(item["type"] == "access_probe_completed" for item in events))
+
+    def test_managed_control_loop_can_promote_xhr_api_and_start_api_child_run(self) -> None:
+        client = TestClient(create_app())
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
+            mock_run.return_value = {
+                "run_id": "run-control-loop-api",
+                "status": "completed",
+                "accepted": False,
+                "product_stats": {"total": 0},
+                "runner_summary": {"claimed": 1, "records_saved": 0, "failed": 1},
+            }
+            response = client.post("/runs/test", json={
+                "target_url": "https://shop.test/list",
+                "profile": {
+                    "name": "shop.test",
+                    "crawl_preferences": {"seed_urls": ["https://shop.test/list"], "seed_kind": "list"},
+                    "access_config": {"mode": "static"},
+                },
+                "selected_fields": ["title", "highest_price"],
+            })
+            self.assertEqual(response.status_code, 200)
+            task_id = response.json()["task_id"]
+            for _ in range(20):
+                status = client.get(f"/runs/{task_id}/status").json()
+                if status["status"] == "completed":
+                    break
+                time.sleep(0.05)
+
+            with patch("autonomous_crawler.runners.managed_actions._should_collect_live_access_probe", return_value=True):
+                with patch("autonomous_crawler.runners.managed_actions.NativeBrowserRuntime") as mock_runtime_cls:
+                    mock_runtime = MagicMock()
+                    mock_response = MagicMock()
+                    mock_response.ok = True
+                    mock_response.final_url = "https://shop.test/list"
+                    mock_response.status_code = 200
+                    mock_response.error = ""
+                    mock_response.html = "<html><body></body></html>"
+                    mock_response.to_dict.return_value = {
+                        "captured_xhr": [{
+                            "url": "https://shop.test/api/catalog?page=1&limit=20",
+                            "method": "GET",
+                            "status_code": 200,
+                            "content_type": "application/json",
+                            "body_preview": "{\"data\":{\"items\":[{\"name\":\"Alpha\",\"price\":10.5}]}}",
+                        }],
+                        "runtime_events": [],
+                        "artifacts": [],
+                        "engine_result": {"failure_classification": {"category": "none"}},
+                    }
+                    mock_runtime.render.return_value = mock_response
+                    mock_runtime_cls.return_value = mock_runtime
+                    loop = client.post(f"/runs/{task_id}/managed-control-loop", json={
+                        "execute": True,
+                        "use_llm": False,
+                        "include_access_probe": True,
+                        "live_probe": True,
+                        "start_child_run": True,
+                        "run_kind": "test",
+                    })
+
+        self.assertEqual(loop.status_code, 200)
+        body = loop.json()
+        self.assertTrue(body["action_record"]["result"]["profile_patch"]["api_hints"]["endpoint"])
+        child_id = body["child_run"]["task_id"]
+        child_status = client.get(f"/runs/{child_id}/status").json()
+        patch_result = child_status["ai_patch_applications"][0]
+        self.assertIn("profile.api_hints.endpoint", patch_result["accepted"])
+        self.assertEqual(child_status["product_run_spec"]["profile"]["crawl_preferences"]["seed_kind"], "api")
+        self.assertEqual(
+            child_status["product_run_spec"]["profile"]["api_hints"]["endpoint"],
+            "https://shop.test/api/catalog",
+        )
+
+    def test_status_and_managed_step_include_evidence_pack(self) -> None:
+        client = TestClient(create_app())
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
+            mock_run.return_value = {
+                "run_id": "run-evidence",
+                "status": "completed",
+                "accepted": False,
+                "product_stats": {"total": 0},
+                "runner_summary": {
+                    "claimed": 3,
+                    "records_saved": 0,
+                    "failed": 3,
+                    "failure_buckets": {"challenge_like": 2, "timeout": 1},
+                },
+                "frontier_stats": {"done": 1, "failed": 2},
+                "quality_summary": {
+                    "total_records": 0,
+                    "field_completeness": {"title": 0.0, "highest_price": 0.0},
+                },
+            }
+            response = client.post("/runs/test", json={
+                "target_url": "https://shop.test/",
+                "profile": {
+                    "name": "shop.test",
+                    "crawl_preferences": {"seed_urls": ["https://shop.test/list"], "seed_kind": "list"},
+                    "access_config": {"mode": "static"},
+                },
+                "selected_fields": ["title", "highest_price"],
+            })
+            task_id = response.json()["task_id"]
+            for _ in range(20):
+                status = client.get(f"/runs/{task_id}/status").json()
+                if status["status"] == "completed":
+                    break
+                time.sleep(0.05)
+            step = client.post(f"/runs/{task_id}/managed-step", json={"execute": False, "use_llm": False})
+
+        self.assertEqual(status["evidence_pack"]["schema_version"], "run-evidence-pack/v1")
+        self.assertEqual(status["evidence_pack"]["access_evidence"]["schema_version"], "access-evidence/v1")
+        self.assertTrue(status["evidence_pack"]["access_evidence"]["summary"]["challenge_like"])
+        self.assertEqual(status["evidence_pack"]["access_evidence"]["summary"]["recommended_runtime"], "protected_browser")
+        self.assertIn("access_challenge", status["evidence_pack"]["recommended_focus"])
+        self.assertEqual(status["evidence_pack"]["failure_evidence"]["failure_buckets"]["challenge_like"], 2)
+        self.assertEqual(step.status_code, 200)
+        self.assertEqual(step.json()["evidence_pack"]["quality_gaps"][0]["kind"], "field_coverage")
+        self.assertEqual(step.json()["evidence_pack"]["access_evidence"]["schema_version"], "access-evidence/v1")
+
+    def test_managed_state_endpoint_returns_unified_state_packet(self) -> None:
+        client = TestClient(create_app())
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
+            mock_run.return_value = {
+                "run_id": "run-managed-state",
+                "status": "completed",
+                "accepted": False,
+                "product_stats": {"total": 0},
+                "runner_summary": {
+                    "claimed": 2,
+                    "records_saved": 0,
+                    "failed": 2,
+                    "failure_buckets": {"zero_records": 2},
+                },
+                "quality_summary": {
+                    "total_records": 0,
+                    "field_completeness": {"title": 0.0, "highest_price": 0.0},
+                },
+            }
+            response = client.post("/runs/test", json={
+                "target_url": "https://shop.test/",
+                "profile": {
+                    "name": "shop.test",
+                    "crawl_preferences": {"seed_urls": ["https://shop.test/list"], "seed_kind": "list"},
+                    "access_config": {"mode": "static"},
+                },
+                "selected_fields": ["title", "highest_price"],
+            })
+        self.assertEqual(response.status_code, 200)
+        task_id = response.json()["task_id"]
+
+        status = {}
+        for _ in range(20):
+            status = client.get(f"/runs/{task_id}/status").json()
+            if status["status"] == "completed":
+                break
+            time.sleep(0.05)
+
+        managed_state = client.get(f"/runs/{task_id}/managed-state").json()
+        state = managed_state["state"]
+        llm_context = managed_state["llm_context"]
+
+        self.assertEqual(managed_state["schema_version"], "managed-crawl-state/v1")
+        self.assertEqual(state["task"]["task_id"], task_id)
+        self.assertEqual(state["workflow"]["loop_name"], "AI Managed Crawl Loop v2")
+        self.assertIn("zero_records", state["workflow"]["recommended_focus"])
+        self.assertTrue(state["workflow"]["is_closed_loop_ready"])
+        self.assertGreaterEqual(state["workflow"]["state_coverage"]["ready_count"], 6)
+        self.assertEqual(state["progress"]["current_stage"], status["current_stage"])
+        self.assertEqual(state["evidence_pack"]["schema_version"], "run-evidence-pack/v1")
+        self.assertEqual(state["evidence_pack"]["quality_gaps"][0]["kind"], "field_coverage")
+        self.assertGreater(len(state["timeline"]), 0)
+        self.assertIn("recent_timeline", llm_context)
+        self.assertEqual(llm_context["schema_version"], "managed-crawl-llm-context/v1")
+        self.assertIn("workflow", llm_context)
+        self.assertIn("quality_context", llm_context)
 
 class ProductWorkflowAPITests(unittest.TestCase):
     def setUp(self) -> None:
@@ -1442,8 +2179,71 @@ class ProductWorkflowAPITests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["selected_fields"], ["sizes", "title"])
 
+    def test_access_probe_endpoint_returns_snapshot_layers(self) -> None:
+        client = TestClient(create_app())
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
+            mock_run.return_value = {
+                "run_id": "run-probe",
+                "status": "completed",
+                "accepted": False,
+                "product_stats": {"total": 0},
+                "runner_summary": {"claimed": 1, "records_saved": 0, "failed": 1},
+                "frontier_stats": {"done": 1},
+            }
+            response = client.post("/runs/test", json={
+                "target_url": "https://shop.test/",
+                "profile": {
+                    "name": "shop.test",
+                    "access_config": {"mode": "dynamic"},
+                },
+                "selected_fields": ["title"],
+            })
+            task_id = response.json()["task_id"]
+
+        with patch("autonomous_crawler.api.routers.runs._execute_inspect_access") as mock_probe:
+            mock_probe.return_value = {
+                "action": "inspect_access",
+                "ok": True,
+                "summary": "runtime access probe completed",
+                "evidence": {
+                    "target_url": "https://shop.test/",
+                    "access_mode": "dynamic",
+                    "browser_config": {"capture_api": True},
+                    "sample_limit": 2,
+                    "signals": ["xhr"],
+                    "profile_summary": {"name": "shop.test", "target_fields": ["title"]},
+                    "request": {"target_url": "https://shop.test/"},
+                    "snapshot": {
+                        "schema_version": "access-probe/v1",
+                        "summary": {"challenge_like": False},
+                        "probe_snapshot": {"schema_version": "access-probe/v1"},
+                    },
+                    "base_snapshot": {
+                        "schema_version": "access-evidence/v1",
+                        "summary": {"challenge_like": False},
+                    },
+                    "live_probe": True,
+                },
+                "patch": {"access_config": {"mode": "dynamic"}},
+                "overrides": {"access_config": {"mode": "dynamic"}},
+            }
+            probe = client.post(f"/runs/{task_id}/access-probe", json={
+                "target_url": "https://shop.test/",
+                "live_probe": True,
+                "sample_limit": 2,
+            })
+
+        self.assertEqual(probe.status_code, 200)
+        body = probe.json()
+        self.assertEqual(body["schema_version"], "access-probe-response/v1")
+        self.assertEqual(body["snapshot"]["schema_version"], "access-probe/v1")
+        self.assertEqual(body["base_snapshot"]["schema_version"], "access-evidence/v1")
+        status = client.get(f"/runs/{task_id}/status").json()
+        self.assertEqual(status["latest_access_probe"]["schema_version"], "access-probe-response/v1")
+        self.assertEqual(len(status["access_probe_history"]), 1)
+
     def test_runs_test_registers_profile_job(self) -> None:
-        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
             mock_run.return_value = {
                 "accepted": True,
                 "status": "completed",
@@ -1520,7 +2320,7 @@ class ProductWorkflowAPITests(unittest.TestCase):
                     "frontier_stats": {"done": 1},
                 }
 
-            with patch("autonomous_crawler.api.app.run_profile_longrun_workflow", side_effect=fake_run):
+            with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow", side_effect=fake_run):
                 client = TestClient(create_app())
                 response = client.post(
                     "/runs/test",

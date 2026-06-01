@@ -18,7 +18,7 @@ from typing import Any
 
 from autonomous_crawler.models.product import ProductRecord
 from autonomous_crawler.runners.batch_runner import BatchRunner, BatchRunnerConfig, ItemProcessResult, ProductRecordCheckpoint
-from autonomous_crawler.runners.profile_ecommerce import profile_quality_summary
+from autonomous_crawler.runners.profile_longrun import profile_quality_summary
 from autonomous_crawler.runners.profile_report import build_profile_run_report
 from autonomous_crawler.runners.spider_models import CrawlRequestEnvelope, SpiderRunSummary, make_spider_event
 from autonomous_crawler.storage.checkpoint_store import CheckpointStore

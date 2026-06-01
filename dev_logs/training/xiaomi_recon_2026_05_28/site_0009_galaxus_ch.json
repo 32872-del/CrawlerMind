@@ -1,0 +1,39 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.galaxus.ch",
+  "domain": "galaxus.ch",
+  "checked_at": "2026-05-28T10:12:00Z",
+  "site_type": "ecommerce",
+  "language": "de",
+  "currency": "CHF",
+  "rendering": "spa",
+  "access_status": {
+    "reachable": false,
+    "status_code": 403,
+    "final_url": "https://www.galaxus.ch/",
+    "redirects": [],
+    "blocked_signals": ["403_forbidden"],
+    "notes": "requests and curl_cffi return 403. Browser also 403. Browser network observation succeeded but only got 403 document response (290 bytes)."
+  },
+  "catalog_candidates": [],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {"type": "", "params": {}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "Cannot determine - blocked", "evidence_type": "guessed"},
+  "api_candidates": [],
+  "selector_candidates": {},
+  "field_quality_expectation": {},
+  "difficulty_signals": [
+    {"kind": "access_blocked", "evidence": "All modes return 403. Browser network shows 403 on document request (290 bytes response).", "impact": "Complete access block", "suggested_handling": "Requires proxy or geo-unblocking. Swiss-only site.", "confidence": 0.9}
+  ],
+  "recommended_action_plan": [
+    {"action": "analyze_site", "priority": "high", "reason": "Re-analyze with Swiss/EU proxy", "params": {"use_proxy": true}, "depends_on_evidence": []}
+  ],
+  "confidence": {"catalog": 0.0, "api": 0.0, "selectors": 0.0, "pagination": 0.0, "overall": 0.05},
+  "evidence_log": [
+    {"ts": "2026-05-28T10:12:01Z", "type": "observed", "detail": "requests: 403 Forbidden"},
+    {"ts": "2026-05-28T10:12:10Z", "type": "observed", "detail": "curl_cffi: HTTP Error 403"},
+    {"ts": "2026-05-28T10:12:15Z", "type": "observed", "detail": "browser: HTTP 403, 290 bytes response"}
+  ],
+  "missing_evidence": ["everything"],
+  "needs_human_review": true
+}

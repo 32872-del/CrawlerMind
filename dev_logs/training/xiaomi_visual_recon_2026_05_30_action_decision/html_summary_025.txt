@@ -1,0 +1,49 @@
+HTML Summary - Page 025
+==================================================
+URL: https://www.bestbuy.com/
+Domain: bestbuy.com
+Page Type: home
+HTTP Status: 200
+Confidence: 0.21
+Checked At: 2026-05-30T10:30:02.007934
+
+HTML Content Analysis:
+  Title: Best Buy International: Select your Country - Best Buy
+  Language: en
+  Total HTML Tags: ~80
+  Scripts: 4
+  Images: 4 (logo, country maps)
+  Links: 0 product links
+  Forms: 0
+  Nav Elements: 0
+  Articles: 0
+  Structured Data: No
+
+STATUS: Geo-redirect / International Landing Page
+
+The page shows a country selection interface:
+- "Hello! Choose a country." heading
+- Canada and United States options
+- Language buttons: English, Francais, Espanol
+- Info text: "International customers can shop on www.bestbuy.com..."
+
+This is a geo-blocking page shown to non-US visitors. No product content is available.
+
+SELECTORS:
+  .language-menu: language selection buttons
+  .country-selection: Canada/US country links
+  .canada-link: Canada option
+  .us-link: United States option
+  .heading: "Hello!" text
+  h1: "Choose a country."
+
+BLOCKING SIGNALS:
+  - geo_redirect: International visitors see country selection instead of store
+  - no_product_content: Page contains only navigation/redirect UI
+
+RECOMMENDATION:
+  Use switch_runtime with US-based proxy to bypass geo-blocking.
+  Alternative: Append ?intl=nosplash to URL to skip splash page.
+
+HTML File Size: ~4.5KB (full page fetched, not truncated)
+NOTE: This is the complete page - no JavaScript product loading needed.

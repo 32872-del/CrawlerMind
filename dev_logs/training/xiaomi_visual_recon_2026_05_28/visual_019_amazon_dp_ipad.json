@@ -1,0 +1,181 @@
+{
+  "schema_version": "clm-visual-recon-v1",
+  "site_url": "https://www.amazon.com",
+  "page_url": "https://www.amazon.com/dp/B09V3KXJPB",
+  "domain": "amazon.com",
+  "checked_at": "2026-05-28T10:18:00Z",
+  "input_artifacts": {
+    "screenshot_path": "screenshot_67a16980.png",
+    "html_summary_path": "",
+    "network_summary_path": ""
+  },
+  "page_type": "product_detail",
+  "visual_state": "normal",
+  "is_product_listing": false,
+  "is_product_detail": true,
+  "visible_catalog": [
+    {
+      "label": "Breadcrumb",
+      "level_hint": 3,
+      "visible_text": "iPad | iPad Pro 11 (第 4 代) | iPad Pro 13 (第 4 代) | iPad Air 11 (第 6 代) | iPad Air 13 (第 6 代) | New iPad (10th Gen) | New iPad mini (6th Gen) | iPad Accessories",
+      "position_hint": "breadcrumb",
+      "confidence": 0.85,
+      "evidence_type": "observed"
+    }
+  ],
+  "visible_product_cards": {
+    "detected": false,
+    "count_estimate": 0,
+    "layout": "detail_page",
+    "evidence": "Single product detail page for Apple iPad Air 5th gen with M1 chip",
+    "confidence": 0.95
+  },
+  "field_regions": {
+    "title": [
+      {
+        "region_id": "product_title",
+        "scope": "detail",
+        "position_hint": "hero_area",
+        "visible_text_sample": "Apple iPad Air 第 5 代;带 M1 芯片,11 英寸液体视网膜显示屏,64GB,Wi-Fi 6,1200 万像素前置/1200 万像素后置摄像头,触控 ID,全天电池寿命 - 粉色",
+        "nearby_visual_clues": ["rating", "price", "images"],
+        "selector_hint": "#productTitle",
+        "confidence": 0.7,
+        "evidence_type": "observed"
+      }
+    ],
+    "highest_price": [
+      {
+        "region_id": "product_price",
+        "scope": "detail",
+        "position_hint": "right_panel",
+        "visible_text_sample": "目前无货",
+        "nearby_visual_clues": ["availability", "seller_info"],
+        "selector_hint": ".a-price",
+        "confidence": 0.6,
+        "evidence_type": "observed"
+      }
+    ],
+    "colors": [
+      {
+        "region_id": "color_options",
+        "scope": "detail",
+        "position_hint": "near_variant_selector",
+        "visible_text_sample": "紫色 | 星光色 | 粉色 | 蓝色 | 太空灰",
+        "nearby_visual_clues": ["color_swatch_dots"],
+        "selector_hint": "#variation_color_name .swatchElement",
+        "confidence": 0.65,
+        "evidence_type": "observed"
+      }
+    ],
+    "sizes": [
+      {
+        "region_id": "storage_options",
+        "scope": "detail",
+        "position_hint": "near_variant_selector",
+        "visible_text_sample": "64 GB | 256 GB",
+        "nearby_visual_clues": ["variant_buttons"],
+        "selector_hint": "#variation_storage_size .swatchElement",
+        "confidence": 0.7,
+        "evidence_type": "observed"
+      }
+    ],
+    "description": [
+      {
+        "region_id": "product_specs",
+        "scope": "detail",
+        "position_hint": "below_title",
+        "visible_text_sample": "品牌: Apple | 型号名称: iPad Air | 内部存储容量: 64 GB",
+        "nearby_visual_clues": ["specs_table"],
+        "selector_hint": "#productDetails_techSpec_section_1",
+        "confidence": 0.6,
+        "evidence_type": "observed"
+      }
+    ],
+    "image_urls": [
+      {
+        "region_id": "product_images",
+        "scope": "detail",
+        "position_hint": "left_gallery",
+        "visible_text_sample": "",
+        "nearby_visual_clues": ["thumbnail_strip", "main_image"],
+        "selector_hint": "#altImages img",
+        "confidence": 0.7,
+        "evidence_type": "observed"
+      }
+    ],
+    "product_url": [
+      {
+        "region_id": "product_url",
+        "scope": "detail",
+        "position_hint": "global",
+        "visible_text_sample": "",
+        "nearby_visual_clues": ["canonical_url"],
+        "selector_hint": "link[rel=canonical]",
+        "confidence": 0.7,
+        "evidence_type": "observed"
+      }
+    ]
+  },
+  "blocking_signals": [
+    {
+      "kind": "empty_listing",
+      "visible_text": "目前无货",
+      "evidence": "Product is out of stock, no price displayed",
+      "impact": "Cannot purchase but product info still visible",
+      "suggested_handling": "Product data extractable but price unavailable",
+      "confidence": 0.9
+    }
+  ],
+  "pagination_signals": [],
+  "visual_action_hints": [
+    {
+      "hint": "probe_detail_page_for_variants",
+      "reason": "Multiple color and storage variants visible as swatch selectors",
+      "confidence": 0.85
+    },
+    {
+      "hint": "extract_breadcrumb_categories",
+      "reason": "Product breadcrumb shows iPad product line hierarchy",
+      "confidence": 0.8
+    }
+  ],
+  "recommended_action_plan": [
+    {
+      "action": "resolve_fields",
+      "priority": "high",
+      "reason": "Rich product detail page with title, variants, specs, images clearly visible",
+      "params": {"fields": ["title", "colors", "sizes", "specs", "images"]},
+      "depends_on_evidence": ["product_detail_detected"]
+    },
+    {
+      "action": "run_test",
+      "priority": "medium",
+      "reason": "Test extraction on Amazon product detail page",
+      "params": {},
+      "depends_on_evidence": ["product_detail_detected"]
+    }
+  ],
+  "confidence": {
+    "page_type": 0.95,
+    "product_cards": 0.95,
+    "fields": 0.7,
+    "blocking": 0.85,
+    "pagination": 0.95,
+    "overall": 0.65
+  },
+  "evidence_log": [
+    "Amazon header with iPad breadcrumb navigation",
+    "Product: Apple iPad Air 5th gen M1 chip 11-inch",
+    "Main image: iPad Air in pink color with home screen visible",
+    "Left gallery: thumbnail strip with 6+ product images",
+    "Color variants: 紫色, 星光色, 粉色, 蓝色, 太空灰 (5 options)",
+    "Storage variants: 64 GB, 256 GB",
+    "Availability: 目前无货 (Currently out of stock)",
+    "Specs table: Brand Apple, Model iPad Air, Storage 64GB",
+    "Delivery info visible",
+    "No price shown (out of stock)"
+  ],
+  "missing_evidence": ["html_summary", "network_summary", "price"],
+  "needs_backend_verification": true,
+  "needs_human_review": false
+}

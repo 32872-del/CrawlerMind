@@ -1,0 +1,13 @@
+HTML Summary - Page 026
+==================================================
+URL: https://www.target.com/
+Domain: target.com
+Page Type: home
+HTTP Status: captcha
+Confidence: 0.15
+Checked At: 2026-05-30T10:30:02.009413
+
+STATUS: Captcha/Challenge Detected
+The server returned a captcha or human verification page.
+
+RECOMMENDATION: Use switch_runtime with browser + captcha solver

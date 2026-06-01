@@ -1,0 +1,140 @@
+{
+  "contract_version": "1.0",
+  "site": "nike.com",
+  "source_url": "https://www.nike.com/gb/w/womens-clothing-5e1x6z6ymx6",
+  "source_type": "nextjs_ssr_listing_page",
+  "recommended_clm_runtime": "browser",
+  "parser_strategy": {
+    "name": "next_data_product_wall_extractor",
+    "description": "Extract product data from __NEXT_DATA__ script tag. The initialState.Wall.productGroupings[] array contains product groups, each with a products[] array of colorway variants.",
+    "input": "Rendered HTML string from browser",
+    "entry_selector": "script#__NEXT_DATA__",
+    "decode_steps": [
+      "Find <script id=\"__NEXT_DATA__\"> element",
+      "Extract text content",
+      "JSON parse the entire content",
+      "Navigate to props.pageProps.initialState.Wall",
+      "Iterate productGroupings[]",
+      "For each grouping, iterate products[]",
+      "Map each product to CLM fields"
+    ],
+    "fallback_selectors": {
+      "product_card_html": "[data-testid=\"product-card\"] with nested .product-card__title, .product-card__price, img[alt]"
+    }
+  },
+  "pagination_strategy": {
+    "type": "api_cursor",
+    "api_template": "https://api.nike.com/discover/product_wall/v1/marketplace/{marketplace}/language/{lang}/consumerChannelId/{channelId}?path={path}&attributeIds={attrs}&queryType=PRODUCTS&anchor={offset}&count={page_size}",
+    "default_page_size": 24,
+    "marketplace": "GB",
+    "language": "en-GB",
+    "consumer_channel_id": "d9a5bc42-4b9c-4976-858a-f159cf99c647",
+    "notes": "Pagination via anchor param. Total pages in Wall.pageData.totalPages. Alternatively, re-render each page URL with ?anchor=N."
+  },
+  "field_paths": {
+    "title": {
+      "path": "copy.title",
+      "type": "string",
+      "required": true,
+      "notes": "Brand-level title (e.g. \"Nike Sportswear\"). Combine with copy.subTitle for full name."
+    },
+    "highest_price": {
+      "path": "prices.currentPrice",
+      "type": "number",
+      "required": true
+    },
+    "currency": {
+      "path": "prices.currency",
+      "type": "string",
+      "required": true
+    },
+    "color": {
+      "path": "displayColors.colorDescription",
+      "type": "string",
+      "required": false,
+      "notes": "Full color description (e.g. \"Chalk/White\"). Also available: displayColors.simpleColor.label and .hex"
+    },
+    "size": {
+      "path": null,
+      "type": "null",
+      "required": false,
+      "missing_reason": "Sizes only available on product detail pages"
+    },
+    "description": {
+      "path": null,
+      "type": "null",
+      "required": false,
+      "missing_reason": "Descriptions only available on product detail pages"
+    },
+    "image_url": {
+      "path": "colorwayImages.portraitURL",
+      "type": "string",
+      "required": true
+    },
+    "product_url": {
+      "path": "pdpUrl.url",
+      "type": "string",
+      "required": true,
+      "notes": "Full absolute URL"
+    },
+    "category_level_1": {
+      "path": "productType",
+      "type": "string",
+      "required": false,
+      "notes": "e.g. APPAREL, FOOTWEAR"
+    },
+    "category_level_2": {
+      "path": null,
+      "type": "null",
+      "required": false,
+      "missing_reason": "Not available in productGroupings. Use Wall.facetNav.categories instead."
+    },
+    "brand": {
+      "path": "Hardcoded Nike",
+      "type": "string",
+      "required": true
+    },
+    "sku": {
+      "path": "productCode",
+      "type": "string",
+      "required": true,
+      "notes": "StyleColor format (e.g. IF0552-103)"
+    },
+    "subtitle": {
+      "path": "copy.subTitle",
+      "type": "string",
+      "required": false,
+      "notes": "Product-level name (e.g. \"Women's Tight Graphic Tank Top\")"
+    }
+  },
+  "post_processors": [
+    {
+      "field": "__NEXT_DATA__",
+      "operation": "json_parse",
+      "params": {}
+    },
+    {
+      "field": "title",
+      "operation": "concatenate",
+      "params": {
+        "fields": [
+          "copy.title",
+          "copy.subTitle"
+        ],
+        "separator": " - "
+      }
+    }
+  ],
+  "missing_fields": [
+    "size",
+    "description",
+    "category_level_2"
+  ],
+  "evidence_files": [
+    "raw_evidence_next_data_sample.json",
+    "raw_evidence_product_card.html",
+    "raw_evidence_wall_meta.json"
+  ],
+  "confidence": 0.8,
+  "implementation_notes": "Nike requires browser rendering. __NEXT_DATA__ is the primary data source. Each productGrouping contains multiple colorway variants as separate products. API pagination available but requires consumerChannelId."
+}

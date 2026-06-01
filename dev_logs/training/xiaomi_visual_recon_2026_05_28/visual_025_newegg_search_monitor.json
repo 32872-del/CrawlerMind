@@ -1,0 +1,169 @@
+{
+  "schema_version": "clm-visual-recon-v1",
+  "site_url": "https://www.newegg.com",
+  "page_url": "https://www.newegg.com/p/pl?d=gaming+monitor",
+  "domain": "newegg.com",
+  "checked_at": "2026-05-28T10:29:00Z",
+  "input_artifacts": {
+    "screenshot_path": "screenshot_ee22e005.png",
+    "html_summary_path": "",
+    "network_summary_path": ""
+  },
+  "page_type": "product_listing",
+  "visual_state": "normal",
+  "is_product_listing": true,
+  "is_product_detail": false,
+  "visible_catalog": [
+    {
+      "label": "Department",
+      "level_hint": 2,
+      "visible_text": "Any Category | Gaming Monitor | Portable Monitor | Computer Monitor",
+      "position_hint": "side_nav",
+      "confidence": 0.9,
+      "evidence_type": "observed"
+    },
+    {
+      "label": "Brand",
+      "level_hint": 2,
+      "visible_text": "MSI | ASUS | Alienware | Acer | Gigabyte",
+      "position_hint": "side_nav",
+      "confidence": 0.85,
+      "evidence_type": "observed"
+    }
+  ],
+  "visible_product_cards": {
+    "detected": true,
+    "count_estimate": 4,
+    "layout": "vertical_list",
+    "evidence": "Search results show monitor product cards with images, titles, specs, prices",
+    "confidence": 0.9
+  },
+  "field_regions": {
+    "title": [
+      {
+        "region_id": "product_title_1",
+        "scope": "list",
+        "position_hint": "product_card_middle",
+        "visible_text_sample": "GIGABYTE 27\" QHD 2K 144Hz IPS AMD FreeSync Premium Plus HDR Ready Gaming Computer Monitor",
+        "nearby_visual_clues": ["specs", "price", "image"],
+        "selector_hint": ".item-title",
+        "confidence": 0.65,
+        "evidence_type": "observed"
+      }
+    ],
+    "highest_price": [
+      {
+        "region_id": "product_price_1",
+        "scope": "list",
+        "position_hint": "product_card_right",
+        "visible_text_sample": "$159.99",
+        "nearby_visual_clues": ["was_price", "add_to_cart"],
+        "selector_hint": ".price-current",
+        "confidence": 0.7,
+        "evidence_type": "observed"
+      }
+    ],
+    "colors": [],
+    "sizes": [
+      {
+        "region_id": "screen_size_1",
+        "scope": "list",
+        "position_hint": "product_card_middle",
+        "visible_text_sample": "27\" Screen",
+        "nearby_visual_clues": ["specs"],
+        "selector_hint": ".item-properties",
+        "confidence": 0.6,
+        "evidence_type": "observed"
+      }
+    ],
+    "description": [
+      {
+        "region_id": "product_specs_1",
+        "scope": "list",
+        "position_hint": "product_card_middle",
+        "visible_text_sample": "Resolution: 2560 x 1440 | Refresh Rate: 144Hz | Panel: IPS | HDR: Ready",
+        "nearby_visual_clues": ["title"],
+        "selector_hint": ".item-properties",
+        "confidence": 0.65,
+        "evidence_type": "observed"
+      }
+    ],
+    "image_urls": [
+      {
+        "region_id": "product_image_1",
+        "scope": "list",
+        "position_hint": "product_card_top",
+        "visible_text_sample": "",
+        "nearby_visual_clues": ["title"],
+        "selector_hint": ".item-img img",
+        "confidence": 0.65,
+        "evidence_type": "observed"
+      }
+    ],
+    "product_url": [
+      {
+        "region_id": "product_link_1",
+        "scope": "list",
+        "position_hint": "product_card_top",
+        "visible_text_sample": "",
+        "nearby_visual_clues": ["image"],
+        "selector_hint": ".item-img a",
+        "confidence": 0.65,
+        "evidence_type": "observed"
+      }
+    ]
+  },
+  "blocking_signals": [],
+  "pagination_signals": [
+    {
+      "kind": "page_numbers",
+      "visible_text": "Page 1/28",
+      "position_hint": "top_right",
+      "confidence": 0.9,
+      "evidence_type": "observed"
+    },
+    {
+      "kind": "filter_sort_panel",
+      "visible_text": "Sort By: Featured Items | Filter: Gaming Monitor, Portable Monitor, Computer Monitor",
+      "position_hint": "top",
+      "confidence": 0.85,
+      "evidence_type": "observed"
+    }
+  ],
+  "visual_action_hints": [
+    {
+      "hint": "wait_for_product_cards",
+      "reason": "Product cards clearly visible with specs",
+      "confidence": 0.9
+    }
+  ],
+  "recommended_action_plan": [
+    {
+      "action": "resolve_fields",
+      "priority": "high",
+      "reason": "Rich monitor product cards with specs and pricing",
+      "params": {"fields": ["title", "price", "specs", "image"]},
+      "depends_on_evidence": ["product_cards_detected"]
+    }
+  ],
+  "confidence": {
+    "page_type": 0.95,
+    "product_cards": 0.9,
+    "fields": 0.7,
+    "blocking": 0.95,
+    "pagination": 0.85,
+    "overall": 0.6
+  },
+  "evidence_log": [
+    "Search: 'gaming monitor'",
+    "Dell sponsored banner at top",
+    "4 product cards visible",
+    "Product 1: GIGABYTE 27\" QHD 144Hz - $159.99",
+    "Product 2: MSI 27\" OLED - $399.99",
+    "Each card: image, title, specs, price, ADD TO CART",
+    "Page 1/28 indicator"
+  ],
+  "missing_evidence": ["html_summary", "network_summary"],
+  "needs_backend_verification": true,
+  "needs_human_review": false
+}

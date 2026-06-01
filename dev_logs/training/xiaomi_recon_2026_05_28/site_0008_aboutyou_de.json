@@ -1,0 +1,52 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.aboutyou.de",
+  "domain": "aboutyou.de",
+  "checked_at": "2026-05-28T10:11:00Z",
+  "site_type": "ecommerce",
+  "language": "de",
+  "currency": "EUR",
+  "rendering": "api_driven",
+  "access_status": {
+    "reachable": true,
+    "status_code": 200,
+    "final_url": "https://www.aboutyou.de",
+    "redirects": [],
+    "blocked_signals": [],
+    "notes": "requests mode works. JS shell with 60 API hints. Dedicated public API at api.aboutyou.com."
+  },
+  "catalog_candidates": [],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {"type": "page_param_guess", "params": {"page": "2"}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "Common page param guess", "evidence_type": "guessed"},
+  "api_candidates": [
+    {"method": "GET", "url": "https://api.aboutyou.com", "content_type": "application/json", "items_path": "", "pagination_hints": {}, "field_mapping": {}, "request_body_hint": {}, "headers_hint": {}, "source": "script", "evidence_type": "observed", "confidence": 0.7, "risks": ["public_api_needs_auth_token"]},
+    {"method": "GET", "url": "https://api-internal.aboutyou.com", "content_type": "application/json", "items_path": "", "pagination_hints": {}, "field_mapping": {}, "request_body_hint": {}, "headers_hint": {}, "source": "script", "evidence_type": "observed", "confidence": 0.6, "risks": ["internal_api_may_require_auth"]},
+    {"method": "GET", "url": "https://api-cloud.aboutyou.de/v1", "content_type": "application/json", "items_path": "", "pagination_hints": {}, "field_mapping": {}, "request_body_hint": {}, "headers_hint": {}, "source": "script", "evidence_type": "observed", "confidence": 0.6, "risks": ["cloud_api_versioned"]}
+  ],
+  "selector_candidates": {
+    "title": [{"selector": "h1", "selector_type": "css", "scope": "detail", "sample_value": "", "evidence_type": "guessed", "confidence": 0.3}],
+    "highest_price": [{"selector": "[class*=price], [itemprop=price], meta[itemprop=price]", "selector_type": "css", "scope": "detail", "sample_value": "", "evidence_type": "guessed", "confidence": 0.3}],
+    "colors": [], "sizes": [],
+    "description": [{"selector": "[class*=description], article, main", "selector_type": "css", "scope": "detail", "sample_value": "", "evidence_type": "guessed", "confidence": 0.2}],
+    "image_urls": [{"selector": "img@src", "selector_type": "css", "scope": "detail", "sample_value": "", "evidence_type": "guessed", "confidence": 0.2}],
+    "product_url": [], "category_level_1": [], "category_level_2": [], "category_level_3": []
+  },
+  "field_quality_expectation": {"title": {"grade": "D", "reason": "SPA shell, no sample values"}},
+  "difficulty_signals": [
+    {"kind": "js_rendering", "evidence": "JS shell page, 60 API hints found in scripts. API-driven architecture.", "impact": "DOM selectors likely won't work; need API approach", "suggested_handling": "Use api.aboutyou.com public API or browser rendering", "confidence": 0.85},
+    {"kind": "api_signature", "evidence": "Multiple API domains found: api.aboutyou.com, api-internal.aboutyou.com, api-cloud.aboutyou.de/v1", "impact": "API may require authentication tokens or signatures", "suggested_handling": "Investigate public API documentation first", "confidence": 0.7}
+  ],
+  "recommended_action_plan": [
+    {"action": "analyze_site", "priority": "high", "reason": "Need to discover public API endpoints and authentication requirements", "params": {"url": "https://api.aboutyou.com"}, "depends_on_evidence": []},
+    {"action": "promote_xhr_to_api", "priority": "high", "reason": "Strong API-driven architecture with dedicated API domain", "params": {}, "depends_on_evidence": ["api_candidates"]}
+  ],
+  "confidence": {"catalog": 0.2, "api": 0.6, "selectors": 0.2, "pagination": 0.2, "overall": 0.45},
+  "evidence_log": [
+    {"ts": "2026-05-28T10:11:01Z", "type": "observed", "detail": "requests: 200 OK, JS shell, 60 API hints"},
+    {"ts": "2026-05-28T10:11:05Z", "type": "observed", "detail": "API domains: api.aboutyou.com, api-internal.aboutyou.com, api-cloud.aboutyou.de/v1"},
+    {"ts": "2026-05-28T10:11:08Z", "type": "inferred", "detail": "API-driven architecture - DOM extraction unlikely to work well"}
+  ],
+  "missing_evidence": ["api_documentation", "api_auth_requirements", "product_endpoint", "rendered_dom"],
+  "needs_human_review": true
+}

@@ -1,0 +1,47 @@
+{
+  "site": "nike.com",
+  "fixture_version": "1.0",
+  "extraction_mode": "browser",
+  "data_source": "__NEXT_DATA__ -> props.pageProps.initialState.Wall.productGroupings[].products[]",
+  "selectors": {
+    "next_data": {
+      "css": "script#__NEXT_DATA__",
+      "post_process": "JSON parse -> props.pageProps.initialState.Wall",
+      "description": "Next.js SSR data containing product catalog"
+    },
+    "product_groupings": {
+      "json_path": "Wall.productGroupings[]",
+      "description": "Array of product groupings, each containing colorway variants"
+    },
+    "product_card_html": {
+      "css": "[data-testid=\"product-card\"]",
+      "description": "Product card DOM element (fallback if __NEXT_DATA__ unavailable)"
+    }
+  },
+  "field_mapping": {
+    "title": "productGroupings[].products[].copy.title",
+    "subtitle": "productGroupings[].products[].copy.subTitle",
+    "price": "productGroupings[].products[].prices.currentPrice",
+    "currency": "productGroupings[].products[].prices.currency",
+    "color_description": "productGroupings[].products[].displayColors.colorDescription",
+    "color_hex": "productGroupings[].products[].displayColors.simpleColor.hex",
+    "product_code": "productGroupings[].products[].productCode",
+    "product_type": "productGroupings[].products[].productType",
+    "detail_url": "productGroupings[].products[].pdpUrl.url",
+    "image": "productGroupings[].products[].colorwayImages.portraitURL",
+    "group_key": "productGroupings[].products[].groupKey",
+    "global_product_id": "productGroupings[].products[].globalProductId"
+  },
+  "missing_fields": {
+    "size": "Not available in listing page - detail page only",
+    "description": "Not available in listing page - detail page only"
+  },
+  "pagination": {
+    "type": "api_cursor",
+    "api_template": "/discover/product_wall/v1/marketplace/{marketplace}/language/{lang}/consumerChannelId/{channelId}?path={path}&attributeIds={attrs}&queryType=PRODUCTS&anchor={offset}&count={page_size}",
+    "default_page_size": 24,
+    "marketplace": "GB",
+    "language": "en-GB",
+    "consumer_channel_id": "d9a5bc42-4b9c-4976-858a-f159cf99c647"
+  }
+}

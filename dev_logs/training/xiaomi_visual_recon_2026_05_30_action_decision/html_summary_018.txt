@@ -1,0 +1,14 @@
+HTML Summary - Page 018
+==================================================
+URL: https://www.homedepot.com/b/Appliances/N-5yc1vZar3y
+Domain: homedepot.com
+Page Type: product_listing
+HTTP Status: 403
+Confidence: 0.14
+Checked At: 2026-05-30T10:30:02.000631
+
+STATUS: HTTP 403 - Access Denied
+The server returned a 403 Forbidden response.
+This indicates anti-bot protection or geo-blocking.
+
+RECOMMENDATION: Use switch_runtime with browser + stealth mode

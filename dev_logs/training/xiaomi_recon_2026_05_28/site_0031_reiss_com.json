@@ -1,0 +1,49 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.reiss.com",
+  "domain": "reiss.com",
+  "checked_at": "2026-05-28T10:38:00Z",
+  "site_type": "ecommerce",
+  "language": "en",
+  "currency": "GBP",
+  "rendering": "spa",
+  "access_status": {
+    "reachable": true,
+    "status_code": 200,
+    "final_url": "https://www.reiss.com",
+    "redirects": [],
+    "blocked_signals": [],
+    "notes": "Accessible via requests mode. 80KB JS shell. 1 API hint found: api.e.reiss.com. Region block detected."
+  },
+  "catalog_candidates": [],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {"type": "", "params": {}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "Not determined", "evidence_type": "guessed"},
+  "api_candidates": [
+    {"method": "GET", "url": "https://api.e.reiss.com", "content_type": "", "items_path": "", "pagination_hints": {}, "field_mapping": {}, "request_body_hint": {}, "headers_hint": {}, "source": "script", "evidence_type": "observed", "confidence": 0.7, "risks": ["dedicated_api_domain", "may_require_auth"]},
+    {"method": "GET", "url": "https://www.reiss.com/api/personalisation/v0/gb/en-gb", "content_type": "", "items_path": "", "pagination_hints": {}, "field_mapping": {}, "request_body_hint": {}, "headers_hint": {}, "source": "script", "evidence_type": "observed", "confidence": 0.6, "risks": ["personalisation_api"]}
+  ],
+  "selector_candidates": {
+    "title": [{"selector": "h1", "selector_type": "css", "scope": "detail", "sample_value": "", "evidence_type": "guessed", "confidence": 0.2}],
+    "highest_price": [{"selector": "[class*=price], [itemprop=price], meta[itemprop=price]", "selector_type": "css", "scope": "detail", "sample_value": "", "evidence_type": "guessed", "confidence": 0.2}],
+    "colors": [], "sizes": [],
+    "description": [], "image_urls": [], "product_url": [], "category_level_1": [], "category_level_2": [], "category_level_3": []
+  },
+  "field_quality_expectation": {},
+  "difficulty_signals": [
+    {"kind": "js_rendering", "evidence": "JS shell with 80KB. SPA architecture with dedicated API domain api.e.reiss.com.", "impact": "DOM selectors unlikely to work. API approach recommended.", "suggested_handling": "Use API discovery for product endpoints", "confidence": 0.8},
+    {"kind": "geo_redirect", "evidence": "Region block detected. May need locale-specific URL or proxy.", "impact": "May get different content based on geo", "suggested_handling": "Use locale-specific URL or proxy", "confidence": 0.6}
+  ],
+  "recommended_action_plan": [
+    {"action": "promote_xhr_to_api", "priority": "high", "reason": "Dedicated API domain found", "params": {}, "depends_on_evidence": ["api_candidates"]},
+    {"action": "analyze_site", "priority": "high", "reason": "Explore api.e.reiss.com for product endpoints", "params": {"url": "https://api.e.reiss.com"}, "depends_on_evidence": []}
+  ],
+  "confidence": {"catalog": 0.2, "api": 0.65, "selectors": 0.1, "pagination": 0.2, "overall": 0.35},
+  "evidence_log": [
+    {"ts": "2026-05-28T10:38:01Z", "type": "observed", "detail": "requests: 200 OK, 80KB JS shell"},
+    {"ts": "2026-05-28T10:38:05Z", "type": "observed", "detail": "API hint: api.e.reiss.com"},
+    {"ts": "2026-05-28T10:38:08Z", "type": "observed", "detail": "Region block detected"}
+  ],
+  "missing_evidence": ["api_documentation", "product_endpoint", "auth_requirements"],
+  "needs_human_review": true
+}

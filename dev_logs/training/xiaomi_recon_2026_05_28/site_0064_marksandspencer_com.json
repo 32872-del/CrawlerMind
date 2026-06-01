@@ -1,0 +1,48 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.marksandspencer.com",
+  "domain": "marksandspencer.com",
+  "checked_at": "2026-05-28T11:12:00Z",
+  "site_type": "ecommerce",
+  "language": "en",
+  "currency": "GBP",
+  "rendering": "unknown",
+  "access_status": {
+    "reachable": true,
+    "status_code": 200,
+    "final_url": "https://www.marksandspencer.com",
+    "redirects": [],
+    "blocked_signals": ["region_block"],
+    "notes": "Accessible via requests and curl_cffi. 80KB HTML. 44 API hints including search, store finder, category URLs. region_block noted."
+  },
+  "catalog_candidates": [
+    {"url": "https://www.marksandspencer.com/content/category/women", "source": "script", "confidence": 0.6, "evidence_type": "observed"},
+    {"url": "https://www.marksandspencer.com/content/category/lingerie", "source": "script", "confidence": 0.6, "evidence_type": "observed"}
+  ],
+  "list_page_candidates": [
+    {"url": "https://www.marksandspencer.com/l/lingerie/shapewear/fs5/shaping-knickers", "source": "script", "confidence": 0.5, "evidence_type": "observed"}
+  ],
+  "detail_url_patterns": [],
+  "pagination": {"type": "", "params": {}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "Not determined", "evidence_type": "guessed"},
+  "api_candidates": [
+    {"url": "https://www.marksandspencer.com/search?searchTerm={search_term_string}", "source": "script", "confidence": 0.7, "evidence_type": "observed"},
+    {"url": "https://www.marksandspencer.com/MSResStoreFinderGlobalBaseCmd?catalogId=10051", "source": "script", "confidence": 0.6, "evidence_type": "observed"}
+  ],
+  "selector_candidates": {},
+  "field_quality_expectation": {},
+  "difficulty_signals": [
+    {"kind": "geo_redirect", "evidence": "region_block category detected", "impact": "Some content may be geo-restricted", "suggested_handling": "May need UK proxy for full access", "confidence": 0.5}
+  ],
+  "recommended_action_plan": [
+    {"action": "analyze_site", "priority": "high", "reason": "Rich API hints, explore search and category endpoints", "params": {}, "depends_on_evidence": ["access_status"]},
+    {"action": "select_catalog", "priority": "high", "reason": "Multiple catalog candidates found", "params": {}, "depends_on_evidence": ["catalog_candidates"]}
+  ],
+  "confidence": {"catalog": 0.4, "api": 0.5, "selectors": 0.1, "pagination": 0.1, "overall": 0.35},
+  "evidence_log": [
+    {"ts": "2026-05-28T11:12:01Z", "type": "observed", "detail": "requests: 200 OK, 80KB HTML"},
+    {"ts": "2026-05-28T11:12:03Z", "type": "observed", "detail": "curl_cffi: 200 OK, 80KB HTML"},
+    {"ts": "2026-05-28T11:12:05Z", "type": "observed", "detail": "44 API hints: search, store finder, category URLs"}
+  ],
+  "missing_evidence": ["product_selectors", "pagination_pattern", "detail_page_structure"],
+  "needs_human_review": false
+}

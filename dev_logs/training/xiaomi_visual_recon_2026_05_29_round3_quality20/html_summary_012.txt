@@ -1,0 +1,12 @@
+HTML Summary: bhphotovideo.com - Page 012
+URL: https://www.bhphotovideo.com/c/buy/Laptops/ci/18837
+Fetched at: 2026-05-30T08:58:53.103945
+Fetch mode: auto (FAILED - HTTP 403 - Access blocked)
+
+=== HTML Not Available ===
+Error: HTTP 403 - Access blocked
+
+=== Screenshot ===
+File: screenshot_012_bhphoto_laptop.png
+Page type: product_listing
+Visual state: normal

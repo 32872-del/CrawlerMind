@@ -2,11 +2,29 @@
 
 ## Current Stage
 
-The project is a runnable MVP with a beginner-facing Easy Mode CLI. The
-LangGraph workflow exists and can complete deterministic fixture crawls, real
-Baidu realtime hot-search extraction, public JSON/GraphQL/API workflows, one
-public SPA observed API replay workflow on HN Algolia, and selected ecommerce
-training runs.
+The project has moved beyond a runnable MVP into an early crawler platform:
+Easy Mode CLI, FastAPI workflow APIs, a Chinese frontend workbench,
+LLM-assisted managed actions, CLM-native runtime backends, profile-driven
+long-running execution, and replay/runtime diagnostics now exist in the same
+codebase.
+
+The LangGraph workflow still exists and remains useful, but it is no longer the
+whole architecture. Current development is converging on:
+
+```text
+AI managed workflow -> evidence/recon -> profile/runtime patch -> long-run execution -> quality/export
+```
+
+Current maturity estimate as of 2026-05-20:
+
+```text
+Level 1 skeleton: complete
+Level 2 usable MVP: complete
+Level 3 advanced crawler backend: 70% - 75%
+Level 4 visible AI decision loop: 45% - 55%
+Level 5 product workbench / long-run operations: 30% - 40%
+Overall distance to the target crawler agent: 55% - 65%
+```
 
 The product target has been sharpened: CLM should become an agent that
 productizes advanced crawler development, not just a simple scraper. The
@@ -28,6 +46,12 @@ fetch, async fetch, parser/adaptive selectors, browser/session/profile/proxy,
 spider/checkpoint/link/robots/site profile, and evidence/visual reporting.
 Transition adapters remain as comparison oracles, not the final product
 architecture.
+
+The current cleanup/review checkpoint is recorded at:
+
+```text
+docs/reviews/2026-05-20_ARCHITECTURE_AND_WORKSPACE_REVIEW.md
+```
 
 ## Completed
 
@@ -1114,31 +1138,36 @@ OK
 
 ## Current Limitations
 
-- Planner and Strategy can use optional LLM advisors through CLI/config and now
-  also through FastAPI request-level configuration. Deterministic fallback
-  remains the default.
+- AI can now participate through advisors, managed actions, model configuration,
+  evidence packs, and replay/runtime profile patches. The remaining gap is a
+  stable end-to-end AI managed loop where the model observes each stage,
+  produces executable actions, repairs failures, and re-runs without forcing the
+  user to debug manually.
 - Scrapling absorption is no longer only a transition-adapter track. The major
   backend capability baseline is now CLM-native. Remaining work is production
-  hardening: 10k/30k native long-run proof, persistent async client pooling,
-  browser profile health persistence/decay, adaptive concurrency, and more
-  real-site calibration.
+  hardening: real-site calibration, persistent job registry, session-bound API
+  replay, stronger signed-request execution, adaptive concurrency, and
+  browser/profile health feedback in long-running runs.
 - Recon selector inference is heuristic and currently strongest for product
-  cards and Baidu-style ranking lists.
-- `site_spec_draft` detail selectors are drafts when only a list page is known.
+  cards, Baidu-style ranking lists, and trained ecommerce fixtures. Directory
+  discovery, pagination discovery, detail-page coverage, and variant extraction
+  still need stronger closed-loop repair.
 - API interception is integrated for direct JSON URLs, API hints, explicit
-  GraphQL queries, observed JSON POST APIs, and multi-page pagination
-  (page/limit, offset/limit, cursor). It still needs POST-based pagination
-  loop support, cross-page deduplication, and richer provider-specific field
-  mapping.
+  GraphQL queries, observed JSON POST APIs, multi-page pagination, replay
+  diagnostics, and executable replay runtime patches. It still needs broader
+  signed/token API handling, browser-session-to-API replay transfer, and richer
+  field mapping under real ecommerce pressure.
 - Dynamic/JS-heavy site coverage is proven for local SPA rendering, local
   XHR-backed network observation smoke tests, profile-driven browser smokes,
   real dynamic training, and one public HN Algolia SPA API-replay scenario.
   Hard protected targets still need more real training and profile-health
   calibration.
-- FastAPI background jobs use in-memory registry; jobs are lost on process
-  restart. TTL cleanup limits stale completed/failed entries, but does not add
-  durability.
-- Storage is local SQLite only; no dashboard yet.
+- FastAPI background jobs and frontend workflow APIs exist, but the job registry
+  and workbench state still need stronger persistence so refresh/restart never
+  loses task progress.
+- Storage is local SQLite and file export focused. Product-level export works,
+  but production export streaming, artifact retention, and richer lineage
+  reports still need hardening.
 - Redis is still unused.
 - Multiple Codex agents can now coordinate by document convention, but there is
   no automated lock/ownership system.
@@ -1147,11 +1176,11 @@ OK
 
 ## Next Development Goal
 
-Move from a runnable engineering MVP toward a simpler user-facing crawl tool
-and a stronger CLM-native crawler backend:
+Move from "many crawler capabilities exist" to "the AI can reliably operate the
+crawler capabilities through one visible workflow":
 
 ```text
-Easy Mode CLI + Access Layer + Scrapling capability absorption + resumable runner + profile-driven crawl execution + broader dynamic-page training
+AI Managed Crawl Loop v2 + stronger real-site profile longrun + workbench flow closure
 ```
 
 Reference roadmap:
@@ -1172,29 +1201,25 @@ Final Status: completed, Extracted Data: 30 items, Validation: passed, LLM error
 Current supervisor priority:
 
 ```text
-EXECUTION-HARDEN: connect profile drafts, replay execution, and checkpoint restart to real long-running crawl execution.
+AI-MANAGED-LOOP-V2: connect site analysis, catalog discovery, field resolution, test run, failure diagnosis, profile/replay patching, rerun, monitoring, and export into one backend workflow.
 ```
 
 Immediate steps:
 
-1. Add `REPLAY-RUNTIME-1`: real JS/WebCrypto sandbox execution behind the
-   accepted deterministic replay result contract.
-2. Add `PROFILE-AUTO-2`: advisor-assisted profile refinement, selector repair,
-   and missing-field explanation on top of generated `SiteProfile` drafts.
-3. Continue `SCALE-RUNTIME-1`: run real ecommerce training through the new
-   CLI/API profile long-run entrypoints and preserve reports.
-   - 2026-05-18 update: backend entrypoints now support `item_workers`,
-     CLI `--workers`, and batch multi-site profile runs capped at 5 sites.
-   - 2026-05-18 product workflow update: frontend-facing endpoints now cover
-     catalog import, site analysis, field resolution, test/full runs, status,
-     events, and exports.
-4. Run `REAL-ECOM-2`: 600+ records through profile runner on public
-   ecommerce/API targets with profile-run reports.
-5. Continue runtime hardening: adaptive concurrency/backpressure, durable
-   multi-site job registry, DNS reuse tuning, and profile health metrics in
-   spider summaries.
-6. Continue visual hardening: real OCR provider adapter and screenshot-to-DOM
-   alignment.
+1. Build one managed backend flow for analyze -> catalog -> fields -> test run
+   -> diagnosis -> patch -> rerun -> export.
+2. Make every managed step produce visible events, `llm_trace`, evidence,
+   executable action, and result status for the frontend.
+3. Feed API replay runtime, browser network evidence, coverage reports, and
+   profile patches into that managed loop instead of leaving them as separate
+   tools.
+4. Improve real ecommerce success rate with directory coverage, pagination
+   coverage, detail-page coverage, variant-field quality, and speed diagnostics.
+5. Persist workbench/task state strongly enough that switching pages or
+   refreshing does not force the user to restart from scratch.
+6. Continue hard backend work after the loop is unified: signed API replay,
+   browser-session replay transfer, real proxy provider adapter, protected
+   profile training, and visual/OCR alignment.
 
 1. ~~Add error-path tests for HTTP failures, empty HTML, invalid selectors, and
    retry exhaustion.~~ Done 2026-05-06.

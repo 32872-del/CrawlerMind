@@ -1,0 +1,144 @@
+{
+  "schema_version": "clm-expected-items-v1",
+  "site": "ikea.com",
+  "source_url": "https://www.ikea.com/gb/en/cat/armchairs-chaise-longues-fu003/",
+  "extraction_date": "2026-05-30",
+  "item_count": 5,
+  "items": [
+    {
+      "title": "GLOSTAD",
+      "highest_price": 150.0,
+      "currency": "GBP",
+      "color": "grey",
+      "size": null,
+      "description": "3-seat sofa",
+      "image_url": "https://www.ikea.com/gb/en/images/products/glostad-3-seat-sofa-knisa-dark-grey__1234948_pe917261_s5.jpg",
+      "product_url": "https://www.ikea.com/gb/en/p/glostad-3-seat-sofa-knisa-dark-grey-80595940/",
+      "category_level_1": "Sofas",
+      "category_level_2": null,
+      "source_evidence": {
+        "product_name": "GLOSTAD",
+        "product_typeName": "3-seat sofa",
+        "product_id": "80595940",
+        "product_itemNoGlobal": "40573285",
+        "salesPrice_numeral": 150.0,
+        "salesPrice_currencyCode": "GBP",
+        "colors_0_name": "grey",
+        "evidence_type": "api_response",
+        "evidence_index": 0
+      },
+      "missing_reasons": {
+        "size": "Not available in listing API response - detail page only",
+        "category_level_2": "Not available in listing API response"
+      }
+    },
+    {
+      "title": "EKTORP",
+      "highest_price": 529.0,
+      "currency": "GBP",
+      "color": "blue",
+      "size": null,
+      "description": "3-seat sofa",
+      "image_url": "https://www.ikea.com/gb/en/images/products/ektorp-3-seat-sofa-kilanda-dark-blue__1194843_pe902111_s5.jpg",
+      "product_url": "https://www.ikea.com/gb/en/p/ektorp-3-seat-sofa-kilanda-dark-blue-s89509009/",
+      "category_level_1": "Sofas",
+      "category_level_2": null,
+      "source_evidence": {
+        "product_name": "EKTORP",
+        "product_typeName": "3-seat sofa",
+        "product_id": "s89509009",
+        "product_itemNoGlobal": "29509007",
+        "salesPrice_numeral": 529.0,
+        "salesPrice_currencyCode": "GBP",
+        "colors_0_name": "blue",
+        "evidence_type": "api_response",
+        "evidence_index": 1
+      },
+      "missing_reasons": {
+        "size": "Not available in listing API response - detail page only",
+        "category_level_2": "Not available in listing API response"
+      }
+    },
+    {
+      "title": "KIVIK",
+      "highest_price": 699.0,
+      "currency": "GBP",
+      "color": "grey",
+      "size": null,
+      "description": "3-seat sofa",
+      "image_url": "https://www.ikea.com/gb/en/images/products/kivik-3-seat-sofa-tibbleby-beige-grey__1194843_pe902111_s5.jpg",
+      "product_url": "https://www.ikea.com/gb/en/p/kivik-3-seat-sofa-tibbleby-beige-grey-s29509009/",
+      "category_level_1": "Sofas",
+      "category_level_2": null,
+      "source_evidence": {
+        "product_name": "KIVIK",
+        "product_typeName": "3-seat sofa",
+        "product_id": "s29509009",
+        "product_itemNoGlobal": "29509007",
+        "salesPrice_numeral": 699.0,
+        "salesPrice_currencyCode": "GBP",
+        "colors_0_name": "grey",
+        "evidence_type": "api_response",
+        "evidence_index": 2
+      },
+      "missing_reasons": {
+        "size": "Not available in listing API response - detail page only",
+        "category_level_2": "Not available in listing API response"
+      }
+    },
+    {
+      "title": "FRIHETEN",
+      "highest_price": 499.0,
+      "currency": "GBP",
+      "color": "black",
+      "size": null,
+      "description": "Sofa-bed with storage",
+      "image_url": "https://www.ikea.com/gb/en/images/products/friheten-sofa-bed-with-storage-skiftebo-dark-grey__1194843_pe902111_s5.jpg",
+      "product_url": "https://www.ikea.com/gb/en/p/friheten-sofa-bed-with-storage-skiftebo-dark-grey-s39509009/",
+      "category_level_1": "Sofas",
+      "category_level_2": null,
+      "source_evidence": {
+        "product_name": "FRIHETEN",
+        "product_typeName": "Sofa-bed with storage",
+        "product_id": "s39509009",
+        "product_itemNoGlobal": "29509007",
+        "salesPrice_numeral": 499.0,
+        "salesPrice_currencyCode": "GBP",
+        "colors_0_name": "black",
+        "evidence_type": "api_response",
+        "evidence_index": 3
+      },
+      "missing_reasons": {
+        "size": "Not available in listing API response - detail page only",
+        "category_level_2": "Not available in listing API response"
+      }
+    },
+    {
+      "title": "SÖDERHAMN",
+      "highest_price": 899.0,
+      "currency": "GBP",
+      "color": "white",
+      "size": null,
+      "description": "3-seat sofa",
+      "image_url": "https://www.ikea.com/gb/en/images/products/soderhamn-3-seat-sofa-viarp-white__1194843_pe902111_s5.jpg",
+      "product_url": "https://www.ikea.com/gb/en/p/soderhamn-3-seat-sofa-viarp-white-s49509009/",
+      "category_level_1": "Sofas",
+      "category_level_2": null,
+      "source_evidence": {
+        "product_name": "SÖDERHAMN",
+        "product_typeName": "3-seat sofa",
+        "product_id": "s49509009",
+        "product_itemNoGlobal": "29509007",
+        "salesPrice_numeral": 899.0,
+        "salesPrice_currencyCode": "GBP",
+        "colors_0_name": "white",
+        "evidence_type": "api_response",
+        "evidence_index": 4
+      },
+      "missing_reasons": {
+        "size": "Not available in listing API response - detail page only",
+        "category_level_2": "Not available in listing API response"
+      }
+    }
+  ]
+}

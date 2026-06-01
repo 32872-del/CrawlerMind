@@ -46,13 +46,13 @@ export function runModeLabel(mode: string): string {
 
 export function managedAiModeLabel(mode: string | undefined): string {
   const labels: Record<string, string> = {
-    deterministic: '规则模式',
-    disabled: '规则模式',
-    analysis_only: '仅分析增强',
-    supervised: '监督托管',
+    deterministic: '关闭',
+    disabled: '关闭',
+    analysis_only: '观察',
+    supervised: '自动修复',
     full_managed: '全托管'
   };
-  return labels[String(mode || 'disabled')] || String(mode || '规则模式');
+  return labels[String(mode || 'disabled')] || String(mode || '关闭');
 }
 
 export function effectiveManagedAiMode(enabled: boolean, mode: ManagedAiMode): ManagedAiMode | 'deterministic' {

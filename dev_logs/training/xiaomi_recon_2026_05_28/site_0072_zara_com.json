@@ -1,0 +1,40 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.zara.com",
+  "domain": "zara.com",
+  "checked_at": "2026-05-28T11:20:00Z",
+  "site_type": "ecommerce",
+  "language": "en",
+  "currency": "USD",
+  "rendering": "spa",
+  "access_status": {
+    "reachable": true,
+    "status_code": 200,
+    "final_url": "https://www.zara.com",
+    "redirects": [],
+    "blocked_signals": ["403_forbidden"],
+    "notes": "Inditex Group. ~2112 byte HTML shell (SPA). curl_cffi and browser blocked. 0 API hints. Same pattern as massimo dutti, stradivarius, oysho."
+  },
+  "catalog_candidates": [],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {"type": "", "params": {}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "Cannot determine - SPA shell only", "evidence_type": "guessed"},
+  "api_candidates": [],
+  "selector_candidates": {},
+  "field_quality_expectation": {},
+  "difficulty_signals": [
+    {"kind": "js_rendering", "evidence": "~2112 byte HTML shell, no content. Inditex SPA architecture.", "impact": "All content loaded via JS, not in initial HTML", "suggested_handling": "Need browser rendering with proper anti-detection", "confidence": 0.9}
+  ],
+  "recommended_action_plan": [
+    {"action": "switch_runtime", "priority": "high", "reason": "SPA requires browser rendering", "params": {}, "depends_on_evidence": ["access_status"]},
+    {"action": "patch_profile", "priority": "medium", "reason": "Try with proxy to bypass Inditex anti-bot", "params": {}, "depends_on_evidence": ["access_status"]}
+  ],
+  "confidence": {"catalog": 0.1, "api": 0.1, "selectors": 0.1, "pagination": 0.1, "overall": 0.1},
+  "evidence_log": [
+    {"ts": "2026-05-28T11:20:01Z", "type": "observed", "detail": "requests: 200 OK, 2112 bytes HTML shell"},
+    {"ts": "2026-05-28T11:20:03Z", "type": "observed", "detail": "curl_cffi: blocked"},
+    {"ts": "2026-05-28T11:20:05Z", "type": "observed", "detail": "browser: blocked"}
+  ],
+  "missing_evidence": ["everything"],
+  "needs_human_review": true
+}

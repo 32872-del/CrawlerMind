@@ -1,0 +1,120 @@
+{
+  "schema_version": "clm-deep-recon-v1",
+  "site_url": "https://www.superdry.com",
+  "domain": "superdry.com",
+  "checked_at": "2026-05-29T02:00:00Z",
+  "phase": "deep_recon_phase_2",
+  "platform": "Demandware (Salesforce Commerce Cloud)",
+
+  "catalog_url": {
+    "url": "https://www.superdry.com/womens/tops",
+    "accessible": true,
+    "status_code": 200,
+    "rendering": "server_side",
+    "notes": "Demandware Search-Show endpoint renders product tiles server-side with GTM data embedded"
+  },
+
+  "list_page_url": {
+    "url": "https://www.superdry.com/womens/tops",
+    "accessible": true,
+    "product_count": 48,
+    "rendering_mode": "requests",
+    "notes": "Full product listing in HTML. GTM data-gtm attributes contain complete product info."
+  },
+
+  "detail_url_pattern": {
+    "pattern": "/{category}/{slug}-{product_id}.html",
+    "example": "/womens/tops/athletic-essentials-stripe-jersey-polo-shirt-277146.html",
+    "product_id_field": "data-pid or GTM item_id",
+    "product_id_format": "numeric (6 digits)",
+    "notes": "URL includes category path, product slug, and numeric product ID"
+  },
+
+  "pagination": {
+    "type": "query_parameter",
+    "mechanism": "Demandware Search-Show pagination",
+    "notes": "22 total results mentioned in page. No visible pagination links in first 48 products (likely all fit on one page). Demandware supports ?start=N&sz=N pagination."
+  },
+
+  "api_response_sample": {
+    "source": "GTM data-gtm attribute on product tiles",
+    "format": "JSON embedded in HTML data attributes",
+    "sample_product": {
+      "item_name": "Athletic Essentials Stripe Jersey Polo Shirt",
+      "item_id": "277146",
+      "item_sku": "277146",
+      "price": 29.99,
+      "item_brand": "SUPERDRY",
+      "item_category": "Womens",
+      "item_category2": "Tops",
+      "item_colour": "NAVY",
+      "item_class": "Polo Shirts",
+      "item_season": "SS26",
+      "item_orig_price": 29.99,
+      "item_is_coming_soon": false
+    },
+    "total_products_in_sample": 48
+  },
+
+  "field_evidence": {
+    "title": {
+      "selector": "data-gtm -> ecommerce.items[0].item_name",
+      "type": "json_attribute",
+      "example": "Athletic Essentials Stripe Jersey Polo Shirt",
+      "confidence": 0.95
+    },
+    "price": {
+      "selector": "data-gtm -> ecommerce.items[0].price",
+      "type": "json_attribute",
+      "currency": "GBP",
+      "example": 29.99,
+      "confidence": 0.95
+    },
+    "image": {
+      "selector": "img.tile-image srcset",
+      "type": "html_attribute",
+      "domain": "images.laguna-live.sd.co.uk",
+      "example": "https://images.laguna-live.sd.co.uk/zoom/upload9223368955666893553.jpg?format=jpg&width=546",
+      "confidence": 0.9
+    },
+    "color": {
+      "selector": "data-gtm -> ecommerce.items[0].item_colour",
+      "type": "json_attribute",
+      "example": "NAVY",
+      "confidence": 0.95
+    },
+    "size": {
+      "selector": "Not available in listing page",
+      "type": "detail_page_only",
+      "confidence": 0.3
+    },
+    "description": {
+      "selector": "Not available in listing page",
+      "type": "detail_page_only",
+      "confidence": 0.3
+    }
+  },
+
+  "clm_suitability": {
+    "verdict": "suitable",
+    "confidence": 0.85,
+    "reasons": [
+      "Rich GTM data embedded in product tiles provides title, price, color, category",
+      "Server-side rendered HTML works with requests mode",
+      "Consistent URL pattern with numeric product IDs",
+      "48 products per page with full field data"
+    ],
+    "limitations": [
+      "Size and description only available on detail pages",
+      "Image URLs use CDN with dynamic sizing parameters",
+      "Need to handle Demandware pagination for complete catalog"
+    ],
+    "recommended_approach": "requests mode + GTM data extraction from data-gtm attributes"
+  },
+
+  "failure_diagnosis": {
+    "status": "success",
+    "blocking_issues": [],
+    "notes": "Superdry is one of the most accessible sites in this batch. GTM data provides rich product metadata directly in the listing page HTML."
+  }
+}

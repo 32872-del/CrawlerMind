@@ -1,0 +1,39 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.tedbaker.com",
+  "domain": "tedbaker.com",
+  "checked_at": "2026-05-28T11:42:00Z",
+  "site_type": "ecommerce",
+  "language": "en",
+  "currency": "GBP",
+  "rendering": "hybrid",
+  "access_status": {
+    "reachable": true,
+    "status_code": 200,
+    "final_url": "https://www.tedbaker.com",
+    "redirects": [],
+    "blocked_signals": ["captcha"],
+    "notes": "Accessible via requests (80KB). curl_cffi gets 80KB but blocked. browser returns captcha. 0 API hints. challenge category detected."
+  },
+  "catalog_candidates": [],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {"type": "", "params": {}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "Not determined", "evidence_type": "guessed"},
+  "api_candidates": [],
+  "selector_candidates": {},
+  "field_quality_expectation": {},
+  "difficulty_signals": [
+    {"kind": "captcha", "evidence": "Browser returns captcha page", "impact": "Cannot use browser mode for scraping", "suggested_handling": "Use requests mode only, or implement captcha solving", "confidence": 0.7}
+  ],
+  "recommended_action_plan": [
+    {"action": "analyze_site", "priority": "medium", "reason": "Requests mode works (80KB) - explore category pages", "params": {}, "depends_on_evidence": ["access_status"]}
+  ],
+  "confidence": {"catalog": 0.2, "api": 0.1, "selectors": 0.1, "pagination": 0.1, "overall": 0.15},
+  "evidence_log": [
+    {"ts": "2026-05-28T11:42:01Z", "type": "observed", "detail": "requests: 200 OK, 80KB HTML"},
+    {"ts": "2026-05-28T11:42:03Z", "type": "observed", "detail": "curl_cffi: 80KB but blocked"},
+    {"ts": "2026-05-28T11:42:05Z", "type": "observed", "detail": "browser: captcha detected"}
+  ],
+  "missing_evidence": ["product_selectors", "catalog_urls", "api_candidates", "pagination_pattern"],
+  "needs_human_review": false
+}

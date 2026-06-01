@@ -1,0 +1,79 @@
+{
+  "schema_version": "clm-visual-recon-v1",
+  "site_url": "https://www.ebay.com",
+  "page_url": "https://www.ebay.com",
+  "domain": "ebay.com",
+  "checked_at": "2026-05-28T10:01:00Z",
+  "input_artifacts": {
+    "screenshot_path": "screenshot_28a155e8.png",
+    "html_summary_path": "",
+    "network_summary_path": ""
+  },
+  "page_type": "home",
+  "visual_state": "normal",
+  "is_product_listing": false,
+  "is_product_detail": false,
+  "visible_catalog": [
+    {
+      "label": "Shop by category",
+      "level_hint": 1,
+      "visible_text": "Shop by category | Deals | Brand Outlet | Gift Cards | Help & Contact",
+      "position_hint": "top_nav",
+      "confidence": 0.95,
+      "evidence_type": "observed"
+    }
+  ],
+  "visible_product_cards": {
+    "detected": false,
+    "count_estimate": 0,
+    "layout": "hero_banner",
+    "evidence": "Homepage shows hero banners (Sealed boxes, Singles, Sealed packs) and eBay Watchlist promo, plus eBay Live section. No product listing cards.",
+    "confidence": 0.9
+  },
+  "field_regions": {
+    "title": [],
+    "highest_price": [],
+    "colors": [],
+    "sizes": [],
+    "description": [],
+    "image_urls": [],
+    "product_url": []
+  },
+  "blocking_signals": [],
+  "pagination_signals": [],
+  "visual_action_hints": [
+    {
+      "hint": "use_browser_runtime",
+      "reason": "Homepage has dynamic content (eBay Live, Watchlist) that may need JS rendering",
+      "confidence": 0.6
+    }
+  ],
+  "recommended_action_plan": [
+    {
+      "action": "analyze_site",
+      "priority": "medium",
+      "reason": "Homepage is promotional, need to navigate to product listing pages",
+      "params": {},
+      "depends_on_evidence": []
+    }
+  ],
+  "confidence": {
+    "page_type": 0.95,
+    "product_cards": 0.9,
+    "fields": 0.0,
+    "blocking": 0.95,
+    "pagination": 0.9,
+    "overall": 0.6
+  },
+  "evidence_log": [
+    "eBay logo and search bar visible",
+    "Top nav: Deals, Brand Outlet, Gift Cards, Help & Contact",
+    "Hero section: Sealed boxes, Singles, Sealed packs (Pokemon cards)",
+    "eBay Watchlist promo banner",
+    "eBay Live section with product thumbnails",
+    "No product listing cards on homepage"
+  ],
+  "missing_evidence": ["html_summary", "network_summary", "product_listing_page"],
+  "needs_backend_verification": true,
+  "needs_human_review": false
+}

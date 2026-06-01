@@ -1,0 +1,42 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.cos.com",
+  "domain": "cos.com",
+  "checked_at": "2026-05-28T10:59:00Z",
+  "site_type": "ecommerce",
+  "language": "en",
+  "currency": "GBP",
+  "rendering": "hybrid",
+  "access_status": {
+    "reachable": true,
+    "status_code": 200,
+    "final_url": "https://www.cos.com",
+    "redirects": [],
+    "blocked_signals": ["403_forbidden"],
+    "notes": "Accessible via requests mode. 80KB HTML truncated. 1 API hint found (/api/geolocation-country). H&M Group brand."
+  },
+  "catalog_candidates": [],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {"type": "", "params": {}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "Not determined", "evidence_type": "guessed"},
+  "api_candidates": [
+    {"method": "GET", "url": "https://www.cos.com/api/geolocation-country", "content_type": "json", "items_path": "", "pagination_hints": {}, "field_mapping": {}, "request_body_hint": {}, "headers_hint": {}, "source": "script", "evidence_type": "observed", "confidence": 0.7, "risks": ["geolocation_api"]}
+  ],
+  "selector_candidates": {},
+  "field_quality_expectation": {},
+  "difficulty_signals": [
+    {"kind": "js_rendering", "evidence": "80KB HTML truncated. Platform may require browser for full content.", "impact": "Some content may require browser rendering", "suggested_handling": "Try requests first, fall back to browser if needed", "confidence": 0.5}
+  ],
+  "recommended_action_plan": [
+    {"action": "promote_xhr_to_api", "priority": "high", "reason": "JSON API endpoint /api/geolocation-country found", "params": {}, "depends_on_evidence": ["api_candidates"]},
+    {"action": "analyze_site", "priority": "medium", "reason": "Explore product pages and API endpoints", "params": {}, "depends_on_evidence": ["api_candidates"]}
+  ],
+  "confidence": {"catalog": 0.2, "api": 0.5, "selectors": 0.1, "pagination": 0.1, "overall": 0.3},
+  "evidence_log": [
+    {"ts": "2026-05-28T10:59:01Z", "type": "observed", "detail": "requests: 200 OK, 80KB HTML truncated"},
+    {"ts": "2026-05-28T10:59:05Z", "type": "observed", "detail": "1 API hint found: /api/geolocation-country (JSON)"},
+    {"ts": "2026-05-28T10:59:08Z", "type": "inferred", "detail": "H&M Group brand detected"}
+  ],
+  "missing_evidence": ["product_list_page", "api_response_sample", "detail_page_sample"],
+  "needs_human_review": false
+}

@@ -244,6 +244,7 @@ class NativeBrowserRuntime:
             if should_capture_api:
                 captured_xhr.append(_capture_response_preview(
                     response=response,
+                    playwright_request=playwright_request,
                     url=response_url,
                     status_code=status_code,
                     content_type=content_type,
@@ -256,6 +257,7 @@ class NativeBrowserRuntime:
             elif should_capture_js:
                 js_assets.append(_capture_response_preview(
                     response=response,
+                    playwright_request=playwright_request,
                     url=response_url,
                     status_code=status_code,
                     content_type=content_type,
@@ -786,6 +788,7 @@ def _session_mode_for(config: NativeBrowserConfig, context_config: BrowserContex
 def _capture_response_preview(
     *,
     response: Any,
+    playwright_request: Any = None,
     url: str,
     status_code: int,
     content_type: str,
@@ -797,6 +800,8 @@ def _capture_response_preview(
     body_preview = ""
     body_truncated = False
     size_bytes = 0
+    request_headers: dict[str, str] = {}
+    post_data_preview = ""
     if max_chars > 0:
         try:
             body = response.body()
@@ -810,6 +815,18 @@ def _capture_response_preview(
             body_truncated = len(body_text) > max_chars
         except Exception as exc:
             errors.append(f"body_read_error:{url}:{type(exc).__name__}:{exc}")
+    if playwright_request is not None:
+        try:
+            request_headers = _safe_replay_headers(dict(getattr(playwright_request, "headers", {}) or {}))
+        except Exception:
+            request_headers = {}
+        try:
+            post_data = getattr(playwright_request, "post_data", None)
+            if callable(post_data):
+                post_data = post_data()
+            post_data_preview = str(post_data or "")[:max_chars]
+        except Exception:
+            post_data_preview = ""
     return {
         "url": url,
         "method": method,
@@ -819,7 +836,33 @@ def _capture_response_preview(
         "body_preview": body_preview,
         "body_truncated": body_truncated,
         "size_bytes": size_bytes,
+        "request_headers": request_headers,
+        "post_data_preview": post_data_preview,
     }
+
+
+def _safe_replay_headers(headers: dict[str, Any]) -> dict[str, str]:
+    allowed = {
+        "accept",
+        "accept-language",
+        "content-type",
+        "origin",
+        "referer",
+        "x-requested-with",
+        "x-csrf-token",
+        "x-xsrf-token",
+        "x-magento-cache-id",
+        "x-store",
+        "store",
+    }
+    output: dict[str, str] = {}
+    for key, value in dict(headers or {}).items():
+        lowered = str(key).strip().lower()
+        if lowered in allowed or lowered.startswith("x-"):
+            text = str(value or "").strip()
+            if text and len(text) <= 1000 and "\x00" not in text:
+                output[str(key)] = text
+    return output
 
 
 def _looks_like_api_response(

@@ -1,0 +1,123 @@
+{
+  "schema_version": "clm-deep-recon-v1",
+  "site_url": "https://www.otto.de",
+  "domain": "otto.de",
+  "checked_at": "2026-05-29T02:20:00Z",
+  "phase": "deep_recon_phase_2",
+  "platform": "Otto Proprietary (Svelte-based reptile-tile system)",
+
+  "catalog_url": {
+    "url": "https://www.otto.de/suche/damenbekleidung/",
+    "accessible": true,
+    "status_code": 200,
+    "rendering": "hybrid",
+    "notes": "Search results page with reptile-tile-list structure. Products rendered server-side."
+  },
+
+  "list_page_url": {
+    "url": "https://www.otto.de/suche/damenbekleidung/",
+    "accessible": true,
+    "product_count": 120,
+    "rendering_mode": "browser",
+    "notes": "Browser render returns 120 product tiles. Products also visible in requests mode but with less data."
+  },
+
+  "detail_url_pattern": {
+    "pattern": "/p/{slug}-{product_id}/",
+    "example": "/p/only-t-shirt-onllive-love-new-3-tlg-3er-pack-figur-betont-elastische-baumwollqualitaet-S0O1G0UV/",
+    "product_id_field": "data-product-id",
+    "product_id_format": "alphanumeric (e.g. S0O1G0UV, 508136608)",
+    "notes": "URL includes product slug and product ID. IDs can be alphanumeric or numeric."
+  },
+
+  "pagination": {
+    "type": "query_parameter",
+    "mechanism": "Otto search pagination",
+    "notes": "Search results page supports pagination. Need to test ?page=N parameter."
+  },
+
+  "api_response_sample": {
+    "source": "reptile-tile HTML structure with data attributes",
+    "format": "HTML with data-product-id and price elements",
+    "sample_product": {
+      "product_id": "S0O1G0UV",
+      "variation_id": "S0O1G0UV4C8I",
+      "article_number": "S0O1G0UVBIG",
+      "name": "ONLY T-Shirt ONLLIVE LOVE NEW (3-tlg., 3er Pack) Figur betont, elastische Baumwollqualität",
+      "price": "39,95 €",
+      "position": 1,
+      "image_url": "https://i.otto.de/i/otto/670703e7-70c9-54a2-8832-f4f1e848a7da?$responsive_ft2_webp$"
+    },
+    "total_products_in_sample": 120,
+    "notes": "Product names in img alt attributes. Prices in reptile-price__priceValue elements. Images in reptile-product-image."
+  },
+
+  "field_evidence": {
+    "title": {
+      "selector": "article[data-product-id] img[alt]",
+      "type": "html_attribute",
+      "example": "ONLY T-Shirt ONLLIVE LOVE NEW (3-tlg., 3er Pack)",
+      "confidence": 0.85
+    },
+    "price": {
+      "selector": ".reptile-price__priceValue",
+      "type": "html_text",
+      "currency": "EUR",
+      "example": "39,95 €",
+      "confidence": 0.85
+    },
+    "image": {
+      "selector": ".reptile-product-image img[src]",
+      "type": "html_attribute",
+      "domain": "i.otto.de",
+      "example": "https://i.otto.de/i/otto/670703e7-70c9-54a2-8832-f4f1e848a7da?$responsive_ft2$",
+      "confidence": 0.9
+    },
+    "color": {
+      "selector": "Not available in listing page",
+      "type": "detail_page_only",
+      "confidence": 0.2
+    },
+    "size": {
+      "selector": "Not available in listing page",
+      "type": "detail_page_only",
+      "confidence": 0.2
+    },
+    "description": {
+      "selector": "Not available in listing page",
+      "type": "detail_page_only",
+      "confidence": 0.2
+    }
+  },
+
+  "clm_suitability": {
+    "verdict": "partially_suitable",
+    "confidence": 0.65,
+    "reasons": [
+      "120 product tiles with product IDs and names",
+      "Clear URL pattern with product IDs",
+      "Prices visible in listing page",
+      "Images accessible via CDN"
+    ],
+    "limitations": [
+      "API requires authentication (401 Unauthorized)",
+      "Product names only in alt text (not structured)",
+      "Color/size/description only on detail pages",
+      "German-language site (locale-specific)"
+    ],
+    "recommended_approach": "browser mode + HTML parsing of reptile-tile structure"
+  },
+
+  "failure_diagnosis": {
+    "status": "partial_success",
+    "blocking_issues": [
+      "API (api.otto.de) returns 401 Unauthorized",
+      "Product data not in structured JSON format"
+    ],
+    "next_steps": [
+      "Use browser mode to extract product data from reptile-tile HTML",
+      "Investigate API authentication mechanism",
+      "Test detail page for richer field data"
+    ]
+  }
+}

@@ -1,0 +1,384 @@
+{
+  "_meta": {
+    "version": "1.1",
+    "generated": "2026-05-30",
+    "author": "Employee 002 (CLM Backend)",
+    "purpose": "Detection rules for auto-generating extraction_contract from raw site evidence. Each rule is directly implementable — detection method uses specific HTML selectors, JSON paths, or regex.",
+    "strategies": 6,
+    "coverage": "6 evidence patterns covering ~70% of e-commerce product listing pages"
+  },
+  "strategies": {
+    "gtm_data_attribute_extractor": {
+      "strategy_name": "gtm_data_attribute_extractor",
+      "extractor_function": "extract_gtm_data_attribute_items",
+      "evidence_type": "html",
+      "detection_method": {
+        "step1_css_check": {
+          "description": "BeautifulSoup parse HTML, select '.product-tile[data-gtm]' elements",
+          "code": "soup = BeautifulSoup(html, 'lxml'); tiles = soup.select('.product-tile[data-gtm]')",
+          "pass_condition": "len(tiles) > 0",
+          "confidence_contribution": 0.5
+        },
+        "step2_json_parse": {
+          "description": "For each tile, html_lib.unescape(tile.get('data-gtm')) then json.loads",
+          "code": "for tile in tiles: payload = json.loads(html_lib.unescape(tile['data-gtm']))",
+          "pass_condition": "At least 1 tile's data-gtm parses without JSONDecodeError",
+          "confidence_contribution": 0.25
+        },
+        "step3_ecommerce_items": {
+          "description": "Check _dig(payload, 'ecommerce', 'items') returns non-empty list with first element being a dict containing 'item_name' or 'item_id'",
+          "pass_condition": "len(ecommerce_items) > 0 and isinstance(ecommerce_items[0], dict) and ('item_name' in ecommerce_items[0] or 'item_id' in ecommerce_items[0])",
+          "confidence_contribution": 0.25
+        },
+        "total_confidence": "step1 + step2 + step3 (capped at 1.0)"
+      },
+      "required_evidence": "Raw HTML string from requests/curl_cffi/browser mode containing at least one .product-tile[data-gtm] with parseable ecommerce.items",
+      "optional_evidence": "Sibling HTML elements: img.tile-image[srcset] for image_url, .tile-image-wrapper-link[href] for product_url",
+      "confidence_calculation": {
+        "base": 0.3,
+        "add_css_match": 0.5,
+        "add_json_parseable": 0.25,
+        "add_ecommerce_items": 0.25,
+        "cap": 1.0,
+        "typical": 0.85
+      },
+      "failure_conditions": [
+        "HTML has no elements matching '.product-tile[data-gtm]' AND no data-gtm regex matches in text nodes",
+        "All data-gtm attributes fail JSON parse after html_lib.unescape",
+        "Parsed JSON has no 'ecommerce' key or 'items' array is empty",
+        "ecommerce.items[0] is not a dict or lacks 'item_name'/'item_id'"
+      ],
+      "suggested_max_items": 100,
+      "detection_priority": 1,
+      "why_low_false_positive": "data-gtm attribute with ecommerce.items containing item_name/item_id is a GTM-specific tracking structure. Only sites instrumented with Google Tag Manager e-commerce tracking produce this. Non-product pages never have .product-tile elements. Blog, home, and article pages have zero .product-tile[data-gtm] elements.",
+      "reference_contract": "xiaomi_recon_2026_05_28/fixtures/superdry_com/extraction_contract.json"
+    },
+    "next_data_product_wall_extractor": {
+      "strategy_name": "next_data_product_wall_extractor",
+      "extractor_function": "extract_next_data_product_wall_items",
+      "evidence_type": "dict_or_list",
+      "detection_method": {
+        "step1_coerce_json": {
+          "description": "If evidence is str, try extract_next_data_json_from_html(evidence) to parse __NEXT_DATA__. If result is dict/list, continue.",
+          "code": "data = _coerce_json(evidence); if not isinstance(data, (dict, list)): return None",
+          "pass_condition": "data is dict or list",
+          "confidence_contribution": 0.2
+        },
+        "step2_find_wall": {
+          "description": "Navigate to data.props.pageProps.initialState.Wall OR data.Wall. Check for 'productGroupings' key.",
+          "code": "wall = _dig(data, 'props', 'pageProps', 'initialState', 'Wall') or _dig(data, 'Wall')",
+          "pass_condition": "isinstance(wall, dict) and isinstance(wall.get('productGroupings'), list) and len(wall['productGroupings']) > 0",
+          "confidence_contribution": 0.3
+        },
+        "step3_nike_shape": {
+          "description": "Check first product has Nike-specific nested shape: product.get('copy', {}).get('title') and product.get('prices', {}).get('currentPrice')",
+          "code": "product = groupings[0]['products'][0]; copy = product.get('copy', {}); prices = product.get('prices', {})",
+          "pass_condition": "isinstance(copy.get('title'), str) and copy['title'] != '' and isinstance(prices.get('currentPrice'), (int, float))",
+          "confidence_contribution": 0.5
+        },
+        "total_confidence": "step1 + step2 + step3"
+      },
+      "required_evidence": "Pre-parsed product list from __NEXT_DATA__ with Nike-specific shape (copy.title, prices.currentPrice, displayColors.colorDescription, colorwayImages.portraitURL)",
+      "optional_evidence": "Raw HTML string containing <script id=\"__NEXT_DATA__\"> with productGroupings",
+      "confidence_calculation": {
+        "base": 0.2,
+        "add_coerce_json": 0.2,
+        "add_product_groupings": 0.3,
+        "add_nike_shape": 0.5,
+        "cap": 1.0,
+        "typical": 0.88
+      },
+      "failure_conditions": [
+        "Evidence is empty string, None, or non-parseable",
+        "No __NEXT_DATA__ script tag found in HTML (for HTML input)",
+        "No 'Wall' key in __NEXT_DATA__ props",
+        "productGroupings is empty or missing",
+        "Products lack Nike-specific nesting (copy.title, prices.currentPrice)"
+      ],
+      "suggested_max_items": 200,
+      "detection_priority": 2,
+      "why_low_false_positive": "Nike's product data shape is extremely site-specific. The nesting copy.title + prices.currentPrice + displayColors.colorDescription + colorwayImages.portraitURL + pdpUrl.url is unique to Nike's CMS. The productGroupings array name only appears in Nike's __NEXT_DATA__. No other common e-commerce site uses this exact structure.",
+      "reference_contract": "xiaomi_recon_2026_05_28/fixtures/nike_com/extraction_contract.json"
+    },
+    "next_data_graphql_ssr_cache_extractor": {
+      "strategy_name": "next_data_graphql_ssr_cache_extractor",
+      "extractor_function": "extract_next_data_graphql_ssr_items",
+      "evidence_type": "dict_or_list",
+      "detection_method": {
+        "step1_coerce_json": {
+          "description": "If evidence is str, try extract_next_data_json_from_html(evidence). If result is dict/list, continue.",
+          "pass_condition": "data is dict or list",
+          "confidence_contribution": 0.2
+        },
+        "step2_find_graphql_results": {
+          "description": "Navigate to data.props.pageProps.serverSideGqlResponseFed.productPageData.search.results OR data.serverSideGqlResponseFed.productPageData.search.results. Check for 'products' key.",
+          "code": "results = _dig(data, 'props', 'pageProps', 'serverSideGqlResponseFed', 'productPageData', 'search', 'results')",
+          "pass_condition": "isinstance(results, dict) and isinstance(results.get('products'), list) and len(results['products']) > 0",
+          "confidence_contribution": 0.3
+        },
+        "step3_graphql_shape": {
+          "description": "Check first product has GraphQL cache structure: product.get('price', {}).get('listPrice', {}).get('amount') is numeric AND product.get('variants') is a non-empty list",
+          "code": "product = results['products'][0]; price = product.get('price', {}); list_price = price.get('listPrice', {})",
+          "pass_condition": "isinstance(list_price.get('amount'), (int, float)) and isinstance(product.get('variants'), list) and len(product['variants']) > 0",
+          "confidence_contribution": 0.5
+        },
+        "total_confidence": "step1 + step2 + step3"
+      },
+      "required_evidence": "Pre-parsed product list from GraphQL SSR cache with: title, price.listPrice.amount, variants array with mediaAssets[].assetId, seoPath",
+      "optional_evidence": "Raw HTML with __NEXT_DATA__ containing serverSideGqlResponseFed",
+      "confidence_calculation": {
+        "base": 0.2,
+        "add_coerce_json": 0.2,
+        "add_graphql_results": 0.3,
+        "add_graphql_shape": 0.5,
+        "cap": 1.0,
+        "typical": 0.85
+      },
+      "failure_conditions": [
+        "Evidence is empty string, None, or non-parseable",
+        "No serverSideGqlResponseFed in __NEXT_DATA__",
+        "results.products is empty or missing",
+        "Products lack price.listPrice.amount nesting (flat price instead)",
+        "No variants array in products"
+      ],
+      "suggested_max_items": 100,
+      "detection_priority": 3,
+      "why_low_false_positive": "GraphQL SSR cache products with price.listPrice.amount + variants[].mediaAssets[].assetId + seoPath is a distinctive Apollo/urql SSR pattern. Plain product pages never have this nested structure. The serverSideGqlResponseFed key is M&S-specific but the price.listPrice.amount shape is generic to GraphQL e-commerce implementations.",
+      "reference_contract": "xiaomi_recon_2026_05_28/fixtures/marksandspencer_com/extraction_contract.json"
+    },
+    "jsonld_product_extractor": {
+      "strategy_name": "jsonld_product_extractor",
+      "extractor_function": "extract_jsonld_product_items",
+      "evidence_type": "html_or_dict_or_list",
+      "detection_method": {
+        "step1_find_scripts": {
+          "description": "BeautifulSoup parse HTML, select 'script[type=\"application/ld+json\"]' elements",
+          "code": "soup = BeautifulSoup(html, 'lxml'); scripts = soup.select('script[type=\"application/ld+json\"]')",
+          "pass_condition": "len(scripts) > 0",
+          "confidence_contribution": 0.3
+        },
+        "step2_parse_json_ld": {
+          "description": "For each script, get script.string or script.get_text(), then json.loads after html_lib.unescape. Check for @type == 'Product'",
+          "code": "for script in scripts: data = json.loads(html_lib.unescape(script.string)); schema_type = data.get('@type')",
+          "pass_condition": "At least one script contains JSON with @type == 'Product'",
+          "confidence_contribution": 0.35
+        },
+        "step3_product_has_offers": {
+          "description": "Check Product has offers.price or offers.lowPrice as numeric, and non-empty name",
+          "code": "offers = product.get('offers', {}); price = offers.get('price') or offers.get('lowPrice')",
+          "pass_condition": "isinstance(product.get('name'), str) and product['name'] != '' and (isinstance(offers.get('price'), (int, float, str)) or isinstance(offers.get('lowPrice'), (int, float, str)))",
+          "confidence_contribution": 0.35
+        },
+        "alt_step1_dict_check": {
+          "description": "If evidence is pre-parsed dict, check @type == 'Product' or @type == 'ItemList'",
+          "pass_condition": "isinstance(evidence, dict) and evidence.get('@type') in ('Product', 'ItemList')",
+          "confidence_contribution": 0.9
+        },
+        "alt_step2_list_check": {
+          "description": "If evidence is list, check any element has @type == 'Product'",
+          "pass_condition": "isinstance(evidence, list) and any(obj.get('@type') == 'Product' for obj in evidence if isinstance(obj, dict))",
+          "confidence_contribution": 0.85
+        }
+      },
+      "required_evidence": "Raw HTML string with <script type=\"application/ld+json\"> containing @type: Product with name and offers, OR pre-parsed dict/list with Product/ItemList schema",
+      "optional_evidence": "Pre-parsed JSON-LD Product or ItemList object from AI network observation",
+      "confidence_calculation": {
+        "base": 0.3,
+        "add_has_scripts": 0.3,
+        "add_product_type": 0.35,
+        "add_has_offers": 0.35,
+        "cap": 1.0,
+        "typical": 0.88
+      },
+      "failure_conditions": [
+        "No <script type=\"application/ld+json\"> in HTML",
+        "All JSON-LD scripts have @type other than Product (e.g., Organization, WebPage, BreadcrumbList)",
+        "Product exists but offers is missing or empty",
+        "JSON in script tag is malformed (JSONDecodeError)",
+        "Product name is empty string"
+      ],
+      "suggested_max_items": 50,
+      "detection_priority": 4,
+      "why_low_false_positive": "schema.org Product markup is a standardized, machine-readable format. Sites that implement it deliberately want search engines to find product data. The @type: Product check combined with offers.price is a high-precision signal — non-product pages (home, blog, about) never contain Product schema.",
+      "reference_fixture": "inline in test_ecommerce_extractors.py (_JSONLD_PRODUCT_HTML, _JSONLD_ITEMLIST_HTML)"
+    },
+    "shopify_product_grid_extractor": {
+      "strategy_name": "shopify_product_grid_extractor",
+      "extractor_function": "extract_shopify_product_grid_items",
+      "evidence_type": "dict_or_list_or_html",
+      "detection_method": {
+        "step1_dict_products_key": {
+          "description": "Check evidence is dict with 'products' key containing a list of product dicts",
+          "code": "isinstance(evidence, dict) and isinstance(evidence.get('products'), list) and len(evidence['products']) > 0",
+          "pass_condition": "True/False",
+          "confidence_contribution": 0.4
+        },
+        "step2_shopify_shape": {
+          "description": "Check first product has Shopify-specific fields: integer 'id', string 'handle', list 'variants' with 'price' key",
+          "code": "product = evidence['products'][0]; isinstance(product.get('id'), int) and isinstance(product.get('handle'), str) and isinstance(product.get('variants'), list)",
+          "pass_condition": "All three fields present",
+          "confidence_contribution": 0.35
+        },
+        "step3_variant_price": {
+          "description": "Check first variant has 'price' key with numeric-like value",
+          "code": "variant = product['variants'][0]; isinstance(variant.get('price'), (str, int, float))",
+          "pass_condition": "True/False",
+          "confidence_contribution": 0.25
+        },
+        "alt_step1_html_analytics": {
+          "description": "If evidence is HTML string, regex for Shopify\\.analytics\\.meta\\.product\\s*=\\s*\\{.*?\\};",
+          "code": "re.search(r'Shopify\\.analytics\\.meta\\.product\\s*=\\s*(\\{.*?\\});', html, re.DOTALL)",
+          "pass_condition": "Match found and JSON parses to dict",
+          "confidence_contribution": 0.85
+        },
+        "alt_step2_html_products_json": {
+          "description": "If evidence is HTML string, regex for 'products'\\s*:\\s*(\\[.*?\\])",
+          "code": "re.search(r'\"products\"\\s*:\\s*(\\[.*?\\])\\s*[,}]', html, re.DOTALL)",
+          "pass_condition": "Match found and JSON parses to list with Shopify-shaped dicts",
+          "confidence_contribution": 0.7
+        }
+      },
+      "required_evidence": "Dict with 'products' key containing Shopify-shaped product objects, list of such dicts, or raw HTML with Shopify analytics",
+      "optional_evidence": "Raw HTML string containing Shopify.analytics.meta.product or products JSON in script tag",
+      "confidence_calculation": {
+        "base": 0.3,
+        "add_dict_products_key": 0.4,
+        "add_shopify_shape": 0.35,
+        "add_variant_price": 0.25,
+        "cap": 1.0,
+        "typical": 0.87
+      },
+      "failure_conditions": [
+        "Evidence is HTML string without Shopify analytics regex matches",
+        "Products lack Shopify-specific fields (id as int, handle as string, variants as list)",
+        "All prices are zero or missing",
+        "Evidence is a non-Shopify dict with 'products' key but products lack Shopify shape"
+      ],
+      "suggested_max_items": 250,
+      "detection_priority": 5,
+      "why_low_false_positive": "Shopify product JSON has a distinctive shape: integer 'id', string 'handle', array 'variants' with 'compare_at_price' and 'price', array 'options' with name/values. This structure is unique to Shopify's Liquid template system. Non-Shopify stores with 'products' key use different nesting (no handle, no variants with compare_at_price).",
+      "reference_fixture": "inline in test_ecommerce_extractors.py (_SHOPIFY_PRODUCTS_JSON)"
+    },
+    "demandware_product_tile_extractor": {
+      "strategy_name": "demandware_product_tile_extractor",
+      "extractor_function": "extract_demandware_product_tile_items",
+      "evidence_type": "html",
+      "detection_method": {
+        "step1_dom_tiles": {
+          "description": "BeautifulSoup parse HTML, select '.product-tile[data-pid]' elements",
+          "code": "soup = BeautifulSoup(html, 'lxml'); tiles = soup.select('.product-tile[data-pid]')",
+          "pass_condition": "len(tiles) > 0",
+          "confidence_contribution": 0.45
+        },
+        "step2_sfcc_classes": {
+          "description": "Check for SFCC-specific CSS classes: .product-tile__name, .product-tile__price, .pdp-link a",
+          "code": "has_name = bool(tile.select_one('.product-tile__name') or tile.select_one('.pdp-link a')); has_price = bool(tile.select_one('.product-tile__price .sales .value') or tile.select_one('.price .value'))",
+          "pass_condition": "At least one tile has both name and price elements",
+          "confidence_contribution": 0.3
+        },
+        "step3_pid_is_string": {
+          "description": "Check data-pid is a non-empty string (product ID)",
+          "code": "pid = tile.get('data-pid'); isinstance(pid, str) and pid.strip() != ''",
+          "pass_condition": "At least one tile has non-empty data-pid",
+          "confidence_contribution": 0.25
+        },
+        "alt_step1_js_fallback": {
+          "description": "If no DOM tiles, regex for productImpressions\\s*=\\s*(\\[.*?\\]); in HTML text",
+          "code": "re.finditer(r'productImpressions\\s*=\\s*(\\[.*?\\]);', html, re.DOTALL)",
+          "pass_condition": "Match found, JSON parses to list with dicts having 'name' or 'product_name'",
+          "confidence_contribution": 0.65
+        }
+      },
+      "required_evidence": "Raw HTML string from Demandware/SFCC listing page with .product-tile[data-pid] elements or productImpressions JS",
+      "optional_evidence": "Inline JS with productImpressions array or dataLayer push with product data",
+      "confidence_calculation": {
+        "base": 0.3,
+        "add_dom_tiles": 0.45,
+        "add_sfcc_classes": 0.3,
+        "add_pid_string": 0.25,
+        "cap": 1.0,
+        "typical": 0.82
+      },
+      "failure_conditions": [
+        "No .product-tile[data-pid] elements AND no productImpressions JS found",
+        "Tiles exist but all lack name/price elements (empty extraction)",
+        "data-pid is empty or not a string",
+        "JS fallback regex matches but JSON parse fails or array is empty"
+      ],
+      "suggested_max_items": 100,
+      "detection_priority": 6,
+      "why_low_false_positive": ".product-tile[data-pid] is a Salesforce Commerce Cloud (Demandware) specific pattern. The data-pid attribute combined with SFCC CSS classes (product-tile__name, product-tile__price .sales .value) is unique to this platform. Generic product grids don't use data-pid. Bootstrap or Material Design grids use data-* for different purposes (data-toggle, data-dismiss).",
+      "reference_fixture": "inline in test_ecommerce_extractors.py (_DEMANDWARE_TILE_HTML)"
+    }
+  },
+  "detection_order_recommendation": [
+    {
+      "priority": 1,
+      "strategy": "gtm_data_attribute_extractor",
+      "reason": "HTML-only, works with requests mode (no browser needed). High confidence, covers ~20% of sites. Real fixture available: superdry_com."
+    },
+    {
+      "priority": 2,
+      "strategy": "shopify_product_grid_extractor",
+      "reason": "Shopify is ~30% of e-commerce. Dict/HTML dual input. Very distinctive shape. No external fixture yet — needs one from a real Shopify store."
+    },
+    {
+      "priority": 3,
+      "strategy": "jsonld_product_extractor",
+      "reason": "HTML-only, ~30% of sites. Standardized schema.org format — high precision. No external fixture yet."
+    },
+    {
+      "priority": 4,
+      "strategy": "demandware_product_tile_extractor",
+      "reason": "HTML-only, covers SFCC sites (big retail). DOM + JS fallback. No external fixture yet."
+    },
+    {
+      "priority": 5,
+      "strategy": "next_data_graphql_ssr_cache_extractor",
+      "reason": "Requires pre-parsed evidence or browser. Covers M&S-style GraphQL SSR. Real fixture available: marksandspencer_com."
+    },
+    {
+      "priority": 6,
+      "strategy": "next_data_product_wall_extractor",
+      "reason": "Requires pre-parsed evidence. Very Nike-specific — lowest generality. Real fixture available: nike_com."
+    }
+  ],
+  "mutual_exclusion_notes": [
+    "gtm_data_attribute_extractor and demandware_product_tile_extractor both parse .product-tile but use different data attributes (data-gtm vs data-pid). Both can match on the same HTML but extract different fields. Detection should check both attributes.",
+    "next_data_product_wall_extractor and next_data_graphql_ssr_cache_extractor both consume __NEXT_DATA__ but target different product shapes. Detection must check product nesting: copy.title + prices.currentPrice = Nike wall; price.listPrice.amount + variants = GraphQL SSR.",
+    "jsonld_product_extractor can coexist with any other strategy — JSON-LD is supplementary structured data, not mutually exclusive with GTM or DOM extraction.",
+    "shopify_product_grid_extractor detects Shopify-specific fields that no other extractor checks for."
+  ],
+  "backlog_patterns_not_yet_supported": [
+    {
+      "pattern": "Open Graph / meta tag product data",
+      "description": "og:title, og:image, product:price:amount meta tags. Common on product detail pages but not listing pages.",
+      "estimated_coverage": "10% of sites",
+      "priority": "P2"
+    },
+    {
+      "pattern": "Microdata (itemprop) product attributes",
+      "description": "HTML itemscope/itemprop='name', itemprop='price', itemprop='image'. Older schema.org implementation.",
+      "estimated_coverage": "5% of sites (declining)",
+      "priority": "P3"
+    },
+    {
+      "pattern": "React/Vue hydration state (window.__INITIAL_STATE__)",
+      "description": "Non-Next.js SPAs that hydrate product data into window state objects.",
+      "estimated_coverage": "10% of sites",
+      "priority": "P2"
+    },
+    {
+      "pattern": "JSON API response interception",
+      "description": "Sites where product data comes from XHR/fetch API calls (e.g., /api/products?page=1). Not embedded in HTML.",
+      "estimated_coverage": "15% of sites",
+      "priority": "P1"
+    },
+    {
+      "pattern": "dataLayer.push with impressions array",
+      "description": "Google Analytics dataLayer product impressions (not GTM data-gtm attributes). Common on SFCC and custom sites.",
+      "estimated_coverage": "8% of sites",
+      "priority": "P2"
+    }
+  ]
+}

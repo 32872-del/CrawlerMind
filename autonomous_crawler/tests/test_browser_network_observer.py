@@ -554,6 +554,28 @@ class BuildCandidatesEdgeCaseTests(unittest.TestCase):
         self.assertEqual(candidates[0]["kind"], "json")
         self.assertEqual(candidates[0]["post_data_preview"], '{"query":"","page":0}')
 
+    def test_candidate_includes_replay_diagnostics_for_signed_dynamic_request(self) -> None:
+        entry = NetworkEntry(
+            url="https://example.com/api/search?timestamp=1710000000000&sign=abc",
+            method="POST",
+            resource_type="xhr",
+            status_code=200,
+            kind="json",
+            score=80,
+            request_headers={"x-store": "nl"},
+            post_data_preview='{"query":"","nonce":"old"}',
+        )
+
+        candidates = build_api_candidates_from_entries([entry])
+
+        self.assertEqual(len(candidates), 1)
+        diagnostics = candidates[0]["replay_diagnostics"]
+        self.assertTrue(diagnostics["replay_required"])
+        self.assertEqual(diagnostics["risk_level"], "high")
+        paths = {(item["location"], item["path"]) for item in diagnostics["dynamic_inputs"]}
+        self.assertIn(("query", "timestamp"), paths)
+        self.assertIn(("json", "nonce"), paths)
+
 
 class ObserveNetworkEdgeCaseTests(unittest.TestCase):
     @patch("autonomous_crawler.tools.browser_network_observer.sync_playwright")

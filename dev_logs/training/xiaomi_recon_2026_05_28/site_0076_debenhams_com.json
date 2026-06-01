@@ -1,0 +1,45 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.debenhams.com",
+  "domain": "debenhams.com",
+  "checked_at": "2026-05-28T11:22:00Z",
+  "site_type": "ecommerce",
+  "language": "en",
+  "currency": "GBP",
+  "rendering": "hybrid",
+  "access_status": {
+    "reachable": true,
+    "status_code": 200,
+    "final_url": "https://www.debenhams.com",
+    "redirects": [],
+    "blocked_signals": ["region_block"],
+    "notes": "Accessible across all modes. requests/curl_cffi 80KB, browser 4.2MB. 80 API hints with category URLs. region_block detected. Boohoo Group brand."
+  },
+  "catalog_candidates": [
+    {"url": "https://www.debenhams.com/categories/fashion-brands-offer-2", "source": "script", "confidence": 0.6, "evidence_type": "observed"},
+    {"url": "https://www.debenhams.com/categories/fashion-offer-1", "source": "script", "confidence": 0.6, "evidence_type": "observed"},
+    {"url": "https://www.debenhams.com/categories/debenhams-beauty", "source": "script", "confidence": 0.6, "evidence_type": "observed"}
+  ],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {"type": "", "params": {}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "Not determined", "evidence_type": "guessed"},
+  "api_candidates": [],
+  "selector_candidates": {},
+  "field_quality_expectation": {},
+  "difficulty_signals": [
+    {"kind": "geo_redirect", "evidence": "region_block category detected", "impact": "Some content may be geo-restricted", "suggested_handling": "May need UK proxy for full access", "confidence": 0.5}
+  ],
+  "recommended_action_plan": [
+    {"action": "select_catalog", "priority": "high", "reason": "80 category URLs found - explore catalog structure", "params": {}, "depends_on_evidence": ["catalog_candidates"]},
+    {"action": "analyze_site", "priority": "medium", "reason": "Browser gets 4.2MB - rich content available", "params": {}, "depends_on_evidence": ["access_status"]}
+  ],
+  "confidence": {"catalog": 0.4, "api": 0.2, "selectors": 0.1, "pagination": 0.1, "overall": 0.3},
+  "evidence_log": [
+    {"ts": "2026-05-28T11:22:01Z", "type": "observed", "detail": "requests: 200 OK, 80KB HTML"},
+    {"ts": "2026-05-28T11:22:03Z", "type": "observed", "detail": "curl_cffi: 200 OK, 80KB HTML"},
+    {"ts": "2026-05-28T11:22:05Z", "type": "observed", "detail": "browser: 200 OK, 4.2MB HTML"},
+    {"ts": "2026-05-28T11:22:06Z", "type": "observed", "detail": "80 API hints: category URLs for fashion, beauty, brands"}
+  ],
+  "missing_evidence": ["product_selectors", "pagination_pattern", "detail_page_structure"],
+  "needs_human_review": false
+}

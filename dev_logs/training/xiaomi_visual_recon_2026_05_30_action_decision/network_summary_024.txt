@@ -1,0 +1,25 @@
+Network Summary - Page 024
+==================================================
+URL: https://www.etsy.com/search?q=handmade+jewelry
+Domain: etsy.com
+HTTP Status: 403
+Checked At: 2026-05-30T10:30:02.007085
+
+STATUS: no_network_captured
+
+Reason: Network observation (observe_browser_network) was not performed for this page.
+To capture network evidence, run observe_browser_network with:
+  url: https://www.etsy.com/search?q=handmade+jewelry
+  resource_types: xhr,fetch,document
+  render_time: 5
+  capture_json_sample: true
+
+What network evidence would provide:
+  - XHR/fetch API endpoints
+  - Pagination parameters in API calls
+  - Data payload structures
+  - Authentication tokens/cookies
+  - Rate limiting signals
+
+NOTE: Page returned HTTP 403. Network observation likely to fail
+without first resolving access blocking via switch_runtime.

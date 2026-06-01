@@ -1,0 +1,74 @@
+{
+  "schema_version": "clm-visual-recon-v1",
+  "site_url": "https://www.amazon.com",
+  "page_url": "https://www.amazon.com",
+  "domain": "amazon.com",
+  "checked_at": "2026-05-30T08:58:53.090899Z",
+  "input_artifacts": {
+    "screenshot_path": "screenshot_004_amazon_home.png",
+    "html_summary_path": "html_summary_004.txt",
+    "network_summary_path": "network_summary_004.txt"
+  },
+  "page_type": "home",
+  "visual_state": "normal",
+  "is_product_listing": false,
+  "is_product_detail": false,
+  "visible_catalog": [],
+  "visible_product_cards": {
+    "detected": false,
+    "count_estimate": "0",
+    "layout": "none",
+    "evidence": "Screenshot shows home",
+    "confidence": 0.4
+  },
+  "field_regions": {},
+  "blocking_signals": [],
+  "pagination_signals": [],
+  "visual_action_hints": [
+    {
+      "hint": "analyze_site",
+      "reason": "home on amazon.com",
+      "confidence": 0.8
+    }
+  ],
+  "recommended_action_plan": [
+    {
+      "action": "analyze_site",
+      "priority": "high",
+      "reason": "Homepage with category navigation",
+      "params": {},
+      "depends_on_evidence": [
+        "screenshot"
+      ]
+    },
+    {
+      "action": "select_catalog",
+      "priority": "medium",
+      "reason": "Identify product listing entry points",
+      "params": {},
+      "depends_on_evidence": [
+        "screenshot"
+      ]
+    }
+  ],
+  "confidence": {
+    "page_type": 0.85,
+    "product_cards": 0.4,
+    "fields": 0.45,
+    "blocking": 0.9,
+    "pagination": 0.6,
+    "overall": 0.5
+  },
+  "evidence_log": [
+    "HTML: 80000 chars, lang=zh-cn, title='None'",
+    "Screenshot: screenshot_004_amazon_home.png (captured)",
+    "Network: no_network_captured",
+    "Note: HTML truncated at 80KB. Navigation structure visible."
+  ],
+  "missing_evidence": [
+    "network_summary",
+    "selector_confirmation"
+  ],
+  "needs_backend_verification": false,
+  "needs_human_review": false
+}

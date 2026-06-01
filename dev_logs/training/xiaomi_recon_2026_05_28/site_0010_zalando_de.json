@@ -1,0 +1,50 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.zalando.de",
+  "domain": "zalando.de",
+  "checked_at": "2026-05-28T10:15:00Z",
+  "site_type": "ecommerce",
+  "language": "de",
+  "currency": "EUR",
+  "rendering": "spa",
+  "access_status": {
+    "reachable": true,
+    "status_code": 200,
+    "final_url": "https://www.zalando.de",
+    "redirects": [],
+    "blocked_signals": [],
+    "notes": "requests and curl_cffi return 80KB HTML. Browser failed. JS shell similar to zalando.nl."
+  },
+  "catalog_candidates": [
+    {"level1": "Catalogue", "level2": "", "level3": "", "label": "catalogue", "url": "https://www.zalando.de/catalogue/", "source": "script", "evidence_type": "inferred", "confidence": 0.5},
+    {"level1": "Catalog", "level2": "", "level3": "", "label": "catalog", "url": "https://www.zalando.de/catalog/", "source": "script", "evidence_type": "inferred", "confidence": 0.4}
+  ],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {"type": "page_param_guess", "params": {"page": "2"}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "Common page param guess", "evidence_type": "guessed"},
+  "api_candidates": [],
+  "selector_candidates": {
+    "title": [{"selector": "h1", "selector_type": "css", "scope": "detail", "sample_value": "", "evidence_type": "guessed", "confidence": 0.3}],
+    "highest_price": [{"selector": "[class*=price], [itemprop=price], meta[itemprop=price]", "selector_type": "css", "scope": "detail", "sample_value": "", "evidence_type": "guessed", "confidence": 0.3}],
+    "colors": [], "sizes": [],
+    "description": [{"selector": "[class*=description], article, main", "selector_type": "css", "scope": "detail", "sample_value": "", "evidence_type": "guessed", "confidence": 0.2}],
+    "image_urls": [{"selector": "img@src", "selector_type": "css", "scope": "detail", "sample_value": "", "evidence_type": "guessed", "confidence": 0.2}],
+    "product_url": [], "category_level_1": [], "category_level_2": [], "category_level_3": []
+  },
+  "field_quality_expectation": {},
+  "difficulty_signals": [
+    {"kind": "js_rendering", "evidence": "JS shell, 80KB HTML with no visible product content in static DOM", "impact": "Need browser rendering or API", "suggested_handling": "Switch to browser runtime or find API", "confidence": 0.85}
+  ],
+  "recommended_action_plan": [
+    {"action": "switch_runtime", "priority": "high", "reason": "SPA requires browser rendering", "params": {"mode": "browser"}, "depends_on_evidence": []},
+    {"action": "promote_xhr_to_api", "priority": "medium", "reason": "Script hints suggest catalog API", "params": {}, "depends_on_evidence": ["catalog_candidates"]}
+  ],
+  "confidence": {"catalog": 0.4, "api": 0.2, "selectors": 0.2, "pagination": 0.2, "overall": 0.3},
+  "evidence_log": [
+    {"ts": "2026-05-28T10:15:01Z", "type": "observed", "detail": "requests: 200 OK, 80KB HTML, JS shell"},
+    {"ts": "2026-05-28T10:15:05Z", "type": "observed", "detail": "curl_cffi: 200 OK, 80KB HTML"},
+    {"ts": "2026-05-28T10:15:10Z", "type": "observed", "detail": "browser: failed, script hints: /catalogue/, /catalog/"}
+  ],
+  "missing_evidence": ["rendered_dom", "product_list", "api_endpoint"],
+  "needs_human_review": true
+}

@@ -1,0 +1,12 @@
+HTML Summary: etsy.com - Page 017
+URL: https://www.etsy.com
+Fetched at: 2026-05-30T08:58:53.109622
+Fetch mode: auto (FAILED - HTTP 403 - Captcha/challenge)
+
+=== HTML Not Available ===
+Error: HTTP 403 - Captcha/challenge
+
+=== Screenshot ===
+File: screenshot_017_etsy_blocked.png
+Page type: blocked
+Visual state: challenge

@@ -1,0 +1,22 @@
+Network Summary - Page 001
+==================================================
+URL: https://www.amazon.com/s?k=wireless+headphones
+Domain: amazon.com
+HTTP Status: 200
+Checked At: 2026-05-30T10:30:01.929567
+
+STATUS: no_network_captured
+
+Reason: Network observation (observe_browser_network) was not performed for this page.
+To capture network evidence, run observe_browser_network with:
+  url: https://www.amazon.com/s?k=wireless+headphones
+  resource_types: xhr,fetch,document
+  render_time: 5
+  capture_json_sample: true
+
+What network evidence would provide:
+  - XHR/fetch API endpoints
+  - Pagination parameters in API calls
+  - Data payload structures
+  - Authentication tokens/cookies
+  - Rate limiting signals

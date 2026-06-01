@@ -1,0 +1,166 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.zalando.nl",
+  "domain": "zalando.nl",
+  "checked_at": "2026-05-28T10:02:00Z",
+  "site_type": "ecommerce",
+  "language": "nl",
+  "currency": "EUR",
+  "rendering": "spa",
+  "access_status": {
+    "reachable": true,
+    "status_code": 200,
+    "final_url": "https://www.zalando.nl",
+    "redirects": [],
+    "blocked_signals": [],
+    "notes": "requests mode returned HTML shell (11KB text, 80KB HTML truncated). curl_cffi also worked. Browser timed out at 30s."
+  },
+  "catalog_candidates": [
+    {
+      "level1": "Dames",
+      "level2": "",
+      "level3": "",
+      "label": "catalogus (NL)",
+      "url": "https://www.zalando.nl/catalogus/",
+      "source": "script",
+      "evidence_type": "inferred",
+      "confidence": 0.5
+    },
+    {
+      "level1": "Heren",
+      "level2": "",
+      "level3": "",
+      "label": "catalogue (EN)",
+      "url": "https://www.zalando.nl/catalogue/",
+      "source": "script",
+      "evidence_type": "inferred",
+      "confidence": 0.4
+    },
+    {
+      "level1": "Catalogo",
+      "level2": "",
+      "level3": "",
+      "label": "catalogo (IT/ES)",
+      "url": "https://www.zalando.nl/catalogo/",
+      "source": "script",
+      "evidence_type": "inferred",
+      "confidence": 0.3
+    },
+    {
+      "level1": "Catalog",
+      "level2": "",
+      "level3": "",
+      "label": "catalog",
+      "url": "https://www.zalando.nl/catalog/",
+      "source": "script",
+      "evidence_type": "inferred",
+      "confidence": 0.3
+    }
+  ],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {
+    "type": "page_param_guess",
+    "params": {"page": "2"},
+    "next_link_selector_candidates": [],
+    "load_more_selector_candidates": [],
+    "notes": "Common page parameter guess. Not verified on actual product pages.",
+    "evidence_type": "guessed"
+  },
+  "api_candidates": [
+    {
+      "method": "GET",
+      "url": "https://mosaic02.ztat.net/",
+      "content_type": "",
+      "items_path": "",
+      "pagination_hints": {},
+      "field_mapping": {},
+      "request_body_hint": {},
+      "headers_hint": {},
+      "source": "script",
+      "evidence_type": "inferred",
+      "confidence": 0.3,
+      "risks": ["static_asset_domain_not_api", "may_be_cdn_only"]
+    }
+  ],
+  "selector_candidates": {
+    "title": [
+      {"selector": "h1", "selector_type": "css", "scope": "detail", "sample_value": "", "evidence_type": "guessed", "confidence": 0.3}
+    ],
+    "highest_price": [
+      {"selector": "[class*=price], [itemprop=price], meta[itemprop=price]", "selector_type": "css", "scope": "detail", "sample_value": "", "evidence_type": "guessed", "confidence": 0.3}
+    ],
+    "colors": [],
+    "sizes": [],
+    "description": [
+      {"selector": "[class*=description], article, main", "selector_type": "css", "scope": "detail", "sample_value": "", "evidence_type": "guessed", "confidence": 0.2}
+    ],
+    "image_urls": [
+      {"selector": "img@src", "selector_type": "css", "scope": "detail", "sample_value": "", "evidence_type": "guessed", "confidence": 0.2}
+    ],
+    "product_url": [],
+    "category_level_1": [],
+    "category_level_2": [],
+    "category_level_3": []
+  },
+  "field_quality_expectation": {
+    "title": {"grade": "D", "reason": "no sample values, SPA shell only"},
+    "price": {"grade": "D", "reason": "no sample values"},
+    "image_src": {"grade": "D", "reason": "no sample values"}
+  },
+  "difficulty_signals": [
+    {
+      "kind": "js_rendering",
+      "evidence": "Page is a JS shell with 54 chars text and 18 scripts. No product DOM content visible.",
+      "impact": "Cannot extract product data from static HTML",
+      "suggested_handling": "Use browser rendering or find public API endpoint",
+      "confidence": 0.9
+    },
+    {
+      "kind": "infinite_scroll",
+      "evidence": "Large SPA with mosaic CDN assets suggests dynamic loading",
+      "impact": "May need scroll to load products",
+      "suggested_handling": "Use scroll_and_load or browser with scroll_count",
+      "confidence": 0.5
+    }
+  ],
+  "recommended_action_plan": [
+    {
+      "action": "switch_runtime",
+      "priority": "high",
+      "reason": "SPA requires browser rendering to get product content",
+      "params": {"mode": "browser", "wait_until": "networkidle", "scroll_count": 2},
+      "depends_on_evidence": ["access_status.notes"]
+    },
+    {
+      "action": "analyze_site",
+      "priority": "high",
+      "reason": "Need to discover actual product list API or rendered DOM selectors",
+      "params": {"mode": "browser"},
+      "depends_on_evidence": []
+    },
+    {
+      "action": "promote_xhr_to_api",
+      "priority": "medium",
+      "reason": "Script hints suggest catalog API may exist at /catalog/ or similar paths",
+      "params": {},
+      "depends_on_evidence": ["api_candidates"]
+    }
+  ],
+  "confidence": {
+    "catalog": 0.4,
+    "api": 0.2,
+    "selectors": 0.2,
+    "pagination": 0.2,
+    "overall": 0.3
+  },
+  "evidence_log": [
+    {"ts": "2026-05-28T10:02:01Z", "type": "observed", "detail": "requests mode: 200 OK, 11214 bytes HTML, 16 scripts, 0 text chars"},
+    {"ts": "2026-05-28T10:02:06Z", "type": "observed", "detail": "curl_cffi mode: 200 OK, 80000 bytes HTML (truncated), 18 scripts, 54 text chars"},
+    {"ts": "2026-05-28T10:02:10Z", "type": "observed", "detail": "browser mode: Timeout 30000ms exceeded on domcontentloaded"},
+    {"ts": "2026-05-28T10:02:11Z", "type": "observed", "detail": "Script URLs found: /catalogus/, /catalogue/, /catalogo/, /catalog/ - all on zalando.nl"},
+    {"ts": "2026-05-28T10:02:12Z", "type": "inferred", "detail": "JS shell with no product DOM - SPA rendering required"}
+  ],
+  "missing_evidence": ["rendered_dom", "product_list_selector", "product_detail_sample", "api_endpoint_verification", "pagination_verification"],
+  "needs_human_review": true
+}

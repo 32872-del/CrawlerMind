@@ -1,0 +1,12 @@
+HTML Summary: etsy.com - Page 018
+URL: https://www.etsy.com/search?q=vintage+necklace
+Fetched at: 2026-05-30T08:58:53.110428
+Fetch mode: auto (FAILED - HTTP 403 - Captcha/challenge)
+
+=== HTML Not Available ===
+Error: HTTP 403 - Captcha/challenge
+
+=== Screenshot ===
+File: screenshot_019_etsy_search.png
+Page type: blocked
+Visual state: challenge

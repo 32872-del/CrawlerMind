@@ -39,6 +39,9 @@ class BatchRunnerConfig:
     lease_seconds: int = 300
     retry_failed: bool = False
     item_workers: int = 1
+    adaptive_item_workers: bool = True
+    min_item_workers: int = 1
+    max_item_workers: int = 0
 
     def __post_init__(self) -> None:
         if not self.run_id:
@@ -51,6 +54,12 @@ class BatchRunnerConfig:
             raise ValueError("lease_seconds must be >= 0")
         if self.item_workers < 1:
             raise ValueError("item_workers must be >= 1")
+        if self.min_item_workers < 1:
+            raise ValueError("min_item_workers must be >= 1")
+        if self.max_item_workers < 0:
+            raise ValueError("max_item_workers must be >= 0")
+        if self.max_item_workers and self.max_item_workers < self.min_item_workers:
+            raise ValueError("max_item_workers must be >= min_item_workers")
 
 
 @dataclass
@@ -104,6 +113,8 @@ class BatchRunnerSummary:
     frontier_stats: dict[str, int] = field(default_factory=dict)
     backpressure: dict[str, Any] | None = None
     supervision_events: list[dict[str, Any]] = field(default_factory=list)
+    worker_history: list[int] = field(default_factory=list)
+    batch_history: list[dict[str, Any]] = field(default_factory=list)
 
     def as_dict(self) -> dict[str, Any]:
         result = {
@@ -124,6 +135,10 @@ class BatchRunnerSummary:
             result["backpressure"] = self.backpressure
         if self.supervision_events:
             result["supervision_events"] = list(self.supervision_events)
+        if self.worker_history:
+            result["worker_history"] = list(self.worker_history)
+        if self.batch_history:
+            result["batch_history"] = list(self.batch_history)
         return result
 
 
@@ -307,7 +322,7 @@ class BatchRunner:
 
     def run(self) -> BatchRunnerSummary:
         summary = BatchRunnerSummary(run_id=self.config.run_id)
-        workers = max(1, int(self.config.item_workers))
+        workers = self._initial_worker_count()
         while True:
             if self.config.max_batches and summary.batches >= self.config.max_batches:
                 break
@@ -322,6 +337,7 @@ class BatchRunner:
 
             summary.batches += 1
             summary.claimed += len(batch)
+            summary.worker_history.append(workers)
 
             # Track per-batch metrics for backpressure
             batch_succeeded_before = summary.succeeded
@@ -354,6 +370,19 @@ class BatchRunner:
                     timer.checkpoint_errors = summary.checkpoint_errors - batch_ckpt_errors_before
                     timer.__exit__(None, None, None)
 
+            batch_snapshot = {
+                "batch_number": summary.batches,
+                "workers": workers,
+                "claimed": len(batch),
+                "succeeded": summary.succeeded - batch_succeeded_before,
+                "failed": summary.failed - batch_failed_before,
+                "retried": summary.retried - batch_retried_before,
+                "checkpoint_errors": summary.checkpoint_errors - batch_ckpt_errors_before,
+                "records_saved": summary.records_saved - batch_records_before,
+                "discovered_urls": summary.discovered_urls - batch_discovered_before,
+            }
+            summary.batch_history.append(batch_snapshot)
+
             if self.supervisor:
                 snapshot = BatchSupervisorSnapshot(
                     batch_number=summary.batches,
@@ -381,6 +410,9 @@ class BatchRunner:
                     summary.status = "paused"
                     break
 
+            if self.config.adaptive_item_workers:
+                workers = self._next_worker_count(workers, batch_snapshot, summary)
+
             if self.backpressure:
                 signals = self.backpressure.current_signals()
                 if signals.recommendation == "abort":
@@ -394,6 +426,34 @@ class BatchRunner:
         if self.backpressure:
             summary.backpressure = self.backpressure.current_signals().as_dict()
         return summary
+
+    def _initial_worker_count(self) -> int:
+        upper = self.config.max_item_workers or self.config.item_workers
+        return max(self.config.min_item_workers, min(self.config.item_workers, upper))
+
+    def _next_worker_count(self, current: int, batch_snapshot: dict[str, Any], summary: BatchRunnerSummary) -> int:
+        lower = self.config.min_item_workers
+        upper = self.config.max_item_workers or max(self.config.item_workers * 2, lower)
+        next_workers = current
+        claimed = int(batch_snapshot.get("claimed") or 0)
+        succeeded = int(batch_snapshot.get("succeeded") or 0)
+        failed = int(batch_snapshot.get("failed") or 0)
+        records_saved = int(batch_snapshot.get("records_saved") or 0)
+        success_rate = succeeded / max(claimed, 1)
+        yield_rate = records_saved / max(claimed, 1)
+        signals = self.backpressure.current_signals() if self.backpressure else None
+        pressure = bool(signals and signals.recommendation in {"pause", "abort"}) or failed > succeeded
+
+        if pressure:
+            next_workers = max(lower, current - 1)
+        elif claimed and success_rate >= 0.85 and yield_rate > 0 and current < upper:
+            next_workers = min(upper, current + 1)
+        elif failed and current > lower:
+            next_workers = max(lower, current - 1)
+
+        if current > lower and summary.failed > summary.succeeded * 2:
+            next_workers = max(lower, current - 1)
+        return next_workers
 
     def _process_one(self, item: FrontierItem, summary: BatchRunnerSummary) -> None:
         """Process and persist one item.

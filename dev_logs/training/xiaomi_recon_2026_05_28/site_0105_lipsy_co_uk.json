@@ -1,0 +1,41 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.lipsy.co.uk",
+  "domain": "lipsy.co.uk",
+  "checked_at": "2026-05-28T11:48:00Z",
+  "site_type": "ecommerce",
+  "language": "en",
+  "currency": "GBP",
+  "rendering": "unknown",
+  "access_status": {
+    "reachable": false,
+    "status_code": 403,
+    "final_url": "https://www.next.co.uk/shop/brand-lipsy-0",
+    "redirects": ["https://www.next.co.uk/shop/brand-lipsy-0"],
+    "blocked_signals": ["forbidden"],
+    "notes": "lipsy.co.uk redirects to next.co.uk/shop/brand-lipsy-0 which returns 403 on all modes. Lipsy is a Next Group brand. 403 on requests, curl_cffi, and browser."
+  },
+  "catalog_candidates": [],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {"type": "", "params": {}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "N/A", "evidence_type": "guessed"},
+  "api_candidates": [],
+  "selector_candidates": {},
+  "field_quality_expectation": {},
+  "difficulty_signals": [
+    {"kind": "redirect_to_parent", "evidence": "lipsy.co.uk redirects to next.co.uk/shop/brand-lipsy-0", "impact": "Brand site not independent - hosted on Next platform", "suggested_handling": "Use next.co.uk API (api.e.next.co.uk) to access Lipsy products", "confidence": 0.9},
+    {"kind": "waf_403", "evidence": "403 on all modes at next.co.uk", "impact": "Cannot access via standard scraping", "suggested_handling": "Use Next Group API if available", "confidence": 0.8}
+  ],
+  "recommended_action_plan": [
+    {"action": "apply_replay_runtime", "priority": "medium", "reason": "Lipsy is on Next platform - try api.e.next.co.uk", "params": {}, "depends_on_evidence": ["access_status"]}
+  ],
+  "confidence": {"catalog": 0.0, "api": 0.1, "selectors": 0.0, "pagination": 0.0, "overall": 0.05},
+  "evidence_log": [
+    {"ts": "2026-05-28T11:48:01Z", "type": "observed", "detail": "lipsy.co.uk redirects to next.co.uk/shop/brand-lipsy-0"},
+    {"ts": "2026-05-28T11:48:02Z", "type": "observed", "detail": "requests: 403 at next.co.uk"},
+    {"ts": "2026-05-28T11:48:03Z", "type": "observed", "detail": "curl_cffi: 403"},
+    {"ts": "2026-05-28T11:48:05Z", "type": "observed", "detail": "browser: 403"}
+  ],
+  "missing_evidence": ["all"],
+  "needs_human_review": false
+}

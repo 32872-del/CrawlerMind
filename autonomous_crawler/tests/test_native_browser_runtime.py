@@ -59,11 +59,15 @@ def _mock_response(
     status: int = 200,
     method: str = "GET",
     body: bytes = b'{"items":[1]}',
+    request_headers: dict[str, str] | None = None,
+    post_data: str = "",
 ) -> MagicMock:
     request = MagicMock()
     request.url = url
     request.resource_type = resource_type
     request.method = method
+    request.headers = request_headers or {}
+    request.post_data = post_data
 
     response = MagicMock()
     response.url = url
@@ -247,6 +251,43 @@ class NativeBrowserRuntimeTests(unittest.TestCase):
         self.assertEqual(len(response.captured_xhr), 1)
         self.assertEqual(response.captured_xhr[0]["url"], "https://example.com/api/products")
         self.assertIn("items", response.captured_xhr[0]["body_preview"])
+
+    @patch("autonomous_crawler.runtime.native_browser.sync_playwright")
+    def test_response_capture_preserves_replay_safe_headers_and_post_body(self, mock_pw: MagicMock) -> None:
+        page, _context, _routes, response_handlers = _setup_mock_playwright(mock_pw)
+
+        def goto_side_effect(*_args, **_kwargs):
+            for handler in response_handlers:
+                handler(_mock_response(
+                    "https://example.com/graphql",
+                    method="POST",
+                    body=b'{"data":{"products":{"items":[{"name":"Alpha"}]}}}',
+                    request_headers={
+                        "content-type": "application/json",
+                        "x-store": "nl",
+                        "authorization": "Bearer secret",
+                    },
+                    post_data='{"operationName":"Products","variables":{"currentPage":1}}',
+                ))
+            nav_response = MagicMock()
+            nav_response.status = 200
+            nav_response.headers = {}
+            return nav_response
+
+        page.goto.side_effect = goto_side_effect
+
+        response = NativeBrowserRuntime().render(RuntimeRequest.from_dict({
+            "url": "https://example.com/app",
+            "capture_xhr": "graphql",
+        }))
+
+        self.assertEqual(len(response.captured_xhr), 1)
+        sample = response.captured_xhr[0]
+        self.assertEqual(sample["method"], "POST")
+        self.assertEqual(sample["request_headers"]["content-type"], "application/json")
+        self.assertEqual(sample["request_headers"]["x-store"], "nl")
+        self.assertNotIn("authorization", sample["request_headers"])
+        self.assertIn("currentPage", sample["post_data_preview"])
 
     @patch("autonomous_crawler.runtime.native_browser.sync_playwright")
     def test_route_blocks_configured_resources(self, mock_pw: MagicMock) -> None:

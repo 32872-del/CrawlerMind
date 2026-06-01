@@ -1,0 +1,14 @@
+HTML Summary - Page 020
+==================================================
+URL: https://www.bhphotovideo.com/c/buy/Laptops/ci/18837
+Domain: bhphotovideo.com
+Page Type: product_listing
+HTTP Status: 403
+Confidence: 0.16
+Checked At: 2026-05-30T10:30:02.002860
+
+STATUS: HTTP 403 - Access Denied
+The server returned a 403 Forbidden response.
+This indicates anti-bot protection or geo-blocking.
+
+RECOMMENDATION: Use switch_runtime with browser + stealth mode

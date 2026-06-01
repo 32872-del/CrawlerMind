@@ -1,0 +1,12 @@
+HTML Summary: bhphotovideo.com - Page 013
+URL: https://www.bhphotovideo.com/c/product/1810368-REG/
+Fetched at: 2026-05-30T08:58:53.104545
+Fetch mode: auto (FAILED - HTTP 403 - Access blocked)
+
+=== HTML Not Available ===
+Error: HTTP 403 - Access blocked
+
+=== Screenshot ===
+File: screenshot_013_bhphoto_detail.png
+Page type: product_detail
+Visual state: normal

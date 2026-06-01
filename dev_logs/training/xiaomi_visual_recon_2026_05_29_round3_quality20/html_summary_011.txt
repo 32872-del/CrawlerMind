@@ -1,0 +1,12 @@
+HTML Summary: bhphotovideo.com - Page 011
+URL: https://www.bhphotovideo.com/c/search?q=mirrorless+camera
+Fetched at: 2026-05-30T08:58:53.103287
+Fetch mode: auto (FAILED - HTTP 403 - Access blocked)
+
+=== HTML Not Available ===
+Error: HTTP 403 - Access blocked
+
+=== Screenshot ===
+File: screenshot_011_bhphoto_search.png
+Page type: search_results
+Visual state: normal

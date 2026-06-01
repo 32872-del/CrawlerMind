@@ -1,0 +1,264 @@
+[
+  {
+    "groupKey": "EHjP6X8h",
+    "productCode": "IF0552-103",
+    "productType": "APPAREL",
+    "productSubType": "STANDARD",
+    "globalProductId": "f4c65114-174d-41eb-a1de-bfb923e00847",
+    "internalPid": "1015869007",
+    "merchProductId": "eab88d77-fa7f-5c83-a67b-157bd7937a9c",
+    "consumerChannelId": "d9a5bc42-4b9c-4976-858a-f159cf99c647",
+    "copy": {
+      "title": "Nike Sportswear",
+      "subTitle": "Women's Tight Graphic Tank Top"
+    },
+    "displayColors": {
+      "simpleColor": {
+        "label": "White",
+        "hex": "F0F4FF"
+      },
+      "colorDescription": "Chalk/White"
+    },
+    "prices": {
+      "currency": "GBP",
+      "currentPrice": 37.99,
+      "employeePrice": 37.99,
+      "initialPrice": 37.99,
+      "discountPercentage": 0,
+      "employeeDiscountPercentage": 0
+    },
+    "colorwayImages": {
+      "portraitURL": "https://static.nike.com/a/images/t_default/u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/591ef954-72b1-4d5d-aa59-30ba099b0225/W+NSW+STREET+GX+TANK.png",
+      "squarishURL": "https://static.nike.com/a/images/t_default/u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/5e4f1dc2-e2e9-49d8-81af-dc1338c058ad/W+NSW+STREET+GX+TANK.png"
+    },
+    "featuredAttributes": null,
+    "pdpUrl": {
+      "url": "https://www.nike.com/gb/t/sportswear-tight-graphic-tank-top-EHjP6X8h/IF0552-103",
+      "path": "/gb/t/sportswear-tight-graphic-tank-top-EHjP6X8h/IF0552-103"
+    },
+    "isNewUntil": null,
+    "promotions": null,
+    "customization": null,
+    "badgeAttribute": null,
+    "badgeLabel": null
+  },
+  {
+    "groupKey": "EHjP6X8h",
+    "productCode": "IF0552-010",
+    "productType": "APPAREL",
+    "productSubType": "STANDARD",
+    "globalProductId": "d5ca859a-cb6d-402b-85d0-36d99f416191",
+    "internalPid": "1015869614",
+    "merchProductId": "ce8ae2b9-8ef8-596c-afd6-b2a919fa3ba2",
+    "consumerChannelId": "d9a5bc42-4b9c-4976-858a-f159cf99c647",
+    "copy": {
+      "title": "Nike Sportswear",
+      "subTitle": "Women's Tight Graphic Tank Top"
+    },
+    "displayColors": {
+      "simpleColor": {
+        "label": "Black",
+        "hex": "27292B"
+      },
+      "colorDescription": "Black/Chalk"
+    },
+    "prices": {
+      "currency": "GBP",
+      "currentPrice": 37.99,
+      "employeePrice": 37.99,
+      "initialPrice": 37.99,
+      "discountPercentage": 0,
+      "employeeDiscountPercentage": 0
+    },
+    "colorwayImages": {
+      "portraitURL": "https://static.nike.com/a/images/t_default/u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/3af90ace-2955-4e14-a8e7-8c12dda58518/W+NSW+STREET+GX+TANK.png",
+      "squarishURL": "https://static.nike.com/a/images/t_default/u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/90487021-587b-4df0-bc1a-9a65c4883bd4/W+NSW+STREET+GX+TANK.png"
+    },
+    "featuredAttributes": null,
+    "pdpUrl": {
+      "url": "https://www.nike.com/gb/t/sportswear-tight-graphic-tank-top-EHjP6X8h/IF0552-010",
+      "path": "/gb/t/sportswear-tight-graphic-tank-top-EHjP6X8h/IF0552-010"
+    },
+    "isNewUntil": null,
+    "promotions": null,
+    "customization": null,
+    "badgeAttribute": null,
+    "badgeLabel": null
+  },
+  {
+    "groupKey": "oHrIpJZt",
+    "productCode": "IF0216-103",
+    "productType": "APPAREL",
+    "productSubType": "STANDARD",
+    "globalProductId": "eb6d9cb3-70b5-4492-9c6b-a1efcf6c30b7",
+    "internalPid": "1015844311",
+    "merchProductId": "4f271614-0521-54a1-8d1e-a73850dcf6f0",
+    "consumerChannelId": "d9a5bc42-4b9c-4976-858a-f159cf99c647",
+    "copy": {
+      "title": "Nike Sportswear",
+      "subTitle": "Women's Shrunken Tracksuit Jacket"
+    },
+    "displayColors": {
+      "simpleColor": {
+        "label": "White",
+        "hex": "F0F4FF"
+      },
+      "colorDescription": "Chalk/White/Light Bone/Sail"
+    },
+    "prices": {
+      "currency": "GBP",
+      "currentPrice": 74.99,
+      "employeePrice": 74.99,
+      "initialPrice": 74.99,
+      "discountPercentage": 0,
+      "employeeDiscountPercentage": 0
+    },
+    "colorwayImages": {
+      "portraitURL": "https://static.nike.com/a/images/t_default/9b78b1ee-953d-4356-a3c5-270c43f25437/W+NSW+SHRUNKEN+TRK+JKT+MOD.png",
+      "squarishURL": "https://static.nike.com/a/images/t_default/02b1076f-dee3-4674-b2d3-c89c1ed622df/W+NSW+SHRUNKEN+TRK+JKT+MOD.png"
+    },
+    "featuredAttributes": [
+      "SUSTAINABLE_MATERIALS"
+    ],
+    "pdpUrl": {
+      "url": "https://www.nike.com/gb/t/sportswear-shrunken-tracksuit-jacket-oHrIpJZt/IF0216-103",
+      "path": "/gb/t/sportswear-shrunken-tracksuit-jacket-oHrIpJZt/IF0216-103"
+    },
+    "isNewUntil": null,
+    "promotions": null,
+    "customization": null,
+    "badgeAttribute": "SUSTAINABLE_MATERIALS",
+    "badgeLabel": "Recycled Materials"
+  },
+  {
+    "groupKey": "oHrIpJZt",
+    "productCode": "IF0216-010",
+    "productType": "APPAREL",
+    "productSubType": "STANDARD",
+    "globalProductId": "2bd33756-af4d-45b6-8c79-6aad9b8453a0",
+    "internalPid": "1015844327",
+    "merchProductId": "32f80f9c-6438-5261-b21b-3e5234ccdc6a",
+    "consumerChannelId": "d9a5bc42-4b9c-4976-858a-f159cf99c647",
+    "copy": {
+      "title": "Nike Sportswear",
+      "subTitle": "Women's Shrunken Tracksuit Jacket"
+    },
+    "displayColors": {
+      "simpleColor": {
+        "label": "Black",
+        "hex": "27292B"
+      },
+      "colorDescription": "Black/Black/Black/Sail"
+    },
+    "prices": {
+      "currency": "GBP",
+      "currentPrice": 74.99,
+      "employeePrice": 74.99,
+      "initialPrice": 74.99,
+      "discountPercentage": 0,
+      "employeeDiscountPercentage": 0
+    },
+    "colorwayImages": {
+      "portraitURL": "https://static.nike.com/a/images/t_default/a1e861ce-96c3-45df-9640-83241de87169/W+NSW+SHRUNKEN+TRK+JKT+MOD.png",
+      "squarishURL": "https://static.nike.com/a/images/t_default/fdc8d0a1-6224-4221-8a79-de34baa9eecc/W+NSW+SHRUNKEN+TRK+JKT+MOD.png"
+    },
+    "featuredAttributes": [
+      "SUSTAINABLE_MATERIALS"
+    ],
+    "pdpUrl": {
+      "url": "https://www.nike.com/gb/t/sportswear-shrunken-tracksuit-jacket-oHrIpJZt/IF0216-010",
+      "path": "/gb/t/sportswear-shrunken-tracksuit-jacket-oHrIpJZt/IF0216-010"
+    },
+    "isNewUntil": null,
+    "promotions": null,
+    "customization": null,
+    "badgeAttribute": "SUSTAINABLE_MATERIALS",
+    "badgeLabel": "Recycled Materials"
+  },
+  {
+    "groupKey": "CO6iqltm",
+    "productCode": "IU9086-110",
+    "productType": "APPAREL",
+    "productSubType": "STANDARD",
+    "globalProductId": "26b5f0e1-7aa1-4fb9-aada-22d96f1663d9",
+    "internalPid": "1015914365",
+    "merchProductId": "8fbf5cd5-15cb-5e74-860b-236eb2d1deca",
+    "consumerChannelId": "d9a5bc42-4b9c-4976-858a-f159cf99c647",
+    "copy": {
+      "title": "Nike Sportswear",
+      "subTitle": "Women's T-shirt"
+    },
+    "displayColors": {
+      "simpleColor": {
+        "label": "Brown",
+        "hex": "6C5627"
+      },
+      "colorDescription": "Pale Ivory"
+    },
+    "prices": {
+      "currency": "GBP",
+      "currentPrice": 37.99,
+      "employeePrice": 37.99,
+      "initialPrice": 37.99,
+      "discountPercentage": 0,
+      "employeeDiscountPercentage": 0
+    },
+    "colorwayImages": {
+      "portraitURL": "https://static.nike.com/a/images/t_default/u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/ba26ed1f-3281-4e97-b8c9-ed798276e6f8/W+NSW+NVLTY+BOXY+OS+TEE.png",
+      "squarishURL": "https://static.nike.com/a/images/t_default/u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/9cc085cf-1507-4da6-b72c-2efc61182db2/W+NSW+NVLTY+BOXY+OS+TEE.png"
+    },
+    "featuredAttributes": null,
+    "pdpUrl": {
+      "url": "https://www.nike.com/gb/t/sportswear-t-shirt-CO6iqltm/IU9086-110",
+      "path": "/gb/t/sportswear-t-shirt-CO6iqltm/IU9086-110"
+    },
+    "isNewUntil": null,
+    "promotions": null,
+    "customization": null,
+    "badgeAttribute": null,
+    "badgeLabel": null
+  },
+  {
+    "groupKey": "CO6iqltm",
+    "productCode": "IU9086-063",
+    "productType": "APPAREL",
+    "productSubType": "STANDARD",
+    "globalProductId": "36b8cb84-e05e-4eb8-b022-77186e068ab2",
+    "internalPid": "1015914345",
+    "merchProductId": "223b1461-fa96-53d9-9d6c-3635563ab684",
+    "consumerChannelId": "d9a5bc42-4b9c-4976-858a-f159cf99c647",
+    "copy": {
+      "title": "Nike Sportswear",
+      "subTitle": "Women's T-shirt"
+    },
+    "displayColors": {
+      "simpleColor": {
+        "label": "Grey",
+        "hex": "808080"
+      },
+      "colorDescription": "Dark Grey Heather"
+    },
+    "prices": {
+      "currency": "GBP",
+      "currentPrice": 37.99,
+      "employeePrice": 37.99,
+      "initialPrice": 37.99,
+      "discountPercentage": 0,
+      "employeeDiscountPercentage": 0
+    },
+    "colorwayImages": {
+      "portraitURL": "https://static.nike.com/a/images/t_default/u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/04b82a8c-bc09-43e1-ad44-1c502da7518f/W+NSW+NVLTY+BOXY+OS+TEE.png",
+      "squarishURL": "https://static.nike.com/a/images/t_default/u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/3abbd48e-9db4-4876-96ec-f3f015b7c6f2/W+NSW+NVLTY+BOXY+OS+TEE.png"
+    },
+    "featuredAttributes": null,
+    "pdpUrl": {
+      "url": "https://www.nike.com/gb/t/sportswear-t-shirt-CO6iqltm/IU9086-063",
+      "path": "/gb/t/sportswear-t-shirt-CO6iqltm/IU9086-063"
+    },
+    "isNewUntil": null,
+    "promotions": null,
+    "customization": null,
+    "badgeAttribute": null,
+    "badgeLabel": null
+  }
+]

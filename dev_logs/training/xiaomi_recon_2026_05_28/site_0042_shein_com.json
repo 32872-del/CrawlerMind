@@ -1,0 +1,40 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.shein.com",
+  "domain": "shein.com",
+  "checked_at": "2026-05-28T10:49:00Z",
+  "site_type": "ecommerce",
+  "language": "en",
+  "currency": "GBP",
+  "rendering": "spa",
+  "access_status": {
+    "reachable": true,
+    "status_code": 200,
+    "final_url": "https://www.shein.com",
+    "redirects": [],
+    "blocked_signals": ["captcha_challenge"],
+    "notes": "Accessible via requests mode. 80KB HTML truncated. Browser shows geetest captcha challenge. No API hints found."
+  },
+  "catalog_candidates": [],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {"type": "", "params": {}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "Cannot determine - captcha", "evidence_type": "guessed"},
+  "api_candidates": [],
+  "selector_candidates": {},
+  "field_quality_expectation": {},
+  "difficulty_signals": [
+    {"kind": "captcha", "evidence": "Browser returns geetest captcha challenge page.", "impact": "Site requires captcha solving for browser access", "suggested_handling": "Requires proxy or authenticated session", "confidence": 0.9},
+    {"kind": "js_rendering", "evidence": "80KB HTML truncated. SPA architecture.", "impact": "Content may require browser rendering", "suggested_handling": "Use browser mode or API endpoint", "confidence": 0.7}
+  ],
+  "recommended_action_plan": [
+    {"action": "patch_profile", "priority": "high", "reason": "Try with proxy to bypass geetest captcha", "params": {}, "depends_on_evidence": ["access_status"]},
+    {"action": "analyze_site", "priority": "medium", "reason": "Re-analyze with proxy if available", "params": {}, "depends_on_evidence": ["access_status"]}
+  ],
+  "confidence": {"catalog": 0.1, "api": 0.1, "selectors": 0.1, "pagination": 0.1, "overall": 0.15},
+  "evidence_log": [
+    {"ts": "2026-05-28T10:49:01Z", "type": "observed", "detail": "requests: 200 OK, 80KB HTML truncated"},
+    {"ts": "2026-05-28T10:49:05Z", "type": "observed", "detail": "browser: geetest captcha challenge page"}
+  ],
+  "missing_evidence": ["everything"],
+  "needs_human_review": true
+}

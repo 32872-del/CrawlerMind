@@ -1,0 +1,54 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.ikea.com/nl/nl/",
+  "domain": "ikea.com",
+  "checked_at": "2026-05-28T10:21:00Z",
+  "site_type": "ecommerce",
+  "language": "nl",
+  "currency": "EUR",
+  "rendering": "hybrid",
+  "access_status": {
+    "reachable": true,
+    "status_code": 200,
+    "final_url": "https://www.ikea.com/nl/nl/",
+    "redirects": [],
+    "blocked_signals": [],
+    "notes": "All 3 modes work. requests/curl_cffi return 80KB, browser returns 1.1MB (fully rendered). 32 API hints."
+  },
+  "catalog_candidates": [
+    {"level1": "Producten", "level2": "", "level3": "", "label": "Producten", "url": "https://www.ikea.com/nl/nl/cat/producten-products/", "source": "link_candidate", "evidence_type": "observed", "confidence": 0.75},
+    {"level1": "Betaalbare accessoires", "level2": "", "level3": "", "label": "Betaalbare accessoires", "url": "https://www.ikea.com/nl/nl/cat/betaalbare-accessoires-voor-elke-dag-700313/", "source": "api_hint", "evidence_type": "observed", "confidence": 0.7},
+    {"level1": "Favourites", "level2": "", "level3": "", "label": "Favourites", "url": "https://www.ikea.com/nl/nl/favourites/", "source": "link_candidate", "evidence_type": "observed", "confidence": 0.65}
+  ],
+  "list_page_candidates": [
+    {"url": "https://www.ikea.com/nl/nl/cat/producten-products/", "label": "Producten", "category_path": ["Producten"], "product_count_hint": null, "source": "link_candidate", "evidence_type": "observed", "confidence": 0.7}
+  ],
+  "detail_url_patterns": [],
+  "pagination": {"type": "page_param_guess", "params": {"page": "2"}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "Common page param guess", "evidence_type": "guessed"},
+  "api_candidates": [],
+  "selector_candidates": {
+    "title": [{"selector": "h1", "selector_type": "css", "scope": "detail", "sample_value": "", "evidence_type": "guessed", "confidence": 0.3}],
+    "highest_price": [{"selector": "[class*=price], [itemprop=price], meta[itemprop=price]", "selector_type": "css", "scope": "detail", "sample_value": "", "evidence_type": "guessed", "confidence": 0.3}],
+    "colors": [], "sizes": [],
+    "description": [{"selector": "div.hnf-navbar__container.hnf-content-container", "selector_type": "css", "scope": "global", "sample_value": "", "evidence_type": "inferred", "confidence": 0.3}],
+    "image_urls": [{"selector": "meta@content", "selector_type": "meta", "scope": "global", "sample_value": "", "evidence_type": "inferred", "confidence": 0.4}],
+    "product_url": [], "category_level_1": [], "category_level_2": [], "category_level_3": []
+  },
+  "field_quality_expectation": {"title": {"grade": "C", "reason": "h1 generic but site well-structured"}},
+  "difficulty_signals": [
+    {"kind": "js_rendering", "evidence": "Browser returns 1.1MB vs 80KB static. SPA with heavy rendering.", "impact": "Static HTML may miss product content", "suggested_handling": "Use browser rendering for product lists", "confidence": 0.7}
+  ],
+  "recommended_action_plan": [
+    {"action": "analyze_site", "priority": "high", "reason": "Explore product category page with browser", "params": {"url": "https://www.ikea.com/nl/nl/cat/producten-products/"}, "depends_on_evidence": []},
+    {"action": "resolve_fields", "priority": "medium", "reason": "IKEA has structured product pages", "params": {}, "depends_on_evidence": []}
+  ],
+  "confidence": {"catalog": 0.7, "api": 0.2, "selectors": 0.35, "pagination": 0.2, "overall": 0.5},
+  "evidence_log": [
+    {"ts": "2026-05-28T10:21:01Z", "type": "observed", "detail": "requests: 200 OK, 80KB"},
+    {"ts": "2026-05-28T10:21:05Z", "type": "observed", "detail": "browser: 200 OK, 1.1MB rendered"},
+    {"ts": "2026-05-28T10:21:08Z", "type": "observed", "detail": "32 API hints, category URL /nl/nl/cat/producten-products/ found"},
+    {"ts": "2026-05-28T10:21:10Z", "type": "observed", "detail": "7 link candidates including producten-products and favourites"}
+  ],
+  "missing_evidence": ["product_list_selector", "price_sample", "detail_page_sample"],
+  "needs_human_review": false
+}

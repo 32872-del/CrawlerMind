@@ -1,0 +1,83 @@
+{
+  "schema_version": "clm-visual-recon-v1",
+  "site_url": "https://www.bhphotovideo.com",
+  "page_url": "https://www.bhphotovideo.com/c/product/1810368-REG/",
+  "domain": "bhphotovideo.com",
+  "checked_at": "2026-05-30T08:58:53.104263Z",
+  "input_artifacts": {
+    "screenshot_path": "screenshot_013_bhphoto_detail.png",
+    "html_summary_path": "html_summary_013.txt",
+    "network_summary_path": "network_summary_013.txt"
+  },
+  "page_type": "product_detail",
+  "visual_state": "normal",
+  "is_product_listing": false,
+  "is_product_detail": true,
+  "visible_catalog": [],
+  "visible_product_cards": {
+    "detected": false,
+    "count_estimate": "0 (detail)",
+    "layout": "single_product",
+    "evidence": "Screenshot shows product detail",
+    "confidence": 0.0
+  },
+  "field_regions": {
+    "_note": "HTTP 403 - selectors inferred from screenshot only"
+  },
+  "blocking_signals": [
+    {
+      "kind": "fetch_failed",
+      "description": "HTTP 403 - Access blocked",
+      "confidence": 0.9,
+      "evidence_type": "observed"
+    }
+  ],
+  "pagination_signals": [],
+  "visual_action_hints": [
+    {
+      "hint": "resolve_fields",
+      "reason": "product_detail on bhphotovideo.com",
+      "confidence": 0.8
+    }
+  ],
+  "recommended_action_plan": [
+    {
+      "action": "resolve_fields",
+      "priority": "high",
+      "reason": "Product detail visible in screenshot",
+      "params": {},
+      "depends_on_evidence": [
+        "screenshot"
+      ]
+    },
+    {
+      "action": "switch_runtime",
+      "priority": "medium",
+      "reason": "HTTP 403 requires browser/proxy",
+      "params": {},
+      "depends_on_evidence": [
+        "screenshot"
+      ]
+    }
+  ],
+  "confidence": {
+    "page_type": 0.95,
+    "product_cards": 0.0,
+    "fields": 0.0,
+    "blocking": 0.3,
+    "pagination": 0.0,
+    "overall": 0.15
+  },
+  "evidence_log": [
+    "HTML: NOT AVAILABLE (HTTP 403 - Access blocked)",
+    "Screenshot: screenshot_013_bhphoto_detail.png (captured)",
+    "Network: no_network_captured",
+    "Note: HTTP 403 blocked. Screenshot shows product detail page."
+  ],
+  "missing_evidence": [
+    "network_summary",
+    "html_content"
+  ],
+  "needs_backend_verification": true,
+  "needs_human_review": false
+}

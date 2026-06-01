@@ -1,0 +1,85 @@
+{
+  "schema_version": "clm-visual-recon-v1",
+  "site_url": "https://www.bestbuy.com",
+  "page_url": "https://www.bestbuy.com",
+  "domain": "bestbuy.com",
+  "checked_at": "2026-05-28T10:04:00Z",
+  "input_artifacts": {
+    "screenshot_path": "screenshot_ca8507f4.png",
+    "html_summary_path": "",
+    "network_summary_path": ""
+  },
+  "page_type": "blocked",
+  "visual_state": "geo_redirect",
+  "is_product_listing": false,
+  "is_product_detail": false,
+  "visible_catalog": [],
+  "visible_product_cards": {
+    "detected": false,
+    "count_estimate": 0,
+    "layout": "",
+    "evidence": "Page shows geo-redirect prompt: 'Hello! Choose a country.' with Canada and United States flags",
+    "confidence": 0.95
+  },
+  "field_regions": {
+    "title": [],
+    "highest_price": [],
+    "colors": [],
+    "sizes": [],
+    "description": [],
+    "image_urls": [],
+    "product_url": []
+  },
+  "blocking_signals": [
+    {
+      "kind": "geo_block",
+      "visible_text": "Hello! Choose a country. | Canada | United States | Shopping in the U.S.A.?",
+      "evidence": "Geo-redirect page detected, blocking access to actual site content based on IP location",
+      "impact": "Cannot access product listings or details without selecting country",
+      "suggested_handling": "Select 'United States' to proceed, or use US-based proxy",
+      "confidence": 0.95
+    }
+  ],
+  "pagination_signals": [],
+  "visual_action_hints": [
+    {
+      "hint": "use_browser_runtime",
+      "reason": "Geo-redirect page requires interaction to proceed",
+      "confidence": 0.8
+    }
+  ],
+  "recommended_action_plan": [
+    {
+      "action": "switch_runtime",
+      "priority": "high",
+      "reason": "Geo-redirect requires browser interaction to select country before accessing content",
+      "params": {"runtime": "browser"},
+      "depends_on_evidence": ["geo_redirect_detected"]
+    },
+    {
+      "action": "patch_profile",
+      "priority": "medium",
+      "reason": "May need US-based proxy or cookie to bypass geo-redirect",
+      "params": {},
+      "depends_on_evidence": ["geo_redirect_detected"]
+    }
+  ],
+  "confidence": {
+    "page_type": 0.95,
+    "product_cards": 0.95,
+    "fields": 0.0,
+    "blocking": 0.95,
+    "pagination": 0.95,
+    "overall": 0.65
+  },
+  "evidence_log": [
+    "BEST BUY logo visible at top",
+    "Blue gradient background",
+    "Text: 'Hello! Choose a country.'",
+    "Two flag options: Canada and United States",
+    "Note: 'International customers can shop on www.bestbuy.com and have orders shipped to any U.S. address or U.S. store'"
+  ],
+  "missing_evidence": ["html_summary", "network_summary", "actual_site_content"],
+  "needs_backend_verification": true,
+  "needs_human_review": false
+}

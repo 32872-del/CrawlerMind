@@ -1,0 +1,159 @@
+{
+  "schema_version": "clm-visual-recon-v1",
+  "site_url": "https://www.newegg.com",
+  "page_url": "https://www.newegg.com/p/N82E16834156500",
+  "domain": "newegg.com",
+  "checked_at": "2026-05-28T10:19:00Z",
+  "input_artifacts": {
+    "screenshot_path": "screenshot_fe334d4c.png",
+    "html_summary_path": "",
+    "network_summary_path": ""
+  },
+  "page_type": "product_detail",
+  "visual_state": "normal",
+  "is_product_listing": false,
+  "is_product_detail": true,
+  "visible_catalog": [
+    {
+      "label": "Breadcrumb",
+      "level_hint": 3,
+      "visible_text": "Home > Computer Systems > Laptop/Notebook > All Laptops > MSI",
+      "position_hint": "breadcrumb",
+      "confidence": 0.9,
+      "evidence_type": "observed"
+    }
+  ],
+  "visible_product_cards": {
+    "detected": false,
+    "count_estimate": 0,
+    "layout": "detail_page",
+    "evidence": "Single product detail page for MSI 15.6\" AMD Ryzen 5 laptop",
+    "confidence": 0.95
+  },
+  "field_regions": {
+    "title": [
+      {
+        "region_id": "product_title",
+        "scope": "detail",
+        "position_hint": "hero_area",
+        "visible_text_sample": "MSI 15.6\" AMD Ryzen 5 PRO 7530U 16GB Memory DDR4 3200 1TB NVMe SSD Windows 11 Home 64-bit Modern 15 B7M-224US",
+        "nearby_visual_clues": ["price", "stock_status", "specs"],
+        "selector_hint": ".product-title",
+        "confidence": 0.7,
+        "evidence_type": "observed"
+      }
+    ],
+    "highest_price": [
+      {
+        "region_id": "product_price",
+        "scope": "detail",
+        "position_hint": "right_panel",
+        "visible_text_sample": "OUT OF STOCK",
+        "nearby_visual_clues": ["stock_status", "seller_info"],
+        "selector_hint": ".price-current",
+        "confidence": 0.7,
+        "evidence_type": "observed"
+      }
+    ],
+    "colors": [],
+    "sizes": [],
+    "description": [
+      {
+        "region_id": "product_specs",
+        "scope": "detail",
+        "position_hint": "below_title",
+        "visible_text_sample": "AMD Ryzen 5 7530U | AMD Radeon Graphics | 16GB DDR4 3200 | 15.6\" 1920 x 1080 | Windows 11 Home 64-bit",
+        "nearby_visual_clues": ["specs_list"],
+        "selector_hint": ".product-bullets",
+        "confidence": 0.7,
+        "evidence_type": "observed"
+      }
+    ],
+    "image_urls": [
+      {
+        "region_id": "product_images",
+        "scope": "detail",
+        "position_hint": "left_gallery",
+        "visible_text_sample": "",
+        "nearby_visual_clues": ["main_image", "thumbnails"],
+        "selector_hint": ".product-gallery img",
+        "confidence": 0.7,
+        "evidence_type": "observed"
+      }
+    ],
+    "product_url": [
+      {
+        "region_id": "product_url",
+        "scope": "detail",
+        "position_hint": "global",
+        "visible_text_sample": "",
+        "nearby_visual_clues": ["canonical_url"],
+        "selector_hint": "link[rel=canonical]",
+        "confidence": 0.7,
+        "evidence_type": "observed"
+      }
+    ]
+  },
+  "blocking_signals": [
+    {
+      "kind": "empty_listing",
+      "visible_text": "OUT OF STOCK | This item is currently out of stock and it may or may not be restocked.",
+      "evidence": "Product is out of stock with warning that it may not be restocked",
+      "impact": "Cannot purchase, but product specs still visible",
+      "suggested_handling": "Data extraction possible, price unavailable",
+      "confidence": 0.95
+    }
+  ],
+  "pagination_signals": [],
+  "visual_action_hints": [
+    {
+      "hint": "extract_breadcrumb_categories",
+      "reason": "Clear breadcrumb navigation: Computer Systems > Laptop/Notebook > All Laptops > MSI",
+      "confidence": 0.9
+    },
+    {
+      "hint": "probe_detail_page_for_variants",
+      "reason": "No variant selectors visible - single configuration product",
+      "confidence": 0.7
+    }
+  ],
+  "recommended_action_plan": [
+    {
+      "action": "resolve_fields",
+      "priority": "high",
+      "reason": "Rich product detail with title, specs, images clearly visible",
+      "params": {"fields": ["title", "specs", "images", "url"]},
+      "depends_on_evidence": ["product_detail_detected"]
+    },
+    {
+      "action": "run_test",
+      "priority": "medium",
+      "reason": "Test extraction on Newegg product detail page",
+      "params": {},
+      "depends_on_evidence": ["product_detail_detected"]
+    }
+  ],
+  "confidence": {
+    "page_type": 0.95,
+    "product_cards": 0.95,
+    "fields": 0.7,
+    "blocking": 0.85,
+    "pagination": 0.95,
+    "overall": 0.65
+  },
+  "evidence_log": [
+    "Newegg header with breadcrumb: Home > Computer Systems > Laptop/Notebook > All Laptops > MSI",
+    "Product: MSI 15.6\" AMD Ryzen 5 PRO 7530U laptop",
+    "Main image: MSI laptop showing screen with game/3D rendering",
+    "Specs listed: CPU, GPU, RAM, Screen, Storage, OS",
+    "OUT OF STOCK badge in red",
+    "Warning: 'may or may not be restocked'",
+    "Sold by: Newegg, Shipped by: Newegg",
+    "No reviews visible",
+    "Tab navigation: Overview | Specs | Reviews",
+    "Warranty & Returns section below"
+  ],
+  "missing_evidence": ["html_summary", "network_summary", "price"],
+  "needs_backend_verification": true,
+  "needs_human_review": false
+}

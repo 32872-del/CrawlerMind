@@ -1,0 +1,23 @@
+HTML Summary - Page 017
+==================================================
+URL: https://www.homedepot.com/
+Domain: homedepot.com
+Page Type: home
+HTTP Status: 200
+Confidence: 0.5
+Checked At: 2026-05-30T10:30:01.998466
+
+HTML Content Analysis:
+  Title: (not found)
+  Language: en
+  Total HTML Tags: 45
+  Scripts: 0
+  Images: 0
+  Links: 0 product links
+  Forms: 0
+  Nav Elements: 0
+  Articles: 0
+  Structured Data: No
+
+HTML File Size: 80,338 bytes
+NOTE: HTML truncated at ~80KB. Product content may load via JavaScript after truncation point.

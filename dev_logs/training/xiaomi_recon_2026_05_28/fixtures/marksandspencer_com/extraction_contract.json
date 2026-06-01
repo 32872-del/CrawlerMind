@@ -1,0 +1,150 @@
+{
+  "contract_version": "1.0",
+  "site": "marksandspencer.com",
+  "source_url": "https://www.marksandspencer.com/l/women/dresses",
+  "source_type": "nextjs_graphql_ssr_listing_page",
+  "recommended_clm_runtime": "browser",
+  "parser_strategy": {
+    "name": "next_data_graphql_ssr_cache_extractor",
+    "description": "Extract product data from __NEXT_DATA__ script tag. The serverSideGqlResponseFed.productPageData.search.results.products[] array contains products with full variant data from GraphQL SSR cache.",
+    "input": "Rendered HTML string from browser",
+    "entry_selector": "script#__NEXT_DATA__",
+    "decode_steps": [
+      "Find <script id=\"__NEXT_DATA__\"> element",
+      "Extract text content",
+      "JSON parse the entire content",
+      "Navigate to props.pageProps.serverSideGqlResponseFed.productPageData.search.results",
+      "Read totalItems for catalog size",
+      "Read pagination for offset/limit",
+      "Iterate products[]",
+      "For each product, extract first variant from variants[]",
+      "Map each product to CLM fields"
+    ],
+    "fallback_selectors": {}
+  },
+  "pagination_strategy": {
+    "type": "graphql_offset",
+    "params": "rows, offset via queryVariables in __NEXT_DATA__",
+    "total_items_path": "search.results.totalItems",
+    "notes": "Total items available in response. Re-request with different offset for next page."
+  },
+  "field_paths": {
+    "title": {
+      "path": "products[].title",
+      "type": "string",
+      "required": true
+    },
+    "highest_price": {
+      "path": "products[].price.listPrice.amount",
+      "type": "number",
+      "required": true
+    },
+    "currency": {
+      "path": "products[].price.currency",
+      "type": "string",
+      "required": true
+    },
+    "color": {
+      "path": "Parse from products[].seoPath query param (color=XXX)",
+      "type": "string",
+      "required": false,
+      "notes": "Not a direct field. Extract from seoPath URL query string."
+    },
+    "size": {
+      "path": "products[].variants[0].size",
+      "type": "string",
+      "required": false,
+      "notes": "First variant size. Multiple sizes available in variants[] array."
+    },
+    "description": {
+      "path": "products[].description",
+      "type": "string|null",
+      "required": false,
+      "notes": "Often null in GraphQL response. May need detail page fetch."
+    },
+    "image_url": {
+      "path": "Construct from products[].variants[0].mediaAssets[0].assetId",
+      "type": "string",
+      "required": true,
+      "template": "https://assets.digitalcontent.marksandspencer.app/image/upload/q_auto,f_auto/{assetId}"
+    },
+    "product_url": {
+      "path": "Construct from products[].seoPath",
+      "type": "string",
+      "required": true,
+      "template": "https://www.marksandspencer.com{seoPath}"
+    },
+    "category_level_1": {
+      "path": "products[].productDefinition",
+      "type": "string",
+      "required": true,
+      "notes": "e.g. Dresses, Tops"
+    },
+    "category_level_2": {
+      "path": null,
+      "type": "null",
+      "required": false,
+      "missing_reason": "Not available in product response. Available in facets[] separately."
+    },
+    "brand": {
+      "path": "products[].brand",
+      "type": "string",
+      "required": true
+    },
+    "sku": {
+      "path": "products[].variants[0].skuId",
+      "type": "string",
+      "required": true
+    },
+    "product_id": {
+      "path": "products[].id",
+      "type": "string",
+      "required": true
+    }
+  },
+  "post_processors": [
+    {
+      "field": "__NEXT_DATA__",
+      "operation": "json_parse",
+      "params": {}
+    },
+    {
+      "field": "image_url",
+      "operation": "template_expand",
+      "params": {
+        "template": "https://assets.digitalcontent.marksandspencer.app/image/upload/q_auto,f_auto/{assetId}",
+        "source_field": "variants[0].mediaAssets[0].assetId"
+      }
+    },
+    {
+      "field": "product_url",
+      "operation": "prepend_base",
+      "params": {
+        "base_url": "https://www.marksandspencer.com",
+        "source_field": "seoPath"
+      }
+    },
+    {
+      "field": "color",
+      "operation": "parse_query_param",
+      "params": {
+        "source_field": "seoPath",
+        "param_name": "color"
+      }
+    }
+  ],
+  "missing_fields": [
+    "category_level_2"
+  ],
+  "conditional_missing": {
+    "description": "Often null in GraphQL response",
+    "color": "Available only as query param in seoPath"
+  },
+  "evidence_files": [
+    "raw_evidence_graphql_sample.json",
+    "raw_evidence_meta.html",
+    "raw_evidence_urql_state.json"
+  ],
+  "confidence": 0.85,
+  "implementation_notes": "M&S has the richest variant data of all 3 sites. GraphQL SSR cache includes sizes, SKUs, and image asset IDs. Image URLs need template construction. Color needs URL parsing. Description often null."
+}

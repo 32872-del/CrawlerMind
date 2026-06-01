@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from .browser_context import BrowserContextConfig, normalize_wait_until
+from .replay_diagnostics import build_replay_diagnostics
 
 try:
     from playwright.sync_api import sync_playwright
@@ -240,6 +241,14 @@ def build_api_candidates_from_entries(entries: list[NetworkEntry]) -> list[dict[
             entry.method.upper() == "POST" and entry.post_data_preview
         ):
             candidate["post_data_preview"] = entry.post_data_preview
+        diagnostics = build_replay_diagnostics(
+            url=entry.url,
+            method=entry.method,
+            headers=entry.request_headers,
+            post_data=entry.post_data_preview,
+        ).to_dict()
+        if diagnostics.get("replay_required"):
+            candidate["replay_diagnostics"] = diagnostics
         candidates.append(candidate)
     return candidates
 

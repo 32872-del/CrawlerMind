@@ -1,0 +1,76 @@
+{
+  "schema_version": "clm-visual-recon-v1",
+  "site_url": "https://www.etsy.com",
+  "page_url": "https://www.etsy.com/search?q=vintage+camera&ref=search_bar",
+  "domain": "etsy.com",
+  "checked_at": "2026-05-28T10:16:00Z",
+  "input_artifacts": {
+    "screenshot_path": "screenshot_fbe9522f.png",
+    "html_summary_path": "",
+    "network_summary_path": ""
+  },
+  "page_type": "blocked",
+  "visual_state": "challenge",
+  "is_product_listing": false,
+  "is_product_detail": false,
+  "visible_catalog": [],
+  "visible_product_cards": {
+    "detected": false,
+    "count_estimate": 0,
+    "layout": "",
+    "evidence": "Fourth Etsy bot detection page with ID: 472c2eb5-b230-15ed-6bc7-03468caa517f",
+    "confidence": 0.95
+  },
+  "field_regions": {
+    "title": [],
+    "highest_price": [],
+    "colors": [],
+    "sizes": [],
+    "description": [],
+    "image_urls": [],
+    "product_url": []
+  },
+  "blocking_signals": [
+    {
+      "kind": "captcha",
+      "visible_text": "访问暂时受限 | IP:80.93.218.39",
+      "evidence": "Consistent bot detection - fourth occurrence from same IP",
+      "impact": "Cannot access any Etsy content",
+      "suggested_handling": "IP rotation or stealth browser required",
+      "confidence": 0.95
+    }
+  ],
+  "pagination_signals": [],
+  "visual_action_hints": [
+    {
+      "hint": "use_browser_runtime",
+      "reason": "CAPTCHA requires browser interaction",
+      "confidence": 0.8
+    }
+  ],
+  "recommended_action_plan": [
+    {
+      "action": "switch_runtime",
+      "priority": "high",
+      "reason": "Etsy consistently blocks - need IP rotation or stealth browser",
+      "params": {"runtime": "browser", "stealth": true},
+      "depends_on_evidence": ["captcha_challenge_detected"]
+    }
+  ],
+  "confidence": {
+    "page_type": 0.95,
+    "product_cards": 0.95,
+    "fields": 0.0,
+    "blocking": 0.95,
+    "pagination": 0.95,
+    "overall": 0.65
+  },
+  "evidence_log": [
+    "Fourth Etsy blocked page",
+    "Error ID: 472c2eb5-b230-15ed-6bc7-03468caa517f",
+    "Same IP detection: 80.93.218.39"
+  ],
+  "missing_evidence": ["html_summary", "network_summary", "search_results"],
+  "needs_backend_verification": true,
+  "needs_human_review": true
+}

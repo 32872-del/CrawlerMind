@@ -1,0 +1,158 @@
+{
+  "schema_version": "clm-action-decision-v1",
+  "page_id": 11,
+  "site_url": "https://www.newegg.com",
+  "page_url": "https://www.newegg.com/p/pl?d=RTX+4090",
+  "domain": "newegg.com",
+  "checked_at": "2026-05-30T10:30:01.977698",
+  "input_artifacts": {
+    "screenshot_path": "screenshot_011.png",
+    "html_summary_path": "html_summary_011.txt",
+    "network_summary_path": "network_summary_011.txt"
+  },
+  "page_type": "product_listing",
+  "visual_state": "visible",
+  "is_product_listing": true,
+  "is_product_detail": false,
+  "http_status": "200",
+  "field_regions": [
+    {
+      "selector": "html.show-tab-store",
+      "hit_count": 1,
+      "sample_values": [],
+      "field_type": "unknown"
+    },
+    {
+      "selector": "html.sticky-header-top",
+      "hit_count": 1,
+      "sample_values": [],
+      "field_type": "unknown"
+    },
+    {
+      "selector": "style.vjs-styles-defaults",
+      "hit_count": 1,
+      "sample_values": [],
+      "field_type": "unknown"
+    },
+    {
+      "selector": "#www-widgetapi-script",
+      "hit_count": 1,
+      "sample_values": [],
+      "field_type": "unknown"
+    },
+    {
+      "selector": "#nrtvTag",
+      "hit_count": 1,
+      "sample_values": [],
+      "field_type": "unknown"
+    }
+  ],
+  "blocking_signals": [],
+  "pagination_signals": [],
+  "recommended_action_plan": [
+    {
+      "action": "analyze_site",
+      "priority": 1,
+      "reason": "Product listing but few product links detected in HTML",
+      "params": {
+        "url": "https://www.newegg.com/p/pl?d=RTX+4090",
+        "focus": "product_detection"
+      },
+      "depends_on_evidence": "html_structure"
+    },
+    {
+      "action": "resolve_fields",
+      "priority": 2,
+      "reason": "Attempt field extraction from available HTML",
+      "params": {
+        "fields": [
+          "title",
+          "price",
+          "image"
+        ]
+      },
+      "depends_on_evidence": "html_structure"
+    },
+    {
+      "action": "export_results",
+      "priority": 3,
+      "reason": "Export extracted data to database/output",
+      "params": {
+        "format": "json"
+      },
+      "depends_on_evidence": "resolved_fields"
+    }
+  ],
+  "confidence": {
+    "screenshot": 0.15,
+    "html_content": 0.2,
+    "selectors": 0.1,
+    "prices": 0.1,
+    "product_cards": 0.0,
+    "blocking": 0.1,
+    "pagination": 0.0,
+    "overall": 0.69
+  },
+  "evidence_log": [
+    {
+      "type": "screenshot",
+      "status": "captured",
+      "path": "screenshot_851dead1.png"
+    },
+    {
+      "type": "html",
+      "status": "captured",
+      "truncated": false
+    },
+    {
+      "type": "network",
+      "status": "not_captured",
+      "reason": "observe_browser_network not called"
+    }
+  ],
+  "missing_evidence": [
+    "network_evidence",
+    "product_card_validation"
+  ],
+  "needs_backend_verification": true,
+  "needs_human_review": false,
+  "rejected_actions": [
+    {
+      "action": "apply_replay_runtime",
+      "reason": "Listing page is static HTML; replay not needed",
+      "what_evidence_would_change_decision": "Dynamic content requiring interaction replay"
+    }
+  ],
+  "evidence_files": {
+    "screenshot": {
+      "path": "screenshot_011.png",
+      "exists": true,
+      "is_placeholder": false
+    },
+    "html_summary": {
+      "path": "html_summary_011.txt",
+      "exists": true
+    },
+    "network_summary": {
+      "path": "network_summary_011.txt",
+      "exists": true
+    }
+  },
+  "site": "newegg.com",
+  "evidence_summary": {
+    "screenshot": "captured for newegg.com product_listing page",
+    "html_summary": "available - summary generated from HTML content",
+    "network_summary": "not captured (observe_browser_network not called)",
+    "overall": "Partial evidence: screenshot OK, HTML available, network not captured (observe_browser_network not called)"
+  },
+  "observed_capabilities": [
+    "html_available",
+    "screenshot_captured",
+    "network_missing",
+    "product_cards_potentially_visible",
+    "selectors_detected"
+  ],
+  "difficulty_signals": [
+    "html_likely_truncated_at_80kb"
+  ]
+}

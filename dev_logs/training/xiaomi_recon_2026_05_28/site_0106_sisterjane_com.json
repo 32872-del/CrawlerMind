@@ -1,0 +1,45 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.sisterjane.com",
+  "domain": "sisterjane.com",
+  "checked_at": "2026-05-28T11:48:00Z",
+  "site_type": "ecommerce",
+  "language": "en",
+  "currency": "GBP",
+  "rendering": "hybrid",
+  "access_status": {
+    "reachable": true,
+    "status_code": 200,
+    "final_url": "https://www.sisterjane.com",
+    "redirects": [],
+    "blocked_signals": ["captcha"],
+    "notes": "Accessible via requests (37KB). curl_cffi gets 80KB but blocked. browser returns captcha. 4 API hints including search and production endpoints."
+  },
+  "catalog_candidates": [],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {"type": "", "params": {}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "Not determined", "evidence_type": "guessed"},
+  "api_candidates": [
+    {"url": "https://www.sisterjane.com/production", "source": "script", "confidence": 0.5, "evidence_type": "observed"},
+    {"url": "https://www.sisterjane.com/api.parcelpanel.com", "source": "script", "confidence": 0.4, "evidence_type": "observed"},
+    {"url": "https://www.sisterjane.com/search", "source": "a", "confidence": 0.5, "evidence_type": "observed"}
+  ],
+  "selector_candidates": {},
+  "field_quality_expectation": {},
+  "difficulty_signals": [
+    {"kind": "captcha", "evidence": "Browser returns captcha page", "impact": "Cannot use browser mode", "suggested_handling": "Use requests mode only", "confidence": 0.7}
+  ],
+  "recommended_action_plan": [
+    {"action": "promote_xhr_to_api", "priority": "medium", "reason": "Search and production endpoints found", "params": {}, "depends_on_evidence": ["api_candidates"]},
+    {"action": "analyze_site", "priority": "medium", "reason": "Requests mode works (37KB) - explore with requests", "params": {}, "depends_on_evidence": ["access_status"]}
+  ],
+  "confidence": {"catalog": 0.2, "api": 0.3, "selectors": 0.1, "pagination": 0.1, "overall": 0.2},
+  "evidence_log": [
+    {"ts": "2026-05-28T11:48:01Z", "type": "observed", "detail": "requests: 200 OK, 37KB HTML"},
+    {"ts": "2026-05-28T11:48:03Z", "type": "observed", "detail": "curl_cffi: 80KB but blocked"},
+    {"ts": "2026-05-28T11:48:05Z", "type": "observed", "detail": "browser: captcha detected"},
+    {"ts": "2026-05-28T11:48:06Z", "type": "observed", "detail": "4 API hints: production, parcelpanel, search"}
+  ],
+  "missing_evidence": ["product_selectors", "catalog_urls", "pagination_pattern", "api_response_sample"],
+  "needs_human_review": false
+}

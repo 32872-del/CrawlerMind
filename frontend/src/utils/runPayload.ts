@@ -112,6 +112,10 @@ export function buildRunPayload(wizard: WizardState, settings: SettingsState): R
       provider: settings.llm.provider,
       base_url: settings.llm.base_url,
       model: settings.llm.model,
+      reasoning_effort: settings.llm.reasoning_effort,
+      stream: settings.llm.stream,
+      timeout_seconds: settings.llm.timeout_seconds,
+      max_tokens: settings.llm.max_tokens,
       ...(settings.llm.api_key ? { api_key: settings.llm.api_key } : {})
     }
   };

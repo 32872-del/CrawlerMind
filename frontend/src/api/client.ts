@@ -8,6 +8,8 @@ import type {
   LlmModelListResponse,
   ManagedActionRequest,
   ManagedRepairRunResponse,
+  ManagedStepRequest,
+  ManagedStepResponse,
   RunEventsResponse,
   RunLaunchResponse,
   RunRequest,
@@ -67,7 +69,11 @@ export async function analyzeSite(settings: SettingsState, targetUrl: string, fi
           provider: settings.llm.provider,
           base_url: settings.llm.base_url,
           api_key: settings.llm.api_key,
-          model: settings.llm.model
+          model: settings.llm.model,
+          reasoning_effort: settings.llm.reasoning_effort,
+          stream: settings.llm.stream,
+          timeout_seconds: settings.llm.timeout_seconds,
+          max_tokens: settings.llm.max_tokens
         }
       })
     },
@@ -135,6 +141,39 @@ export async function managedRepairRun(settings: SettingsState, taskId: string, 
           rerun_ready: true
         }
       }
+    })
+  );
+}
+
+export async function managedStep(settings: SettingsState, taskId: string, payload: ManagedStepRequest): Promise<ManagedStepResponse> {
+  return requestJson(
+    settings,
+    `/runs/${taskId}/managed-step`,
+    { method: 'POST', body: JSON.stringify(payload) },
+    () => ({
+      task_id: taskId,
+      schema_version: 'managed-step/v1',
+      stage: 'quality_review',
+      status_before: 'completed',
+      progress: {},
+      evidence_pack: {},
+      evidence: {},
+      action_record: {
+        created_at: nowIso(),
+        executed: true,
+        result: {
+          schema_version: 'managed-action-result/v1',
+          plan: {
+            source: 'mock',
+            actions: [{ action: 'repair_selectors', priority: 'high', reason: '模拟修复字段' }]
+          },
+          results: [],
+          profile_patch: {},
+          run_overrides: {},
+          rerun_ready: true
+        }
+      },
+      child_run: null
     })
   );
 }

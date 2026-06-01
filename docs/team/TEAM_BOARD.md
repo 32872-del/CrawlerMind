@@ -11,6 +11,7 @@ Last updated: 2026-05-18
 | LLM-2026-002 | Worker Beta | Proxy / Transport Runtime Worker | standby | Long-run operations round 2 accepted |
 | LLM-2026-003 | Worker Gamma | Unassigned | standby | none |
 | LLM-2026-004 | Worker Delta | Spider Runtime Worker | standby | Chinese product workbench round 2 accepted |
+| LLM-2026-005 | Worker Echo | Multimodal Visual Evidence Worker | assigned | Multimodal visual recon dataset |
 
 ## Current Project Roles
 
@@ -134,6 +135,7 @@ Last updated: 2026-05-18
 | Chinese Product Workbench Round 2 | LLM-2026-004 | Frontend Workbench Worker | accepted | `docs/team/acceptance/2026-05-18_round2_chinese_frontend_ACCEPTED.md` |
 | Frontend Support API Round 2 | LLM-2026-001 | Backend Product Workflow Worker | accepted | `docs/team/acceptance/2026-05-18_round2_frontend_support_api_ACCEPTED.md` |
 | Long-Run Operations Round 2 | LLM-2026-002 | Backend Stability Worker | accepted with follow-up | `docs/team/acceptance/2026-05-18_round2_longrun_operations_ACCEPTED.md` |
+| Multimodal Visual Recon Dataset | LLM-2026-005 | Multimodal Visual Evidence Worker | assigned | `docs/team/assignments/2026-05-28_LLM-2026-005_MULTIMODAL_VISUAL_RECON_DATASET.md` |
 
 ## Recent Accepted Work Log
 

@@ -34,8 +34,8 @@ class FastAPIMVPTests(unittest.TestCase):
 
     def test_post_crawl_returns_immediately_with_running_status(self) -> None:
         """POST /crawl should return before the workflow finishes."""
-        with patch("autonomous_crawler.api.app.run_crawl_workflow") as mock_wf, patch(
-            "autonomous_crawler.api.app.save_crawl_result"
+        with patch("autonomous_crawler.api.routers.crawl.run_crawl_workflow") as mock_wf, patch(
+            "autonomous_crawler.api.routers.crawl.save_crawl_result"
         ) as mock_save:
             # Make the workflow slow so we can verify the response comes first
             def slow_workflow(**kwargs):
@@ -65,8 +65,8 @@ class FastAPIMVPTests(unittest.TestCase):
 
     def test_get_crawl_returns_running_task_from_registry(self) -> None:
         """GET /crawl/{task_id} should show a running task before it completes."""
-        with patch("autonomous_crawler.api.app.run_crawl_workflow") as mock_wf, patch(
-            "autonomous_crawler.api.app.save_crawl_result"
+        with patch("autonomous_crawler.api.routers.crawl.run_crawl_workflow") as mock_wf, patch(
+            "autonomous_crawler.api.routers.crawl.save_crawl_result"
         ) as mock_save:
             block_event = __import__("threading").Event()
 
@@ -100,8 +100,8 @@ class FastAPIMVPTests(unittest.TestCase):
 
     def test_background_completion_persists_result(self) -> None:
         """When background workflow completes, result should be persisted."""
-        with patch("autonomous_crawler.api.app.run_crawl_workflow") as mock_wf, patch(
-            "autonomous_crawler.api.app.save_crawl_result"
+        with patch("autonomous_crawler.api.routers.crawl.run_crawl_workflow") as mock_wf, patch(
+            "autonomous_crawler.api.routers.crawl.save_crawl_result"
         ) as mock_save:
             mock_wf.return_value = {
                 "status": "completed",
@@ -132,8 +132,8 @@ class FastAPIMVPTests(unittest.TestCase):
 
     def test_background_exception_becomes_queryable_failed_task(self) -> None:
         """If the workflow raises, the task should be queryable as failed."""
-        with patch("autonomous_crawler.api.app.run_crawl_workflow") as mock_wf, patch(
-            "autonomous_crawler.api.app.save_crawl_result"
+        with patch("autonomous_crawler.api.routers.crawl.run_crawl_workflow") as mock_wf, patch(
+            "autonomous_crawler.api.routers.crawl.save_crawl_result"
         ):
             mock_wf.side_effect = RuntimeError("workflow crashed")
 
@@ -153,7 +153,7 @@ class FastAPIMVPTests(unittest.TestCase):
             self.assertIn("workflow crashed", get_resp.json()["error"])
 
     def test_get_crawl_returns_404_for_unknown_task(self) -> None:
-        with patch("autonomous_crawler.api.app.load_crawl_result", return_value=None):
+        with patch("autonomous_crawler.api.routers.crawl.load_crawl_result", return_value=None):
             client = TestClient(create_app())
             response = client.get("/crawl/nonexistent")
 
@@ -161,7 +161,7 @@ class FastAPIMVPTests(unittest.TestCase):
 
     def test_history_endpoint_returns_persisted_items(self) -> None:
         with patch(
-            "autonomous_crawler.api.app.list_crawl_results",
+            "autonomous_crawler.api.routers.crawl.list_crawl_results",
             return_value=[{"task_id": "task-1", "status": "completed"}],
         ):
             client = TestClient(create_app())
@@ -172,7 +172,7 @@ class FastAPIMVPTests(unittest.TestCase):
 
     def test_get_crawl_falls_back_to_persisted_result(self) -> None:
         """If task is not in memory registry, should fall back to SQLite."""
-        with patch("autonomous_crawler.api.app.load_crawl_result") as mock_load:
+        with patch("autonomous_crawler.api.routers.crawl.load_crawl_result") as mock_load:
             mock_load.return_value = {
                 "task_id": "old-task",
                 "status": "completed",
@@ -206,7 +206,7 @@ class FastAPIProfileRunTests(unittest.TestCase):
         }
 
     def test_post_profile_run_starts_background_job(self) -> None:
-        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
             block = threading.Event()
 
             def _run(request, *, task_id):
@@ -243,7 +243,7 @@ class FastAPIProfileRunTests(unittest.TestCase):
             time.sleep(0.3)
 
     def test_profile_run_passes_item_workers_to_workflow(self) -> None:
-        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
             mock_run.return_value = {
                 "accepted": True,
                 "status": "completed",
@@ -263,7 +263,7 @@ class FastAPIProfileRunTests(unittest.TestCase):
         self.assertEqual(request.item_workers, 9)
 
     def test_multi_profile_run_starts_batch_job(self) -> None:
-        with patch("autonomous_crawler.api.app.run_multi_profile_longrun_workflow") as mock_run:
+        with patch("autonomous_crawler.api.routers.profile_runs.run_multi_profile_longrun_workflow") as mock_run:
             mock_run.return_value = {
                 "total_sites": 2,
                 "ok_sites": 2,
@@ -313,7 +313,7 @@ class FastAPIProfileRunTests(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_profile_run_completion_is_queryable(self) -> None:
-        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
             mock_run.return_value = {
                 "accepted": True,
                 "status": "completed",
@@ -342,7 +342,7 @@ class FastAPIProfileRunTests(unittest.TestCase):
         self.assertIn("profile or profile_path", response.json()["detail"])
 
     def test_profile_run_background_error_is_queryable(self) -> None:
-        with patch("autonomous_crawler.api.app.run_profile_longrun_workflow") as mock_run:
+        with patch("autonomous_crawler.api.routers.runs.run_profile_longrun_workflow") as mock_run:
             mock_run.side_effect = RuntimeError("profile runtime failed")
             client = TestClient(create_app())
             post = client.post("/profile-runs", json={"profile": self._profile_payload()})
@@ -405,8 +405,8 @@ class ConcurrencyLimitTests(unittest.TestCase):
             }
         return _wf
 
-    @patch("autonomous_crawler.api.app.save_crawl_result")
-    @patch("autonomous_crawler.api.app.run_crawl_workflow")
+    @patch("autonomous_crawler.api.routers.crawl.save_crawl_result")
+    @patch("autonomous_crawler.api.routers.crawl.run_crawl_workflow")
     def test_accepted_when_below_limit(self, mock_wf, mock_save) -> None:
         """POST /crawl should succeed when active jobs < limit."""
         block = threading.Event()
@@ -425,8 +425,8 @@ class ConcurrencyLimitTests(unittest.TestCase):
             block.set()
             time.sleep(0.3)
 
-    @patch("autonomous_crawler.api.app.save_crawl_result")
-    @patch("autonomous_crawler.api.app.run_crawl_workflow")
+    @patch("autonomous_crawler.api.routers.crawl.save_crawl_result")
+    @patch("autonomous_crawler.api.routers.crawl.run_crawl_workflow")
     def test_rejected_when_at_limit(self, mock_wf, mock_save) -> None:
         """POST /crawl should return 429 when active jobs == limit."""
         block = threading.Event()
@@ -454,8 +454,8 @@ class ConcurrencyLimitTests(unittest.TestCase):
             block.set()
             time.sleep(0.3)
 
-    @patch("autonomous_crawler.api.app.save_crawl_result")
-    @patch("autonomous_crawler.api.app.run_crawl_workflow")
+    @patch("autonomous_crawler.api.routers.crawl.save_crawl_result")
+    @patch("autonomous_crawler.api.routers.crawl.run_crawl_workflow")
     def test_completed_jobs_do_not_count_as_active(self, mock_wf, mock_save) -> None:
         """After a job completes, it should free up a slot."""
         mock_wf.return_value = {
@@ -485,8 +485,8 @@ class ConcurrencyLimitTests(unittest.TestCase):
             )
             self.assertEqual(resp2.status_code, 200)
 
-    @patch("autonomous_crawler.api.app.save_crawl_result")
-    @patch("autonomous_crawler.api.app.run_crawl_workflow")
+    @patch("autonomous_crawler.api.routers.crawl.save_crawl_result")
+    @patch("autonomous_crawler.api.routers.crawl.run_crawl_workflow")
     def test_failed_jobs_do_not_count_as_active(self, mock_wf, mock_save) -> None:
         """After a job fails, it should free up a slot."""
         mock_wf.side_effect = RuntimeError("boom")
@@ -655,8 +655,8 @@ class FastAPILLMOptInTests(unittest.TestCase):
 
     def test_post_crawl_without_llm_remains_deterministic(self) -> None:
         """POST /crawl without llm field should not enable LLM."""
-        with patch("autonomous_crawler.api.app.run_crawl_workflow") as mock_wf, patch(
-            "autonomous_crawler.api.app.save_crawl_result"
+        with patch("autonomous_crawler.api.routers.crawl.run_crawl_workflow") as mock_wf, patch(
+            "autonomous_crawler.api.routers.crawl.save_crawl_result"
         ) as mock_save:
             mock_wf.return_value = {
                 "status": "completed",
@@ -683,8 +683,8 @@ class FastAPILLMOptInTests(unittest.TestCase):
 
     def test_post_crawl_with_llm_enabled_false_remains_deterministic(self) -> None:
         """POST /crawl with llm.enabled=false should not enable LLM."""
-        with patch("autonomous_crawler.api.app.run_crawl_workflow") as mock_wf, patch(
-            "autonomous_crawler.api.app.save_crawl_result"
+        with patch("autonomous_crawler.api.routers.crawl.run_crawl_workflow") as mock_wf, patch(
+            "autonomous_crawler.api.routers.crawl.save_crawl_result"
         ) as mock_save:
             mock_wf.return_value = {
                 "status": "completed",
@@ -750,8 +750,8 @@ class FastAPILLMOptInTests(unittest.TestCase):
 
     def test_post_crawl_with_valid_llm_config_starts_job(self) -> None:
         """POST /crawl with valid llm config should start a background job."""
-        with patch("autonomous_crawler.api.app.run_crawl_workflow") as mock_wf, patch(
-            "autonomous_crawler.api.app.save_crawl_result"
+        with patch("autonomous_crawler.api.routers.crawl.run_crawl_workflow") as mock_wf, patch(
+            "autonomous_crawler.api.routers.crawl.save_crawl_result"
         ) as mock_save:
             mock_wf.return_value = {
                 "status": "completed",
@@ -787,8 +787,8 @@ class FastAPILLMOptInTests(unittest.TestCase):
 
     def test_background_job_with_llm_completes_and_queryable(self) -> None:
         """Background job with LLM should complete and be queryable via GET."""
-        with patch("autonomous_crawler.api.app.run_crawl_workflow") as mock_wf, patch(
-            "autonomous_crawler.api.app.save_crawl_result"
+        with patch("autonomous_crawler.api.routers.crawl.run_crawl_workflow") as mock_wf, patch(
+            "autonomous_crawler.api.routers.crawl.save_crawl_result"
         ) as mock_save:
             mock_wf.return_value = {
                 "status": "completed",
@@ -823,8 +823,8 @@ class FastAPILLMOptInTests(unittest.TestCase):
 
     def test_llm_config_error_in_background_records_failure(self) -> None:
         """If LLM config validation somehow passes but advisor fails, job should fail gracefully."""
-        with patch("autonomous_crawler.api.app.run_crawl_workflow") as mock_wf, patch(
-            "autonomous_crawler.api.app.save_crawl_result"
+        with patch("autonomous_crawler.api.routers.crawl.run_crawl_workflow") as mock_wf, patch(
+            "autonomous_crawler.api.routers.crawl.save_crawl_result"
         ):
             mock_wf.side_effect = RuntimeError("LLM configuration error: bad config")
 

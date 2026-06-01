@@ -1,0 +1,986 @@
+{
+  "totalItems": 2493,
+  "pagination": {
+    "limit": 48,
+    "offset": 0,
+    "__typename": "Global_PageInfo"
+  },
+  "products": [
+    {
+      "id": "60786172",
+      "productExternalId": "P60786172",
+      "strokeId": "T425023R,T42/5023R",
+      "brand": "M&S",
+      "title": "Satin V-Neck Lace Insert Midi Slip Dress",
+      "description": null,
+      "subMessage": null,
+      "seoPath": "/satin-v-neck-lace-insert-midi-slip-dress/p/clp60786172?color=BLACKMIX&image=SD_01_T42_5023R_Y4_X_EC_90",
+      "productDefinition": "Dresses",
+      "variants": [
+        {
+          "colour": null,
+          "skuId": "60786172002",
+          "upc": "06706388",
+          "size": "6 Regular",
+          "servingSize": null,
+          "partNumber": "60786172002",
+          "price": 50,
+          "mediaAssets": [
+            {
+              "assetId": "SD_01_T42_5023R_Y4_X_EC_88",
+              "isLandscapeImage": false,
+              "type": "Fabric",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5023R_Y4_X_EC_90",
+              "isLandscapeImage": false,
+              "type": "Cut_Out",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5023R_Y4_X_EC_2",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5023R_Y4_X_EC_1",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5023R_Y4_X_EC_0",
+              "isLandscapeImage": false,
+              "type": "Main",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            }
+          ],
+          "swatchAsset": null,
+          "__typename": "SearchRecommendation_ResultVariant"
+        }
+      ],
+      "reviews": {
+        "averageRating": 4.25,
+        "totalReviewCount": 8,
+        "__typename": "SearchRecommendation_ResultReviews"
+      },
+      "price": {
+        "unitPrice": null,
+        "listPrice": {
+          "amount": 50,
+          "__typename": "SearchRecommendation_SingleListPrice"
+        },
+        "currency": "GBP",
+        "previousPrice": null,
+        "__typename": "SearchRecommendation_ResultPrice"
+      },
+      "dietaryInformation": [],
+      "isRanged": false,
+      "labels": [
+        {
+          "name": "NewIn",
+          "values": [
+            "Just Arrived"
+          ],
+          "__typename": "SearchRecommendation_ResultLabel"
+        }
+      ],
+      "onlineOnly": false,
+      "sparksOffers": [
+        {
+          "loyaltyPromotionCode": "16742",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "17509",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "18674",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "15671",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "15946",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "18838",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "19592",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "19683",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "16110",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "17804",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "18925",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "19365",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "21837",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "21911",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "22047",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "15285",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "20698",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "16406",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "16406",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        }
+      ],
+      "stockLevelIndicator": "M",
+      "__typename": "SearchRecommendation_ResultHit"
+    },
+    {
+      "id": "60786416",
+      "productExternalId": "P60786416",
+      "strokeId": "T428279J,T42/8279J",
+      "brand": "M&S",
+      "title": "Cotton Rich Striped Midi Column Dress",
+      "description": null,
+      "subMessage": null,
+      "seoPath": "/cotton-rich-striped-midi-column-dress/p/clp60786416?color=BLACKMIX&image=SD_01_T42_8279J_Y4_X_EC_90",
+      "productDefinition": "Dresses",
+      "variants": [
+        {
+          "colour": null,
+          "skuId": "60786416001",
+          "upc": "21401282",
+          "size": "6 Petite",
+          "servingSize": null,
+          "partNumber": "60786416001",
+          "price": 26,
+          "mediaAssets": [
+            {
+              "assetId": "SD_01_T42_8279J_Y4_X_EC_88",
+              "isLandscapeImage": false,
+              "type": "Fabric",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_8279J_Y4_X_EC_90",
+              "isLandscapeImage": false,
+              "type": "Cut_Out",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_8279J_Y4_X_EC_3",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_8279J_Y4_X_EC_2",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_8279J_Y4_X_EC_1",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_8279J_Y4_X_EC_0",
+              "isLandscapeImage": false,
+              "type": "Main",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            }
+          ],
+          "swatchAsset": null,
+          "__typename": "SearchRecommendation_ResultVariant"
+        }
+      ],
+      "reviews": {
+        "averageRating": 4.888888888888889,
+        "totalReviewCount": 63,
+        "__typename": "SearchRecommendation_ResultReviews"
+      },
+      "price": {
+        "unitPrice": null,
+        "listPrice": {
+          "amount": 26,
+          "__typename": "SearchRecommendation_SingleListPrice"
+        },
+        "currency": "GBP",
+        "previousPrice": null,
+        "__typename": "SearchRecommendation_ResultPrice"
+      },
+      "dietaryInformation": [],
+      "isRanged": false,
+      "labels": [],
+      "onlineOnly": false,
+      "sparksOffers": [
+        {
+          "loyaltyPromotionCode": "16742",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "17509",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "18674",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "15671",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "15946",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "18838",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "19592",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "19683",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "16110",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "17804",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "18925",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "19365",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "21837",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "21911",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "22047",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "15285",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "20698",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "16406",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "16406",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        }
+      ],
+      "stockLevelIndicator": "M",
+      "__typename": "SearchRecommendation_ResultHit"
+    },
+    {
+      "id": "60786475",
+      "productExternalId": "P60786686",
+      "strokeId": "T425327,T42/5327",
+      "brand": "M&S",
+      "title": "Broderie Cutwork Detail Mini Shift Dress",
+      "description": null,
+      "subMessage": null,
+      "seoPath": "/broderie-cutwork-detail-mini-shift-dress/p/clp60786686?color=PALEYELLOW&image=SD_01_T42_5327_QR_X_EC_90",
+      "productDefinition": "Dresses",
+      "variants": [
+        {
+          "colour": "PALE YELLOW",
+          "skuId": "60786475001",
+          "upc": "07786501",
+          "size": "6 Petite",
+          "servingSize": null,
+          "partNumber": "60786475001",
+          "price": 45,
+          "mediaAssets": [
+            {
+              "assetId": "SD_01_T42_5327_QR_X_EC_88",
+              "isLandscapeImage": false,
+              "type": "Fabric",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5327_QR_X_EC_90",
+              "isLandscapeImage": false,
+              "type": "Cut_Out",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5327_QR_X_EC_3",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5327_QR_X_EC_1",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5327_QR_X_EC_2",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5327_QR_X_EC_0",
+              "isLandscapeImage": false,
+              "type": "Main",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5327_QR_X_EC_90",
+              "isLandscapeImage": false,
+              "type": "Other",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5327_QR_X_EC_0",
+              "isLandscapeImage": false,
+              "type": "Other",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            }
+          ],
+          "swatchAsset": {
+            "assetId": "SD_01_T42_5327_QR_X_EC_88",
+            "isLandscapeImage": false,
+            "type": "Fabric",
+            "__typename": "SearchRecommendation_ResultMediaAsset"
+          },
+          "__typename": "SearchRecommendation_ResultVariant"
+        },
+        {
+          "colour": "BLACK",
+          "skuId": "60786475001",
+          "upc": "07786501",
+          "size": "6 Petite",
+          "servingSize": null,
+          "partNumber": "60786475001",
+          "price": 45,
+          "mediaAssets": [
+            {
+              "assetId": "SD_01_T42_5327_QR_X_EC_88",
+              "isLandscapeImage": false,
+              "type": "Fabric",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5327_QR_X_EC_90",
+              "isLandscapeImage": false,
+              "type": "Cut_Out",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5327_QR_X_EC_3",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5327_QR_X_EC_1",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5327_QR_X_EC_2",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5327_QR_X_EC_0",
+              "isLandscapeImage": false,
+              "type": "Main",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5327_Y0_X_EC_90",
+              "isLandscapeImage": false,
+              "type": "Other",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5327_Y0_X_EC_0",
+              "isLandscapeImage": false,
+              "type": "Other",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            }
+          ],
+          "swatchAsset": {
+            "assetId": "SD_01_T42_5327_Y0_X_EC_88",
+            "isLandscapeImage": false,
+            "type": "Fabric",
+            "__typename": "SearchRecommendation_ResultMediaAsset"
+          },
+          "__typename": "SearchRecommendation_ResultVariant"
+        },
+        {
+          "colour": "WINE",
+          "skuId": "60786475001",
+          "upc": "07786501",
+          "size": "6 Petite",
+          "servingSize": null,
+          "partNumber": "60786475001",
+          "price": 45,
+          "mediaAssets": [
+            {
+              "assetId": "SD_01_T42_5327_QR_X_EC_88",
+              "isLandscapeImage": false,
+              "type": "Fabric",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5327_QR_X_EC_90",
+              "isLandscapeImage": false,
+              "type": "Cut_Out",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5327_QR_X_EC_3",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5327_QR_X_EC_1",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5327_QR_X_EC_2",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5327_QR_X_EC_0",
+              "isLandscapeImage": false,
+              "type": "Main",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5327_C0_X_EC_90",
+              "isLandscapeImage": false,
+              "type": "Other",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5327_C0_X_EC_0",
+              "isLandscapeImage": false,
+              "type": "Other",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            }
+          ],
+          "swatchAsset": {
+            "assetId": "SD_01_T42_5327_C0_X_EC_88",
+            "isLandscapeImage": false,
+            "type": "Fabric",
+            "__typename": "SearchRecommendation_ResultMediaAsset"
+          },
+          "__typename": "SearchRecommendation_ResultVariant"
+        }
+      ],
+      "reviews": {
+        "averageRating": 5,
+        "totalReviewCount": 9,
+        "__typename": "SearchRecommendation_ResultReviews"
+      },
+      "price": {
+        "unitPrice": null,
+        "listPrice": {
+          "amount": 45,
+          "__typename": "SearchRecommendation_SingleListPrice"
+        },
+        "currency": "GBP",
+        "previousPrice": null,
+        "__typename": "SearchRecommendation_ResultPrice"
+      },
+      "dietaryInformation": [],
+      "isRanged": false,
+      "labels": [],
+      "onlineOnly": false,
+      "sparksOffers": [
+        {
+          "loyaltyPromotionCode": "16742",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "17509",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "18674",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "15671",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "15946",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "18838",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "19592",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "19683",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "16110",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "17804",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "18925",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "19365",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "21837",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "21911",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "22047",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "15285",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "20698",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "16406",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "16406",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        }
+      ],
+      "stockLevelIndicator": "M",
+      "__typename": "SearchRecommendation_ResultHit"
+    },
+    {
+      "id": "60786519",
+      "productExternalId": "P60786519",
+      "strokeId": "T425384,T42/5384",
+      "brand": "M&S",
+      "title": "Satin Scoop Neck Midaxi Slip Dress",
+      "description": null,
+      "subMessage": null,
+      "seoPath": "/satin-scoop-neck-midaxi-slip-dress/p/clp60786519?color=SAGE&image=SD_01_T42_5384_B8_X_EC_90",
+      "productDefinition": "Dresses",
+      "variants": [
+        {
+          "colour": null,
+          "skuId": "60786519001",
+          "upc": "24679824",
+          "size": "6 Petite",
+          "servingSize": null,
+          "partNumber": "60786519001",
+          "price": 50,
+          "mediaAssets": [
+            {
+              "assetId": "SD_01_T42_5384_B8_X_EC_88",
+              "isLandscapeImage": false,
+              "type": "Fabric",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5384_B8_X_EC_90",
+              "isLandscapeImage": false,
+              "type": "Cut_Out",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5384_B8_X_EC_4",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5384_B8_X_EC_3",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5384_B8_X_EC_2",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5384_B8_X_EC_1",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_5384_B8_X_EC_0",
+              "isLandscapeImage": false,
+              "type": "Main",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            }
+          ],
+          "swatchAsset": null,
+          "__typename": "SearchRecommendation_ResultVariant"
+        }
+      ],
+      "reviews": {
+        "averageRating": 0,
+        "totalReviewCount": 0,
+        "__typename": "SearchRecommendation_ResultReviews"
+      },
+      "price": {
+        "unitPrice": null,
+        "listPrice": {
+          "amount": 50,
+          "__typename": "SearchRecommendation_SingleListPrice"
+        },
+        "currency": "GBP",
+        "previousPrice": null,
+        "__typename": "SearchRecommendation_ResultPrice"
+      },
+      "dietaryInformation": [],
+      "isRanged": false,
+      "labels": [
+        {
+          "name": "NewIn",
+          "values": [
+            "Just Arrived"
+          ],
+          "__typename": "SearchRecommendation_ResultLabel"
+        }
+      ],
+      "onlineOnly": false,
+      "sparksOffers": [
+        {
+          "loyaltyPromotionCode": "16742",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "17509",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "18674",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "15671",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "15946",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "18838",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "19592",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "19683",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "16110",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "17804",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "18925",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "19365",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "21837",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "21911",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "22047",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "15285",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "20698",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "16406",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "16406",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        }
+      ],
+      "stockLevelIndicator": "M",
+      "__typename": "SearchRecommendation_ResultHit"
+    },
+    {
+      "id": "61231756",
+      "productExternalId": "P61231756",
+      "strokeId": "T426599,T42/6599",
+      "brand": "M&S",
+      "title": "Satin Lace Mini Slip Dress",
+      "description": null,
+      "subMessage": null,
+      "seoPath": "/satin-lace-mini-slip-dress/p/clp61231756?color=OLIVE&image=SD_01_T42_6599_JR_X_EC_90",
+      "productDefinition": "Dresses",
+      "variants": [
+        {
+          "colour": null,
+          "skuId": "61231756002",
+          "upc": "21469855",
+          "size": "6 Regular",
+          "servingSize": null,
+          "partNumber": "61231756002",
+          "price": 45,
+          "mediaAssets": [
+            {
+              "assetId": "SD_01_T42_6599_JR_X_EC_88",
+              "isLandscapeImage": false,
+              "type": "Fabric",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_6599_JR_X_EC_90",
+              "isLandscapeImage": false,
+              "type": "Cut_Out",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_6599_JR_X_EC_4",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_6599_JR_X_EC_3",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_6599_JR_X_EC_2",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_6599_JR_X_EC_1",
+              "isLandscapeImage": false,
+              "type": "Alternative",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            },
+            {
+              "assetId": "SD_01_T42_6599_JR_X_EC_0",
+              "isLandscapeImage": false,
+              "type": "Main",
+              "__typename": "SearchRecommendation_ResultMediaAsset"
+            }
+          ],
+          "swatchAsset": null,
+          "__typename": "SearchRecommendation_ResultVariant"
+        }
+      ],
+      "reviews": {
+        "averageRating": 0,
+        "totalReviewCount": 0,
+        "__typename": "SearchRecommendation_ResultReviews"
+      },
+      "price": {
+        "unitPrice": null,
+        "listPrice": {
+          "amount": 45,
+          "__typename": "SearchRecommendation_SingleListPrice"
+        },
+        "currency": "GBP",
+        "previousPrice": null,
+        "__typename": "SearchRecommendation_ResultPrice"
+      },
+      "dietaryInformation": [],
+      "isRanged": false,
+      "labels": [],
+      "onlineOnly": false,
+      "sparksOffers": [
+        {
+          "loyaltyPromotionCode": "16742",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "17509",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "18674",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "15671",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "15946",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "18838",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "19592",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "19683",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "16110",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "17804",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "18925",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "19365",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "21837",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "21911",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "22047",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "15285",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "20698",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "16406",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        },
+        {
+          "loyaltyPromotionCode": "16406",
+          "__typename": "SearchRecommendation_ResultSparksOffer"
+        }
+      ],
+      "stockLevelIndicator": "M",
+      "__typename": "SearchRecommendation_ResultHit"
+    }
+  ]
+}

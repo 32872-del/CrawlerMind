@@ -1,0 +1,15 @@
+HTML Summary: newegg.com - Page 006
+URL: https://www.newegg.com/p/pl?d=gaming+monitor
+Fetched at: 2026-05-30T08:58:53.095056
+Fetch mode: auto (80000 chars)
+Title: gaming monitor | Newegg.com
+Language: en-us
+Truncated: Yes (80KB limit)
+
+=== Selectors in HTML ===
+  item-img: 1 hits
+
+=== Screenshot ===
+File: screenshot_006_newegg_search.png
+Page type: search_results
+Visual state: normal

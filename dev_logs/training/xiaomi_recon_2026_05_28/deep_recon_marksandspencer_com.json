@@ -1,0 +1,123 @@
+{
+  "schema_version": "clm-deep-recon-v1",
+  "site_url": "https://www.marksandspencer.com",
+  "domain": "marksandspencer.com",
+  "checked_at": "2026-05-29T02:30:00Z",
+  "phase": "deep_recon_phase_2",
+  "platform": "Next.js with GraphQL (SearchRecommendation API)",
+
+  "catalog_url": {
+    "url": "https://www.marksandspencer.com/l/women/dresses",
+    "accessible": true,
+    "status_code": 200,
+    "rendering": "server_side",
+    "notes": "Next.js SSR with __NEXT_DATA__ containing GraphQL response. serverSideGqlResponseFed has full product data."
+  },
+
+  "list_page_url": {
+    "url": "https://www.marksandspencer.com/l/women/dresses",
+    "accessible": true,
+    "product_count": 48,
+    "rendering_mode": "browser",
+    "notes": "Browser render returns 48 products in __NEXT_DATA__.serverSideGqlResponseFed.productPageData.search.results.products."
+  },
+
+  "detail_url_pattern": {
+    "pattern": "/{seo-slug}/p/clp{product_id}?color={color}",
+    "example": "/satin-v-neck-lace-insert-midi-slip-dress/p/clp60786172?color=BLACKMIX",
+    "product_id_field": "productExternalId (P{id})",
+    "product_id_format": "numeric (8 digits, prefixed with P or clp)",
+    "notes": "URL includes SEO slug, product ID in /p/clp{id} format, and color query param."
+  },
+
+  "pagination": {
+    "type": "graphql_offset",
+    "mechanism": "GraphQL query variables with rows/offset",
+    "notes": "Pagination via queryVariables in __NEXT_DATA__. Supports rows and offset parameters."
+  },
+
+  "api_response_sample": {
+    "source": "__NEXT_DATA__ -> serverSideGqlResponseFed.productPageData.search.results",
+    "format": "GraphQL JSON response",
+    "sample_product": {
+      "id": "60786172",
+      "productExternalId": "P60786172",
+      "brand": "M&S",
+      "title": "Satin V-Neck Lace Insert Midi Slip Dress",
+      "seoPath": "/satin-v-neck-lace-insert-midi-slip-dress/p/clp60786172?color=BLACKMIX",
+      "productDefinition": "Dresses",
+      "price.listPrice.amount": 50,
+      "price.currency": "GBP",
+      "variants[0].size": "6 Regular",
+      "variants[0].price": 50,
+      "variants[0].skuId": "60786172002",
+      "variants[0].mediaAssets[0].assetId": "SD_01_T42_5023R_Y4_X_EC_88"
+    },
+    "total_products_in_sample": 48,
+    "notes": "GraphQL response includes facets, pagination, sort options, and full variant data."
+  },
+
+  "field_evidence": {
+    "title": {
+      "selector": "search.results.products[].title",
+      "type": "json_nested",
+      "example": "Satin V-Neck Lace Insert Midi Slip Dress",
+      "confidence": 0.95
+    },
+    "price": {
+      "selector": "search.results.products[].price.listPrice.amount",
+      "type": "json_nested",
+      "currency": "GBP",
+      "example": 50,
+      "confidence": 0.95
+    },
+    "image": {
+      "selector": "search.results.products[].variants[0].mediaAssets[0].assetId",
+      "type": "json_nested",
+      "domain": "assets.digitalcontent.marksandspencer.app",
+      "example": "SD_01_T42_5023R_Y4_X_EC_88",
+      "confidence": 0.9
+    },
+    "color": {
+      "selector": "Available in seoPath query param and variant data",
+      "type": "json_nested",
+      "example": "BLACKMIX",
+      "confidence": 0.7
+    },
+    "size": {
+      "selector": "search.results.products[].variants[].size",
+      "type": "json_nested",
+      "example": "6 Regular",
+      "confidence": 0.9
+    },
+    "description": {
+      "selector": "search.results.products[].description (often null)",
+      "type": "json_nested",
+      "confidence": 0.5
+    }
+  },
+
+  "clm_suitability": {
+    "verdict": "suitable",
+    "confidence": 0.85,
+    "reasons": [
+      "Rich GraphQL data in __NEXT_DATA__ with title, price, size, image, color",
+      "Server-side rendered (works with browser mode)",
+      "48 products per page with full variant data",
+      "Clear product URL pattern with SEO slugs"
+    ],
+    "limitations": [
+      "Requires browser rendering to get __NEXT_DATA__",
+      "GraphQL API requires authentication",
+      "Image asset IDs need URL construction",
+      "Some fields (description) often null"
+    ],
+    "recommended_approach": "browser mode + __NEXT_DATA__ extraction from serverSideGqlResponseFed"
+  },
+
+  "failure_diagnosis": {
+    "status": "success",
+    "blocking_issues": [],
+    "notes": "M&S has excellent data quality via __NEXT_DATA__. GraphQL response includes facets, variants, and pricing. One of the best sites in this batch."
+  }
+}

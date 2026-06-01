@@ -157,6 +157,52 @@ class BatchRunnerTests(unittest.TestCase):
         self.assertLess(elapsed, 0.22)
         self.assertEqual(self.frontier.stats(), {"done": 4})
 
+    def test_adaptive_item_workers_scale_up_on_healthy_batches(self) -> None:
+        self.frontier.add_urls([f"https://example.test/{idx}" for idx in range(6)])
+
+        summary = BatchRunner(
+            frontier=self.frontier,
+            processor=lambda item: ItemProcessResult.success(records=[
+                ProductRecord(
+                    run_id="run-adaptive-up",
+                    source_site="example.test",
+                    source_url=item["url"],
+                    canonical_url=item["url"],
+                    title=f"Product {item['id']}",
+                )
+            ]),
+            config=BatchRunnerConfig(
+                run_id="run-adaptive-up",
+                batch_size=2,
+                item_workers=1,
+                min_item_workers=1,
+                max_item_workers=4,
+            ),
+            checkpoint=ProductRecordCheckpoint(self.product_store),
+        ).run()
+
+        self.assertEqual(summary.succeeded, 6)
+        self.assertEqual(summary.worker_history[:3], [1, 2, 3])
+        self.assertEqual(summary.batch_history[0]["workers"], 1)
+
+    def test_adaptive_item_workers_scale_down_on_failed_batches(self) -> None:
+        self.frontier.add_urls([f"https://example.test/{idx}" for idx in range(4)])
+
+        summary = BatchRunner(
+            frontier=self.frontier,
+            processor=lambda item: ItemProcessResult.failure("blocked"),
+            config=BatchRunnerConfig(
+                run_id="run-adaptive-down",
+                batch_size=2,
+                item_workers=3,
+                min_item_workers=1,
+                max_item_workers=3,
+            ),
+        ).run()
+
+        self.assertEqual(summary.failed, 4)
+        self.assertEqual(summary.worker_history[:2], [3, 2])
+
     def test_discovered_urls_are_added_to_frontier(self) -> None:
         self.frontier.add_urls(["https://example.test/list"])
 

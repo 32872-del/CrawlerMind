@@ -1,0 +1,90 @@
+{
+  "schema_version": "clm-visual-recon-v1",
+  "site_url": "https://www.etsy.com",
+  "page_url": "https://www.etsy.com",
+  "domain": "etsy.com",
+  "checked_at": "2026-05-28T10:02:00Z",
+  "input_artifacts": {
+    "screenshot_path": "screenshot_9577be2a.png",
+    "html_summary_path": "",
+    "network_summary_path": ""
+  },
+  "page_type": "blocked",
+  "visual_state": "challenge",
+  "is_product_listing": false,
+  "is_product_detail": false,
+  "visible_catalog": [],
+  "visible_product_cards": {
+    "detected": false,
+    "count_estimate": 0,
+    "layout": "",
+    "evidence": "Page shows Etsy logo with Chinese text '访问暂时受限' (Access temporarily restricted) and bot detection message",
+    "confidence": 0.95
+  },
+  "field_regions": {
+    "title": [],
+    "highest_price": [],
+    "colors": [],
+    "sizes": [],
+    "description": [],
+    "image_urls": [],
+    "product_url": []
+  },
+  "blocking_signals": [
+    {
+      "kind": "captcha",
+      "visible_text": "访问暂时受限 | 为什么需要经过「我不是机器人」的验证？",
+      "evidence": "Page displays bot detection challenge with IP:80.93.218.39 identified as network robot",
+      "impact": "Cannot access any content on the site",
+      "suggested_handling": "Use browser with cookie session or rotate IP; manual CAPTCHA solving may be required",
+      "confidence": 0.95
+    }
+  ],
+  "pagination_signals": [],
+  "visual_action_hints": [
+    {
+      "hint": "accept_cookie_banner",
+      "reason": "Site may require cookie acceptance before access",
+      "confidence": 0.4
+    },
+    {
+      "hint": "use_browser_runtime",
+      "reason": "CAPTCHA challenge requires browser with JS execution and potential human interaction",
+      "confidence": 0.8
+    }
+  ],
+  "recommended_action_plan": [
+    {
+      "action": "switch_runtime",
+      "priority": "high",
+      "reason": "Bot detection triggered - need browser runtime with stealth capabilities",
+      "params": {"runtime": "browser", "stealth": true},
+      "depends_on_evidence": ["captcha_challenge_detected"]
+    },
+    {
+      "action": "patch_profile",
+      "priority": "medium",
+      "reason": "May need to add cookie/session profile to bypass bot detection",
+      "params": {},
+      "depends_on_evidence": ["captcha_challenge_detected"]
+    }
+  ],
+  "confidence": {
+    "page_type": 0.95,
+    "product_cards": 0.95,
+    "fields": 0.0,
+    "blocking": 0.95,
+    "pagination": 0.95,
+    "overall": 0.65
+  },
+  "evidence_log": [
+    "Etsy logo visible at top center",
+    "Main text: '访问暂时受限' (Access temporarily restricted)",
+    "Bot detection reasons listed: abnormal browsing speed, JavaScript blocked, IP:80.93.218.39 matches network robot",
+    "Error ID: 7e9dfc8f-f2c8-581c-940d-44ac97b1b41e",
+    "Contact link: 联络我们"
+  ],
+  "missing_evidence": ["html_summary", "network_summary", "actual_site_content"],
+  "needs_backend_verification": true,
+  "needs_human_review": true
+}

@@ -1,0 +1,19 @@
+HTML Summary: amazon.com - Page 001
+URL: https://www.amazon.com/s?k=wireless+headphones
+Fetched at: 2026-05-30T08:58:53.085716
+Fetch mode: auto (80000 chars)
+Title: Amazon.com : wireless headphones
+Language: zh-cn
+Truncated: Yes (80KB limit)
+
+=== Selectors in HTML ===
+  s-image: 1 hits
+  s-result-item: 1 hits
+
+=== Prices ===
+  ['$.', '$.', '$.', '$.', '$,']
+
+=== Screenshot ===
+File: screenshot_001_amazon_search.png
+Page type: search_results
+Visual state: normal

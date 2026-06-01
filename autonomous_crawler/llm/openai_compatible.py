@@ -42,6 +42,8 @@ class OpenAICompatibleConfig:
     temperature: float = 0.0
     max_tokens: int = 800
     use_response_format: bool = True
+    reasoning_effort: str = "medium"
+    stream: bool = False
 
     @classmethod
     def from_env(cls) -> "OpenAICompatibleConfig":
@@ -65,6 +67,8 @@ class OpenAICompatibleConfig:
             temperature=_float_env("CLM_LLM_TEMPERATURE", 0.0),
             max_tokens=_int_env("CLM_LLM_MAX_TOKENS", 800),
             use_response_format=_bool_env("CLM_LLM_USE_RESPONSE_FORMAT", True),
+            reasoning_effort=os.environ.get("CLM_LLM_REASONING_EFFORT", "medium").strip() or "medium",
+            stream=_bool_env("CLM_LLM_STREAM", False),
         )
 
 
@@ -236,6 +240,10 @@ class OpenAICompatibleAdvisor:
             "temperature": self.config.temperature,
             "max_tokens": self.config.max_tokens,
         }
+        if self.config.reasoning_effort:
+            body["reasoning_effort"] = self.config.reasoning_effort
+        if self.config.stream:
+            body["stream"] = True
         if self.config.use_response_format:
             body["response_format"] = {"type": "json_object"}
 
@@ -243,11 +251,10 @@ class OpenAICompatibleAdvisor:
             response = self._post_chat_completion(endpoint, headers, body)
             response.raise_for_status()
         except httpx.HTTPStatusError as exc:
-            if _should_retry_without_response_format(exc.response, body):
-                body = dict(body)
-                body.pop("response_format", None)
+            retry_body = _fallback_body_for_unsupported_param(exc.response, body)
+            if retry_body is not None:
                 try:
-                    response = self._post_chat_completion(endpoint, headers, body)
+                    response = self._post_chat_completion(endpoint, headers, retry_body)
                     response.raise_for_status()
                 except httpx.HTTPStatusError as retry_exc:
                     preview = _safe_response_preview(retry_exc.response)
@@ -271,7 +278,7 @@ class OpenAICompatibleAdvisor:
             ) from exc
 
         try:
-            raw = response.json()
+            raw = _decode_chat_response(response)
         except ValueError as exc:
             preview = _safe_response_preview(response)
             raise LLMResponseError(
@@ -346,6 +353,33 @@ def extract_chat_content(raw: Any) -> Any:
     raise KeyError("choices[0].message.content")
 
 
+def extract_stream_chat_content(text: str) -> str:
+    """Aggregate OpenAI-compatible SSE chat-completion chunks into content."""
+    chunks: list[str] = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("data:"):
+            continue
+        payload = stripped.removeprefix("data:").strip()
+        if not payload or payload == "[DONE]":
+            continue
+        try:
+            event = json.loads(payload)
+        except json.JSONDecodeError:
+            continue
+        choice = (event.get("choices") or [{}])[0] if isinstance(event, dict) else {}
+        if not isinstance(choice, dict):
+            continue
+        delta = choice.get("delta") if isinstance(choice.get("delta"), dict) else {}
+        message = choice.get("message") if isinstance(choice.get("message"), dict) else {}
+        content = delta.get("content") or message.get("content") or choice.get("text")
+        if isinstance(content, list):
+            chunks.append(_join_content_parts(content))
+        elif isinstance(content, str):
+            chunks.append(content)
+    return "".join(chunks)
+
+
 def parse_json_object(text: str) -> Any:
     """Parse a JSON object, allowing fenced JSON output."""
     cleaned = text.strip()
@@ -387,15 +421,32 @@ def _safe_response_preview(response: httpx.Response) -> str:
     return redacted
 
 
-def _should_retry_without_response_format(
+def _decode_chat_response(response: httpx.Response) -> Any:
+    content_type = response.headers.get("content-type", "").lower()
+    if "text/event-stream" in content_type or response.text.lstrip().startswith("data:"):
+        content = extract_stream_chat_content(response.text)
+        return {"choices": [{"message": {"content": content}}]}
+    return response.json()
+
+
+def _fallback_body_for_unsupported_param(
     response: httpx.Response,
     body: dict[str, Any],
-) -> bool:
-    if "response_format" not in body:
-        return False
+) -> dict[str, Any] | None:
     if response.status_code not in {400, 422}:
-        return False
-    return "response_format" in response.text.lower()
+        return None
+    lowered = response.text.lower()
+    fallback = dict(body)
+    changed = False
+    for key in ("response_format", "reasoning_effort", "stream"):
+        if key in fallback and key in lowered:
+            fallback.pop(key, None)
+            changed = True
+    if "unsupported" in lowered or "not support" in lowered or "unknown parameter" in lowered:
+        if "response_format" in fallback:
+            fallback.pop("response_format", None)
+            changed = True
+    return fallback if changed else None
 
 
 def _bounded(value: Any, max_chars: int) -> Any:
@@ -532,16 +583,21 @@ not claim certainty when evidence is weak.
 _MANAGED_ACTIONS_SYSTEM_PROMPT = """You are the managed crawl tool planner for Crawler-Mind.
 Return only one JSON object. Do not include markdown or commentary.
 
+You receive one compact managed crawl state packet plus available_actions.
 You may choose only actions listed in available_actions. These actions are
 executed by CLM's backend, not by you directly.
 
 Allowed output:
+- schema_version: "managed-action-plan/v2"
 - reasoning_summary: one short sentence
 - actions: array of objects with:
   - action: one of available_actions
   - priority: "low", "medium", or "high"
   - reason: short practical reason
   - params: object
+
+Prefer compact executable actions over vague advice. Each action should be
+bounded, safe, and directly useful to the next run.
 
 Prefer concrete repair actions when progress shows zero records, low field
 coverage, empty batches, access blocks, or selector failures. Do not invent
@@ -557,4 +613,24 @@ Useful action meanings:
 - evaluate_quality: set required fields and minimum success/coverage gates.
 - prepare_export: prepare export format/path/mapping for the next run.
 - prepare_rerun: mark that accumulated changes should feed an executable rerun.
+- extract_from_contract: run a known extraction_contract against matching
+  evidence supplied in the managed state or extra_context. Use this when the
+  state contains a parser strategy such as GTM data attributes, JSON-LD,
+  Next.js page data, GraphQL SSR cache, Shopify, Demandware, or another
+  structured ecommerce evidence contract. Params should include contract,
+  evidence, optional source_url, and optional max_items.
+
+When useful, you may also include these canonical intent names in your reasoning
+only; the backend will map them to executable actions:
+- analyze_site
+- select_catalog
+- resolve_fields
+- switch_runtime
+- patch_profile
+- patch_selector
+- promote_xhr_to_api
+- apply_replay_runtime
+- run_test
+- rerun_failed
+- export_results
 """

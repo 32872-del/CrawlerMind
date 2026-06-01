@@ -1,0 +1,69 @@
+{
+  "schema_version": "clm-visual-recon-v1",
+  "site_url": "https://www.amazon.com",
+  "page_url": "https://www.amazon.com/dp/B0D5CDCVCD",
+  "domain": "amazon.com",
+  "checked_at": "2026-05-28T10:30:00Z",
+  "input_artifacts": {
+    "screenshot_path": "screenshot_3fd23491.png",
+    "html_summary_path": "",
+    "network_summary_path": ""
+  },
+  "page_type": "error",
+  "visual_state": "normal",
+  "is_product_listing": false,
+  "is_product_detail": false,
+  "visible_catalog": [],
+  "visible_product_cards": {
+    "detected": false,
+    "count_estimate": 0,
+    "layout": "",
+    "evidence": "Same Amazon error page as visual_011: '很抱歉。您输入的网址不是我们网站上的有效网页。'",
+    "confidence": 0.95
+  },
+  "field_regions": {
+    "title": [],
+    "highest_price": [],
+    "colors": [],
+    "sizes": [],
+    "description": [],
+    "image_urls": [],
+    "product_url": []
+  },
+  "blocking_signals": [
+    {
+      "kind": "unknown",
+      "visible_text": "很抱歉。您输入的网址不是我们网站上的有效网页。",
+      "evidence": "Invalid product URL",
+      "impact": "Cannot access product",
+      "suggested_handling": "Try alternative URL or search",
+      "confidence": 0.95
+    }
+  ],
+  "pagination_signals": [],
+  "visual_action_hints": [],
+  "recommended_action_plan": [
+    {
+      "action": "analyze_site",
+      "priority": "high",
+      "reason": "Invalid product URL, need valid pages",
+      "params": {},
+      "depends_on_evidence": ["error_page_detected"]
+    }
+  ],
+  "confidence": {
+    "page_type": 0.95,
+    "product_cards": 0.95,
+    "fields": 0.0,
+    "blocking": 0.95,
+    "pagination": 0.95,
+    "overall": 0.65
+  },
+  "evidence_log": [
+    "Amazon error page - same as visual_011",
+    "Invalid product URL"
+  ],
+  "missing_evidence": ["html_summary", "network_summary", "valid_product"],
+  "needs_backend_verification": true,
+  "needs_human_review": false
+}

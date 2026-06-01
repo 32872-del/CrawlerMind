@@ -1,0 +1,45 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.zalando.co.uk",
+  "domain": "zalando.co.uk",
+  "checked_at": "2026-05-28T11:18:00Z",
+  "site_type": "ecommerce",
+  "language": "en",
+  "currency": "GBP",
+  "rendering": "spa",
+  "access_status": {
+    "reachable": true,
+    "status_code": 200,
+    "final_url": "https://www.zalando.co.uk",
+    "redirects": [],
+    "blocked_signals": ["403_forbidden"],
+    "notes": "Accessible via requests and curl_cffi (80KB HTML). Browser returns 403. JS shell. 4 catalog URL hints in multiple languages. Detail fetch times out."
+  },
+  "catalog_candidates": [
+    {"url": "https://www.zalando.co.uk/catalog/", "source": "script", "confidence": 0.5, "evidence_type": "observed"},
+    {"url": "https://www.zalando.co.uk/catalogue/", "source": "script", "confidence": 0.5, "evidence_type": "observed"}
+  ],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {"type": "", "params": {}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "Not determined - JS shell", "evidence_type": "guessed"},
+  "api_candidates": [],
+  "selector_candidates": {},
+  "field_quality_expectation": {},
+  "difficulty_signals": [
+    {"kind": "js_rendering", "evidence": "80KB HTML, JS shell detected. Browser returns 403.", "impact": "Product data loaded via SPA/API", "suggested_handling": "Investigate catalog endpoints or use API", "confidence": 0.7},
+    {"kind": "network_timeout", "evidence": "Detail sample fetch timed out", "impact": "Slow or rate-limited responses", "suggested_handling": "Increase timeout or reduce request rate", "confidence": 0.5}
+  ],
+  "recommended_action_plan": [
+    {"action": "analyze_site", "priority": "medium", "reason": "Explore catalog endpoints for product data", "params": {}, "depends_on_evidence": ["catalog_candidates"]},
+    {"action": "promote_xhr_to_api", "priority": "medium", "reason": "Look for Zalando API endpoints in network traffic", "params": {}, "depends_on_evidence": ["access_status"]}
+  ],
+  "confidence": {"catalog": 0.3, "api": 0.2, "selectors": 0.1, "pagination": 0.1, "overall": 0.2},
+  "evidence_log": [
+    {"ts": "2026-05-28T11:18:01Z", "type": "observed", "detail": "requests: 200 OK, 80KB HTML"},
+    {"ts": "2026-05-28T11:18:03Z", "type": "observed", "detail": "curl_cffi: 200 OK, 80KB HTML"},
+    {"ts": "2026-05-28T11:18:05Z", "type": "observed", "detail": "browser: 403 Forbidden"},
+    {"ts": "2026-05-28T11:18:06Z", "type": "observed", "detail": "4 catalog URL hints found (/catalog/, /catalogue/, /catalogo/, /catalogus/)"}
+  ],
+  "missing_evidence": ["api_endpoints", "product_selectors", "pagination_pattern"],
+  "needs_human_review": false
+}

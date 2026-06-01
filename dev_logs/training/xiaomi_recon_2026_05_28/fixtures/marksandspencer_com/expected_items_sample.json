@@ -1,0 +1,129 @@
+{
+  "schema_version": "clm-expected-items-v1",
+  "site": "marksandspencer.com",
+  "source_url": "https://www.marksandspencer.com/l/women/dresses",
+  "extraction_date": "2026-05-29",
+  "item_count": 5,
+  "items": [
+    {
+      "title": "Satin V-Neck Lace Insert Midi Slip Dress",
+      "highest_price": 50,
+      "currency": "GBP",
+      "color": "BLACKMIX",
+      "size": "6 Regular",
+      "description": null,
+      "image_url": "https://assets.digitalcontent.marksandspencer.app/image/upload/q_auto,f_auto/SD_01_T42_5023R_Y4_X_EC_88",
+      "product_url": "https://www.marksandspencer.com/satin-v-neck-lace-insert-midi-slip-dress/p/clp60786172?color=BLACKMIX&image=SD_01_T42_5023R_Y4_X_EC_90",
+      "category_level_1": "Dresses",
+      "category_level_2": null,
+      "source_evidence": {
+        "product_id": "60786172",
+        "product_external_id": "P60786172",
+        "variant_sku": "60786172002",
+        "variant_price": 50,
+        "image_asset_id": "SD_01_T42_5023R_Y4_X_EC_88",
+        "evidence_type": "raw_evidence_graphql_sample.json",
+        "evidence_index": 0
+      },
+      "missing_reasons": {
+        "description": "Often null in GraphQL response"
+      }
+    },
+    {
+      "title": "Cotton Rich Striped Midi Column Dress",
+      "highest_price": 26,
+      "currency": "GBP",
+      "color": "BLACKMIX",
+      "size": "6 Petite",
+      "description": null,
+      "image_url": "https://assets.digitalcontent.marksandspencer.app/image/upload/q_auto,f_auto/SD_01_T42_8279J_Y4_X_EC_88",
+      "product_url": "https://www.marksandspencer.com/cotton-rich-striped-midi-column-dress/p/clp60786416?color=BLACKMIX&image=SD_01_T42_8279J_Y4_X_EC_90",
+      "category_level_1": "Dresses",
+      "category_level_2": null,
+      "source_evidence": {
+        "product_id": "60786416",
+        "product_external_id": "P60786416",
+        "variant_sku": "60786416001",
+        "variant_price": 26,
+        "image_asset_id": "SD_01_T42_8279J_Y4_X_EC_88",
+        "evidence_type": "raw_evidence_graphql_sample.json",
+        "evidence_index": 1
+      },
+      "missing_reasons": {
+        "description": "Often null in GraphQL response"
+      }
+    },
+    {
+      "title": "Broderie Cutwork Detail Mini Shift Dress",
+      "highest_price": 45,
+      "currency": "GBP",
+      "color": "PALEYELLOW",
+      "size": "6 Petite",
+      "description": null,
+      "image_url": "https://assets.digitalcontent.marksandspencer.app/image/upload/q_auto,f_auto/SD_01_T42_5327_QR_X_EC_88",
+      "product_url": "https://www.marksandspencer.com/broderie-cutwork-detail-mini-shift-dress/p/clp60786686?color=PALEYELLOW&image=SD_01_T42_5327_QR_X_EC_90",
+      "category_level_1": "Dresses",
+      "category_level_2": null,
+      "source_evidence": {
+        "product_id": "60786475",
+        "product_external_id": "P60786686",
+        "variant_sku": "60786475001",
+        "variant_price": 45,
+        "image_asset_id": "SD_01_T42_5327_QR_X_EC_88",
+        "evidence_type": "raw_evidence_graphql_sample.json",
+        "evidence_index": 2
+      },
+      "missing_reasons": {
+        "description": "Often null in GraphQL response"
+      }
+    },
+    {
+      "title": "Satin Scoop Neck Midaxi Slip Dress",
+      "highest_price": 50,
+      "currency": "GBP",
+      "color": "SAGE",
+      "size": "6 Petite",
+      "description": null,
+      "image_url": "https://assets.digitalcontent.marksandspencer.app/image/upload/q_auto,f_auto/SD_01_T42_5384_B8_X_EC_88",
+      "product_url": "https://www.marksandspencer.com/satin-scoop-neck-midaxi-slip-dress/p/clp60786519?color=SAGE&image=SD_01_T42_5384_B8_X_EC_90",
+      "category_level_1": "Dresses",
+      "category_level_2": null,
+      "source_evidence": {
+        "product_id": "60786519",
+        "product_external_id": "P60786519",
+        "variant_sku": "60786519001",
+        "variant_price": 50,
+        "image_asset_id": "SD_01_T42_5384_B8_X_EC_88",
+        "evidence_type": "raw_evidence_graphql_sample.json",
+        "evidence_index": 3
+      },
+      "missing_reasons": {
+        "description": "Often null in GraphQL response"
+      }
+    },
+    {
+      "title": "Satin Lace Mini Slip Dress",
+      "highest_price": 45,
+      "currency": "GBP",
+      "color": "OLIVE",
+      "size": "6 Regular",
+      "description": null,
+      "image_url": "https://assets.digitalcontent.marksandspencer.app/image/upload/q_auto,f_auto/SD_01_T42_6599_JR_X_EC_88",
+      "product_url": "https://www.marksandspencer.com/satin-lace-mini-slip-dress/p/clp61231756?color=OLIVE&image=SD_01_T42_6599_JR_X_EC_90",
+      "category_level_1": "Dresses",
+      "category_level_2": null,
+      "source_evidence": {
+        "product_id": "61231756",
+        "product_external_id": "P61231756",
+        "variant_sku": "61231756002",
+        "variant_price": 45,
+        "image_asset_id": "SD_01_T42_6599_JR_X_EC_88",
+        "evidence_type": "raw_evidence_graphql_sample.json",
+        "evidence_index": 4
+      },
+      "missing_reasons": {
+        "description": "Often null in GraphQL response"
+      }
+    }
+  ]
+}

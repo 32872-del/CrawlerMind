@@ -1,0 +1,40 @@
+HTML Summary - Page 001
+==================================================
+URL: https://www.amazon.com/s?k=wireless+headphones
+Domain: amazon.com
+Page Type: search_results
+HTTP Status: 200
+Confidence: 0.56
+Checked At: 2026-05-30T10:30:01.928801
+
+HTML Content Analysis:
+  Title: Amazon.com : wireless headphones
+  Language: zh-cn
+  Total HTML Tags: 59
+  Scripts: 36
+  Images: 0
+  Links: 0 product links
+  Forms: 0
+  Nav Elements: 0
+  Articles: 0
+  Structured Data: No
+
+Top CSS Selectors (by frequency):
+  html.a-ws: 1 occurrences
+  html.a-js: 1 occurrences
+  #optimistic-ax-qs-animation: 1 occurrences
+  #non-optimistic-ax-qs-animation: 1 occurrences
+  body.a-m-us: 1 occurrences
+  body.a-aui_72554-c: 1 occurrences
+  #a-page: 1 occurrences
+
+Text Sample (first 500 chars):
+  var aPageStart = (new Date()).getTime(); var ue_t0=ue_t0||+new Date(); window.ue_ihb = (window.ue_ihb || window.ueinit || 0) + 1;
+if (window.ue_ihb === 1) {
+
+var ue_csm = window,
+    ue_hob = +new Date();
+(function(d){var e=d.ue=d.ue||{},f=Date.now||function(){return+new Date};e.d=function(b){return f()-(b?0:d.ue_t0)};e.stub=function(b,a){if(!b[a]){var c=[];b[a]=function(){c.push([c.slice.call(arguments),e.d(),d.ue_id])};b[a].replay=function(b){for(var a;a=c.shift();)b(a[0],a[1],a[2])};b[a].isS
+
+HTML File Size: 82,575 bytes
+NOTE: HTML truncated at ~80KB. Product content may load via JavaScript after truncation point.

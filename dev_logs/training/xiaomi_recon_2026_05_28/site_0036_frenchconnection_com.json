@@ -1,0 +1,43 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.frenchconnection.com",
+  "domain": "frenchconnection.com",
+  "checked_at": "2026-05-28T10:43:00Z",
+  "site_type": "ecommerce",
+  "language": "en",
+  "currency": "GBP",
+  "rendering": "unknown",
+  "access_status": {
+    "reachable": true,
+    "status_code": 403,
+    "final_url": "https://www.frenchconnection.com",
+    "redirects": [],
+    "blocked_signals": ["403_forbidden", "captcha_challenge"],
+    "notes": "All 3 modes return 403 Forbidden. Browser shows captcha challenge. 4 API hints found."
+  },
+  "catalog_candidates": [],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {"type": "", "params": {}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "Cannot determine - blocked", "evidence_type": "guessed"},
+  "api_candidates": [
+    {"method": "GET", "url": "https://www.frenchconnection.com/api/allocator/web/public/v2/allocate", "content_type": "", "items_path": "", "pagination_hints": {}, "field_mapping": {}, "request_body_hint": {}, "headers_hint": {}, "source": "script", "evidence_type": "observed", "confidence": 0.6, "risks": ["api_endpoint"]}
+  ],
+  "selector_candidates": {},
+  "field_quality_expectation": {},
+  "difficulty_signals": [
+    {"kind": "captcha", "evidence": "All modes return 403 Forbidden. Browser shows captcha challenge.", "impact": "Site requires captcha solving or authenticated session", "suggested_handling": "Requires proxy or authenticated session", "confidence": 0.95}
+  ],
+  "recommended_action_plan": [
+    {"action": "patch_profile", "priority": "high", "reason": "Try with proxy to bypass captcha", "params": {}, "depends_on_evidence": []},
+    {"action": "analyze_site", "priority": "medium", "reason": "Re-analyze with proxy if available", "params": {}, "depends_on_evidence": ["access_status"]}
+  ],
+  "confidence": {"catalog": 0.1, "api": 0.4, "selectors": 0.1, "pagination": 0.1, "overall": 0.15},
+  "evidence_log": [
+    {"ts": "2026-05-28T10:43:01Z", "type": "observed", "detail": "requests: 403 Forbidden"},
+    {"ts": "2026-05-28T10:43:05Z", "type": "observed", "detail": "curl_cffi: 403 Forbidden"},
+    {"ts": "2026-05-28T10:43:08Z", "type": "observed", "detail": "browser: 403 Forbidden, captcha challenge"},
+    {"ts": "2026-05-28T10:43:10Z", "type": "observed", "detail": "4 API hints found in scripts"}
+  ],
+  "missing_evidence": ["everything"],
+  "needs_human_review": true
+}

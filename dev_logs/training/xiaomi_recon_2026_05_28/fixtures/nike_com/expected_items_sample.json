@@ -1,0 +1,165 @@
+{
+  "schema_version": "clm-expected-items-v1",
+  "site": "nike.com",
+  "source_url": "https://www.nike.com/gb/w/womens-clothing-5e1x6z6ymx6",
+  "extraction_date": "2026-05-29",
+  "item_count": 6,
+  "items": [
+    {
+      "title": "Nike Sportswear - Women's Tight Graphic Tank Top",
+      "highest_price": 37.99,
+      "currency": "GBP",
+      "color": "Chalk/White",
+      "size": null,
+      "description": null,
+      "image_url": "https://static.nike.com/a/images/t_default/u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/591ef954-72b1-4d5d-aa59-30ba099b0225/W+NSW+STREET+GX+TANK.png",
+      "product_url": "https://www.nike.com/gb/t/sportswear-tight-graphic-tank-top-EHjP6X8h/IF0552-103",
+      "category_level_1": "APPAREL",
+      "category_level_2": null,
+      "source_evidence": {
+        "copy_title": "Nike Sportswear",
+        "copy_subTitle": "Women's Tight Graphic Tank Top",
+        "prices_currentPrice": 37.99,
+        "displayColors_colorDescription": "Chalk/White",
+        "productCode": "IF0552-103",
+        "evidence_type": "raw_evidence_next_data_sample.json",
+        "evidence_index": 0
+      },
+      "missing_reasons": {
+        "size": "Not available in listing page - detail page only",
+        "description": "Not available in listing page - detail page only",
+        "category_level_2": "Not in productGroupings. Available in Wall.facetNav.categories separately."
+      }
+    },
+    {
+      "title": "Nike Sportswear - Women's Tight Graphic Tank Top",
+      "highest_price": 37.99,
+      "currency": "GBP",
+      "color": "Black/Chalk",
+      "size": null,
+      "description": null,
+      "image_url": "https://static.nike.com/a/images/t_default/u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/3af90ace-2955-4e14-a8e7-8c12dda58518/W+NSW+STREET+GX+TANK.png",
+      "product_url": "https://www.nike.com/gb/t/sportswear-tight-graphic-tank-top-EHjP6X8h/IF0552-010",
+      "category_level_1": "APPAREL",
+      "category_level_2": null,
+      "source_evidence": {
+        "copy_title": "Nike Sportswear",
+        "copy_subTitle": "Women's Tight Graphic Tank Top",
+        "prices_currentPrice": 37.99,
+        "displayColors_colorDescription": "Black/Chalk",
+        "productCode": "IF0552-010",
+        "evidence_type": "raw_evidence_next_data_sample.json",
+        "evidence_index": 1
+      },
+      "missing_reasons": {
+        "size": "Not available in listing page - detail page only",
+        "description": "Not available in listing page - detail page only",
+        "category_level_2": "Not in productGroupings. Available in Wall.facetNav.categories separately."
+      }
+    },
+    {
+      "title": "Nike Sportswear - Women's Shrunken Tracksuit Jacket",
+      "highest_price": 74.99,
+      "currency": "GBP",
+      "color": "Chalk/White/Light Bone/Sail",
+      "size": null,
+      "description": null,
+      "image_url": "https://static.nike.com/a/images/t_default/9b78b1ee-953d-4356-a3c5-270c43f25437/W+NSW+SHRUNKEN+TRK+JKT+MOD.png",
+      "product_url": "https://www.nike.com/gb/t/sportswear-shrunken-tracksuit-jacket-oHrIpJZt/IF0216-103",
+      "category_level_1": "APPAREL",
+      "category_level_2": null,
+      "source_evidence": {
+        "copy_title": "Nike Sportswear",
+        "copy_subTitle": "Women's Shrunken Tracksuit Jacket",
+        "prices_currentPrice": 74.99,
+        "displayColors_colorDescription": "Chalk/White/Light Bone/Sail",
+        "productCode": "IF0216-103",
+        "evidence_type": "raw_evidence_next_data_sample.json",
+        "evidence_index": 2
+      },
+      "missing_reasons": {
+        "size": "Not available in listing page - detail page only",
+        "description": "Not available in listing page - detail page only",
+        "category_level_2": "Not in productGroupings. Available in Wall.facetNav.categories separately."
+      }
+    },
+    {
+      "title": "Nike Sportswear - Women's Shrunken Tracksuit Jacket",
+      "highest_price": 74.99,
+      "currency": "GBP",
+      "color": "Black/Black/Black/Sail",
+      "size": null,
+      "description": null,
+      "image_url": "https://static.nike.com/a/images/t_default/a1e861ce-96c3-45df-9640-83241de87169/W+NSW+SHRUNKEN+TRK+JKT+MOD.png",
+      "product_url": "https://www.nike.com/gb/t/sportswear-shrunken-tracksuit-jacket-oHrIpJZt/IF0216-010",
+      "category_level_1": "APPAREL",
+      "category_level_2": null,
+      "source_evidence": {
+        "copy_title": "Nike Sportswear",
+        "copy_subTitle": "Women's Shrunken Tracksuit Jacket",
+        "prices_currentPrice": 74.99,
+        "displayColors_colorDescription": "Black/Black/Black/Sail",
+        "productCode": "IF0216-010",
+        "evidence_type": "raw_evidence_next_data_sample.json",
+        "evidence_index": 3
+      },
+      "missing_reasons": {
+        "size": "Not available in listing page - detail page only",
+        "description": "Not available in listing page - detail page only",
+        "category_level_2": "Not in productGroupings. Available in Wall.facetNav.categories separately."
+      }
+    },
+    {
+      "title": "Nike Sportswear - Women's T-shirt",
+      "highest_price": 37.99,
+      "currency": "GBP",
+      "color": "Pale Ivory",
+      "size": null,
+      "description": null,
+      "image_url": "https://static.nike.com/a/images/t_default/u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/ba26ed1f-3281-4e97-b8c9-ed798276e6f8/W+NSW+NVLTY+BOXY+OS+TEE.png",
+      "product_url": "https://www.nike.com/gb/t/sportswear-t-shirt-CO6iqltm/IU9086-110",
+      "category_level_1": "APPAREL",
+      "category_level_2": null,
+      "source_evidence": {
+        "copy_title": "Nike Sportswear",
+        "copy_subTitle": "Women's T-shirt",
+        "prices_currentPrice": 37.99,
+        "displayColors_colorDescription": "Pale Ivory",
+        "productCode": "IU9086-110",
+        "evidence_type": "raw_evidence_next_data_sample.json",
+        "evidence_index": 4
+      },
+      "missing_reasons": {
+        "size": "Not available in listing page - detail page only",
+        "description": "Not available in listing page - detail page only",
+        "category_level_2": "Not in productGroupings. Available in Wall.facetNav.categories separately."
+      }
+    },
+    {
+      "title": "Nike Sportswear - Women's T-shirt",
+      "highest_price": 37.99,
+      "currency": "GBP",
+      "color": "Dark Grey Heather",
+      "size": null,
+      "description": null,
+      "image_url": "https://static.nike.com/a/images/t_default/u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/04b82a8c-bc09-43e1-ad44-1c502da7518f/W+NSW+NVLTY+BOXY+OS+TEE.png",
+      "product_url": "https://www.nike.com/gb/t/sportswear-t-shirt-CO6iqltm/IU9086-063",
+      "category_level_1": "APPAREL",
+      "category_level_2": null,
+      "source_evidence": {
+        "copy_title": "Nike Sportswear",
+        "copy_subTitle": "Women's T-shirt",
+        "prices_currentPrice": 37.99,
+        "displayColors_colorDescription": "Dark Grey Heather",
+        "productCode": "IU9086-063",
+        "evidence_type": "raw_evidence_next_data_sample.json",
+        "evidence_index": 5
+      },
+      "missing_reasons": {
+        "size": "Not available in listing page - detail page only",
+        "description": "Not available in listing page - detail page only",
+        "category_level_2": "Not in productGroupings. Available in Wall.facetNav.categories separately."
+      }
+    }
+  ]
+}

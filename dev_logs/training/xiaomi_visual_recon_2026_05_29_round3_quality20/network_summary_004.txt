@@ -1,0 +1,19 @@
+Network Summary: amazon.com - Page 004
+URL: https://www.amazon.com
+Captured at: 2026-05-30T08:58:53.091395
+
+=== Status ===
+no_network_captured
+
+=== Reason ===
+Network observation (observe_browser_network) was not called during evidence collection.
+To capture network evidence, run:
+  url: https://www.amazon.com
+  resource_types: xhr,fetch,document
+  capture_json_sample: true
+
+=== Expected Network Evidence ===
+- XHR/Fetch API endpoints
+- Pagination parameters
+- API response structures
+- Rate limiting patterns

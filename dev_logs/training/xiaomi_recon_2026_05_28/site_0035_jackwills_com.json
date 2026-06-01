@@ -1,0 +1,38 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.jackwills.com",
+  "domain": "jackwills.com",
+  "checked_at": "2026-05-28T10:42:00Z",
+  "site_type": "ecommerce",
+  "language": "en",
+  "currency": "GBP",
+  "rendering": "unknown",
+  "access_status": {
+    "reachable": true,
+    "status_code": 200,
+    "final_url": "https://www.jackwills.com",
+    "redirects": [],
+    "blocked_signals": ["robots_txt_block"],
+    "notes": "robots.txt prohibits crawling. All modes blocked. HTTP2 protocol error in browser."
+  },
+  "catalog_candidates": [],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {"type": "", "params": {}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "Cannot determine - blocked", "evidence_type": "guessed"},
+  "api_candidates": [],
+  "selector_candidates": {},
+  "field_quality_expectation": {},
+  "difficulty_signals": [
+    {"kind": "robots_txt_block", "evidence": "robots.txt prohibits crawling. All modes blocked.", "impact": "Site blocks automated access via robots.txt", "suggested_handling": "Respect robots.txt or use manual access", "confidence": 0.95}
+  ],
+  "recommended_action_plan": [
+    {"action": "analyze_site", "priority": "low", "reason": "Site blocks automated access via robots.txt", "params": {}, "depends_on_evidence": ["access_status"]}
+  ],
+  "confidence": {"catalog": 0.1, "api": 0.1, "selectors": 0.1, "pagination": 0.1, "overall": 0.1},
+  "evidence_log": [
+    {"ts": "2026-05-28T10:42:01Z", "type": "observed", "detail": "robots.txt prohibits crawling"},
+    {"ts": "2026-05-28T10:42:05Z", "type": "observed", "detail": "All modes blocked: requests, curl_cffi, browser"}
+  ],
+  "missing_evidence": ["everything"],
+  "needs_human_review": true
+}

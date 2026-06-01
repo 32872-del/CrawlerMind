@@ -1,20 +1,99 @@
-import { Alert, Button, Card, Descriptions, Empty, Input, Popconfirm, Progress, Select, Space, Table, Tag, message } from 'antd';
+import { Alert, Button, Card, Descriptions, Empty, Input, List, Popconfirm, Progress, Select, Space, Table, Tag, Typography, message } from 'antd';
 import { useEffect, useMemo, useState, type ChangeEvent } from 'react';
-import { cancelRun, deleteRun, exportRun, fetchRunEvents, fetchRunStatus, managedRepairRun } from '../api/client';
+import { cancelRun, deleteRun, exportRun, fetchRunEvents, fetchRunStatus, managedRepairRun, managedStep } from '../api/client';
 import { AiManagedPanel } from '../components/AiManagedPanel';
 import { EventTimeline } from '../components/EventTimeline';
 import { MetricStrip } from '../components/MetricStrip';
 import { StatusPill } from '../components/StatusPill';
 import { WorkflowOverview } from '../components/WorkflowOverview';
 import { useWorkbench } from '../store/workbench';
-import { exportFilename, joinExportPath } from '../utils/format';
 import { formatTime, managedAiModeLabel, percent, qualitySeverityLabel, replaceExportPathSuffix, statusLabel, userFacingError } from '../utils/format';
-import type { ExportFormat, ManagedActionRecord } from '../types/workflow';
+import type { ExportFormat, ManagedActionRecord, ManagedStepRecord } from '../types/workflow';
 import { seedUrlRows } from '../utils/runPayload';
 
 function isMissingRunError(error: unknown): boolean {
   const messageText = error instanceof Error ? error.message : String(error || '');
   return messageText.includes('404') || messageText.includes('Not Found') || messageText.includes('run not found');
+}
+
+const actionLabels: Record<string, string> = {
+  reanalyze_site: '重新分析站点',
+  discover_catalog: '重新分析目录',
+  probe_fields: '探测字段',
+  inspect_access: '检查访问状态',
+  repair_selectors: '修复字段选择器',
+  adjust_runtime: '切换动态模式',
+  evaluate_quality: '评估质量门',
+  prepare_export: '准备导出',
+  prepare_rerun: '准备重跑',
+  patch_profile: '修补 Profile',
+  extract_from_contract: '按抽取合同提取商品'
+};
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
+}
+
+function actionName(value: unknown): string {
+  const name = String(value || '').trim();
+  return actionLabels[name] || name || '-';
+}
+
+function humanError(value: unknown): string {
+  const text = String(value || '').trim();
+  if (!text) return '';
+  if (text.includes('missing extraction contract')) return '缺少抽取合同，请先生成或传入 extraction contract。';
+  if (text.includes('missing extraction evidence')) return '缺少抽取证据，请先提供页面 HTML、接口 JSON 或浏览器采样证据。';
+  if (text.includes('unsupported parser_strategy.name')) return `抽取策略暂不支持：${text.replace('unsupported parser_strategy.name:', '').trim() || '未命名策略'}`;
+  return text;
+}
+
+function paramsSummary(value: unknown): string {
+  const params = asRecord(value);
+  if (!Object.keys(params).length) return '-';
+  const contract = asRecord(params.contract);
+  const strategy = asRecord(contract.parser_strategy);
+  const pieces = [
+    contract.site ? `站点 ${String(contract.site)}` : '',
+    strategy.name ? `策略 ${String(strategy.name)}` : '',
+    params.source_url ? `来源 ${String(params.source_url)}` : '',
+    params.max_items ? `最多 ${String(params.max_items)} 条` : ''
+  ].filter(Boolean);
+  return pieces.length ? pieces.join('；') : JSON.stringify(params);
+}
+
+function actionResultFor(action: Record<string, unknown>, results: unknown[]): Record<string, unknown> {
+  const name = String(action.action || '');
+  return asRecord(results.find((item) => String(asRecord(item).action || '') === name));
+}
+
+function fieldCoverageText(value: unknown): string {
+  const fields = Array.isArray(value) ? value.map((item) => String(item)).filter(Boolean) : [];
+  return fields.length ? `${fields.length} 个字段：${fields.join('、')}` : '暂无字段覆盖记录';
+}
+
+function findContractExtraction(records: ManagedActionRecord[]): Record<string, unknown> {
+  for (const record of [...records].reverse()) {
+    const result = asRecord(record.result);
+    const extraction = asRecord(asRecord(result.run_overrides).extraction_result);
+    if (extraction.schema_version === 'contract-extraction-result/v1' || extraction.item_count !== undefined) return extraction;
+    const results = Array.isArray(result.results) ? result.results : [];
+    for (const item of results) {
+      const actionResult = asRecord(item);
+      const evidence = asRecord(actionResult.evidence);
+      if (actionResult.action === 'extract_from_contract' && Object.keys(evidence).length) {
+        return {
+          schema_version: 'contract-extraction-result/v1',
+          site: evidence.contract_site,
+          parser_strategy: evidence.parser_strategy,
+          item_count: evidence.item_count,
+          fields_found: evidence.fields_found,
+          items: Array.isArray(evidence.sample_items) ? evidence.sample_items : actionResult.extracted_items
+        };
+      }
+    }
+  }
+  return {};
 }
 
 export function TaskDetailPage() {
@@ -50,7 +129,14 @@ export function TaskDetailPage() {
   const aiDecisions = status?.ai_decisions || task?.ai_decisions || [];
   const aiDiagnostics = status?.ai_diagnostics || task?.ai_diagnostics || [];
   const aiRepairSuggestions = status?.ai_repair_suggestions || task?.ai_repair_suggestions || [];
+  const llmTraces = status?.llm_traces || task?.llm_traces || [];
   const managedActions = status?.managed_actions || task?.managed_actions || [];
+  const managedSteps = status?.managed_steps || task?.managed_steps || [];
+  const evidencePack = status?.evidence_pack || task?.evidence_pack || {};
+  const accessEvidenceRequest = (evidencePack.access_evidence_request || {}) as Record<string, unknown>;
+  const managedAutoRepair = status?.managed_auto_repair || task?.managed_auto_repair || null;
+  const parentTaskId = status?.parent_task_id || task?.parent_task_id || '';
+  const repairSource = status?.repair_source || task?.repair_source || '';
   const selectedFields = payload?.selected_fields || wizard.selectedFields;
   const seedCount = payload ? seedUrlRows(payload).length : 0;
   const modelName = payload?.llm?.model || settings.llm.model || '未选择模型';
@@ -88,13 +174,17 @@ export function TaskDetailPage() {
           run_id: task.run_id,
           status: 'failed',
           record_count: task.record_count || 0,
-                accepted: false,
-                managed_mode: task.managed_mode,
-                managed_ai: task.managed_ai,
-                ai_decisions: task.ai_decisions,
-                ai_diagnostics: task.ai_diagnostics,
-                ai_repair_suggestions: task.ai_repair_suggestions,
-                error: staleMessage,
+          accepted: false,
+          managed_mode: task.managed_mode,
+          managed_ai: task.managed_ai,
+          ai_decisions: task.ai_decisions,
+          ai_diagnostics: task.ai_diagnostics,
+          ai_repair_suggestions: task.ai_repair_suggestions,
+          managed_actions: task.managed_actions,
+          managed_auto_repair: task.managed_auto_repair,
+          parent_task_id: task.parent_task_id,
+          repair_source: task.repair_source,
+          error: staleMessage,
           progress: {
             status: 'failed',
             records_saved: task.record_count || 0,
@@ -239,7 +329,11 @@ export function TaskDetailPage() {
           provider: settings.llm.provider,
           base_url: settings.llm.base_url,
           api_key: settings.llm.api_key,
-          model: settings.llm.model
+          model: settings.llm.model,
+          reasoning_effort: settings.llm.reasoning_effort,
+          stream: settings.llm.stream,
+          timeout_seconds: settings.llm.timeout_seconds,
+          max_tokens: settings.llm.max_tokens
         }
       });
       const childTask = {
@@ -252,7 +346,9 @@ export function TaskDetailPage() {
         accepted: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        managed_actions: result.managed_action ? [result.managed_action] : task.managed_actions,
+        parent_task_id: result.parent_task_id || task.task_id,
+        repair_source: result.repair_source || 'managed_actions',
+        managed_actions: result.managed_action ? [...managedActions, result.managed_action] : task.managed_actions,
         run_payload: task.run_payload
           ? {
               ...task.run_payload,
@@ -269,6 +365,56 @@ export function TaskDetailPage() {
       upsertTask(childTask);
       setPolling(true);
       message.success('AI 托管修复任务已启动');
+    } catch (error) {
+      message.error(userFacingError(error));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const triggerManagedStep = async () => {
+    if (!task) return;
+    setBusy(true);
+    try {
+      const runKind: 'test' | 'full' = task.mode === 'full' ? 'full' : 'test';
+      const result = await managedStep(settings, task.task_id, {
+        execute: true,
+        use_llm: Boolean(settings.llm.base_url && settings.llm.model),
+        start_child_run: false,
+        run_kind: runKind,
+        apply_diagnostics: true,
+        extra_context: {
+          field_goal: wizard.fieldGoal,
+          selected_fields: selectedFields,
+          imported_catalog: wizard.importedCatalog,
+          export: {
+            ...(task.export_config || wizard.export),
+            format,
+            output_path: replaceExportPathSuffix(outputPath, format)
+          }
+        },
+        managed_ai: settings.managed_ai,
+        llm: {
+          enabled: Boolean(settings.llm.base_url && settings.llm.model),
+          provider: settings.llm.provider,
+          base_url: settings.llm.base_url,
+          api_key: settings.llm.api_key,
+          model: settings.llm.model,
+          reasoning_effort: settings.llm.reasoning_effort,
+          stream: settings.llm.stream,
+          timeout_seconds: settings.llm.timeout_seconds,
+          max_tokens: settings.llm.max_tokens
+        }
+      });
+      upsertTask({
+        ...task,
+        managed_steps: [...managedSteps, result],
+        managed_actions: result.action_record ? [...managedActions, result.action_record] : managedActions,
+        evidence_pack: result.evidence_pack || evidencePack,
+        updated_at: new Date().toISOString()
+      });
+      await refresh(true);
+      message.success('AI 已执行一个托管步骤');
     } catch (error) {
       message.error(userFacingError(error));
     } finally {
@@ -338,8 +484,11 @@ export function TaskDetailPage() {
       {status?.error ? <Alert type="error" showIcon message="任务运行失败" description={status.error} /> : null}
 
       <AiManagedPanel
-        title="AI 托管与模型决策"
+        title="AI 托管驾驶舱"
         settings={settings}
+        status={status?.status || task.status}
+        recordCount={status?.record_count ?? task.record_count}
+        progress={progress}
         managedMode={String(managedMode)}
         managedAi={managedAi}
         modelName={modelName}
@@ -347,9 +496,19 @@ export function TaskDetailPage() {
         aiDecisions={aiDecisions}
         aiDiagnostics={aiDiagnostics}
         aiRepairSuggestions={aiRepairSuggestions}
+        llmTraces={llmTraces}
+        managedActions={managedActions}
+        managedAutoRepair={managedAutoRepair}
+        parentTaskId={parentTaskId}
+        repairSource={repairSource}
+        onManagedRepairRun={triggerManagedRepairRun}
+        onManagedStep={triggerManagedStep}
+        repairLoading={busy}
+        repairDisabled={isRunning}
       />
 
       <ManagedActionTable records={managedActions} />
+      <ManagedStepTable records={managedSteps} evidencePack={evidencePack} accessEvidenceRequest={accessEvidenceRequest} />
 
       <div className="two-column-grid">
         <div>
@@ -392,21 +551,32 @@ export function TaskDetailPage() {
 }
 
 function ManagedActionTable({ records }: { records: ManagedActionRecord[] }) {
-  const rows = records.map((record, index) => {
+  const rows = records.flatMap((record, recordIndex) => {
     const plan = record.result?.plan || {};
     const actions = Array.isArray(plan.actions) ? plan.actions : [];
-    return {
-      key: `${record.created_at || index}`,
-      time: record.created_at || '-',
-      source: String(plan.source || '-'),
-      action_count: actions.length,
-      actions: actions.map((item) => String(item.action || '')).filter(Boolean).join(', '),
-      rerun_ready: Boolean(record.result?.rerun_ready)
-    };
+    const results = Array.isArray(record.result?.results) ? record.result?.results || [] : [];
+    return actions.map((item, actionIndex) => {
+      const action = asRecord(item);
+      const result = actionResultFor(action, results);
+      const failed = result.ok === false;
+      return {
+        key: `${record.created_at || recordIndex}-${actionIndex}`,
+        time: record.created_at || '-',
+        source: String(plan.source || '-'),
+        action: action.action,
+        reason: action.reason,
+        params: action.params,
+        status: failed ? '失败' : Object.keys(result).length ? '已执行' : record.executed ? '等待结果' : '已规划',
+        result: failed ? humanError(result.error) : String(result.summary || result.message || (Object.keys(result).length ? '已返回执行结果' : '-')),
+        rerun_ready: Boolean(record.result?.rerun_ready)
+      };
+    });
   });
+  const extraction = findContractExtraction(records);
+  const extractionItems = Array.isArray(extraction.items) ? extraction.items.slice(0, 5).map((item) => asRecord(item)) : [];
 
   return (
-    <Card title="托管动作记录">
+    <Card title="托管动作完整记录">
       {rows.length ? (
         <Table
           size="small"
@@ -415,8 +585,16 @@ function ManagedActionTable({ records }: { records: ManagedActionRecord[] }) {
           columns={[
             { title: '时间', dataIndex: 'time', width: 220 },
             { title: '来源', dataIndex: 'source', width: 120 },
-            { title: '动作数', dataIndex: 'action_count', width: 90 },
-            { title: '动作', dataIndex: 'actions' },
+            { title: '动作名称', dataIndex: 'action', width: 180, render: (value: unknown) => actionName(value) },
+            { title: 'Reason', dataIndex: 'reason' },
+            { title: 'Params 摘要', dataIndex: 'params', render: (value: unknown) => paramsSummary(value) },
+            {
+              title: '执行状态',
+              dataIndex: 'status',
+              width: 110,
+              render: (value: string) => <Tag color={value === '失败' ? 'error' : value === '已执行' ? 'success' : 'default'}>{value}</Tag>
+            },
+            { title: '执行结果', dataIndex: 'result' },
             {
               title: '可重跑',
               dataIndex: 'rerun_ready',
@@ -427,6 +605,93 @@ function ManagedActionTable({ records }: { records: ManagedActionRecord[] }) {
         />
       ) : (
         <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无托管动作记录" />
+      )}
+      {Object.keys(extraction).length ? (
+        <div className="section-gap">
+          <Descriptions size="small" column={2}>
+            <Descriptions.Item label="抽取策略">{String(extraction.parser_strategy || '未记录')}</Descriptions.Item>
+            <Descriptions.Item label="站点">{String(extraction.site || '未记录')}</Descriptions.Item>
+            <Descriptions.Item label="抽取条数">{String(extraction.item_count ?? extractionItems.length)}</Descriptions.Item>
+            <Descriptions.Item label="字段覆盖">{fieldCoverageText(extraction.fields_found)}</Descriptions.Item>
+          </Descriptions>
+          {extractionItems.length ? (
+            <List
+              className="section-gap-small"
+              size="small"
+              header="前 5 条样例商品"
+              dataSource={extractionItems}
+              renderItem={(item) => (
+                <List.Item>
+                  <Typography.Text>{`${String(item.title || '-')} / ${String(item.highest_price ?? '-')} / ${String(item.color || '-')}`}</Typography.Text>
+                </List.Item>
+              )}
+            />
+          ) : null}
+        </div>
+      ) : null}
+    </Card>
+  );
+}
+
+function ManagedStepTable({
+  records,
+  evidencePack,
+  accessEvidenceRequest
+}: {
+  records: ManagedStepRecord[];
+  evidencePack: Record<string, unknown>;
+  accessEvidenceRequest: Record<string, unknown>;
+}) {
+  const focus = Array.isArray(evidencePack.recommended_focus) ? evidencePack.recommended_focus.map((item) => String(item)) : [];
+  const failureEvidence = (evidencePack.failure_evidence || {}) as Record<string, unknown>;
+  const failureBuckets = (failureEvidence.failure_buckets || {}) as Record<string, unknown>;
+  const accessEvidence = (evidencePack.access_evidence || {}) as Record<string, unknown>;
+  const accessSummary = (accessEvidence.summary || {}) as Record<string, unknown>;
+  const xhrSamples = Array.isArray(accessEvidence.xhr_samples) ? accessEvidence.xhr_samples : [];
+  const runtimeEvents = Array.isArray(accessEvidence.runtime_events) ? accessEvidence.runtime_events : [];
+  const missingEvidence = Array.isArray(accessSummary.missing_evidence) ? accessSummary.missing_evidence.map((item) => String(item)) : [];
+  const decisionHints = Array.isArray(accessEvidence.decision_hints) ? accessEvidence.decision_hints.map((item) => String(item)) : [];
+  const rows = records.map((record, index) => {
+    const actions = record.action_record?.result?.plan?.actions || [];
+    return {
+      key: `${record.created_at || index}`,
+      time: record.created_at || '-',
+      stage: record.stage || '-',
+      status_before: record.status_before || '-',
+      action_count: Array.isArray(actions) ? actions.length : 0,
+      child: record.child_run?.task_id || '-'
+    };
+  });
+
+  return (
+    <Card title="AI 托管步骤与证据包">
+      {focus.length || Object.keys(failureBuckets).length || Object.keys(accessEvidence).length ? (
+        <Descriptions size="small" column={2}>
+          <Descriptions.Item label="建议关注">
+            <Space wrap>{focus.length ? focus.map((item) => <Tag key={item}>{item}</Tag>) : '-'}</Space>
+          </Descriptions.Item>
+          <Descriptions.Item label="失败桶">{Object.keys(failureBuckets).length ? JSON.stringify(failureBuckets) : '-'}</Descriptions.Item>
+          <Descriptions.Item label="证据采样请求" span={2}>
+            {Object.keys(accessEvidenceRequest).length ? JSON.stringify(accessEvidenceRequest) : '-'}
+          </Descriptions.Item>
+        </Descriptions>
+      ) : null}
+      {rows.length ? (
+        <Table
+          className="section-gap-small"
+          size="small"
+          pagination={false}
+          dataSource={rows}
+          columns={[
+            { title: '时间', dataIndex: 'time', width: 220 },
+            { title: '阶段', dataIndex: 'stage', width: 160 },
+            { title: '执行前状态', dataIndex: 'status_before', width: 120 },
+            { title: '动作数', dataIndex: 'action_count', width: 90 },
+            { title: '子任务', dataIndex: 'child' }
+          ]}
+        />
+      ) : (
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无 AI 托管步骤" />
       )}
     </Card>
   );

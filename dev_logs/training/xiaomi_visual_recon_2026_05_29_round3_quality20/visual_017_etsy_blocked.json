@@ -1,0 +1,81 @@
+{
+  "schema_version": "clm-visual-recon-v1",
+  "site_url": "https://www.etsy.com",
+  "page_url": "https://www.etsy.com",
+  "domain": "etsy.com",
+  "checked_at": "2026-05-30T08:58:53.109128Z",
+  "input_artifacts": {
+    "screenshot_path": "screenshot_017_etsy_blocked.png",
+    "html_summary_path": "html_summary_017.txt",
+    "network_summary_path": "network_summary_017.txt"
+  },
+  "page_type": "blocked",
+  "visual_state": "challenge",
+  "is_product_listing": false,
+  "is_product_detail": false,
+  "visible_catalog": [],
+  "visible_product_cards": {
+    "detected": false,
+    "count_estimate": "0 (blocked)",
+    "layout": "none",
+    "evidence": "Blocked: HTTP 403 - Captcha/challenge",
+    "confidence": 0.0
+  },
+  "field_regions": {},
+  "blocking_signals": [
+    {
+      "kind": "access_blocked",
+      "description": "HTTP 403 - Captcha/challenge",
+      "confidence": 0.95,
+      "evidence_type": "observed"
+    }
+  ],
+  "pagination_signals": [],
+  "visual_action_hints": [
+    {
+      "hint": "switch_runtime",
+      "reason": "blocked on etsy.com",
+      "confidence": 0.8
+    }
+  ],
+  "recommended_action_plan": [
+    {
+      "action": "switch_runtime",
+      "priority": "high",
+      "reason": "Captcha blocks automated access",
+      "params": {},
+      "depends_on_evidence": [
+        "screenshot"
+      ]
+    },
+    {
+      "action": "analyze_site",
+      "priority": "low",
+      "reason": "Cannot access site content",
+      "params": {},
+      "depends_on_evidence": [
+        "screenshot"
+      ]
+    }
+  ],
+  "confidence": {
+    "page_type": 0.8,
+    "product_cards": 0.0,
+    "fields": 0.0,
+    "blocking": 0.15,
+    "pagination": 0.0,
+    "overall": 0.15
+  },
+  "evidence_log": [
+    "HTML: NOT AVAILABLE (HTTP 403 - Captcha/challenge)",
+    "Screenshot: screenshot_017_etsy_blocked.png (captured)",
+    "Network: no_network_captured",
+    "Note: HTTP 403 with captcha challenge. Bot detection active."
+  ],
+  "missing_evidence": [
+    "network_summary",
+    "html_content"
+  ],
+  "needs_backend_verification": true,
+  "needs_human_review": true
+}

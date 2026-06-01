@@ -1,0 +1,89 @@
+{
+  "schema_version": "clm-deep-recon-v1",
+  "site_url": "https://www.reiss.com",
+  "domain": "reiss.com",
+  "checked_at": "2026-05-29T03:00:00Z",
+  "phase": "deep_recon_phase_2",
+  "platform": "Next Group CMS (api.e.reiss.com + cms.platform.next)",
+
+  "catalog_url": {
+    "url": "https://www.reiss.com/shop/womens",
+    "accessible": false,
+    "status_code": 403,
+    "rendering": "server_side",
+    "notes": "Category pages return 403 on all modes (requests, curl_cffi, browser). Homepage loads fine."
+  },
+
+  "list_page_url": {
+    "url": "https://www.reiss.com/shop/womens",
+    "accessible": false,
+    "product_count": 0,
+    "rendering_mode": "all_blocked",
+    "notes": "All category/shop URLs return 403. Homepage and non-shop pages accessible."
+  },
+
+  "detail_url_pattern": {
+    "pattern": "Unknown - category pages blocked",
+    "example": "N/A",
+    "product_id_field": "N/A",
+    "product_id_format": "N/A",
+    "notes": "Cannot discover product URLs without access to category pages."
+  },
+
+  "pagination": {
+    "type": "unknown",
+    "mechanism": "N/A",
+    "notes": "Cannot determine pagination without category page access."
+  },
+
+  "api_response_sample": {
+    "source": "None - API endpoints return 404",
+    "format": "N/A",
+    "api_endpoints_found": [
+      "api.e.reiss.com (404 on /v1/products)",
+      "www.reiss.com/api/personalisation/v0/gb/en-gb (json_like=true)",
+      "cms.platform.next/cms2/api/v1/{realm}/{territory}/{language}/{type}/{contentid}"
+    ],
+    "notes": "80 API hints discovered but all tested endpoints return 404. Next Group platform shares API structure with next.co.uk."
+  },
+
+  "field_evidence": {
+    "title": {"selector": "N/A", "type": "unknown", "confidence": 0.0},
+    "price": {"selector": "N/A", "type": "unknown", "confidence": 0.0},
+    "image": {"selector": "N/A", "type": "unknown", "confidence": 0.0},
+    "color": {"selector": "N/A", "type": "unknown", "confidence": 0.0},
+    "size": {"selector": "N/A", "type": "unknown", "confidence": 0.0},
+    "description": {"selector": "N/A", "type": "unknown", "confidence": 0.0}
+  },
+
+  "clm_suitability": {
+    "verdict": "not_suitable",
+    "confidence": 0.05,
+    "reasons": [
+      "All category/shop URLs return 403",
+      "API endpoints return 404",
+      "Cannot discover product URLs or data"
+    ],
+    "limitations": [
+      "403 blocks all category page access",
+      "Next Group platform has strong anti-scraping",
+      "No working API endpoints found"
+    ],
+    "recommended_approach": "Not suitable. Consider proxy rotation or cookie-based access."
+  },
+
+  "failure_diagnosis": {
+    "status": "failed",
+    "blocking_issues": [
+      "403 on all /shop/* URLs",
+      "API endpoints return 404"
+    ],
+    "platform_notes": "Shares Next Group platform with next.co.uk. Both have same 403 blocking behavior.",
+    "next_steps": [
+      "Try with proxy rotation",
+      "Investigate cookie/authentication requirements",
+      "Check if API requires specific headers",
+      "Consider skipping - same platform as next.co.uk"
+    ]
+  }
+}

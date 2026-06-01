@@ -1,0 +1,44 @@
+{
+  "schema_version": "clm-site-recon-v1",
+  "site_url": "https://www.johnlewis.com",
+  "domain": "johnlewis.com",
+  "checked_at": "2026-05-28T11:22:00Z",
+  "site_type": "ecommerce",
+  "language": "en",
+  "currency": "GBP",
+  "rendering": "spa",
+  "access_status": {
+    "reachable": true,
+    "status_code": 200,
+    "final_url": "https://www.johnlewis.com",
+    "redirects": [],
+    "blocked_signals": ["403_forbidden", "login_required"],
+    "notes": "Accessible via requests and curl_cffi (80KB). Browser returns HTTP2 protocol error. JS shell. 3 API hints including search template and Monetate API. Login required for some content."
+  },
+  "catalog_candidates": [],
+  "list_page_candidates": [],
+  "detail_url_patterns": [],
+  "pagination": {"type": "", "params": {}, "next_link_selector_candidates": [], "load_more_selector_candidates": [], "notes": "Not determined - JS shell", "evidence_type": "guessed"},
+  "api_candidates": [
+    {"url": "https://www.johnlewis.com/search?search-term={search_term_string}", "source": "script", "confidence": 0.7, "evidence_type": "observed"},
+    {"url": "https://engine.monetate.net/api/engine/v1/decide/JohnLewis", "source": "script", "confidence": 0.5, "evidence_type": "observed"}
+  ],
+  "selector_candidates": {},
+  "field_quality_expectation": {},
+  "difficulty_signals": [
+    {"kind": "js_rendering", "evidence": "80KB HTML, JS shell detected. Browser HTTP2 protocol error.", "impact": "Product data loaded via SPA", "suggested_handling": "Investigate search API endpoint", "confidence": 0.7}
+  ],
+  "recommended_action_plan": [
+    {"action": "promote_xhr_to_api", "priority": "high", "reason": "Search API template found - test product search endpoint", "params": {}, "depends_on_evidence": ["api_candidates"]},
+    {"action": "analyze_site", "priority": "medium", "reason": "Explore search API for product data", "params": {}, "depends_on_evidence": ["access_status"]}
+  ],
+  "confidence": {"catalog": 0.2, "api": 0.5, "selectors": 0.1, "pagination": 0.1, "overall": 0.3},
+  "evidence_log": [
+    {"ts": "2026-05-28T11:22:01Z", "type": "observed", "detail": "requests: 200 OK, 80KB HTML"},
+    {"ts": "2026-05-28T11:22:03Z", "type": "observed", "detail": "curl_cffi: 200 OK, 80KB HTML"},
+    {"ts": "2026-05-28T11:22:05Z", "type": "observed", "detail": "browser: HTTP2 protocol error"},
+    {"ts": "2026-05-28T11:22:06Z", "type": "observed", "detail": "Search API template and Monetate API found"}
+  ],
+  "missing_evidence": ["product_selectors", "catalog_urls", "api_response_sample"],
+  "needs_human_review": false
+}

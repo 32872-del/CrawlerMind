@@ -1,0 +1,15 @@
+HTML Summary: newegg.com - Page 009
+URL: https://www.newegg.com
+Fetched at: 2026-05-30T08:58:53.101177
+Fetch mode: auto (80000 chars)
+Title: Electronics Store: Tech, PC Parts, AI PC &amp; More | Newegg
+Language: en-us
+Truncated: Yes (80KB limit)
+
+=== Selectors in HTML ===
+  Product selectors not found in truncated HTML
+
+=== Screenshot ===
+File: screenshot_009_newegg_home.png
+Page type: home
+Visual state: normal

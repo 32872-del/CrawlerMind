@@ -1,0 +1,12 @@
+HTML Summary: newegg.com - Page 010
+URL: https://www.newegg.com/promotions/nid/landingpage/DealZone
+Fetched at: 2026-05-30T08:58:53.102474
+Fetch mode: auto (FAILED - HTTP 404 - Page not found)
+
+=== HTML Not Available ===
+Error: HTTP 404 - Page not found
+
+=== Screenshot ===
+File: screenshot_010_newegg_dealzone.png
+Page type: featured
+Visual state: normal
