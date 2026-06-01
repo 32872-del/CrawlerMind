@@ -54,7 +54,8 @@ _CURRENCY_TOKENS = (
     "\u20ac", "$", "\u00a3", "\u00a5", "z\u0142",
 )
 _FREE_RE = re.compile(r"^(free|gratis|kostenlos|gratuit)$", re.IGNORECASE)
-_NUMBER_RE = re.compile(r"-?\d+(?:[.,\s]\d{3})*(?:[.,]\d{1,2})?|-?\d+")
+_NUMBER_RE = re.compile(r"-?\d+(?:[.,]\d{3})*(?:[.,]\d{1,2})?|-?\d+")
+_PRICE_RANGE_RE = re.compile(r"\d[\d.,]*\s*[\-\u2013\u2014~]\s*\d[\d.,]*")
 
 
 @dataclass(frozen=True)
@@ -101,6 +102,14 @@ def parse_price(raw: Any) -> float | None:
         return 0.0
     for token in _CURRENCY_TOKENS:
         text = re.sub(re.escape(token), " ", text, flags=re.IGNORECASE)
+    # Detect price ranges like "13 - 26" or "13–26" and split them
+    range_match = _PRICE_RANGE_RE.search(text)
+    if range_match:
+        range_text = range_match.group()
+        parts = re.split(r"\s*[\-\u2013\u2014~]\s*", range_text)
+        if len(parts) == 2:
+            # Replace the range in text with just the parts separated by space
+            text = text[:range_match.start()] + " ".join(parts) + text[range_match.end():]
     matches = _NUMBER_RE.findall(text)
     if not matches:
         return None
@@ -114,6 +123,46 @@ def parse_price(raw: Any) -> float | None:
     if not values:
         return None
     return max(values)
+
+
+def parse_lowest_price(raw: Any) -> float | None:
+    """Parse a price value and return the LOWEST number found.
+
+    For single prices returns the value itself.
+    For ranges like "13 - 26" returns 13.0.
+    """
+    if raw is None:
+        return None
+    if isinstance(raw, bool):
+        return None
+    if isinstance(raw, (int, float)):
+        return float(raw)
+    text = str(raw).strip()
+    if not text:
+        return None
+    if _FREE_RE.match(text):
+        return 0.0
+    for token in _CURRENCY_TOKENS:
+        text = re.sub(re.escape(token), " ", text, flags=re.IGNORECASE)
+    range_match = _PRICE_RANGE_RE.search(text)
+    if range_match:
+        range_text = range_match.group()
+        parts = re.split(r"\s*[\-\u2013\u2014~]\s*", range_text)
+        if len(parts) == 2:
+            text = text[:range_match.start()] + " ".join(parts) + text[range_match.end():]
+    matches = _NUMBER_RE.findall(text)
+    if not matches:
+        return None
+    values: list[float] = []
+    for match in matches:
+        normalized = _normalize_number(match)
+        try:
+            values.append(float(normalized))
+        except ValueError:
+            continue
+    if not values:
+        return None
+    return min(values)
 
 
 def validate_product_record(

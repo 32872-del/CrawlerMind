@@ -10,6 +10,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+# Fix Windows console encoding for Unicode characters (GBP, EUR, etc.)
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 from autonomous_crawler.llm import LLMConfigurationError
 from autonomous_crawler.runners import (
     ProfileLongRunConfig,
