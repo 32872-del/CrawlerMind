@@ -489,6 +489,10 @@ def execute_managed_action_plan(
             llm_trace_callback=llm_trace_callback,
         )
 
+    # Track actions that may need dynamic follow-up (pagination, SPA)
+    _executed_actions: set[str] = set()
+    _auto_appended: set[str] = set()
+
     for action in effective_plan.actions:
         if action.action == "reanalyze_site":
             result = _execute_reanalyze_site(action, target_url=target_url, advisor=advisor, extra_context=extra_context)
@@ -526,6 +530,95 @@ def execute_managed_action_plan(
         run_overrides = _deep_merge(run_overrides, result.get("overrides") if isinstance(result.get("overrides"), dict) else {})
         results.append(result)
 
+    # ------------------------------------------------------------------
+    # Post-loop: auto-append pagination and SPA actions based on results
+    # ------------------------------------------------------------------
+    for result in results:
+        act_name = str(result.get("action") or "")
+        _executed_actions.add(act_name)
+
+    # Bug 2: If reanalyze_site or inspect_access found pagination URLs,
+    # automatically append a follow_pagination action.
+    if "follow_pagination" not in _executed_actions and "follow_pagination" not in _auto_appended:
+        pagination_urls = _collect_pagination_urls_from_results(results, extra_context)
+        if pagination_urls and "follow_pagination" not in {a.action for a in effective_plan.actions}:
+            # If pagination URLs are already known (from extra_context or results),
+            # create the result directly without needing HTML re-detection.
+            result: dict[str, Any] = {
+                "action": "follow_pagination",
+                "ok": True,
+                "summary": f"auto-appended follow_pagination with {len(pagination_urls)} URLs",
+                "patch": {
+                    "pagination_urls": pagination_urls,
+                    "pagination_detected": True,
+                },
+                "overrides": {
+                    "follow_pagination": True,
+                    "pagination_urls": pagination_urls,
+                },
+            }
+            # Also try HTML-based detection if HTML is available, to find even more pages
+            html = str(extra_context.get("html") or "")
+            if html:
+                pagination_action = ManagedCrawlAction(
+                    action="follow_pagination",
+                    reason="Pagination links detected in site analysis; auto-following.",
+                    priority="medium",
+                    params={
+                        "html": html,
+                        "max_pages": int(extra_context.get("max_pages") or 5),
+                    },
+                )
+                html_result = _execute_follow_pagination(
+                    pagination_action, target_url=target_url, profile=profile, extra_context=extra_context
+                )
+                if html_result.get("ok") and isinstance(html_result.get("patch", {}).get("pagination_urls"), list):
+                    # Merge HTML-detected URLs with known URLs
+                    all_urls = list(dict.fromkeys(
+                        pagination_urls + html_result["patch"]["pagination_urls"]
+                    ))
+                    result["patch"]["pagination_urls"] = all_urls
+                    result["overrides"]["pagination_urls"] = all_urls
+                    result["summary"] = f"auto-appended follow_pagination with {len(all_urls)} URLs"
+            profile_patch = _deep_merge(profile_patch, result.get("patch") if isinstance(result.get("patch"), dict) else {})
+            run_overrides = _deep_merge(run_overrides, result.get("overrides") if isinstance(result.get("overrides"), dict) else {})
+            results.append(result)
+            _auto_appended.add("follow_pagination")
+
+    # Bug 3: If reanalyze_site or inspect_access detected empty body / JS shell,
+    # automatically upgrade to dynamic browser runtime.
+    if "render_with_browser" not in _executed_actions and "adjust_runtime" not in _auto_appended:
+        spa_detected = _detect_spa_from_results(results)
+        if spa_detected:
+            # Append adjust_runtime to switch to dynamic mode
+            runtime_action = ManagedCrawlAction(
+                action="adjust_runtime",
+                reason="SPA/JS shell detected; upgrading to dynamic browser runtime.",
+                priority="high",
+                params={"mode": "dynamic", "capture_api": True, "wait_until": "networkidle"},
+            )
+            rt_result = _execute_adjust_runtime(runtime_action)
+            profile_patch = _deep_merge(profile_patch, rt_result.get("patch") if isinstance(rt_result.get("patch"), dict) else {})
+            run_overrides = _deep_merge(run_overrides, rt_result.get("overrides") if isinstance(rt_result.get("overrides"), dict) else {})
+            results.append(rt_result)
+            _auto_appended.add("adjust_runtime")
+
+            # Also append render_with_browser to actually fetch rendered content
+            if "render_with_browser" not in _executed_actions:
+                render_action = ManagedCrawlAction(
+                    action="render_with_browser",
+                    reason="SPA site requires browser rendering to extract product data.",
+                    priority="high",
+                    params={"target_url": target_url, "wait_until": "networkidle"},
+                )
+                rb_result = _execute_render_with_browser(
+                    render_action, target_url=target_url, profile=profile
+                )
+                profile_patch = _deep_merge(profile_patch, rb_result.get("patch") if isinstance(rb_result.get("patch"), dict) else {})
+                run_overrides = _deep_merge(run_overrides, rb_result.get("overrides") if isinstance(rb_result.get("overrides"), dict) else {})
+                results.append(rb_result)
+                _auto_appended.add("render_with_browser")
+
     if not run_overrides and profile_patch:
         run_overrides = dict(profile_patch)
     api_replay_promotions = [
@@ -547,6 +640,491 @@ def execute_managed_action_plan(
         "rerun_ready": bool(profile_patch or run_overrides),
     }
 
+def execute_and_run(
+    *,
+    plan: ManagedActionPlan,
+    target_url: str,
+    profile: dict[str, Any],
+    run_spec: dict[str, Any] | None = None,
+    advisor: Any = None,
+    extra_context: dict[str, Any] | None = None,
+    job: dict[str, Any] | None = None,
+    llm_decide: bool = False,
+    llm_decision_callback: Any = None,
+    llm_trace_callback: Any = None,
+    progress: dict[str, Any] | None = None,
+    diagnostics: dict[str, Any] | None = None,
+    supervision: dict[str, Any] | None = None,
+    batch_size: int = 20,
+    max_batches: int = 0,
+    item_workers: int = 4,
+    runtime_dir: str = "",
+    run_mode: str = "direct",
+) -> dict[str, Any]:
+    """Execute managed actions, merge results into profile, then run a crawl.
+
+    This is the **execute-and-run** closed-loop entry point.  It:
+
+    1. Runs ``execute_managed_action_plan()`` to collect ``profile_patch``
+       and ``run_overrides``.
+    2. Deep-merges the ``profile_patch`` into *profile*.
+    3. Applies ``run_overrides`` to the effective run spec (item_workers,
+       runtime_dir, export settings, etc.).
+    4. Kicks off ``run_profile_longrun()`` with the patched profile and spec.
+    5. Returns a combined dict containing both the action results and the
+       crawl run results.
+
+    When *rerun_ready* is ``False`` (no patches or overrides produced) the
+    crawl step is skipped and the action result is returned as-is.
+    """
+    import uuid as _uuid
+    from .product_workflow import build_run_spec, profile_from_run_spec, QualityGate
+    from .profile_longrun import ProfileLongRunConfig, run_profile_longrun
+    from autonomous_crawler.runtime import NativeFetchRuntime, NativeBrowserRuntime
+
+    run_spec = run_spec if isinstance(run_spec, dict) else {}
+
+    # ------------------------------------------------------------------
+    # Phase 1: Execute managed actions
+    # ------------------------------------------------------------------
+    action_result = execute_managed_action_plan(
+        plan=plan,
+        target_url=target_url,
+        profile=profile,
+        run_spec=run_spec,
+        advisor=advisor,
+        extra_context=extra_context,
+        job=job,
+        llm_decide=llm_decide,
+        llm_decision_callback=llm_decision_callback,
+        llm_trace_callback=llm_trace_callback,
+        progress=progress,
+        diagnostics=diagnostics,
+        supervision=supervision,
+    )
+
+    profile_patch = action_result.get("profile_patch") or {}
+    run_overrides = action_result.get("run_overrides") or {}
+
+    # Short-circuit: nothing to run
+    if not action_result.get("rerun_ready"):
+        return {
+            "schema_version": "execute-and-run/v1",
+            "action_result": action_result,
+            "run_result": None,
+            "merged_profile": profile,
+            "applied_patch": False,
+            "skipped_run": True,
+            "reason": "no profile_patch or run_overrides produced",
+            "quality_diagnostics": {
+                "total_records": 0,
+                "field_coverage": 0.0,
+                "field_completeness": {},
+                "quality_gate": {},
+                "quality_indicator": "skip",
+                "critical_failures": [],
+                "failed_actions": [],
+                "duplicate_rate": 0.0,
+                "coverage_report": {},
+            },
+            "chain_evidence": {
+                "schema_version": "execute-and-run-chain/v1",
+                "actions_executed": [],
+                "action_count": 0,
+                "patch_applied": {"keys": [], "override_keys": []},
+                "run_effect": {
+                    "status": "skipped",
+                    "total_records": 0,
+                    "field_coverage": 0.0,
+                    "quality_indicator": "skip",
+                },
+                "run_started_at": "",
+                "run_finished_at": "",
+            },
+        }
+
+    # ------------------------------------------------------------------
+    # Phase 2: Merge profile patch
+    # ------------------------------------------------------------------
+    merged_profile = _deep_merge(profile, profile_patch)
+
+    # Preserve original seed_urls when the patch only has speculative
+    # discoveries (reanalyze_site guesses URLs like /shop, /sklep, etc.)
+    # that would overwrite explicit user-provided seed_urls.
+    original_seeds = (
+        profile.get("crawl_preferences", {}).get("seed_urls")
+        if isinstance(profile.get("crawl_preferences"), dict)
+        else None
+    )
+    if original_seeds and isinstance(original_seeds, list):
+        merged_prefs = merged_profile.get("crawl_preferences")
+        if isinstance(merged_prefs, dict):
+            merged_prefs["seed_urls"] = original_seeds
+
+    # ------------------------------------------------------------------
+    # Phase 3: Apply run overrides to spec
+    # ------------------------------------------------------------------
+    merged_spec = dict(run_spec)
+    for key in ("item_workers", "test_limit", "max_sites", "runtime_dir", "run_mode"):
+        if key in run_overrides:
+            merged_spec[key] = run_overrides[key]
+    if isinstance(run_overrides.get("export"), dict):
+        merged_spec["export"] = _deep_merge(
+            merged_spec.get("export") or {},
+            run_overrides["export"],
+        )
+    if isinstance(run_overrides.get("selected_fields"), list):
+        merged_spec["selected_fields"] = run_overrides["selected_fields"]
+
+    effective_item_workers = int(merged_spec.get("item_workers") or item_workers)
+    effective_runtime_dir = str(merged_spec.get("runtime_dir") or runtime_dir)
+    effective_run_mode = str(merged_spec.get("run_mode") or run_mode)
+
+    # Build CrawlRunSpec and SiteProfile for the long-run executor
+    spec_payload = {
+        "target_url": target_url,
+        "profile": merged_profile,
+        "catalog_nodes": (
+            merged_spec.get("catalog_nodes")
+            or merged_profile.get("crawl_preferences", {}).get("catalog_tree")
+            or []
+        ),
+        "selected_fields": (
+            merged_spec.get("selected_fields")
+            or merged_profile.get("target_fields")
+            or []
+        ),
+        "export": merged_spec.get("export") or {},
+        "run_mode": effective_run_mode,
+        "item_workers": effective_item_workers,
+        "max_sites": int(merged_spec.get("max_sites") or 1),
+        "test_limit": int(merged_spec.get("test_limit") or 100),
+        "runtime_dir": effective_runtime_dir,
+    }
+
+    # Pre-check: if access_config says dynamic but browser binary is unavailable,
+    # downgrade to static before building the crawl spec.
+    _ac = merged_profile.get("access_config")
+    if isinstance(_ac, dict) and str(_ac.get("mode") or "").strip().lower() in {"dynamic", "protected", "browser", "playwright"}:
+        browser_available = False
+        try:
+            import glob as _glob
+            _pw_dir = Path(os.path.expanduser("~")) / "AppData" / "Local" / "ms-playwright"
+            _chromes = list(_glob.glob(str(_pw_dir / "chromium*" / "chrome*"))) if _pw_dir.exists() else []
+            browser_available = len(_chromes) > 0
+        except Exception:
+            pass
+        if not browser_available:
+            _ac["mode"] = "static"
+            _ac["_fallback_reason"] = "playwright_not_available"
+
+    crawl_spec = build_run_spec(spec_payload)
+    site_profile = profile_from_run_spec(crawl_spec, limit=crawl_spec.test_limit)
+
+    # Restore original seed_urls if profile_from_run_spec overwrote them
+    # with speculative catalog-discovery URLs.  The user's explicit seeds
+    # should always take priority over guessed paths like /shop, /sklep.
+    original_seeds = merged_profile.get("crawl_preferences", {}).get("seed_urls")
+    if isinstance(original_seeds, list) and original_seeds:
+        site_profile.crawl_preferences["seed_urls"] = original_seeds
+
+    # ------------------------------------------------------------------
+    # Phase 4: Run the crawl
+    # ------------------------------------------------------------------
+    fetch_runtime = NativeFetchRuntime(reuse_httpx_client=effective_item_workers > 1)
+    browser_runtime = None
+    access = merged_profile.get("access_config") or {}
+    access_mode = str(
+        access.get("mode") or access.get("runtime_mode") or "static"
+    ).strip().lower()
+    if access_mode in {"dynamic", "protected", "browser", "playwright"}:
+        try:
+            browser_runtime = NativeBrowserRuntime()
+        except Exception:
+            # Playwright not installed â€?fall back to static mode
+            access_mode = "static"
+            if isinstance(merged_profile.get("access_config"), dict):
+                merged_profile["access_config"]["mode"] = "static"
+                merged_profile["access_config"]["_fallback_reason"] = "playwright_not_available"
+
+    # ------------------------------------------------------------------
+    # Phase 3.5: Build action evidence context for the run
+    # ------------------------------------------------------------------
+    action_evidence_context = _build_action_evidence_context(
+        action_result=action_result,
+        profile_patch=profile_patch,
+        run_overrides=run_overrides,
+    )
+
+    # Inject action evidence into the merged profile so the run can use it
+    if action_evidence_context:
+        merged_profile.setdefault("_action_evidence", action_evidence_context)
+
+    # ------------------------------------------------------------------
+    # Phase 4: Run the crawl
+    # ------------------------------------------------------------------
+    run_result: dict[str, Any] = {}
+    run_started_at = datetime.now(timezone.utc).isoformat()
+    try:
+        result = run_profile_longrun(
+            profile=site_profile,
+            config=ProfileLongRunConfig(
+                run_id="managed-" + _uuid.uuid4().hex[:8],
+                worker_id="execute-and-run",
+                batch_size=batch_size,
+                max_batches=max_batches,
+                item_workers=effective_item_workers,
+                mode=(
+                    effective_run_mode
+                    if effective_run_mode in {"static", "dynamic", "protected"}
+                    else "static"
+                ),
+            ),
+            fetch_runtime=fetch_runtime,
+            browser_runtime=browser_runtime,
+            runtime_dir=effective_runtime_dir or None,
+        )
+        run_result = result.to_dict()
+    except Exception as exc:
+        run_result = {
+            "schema_version": "profile-run-report/v1",
+            "status": "failed",
+            "error": str(exc)[:500],
+        }
+    finally:
+        fetch_runtime.close()
+        if browser_runtime is not None:
+            browser_runtime.close()
+
+    # ------------------------------------------------------------------
+    # Phase 5: Build quality diagnostics from run result
+    # ------------------------------------------------------------------
+    quality_diagnostics = _build_quality_diagnostics(
+        run_result=run_result,
+        merged_profile=merged_profile,
+        action_result=action_result,
+    )
+
+    # Run QualityGate evaluation against the merged profile expectations
+    quality_gate = QualityGate.from_profile(merged_profile)
+    quality_gate_result = quality_gate.evaluate(run_result)
+    quality_diagnostics["quality_gate_result"] = quality_gate_result.to_dict()
+
+    # ------------------------------------------------------------------
+    # Phase 6: Build chain evidence (action â†?run linkage)
+    # ------------------------------------------------------------------
+    chain_evidence = _build_chain_evidence(
+        action_result=action_result,
+        run_result=run_result,
+        profile_patch=profile_patch,
+        run_overrides=run_overrides,
+        run_started_at=run_started_at,
+        quality_diagnostics=quality_diagnostics,
+    )
+
+    return {
+        "schema_version": "execute-and-run/v1",
+        "action_result": action_result,
+        "run_result": run_result,
+        "merged_profile": merged_profile,
+        "applied_patch": True,
+        "skipped_run": False,
+        "records_saved": int(
+            (run_result.get("product_stats") or {}).get("total") or 0
+        ),
+        "run_status": run_result.get("status", "unknown"),
+        "quality_diagnostics": quality_diagnostics,
+        "chain_evidence": chain_evidence,
+    }
+
+# ------------------------------------------------------------------
+# execute_and_run helper functions
+# ------------------------------------------------------------------
+
+def _build_action_evidence_context(
+    *,
+    action_result: dict[str, Any],
+    profile_patch: dict[str, Any],
+    run_overrides: dict[str, Any],
+) -> dict[str, Any]:
+    """Extract actionable evidence from action results for the crawl phase.
+
+    Collects selector patches, runtime adjustments, and other evidence that
+    the crawl run can leverage for better extraction.
+    """
+    results = action_result.get("results") or []
+    selector_patches: dict[str, Any] = {}
+    runtime_adjustments: dict[str, Any] = {}
+    api_hints: dict[str, Any] = {}
+    pagination_hints: dict[str, Any] = {}
+    field_probes: list[dict[str, Any]] = []
+
+    for result in results:
+        if not isinstance(result, dict) or not result.get("ok"):
+            continue
+        action_type = str(result.get("action") or "")
+        patch = result.get("patch") if isinstance(result.get("patch"), dict) else {}
+
+        if action_type in {"repair_selectors", "probe_fields", "reanalyze_site"}:
+            selectors = patch.get("selectors")
+            if isinstance(selectors, dict):
+                detail = selectors.get("detail") or selectors
+                if isinstance(detail, dict):
+                    selector_patches.update(detail)
+
+        if action_type == "adjust_runtime":
+            acc = patch.get("access_config")
+            if isinstance(acc, dict):
+                runtime_adjustments.update(acc)
+
+        if action_type == "inspect_access":
+            hints = patch.get("api_hints")
+            if isinstance(hints, dict):
+                api_hints.update(hints)
+            ph = patch.get("pagination_hints")
+            if isinstance(ph, dict):
+                pagination_hints.update(ph)
+
+        if action_type == "probe_fields":
+            evidence = result.get("evidence") if isinstance(result.get("evidence"), dict) else {}
+            if evidence:
+                field_probes.append({
+                    "action": action_type,
+                    "fields": list(evidence.get("fields") or []),
+                    "coverage": evidence.get("coverage"),
+                })
+
+    ctx: dict[str, Any] = {}
+    if selector_patches:
+        ctx["selector_patches"] = selector_patches
+    if runtime_adjustments:
+        ctx["runtime_adjustments"] = runtime_adjustments
+    if api_hints:
+        ctx["api_hints"] = api_hints
+    if pagination_hints:
+        ctx["pagination_hints"] = pagination_hints
+    if field_probes:
+        ctx["field_probes"] = field_probes
+    if profile_patch:
+        ctx["profile_patch_keys"] = sorted(profile_patch.keys())
+    return ctx
+
+
+def _build_quality_diagnostics(
+    *,
+    run_result: dict[str, Any],
+    merged_profile: dict[str, Any],
+    action_result: dict[str, Any],
+) -> dict[str, Any]:
+    """Extract quality diagnostics from the crawl run result.
+
+    Pulls product_stats, field_coverage, and quality_gate information
+    from the run result and normalises it into a compact diagnostic dict.
+    """
+    product_stats = run_result.get("product_stats") or {}
+    quality_summary = run_result.get("quality_summary") or {}
+    quality_gate = quality_summary.get("quality_gate") or {}
+    field_completeness = quality_summary.get("field_completeness") or {}
+    coverage_report = run_result.get("coverage_report") or {}
+
+    total_records = int(
+        product_stats.get("total")
+        or product_stats.get("records_saved")
+        or 0
+    )
+
+    # Normalise field coverage into a 0-1 float
+    if field_completeness:
+        coverage_values = [
+            float(v) for v in field_completeness.values()
+            if isinstance(v, (int, float))
+        ]
+        avg_coverage = round(sum(coverage_values) / len(coverage_values), 4) if coverage_values else 0.0
+    else:
+        avg_coverage = 0.0
+
+    # Extract critical failures from quality gate
+    critical_failures: list[str] = []
+    if isinstance(quality_gate.get("checks"), list):
+        for check in quality_gate["checks"]:
+            if isinstance(check, dict) and not check.get("passed") and check.get("severity") == "fail":
+                critical_failures.append(str(check.get("name") or ""))
+
+    # Collect action-level quality signals
+    action_results = action_result.get("results") or []
+    failed_actions = [
+        str(r.get("action") or "")
+        for r in action_results
+        if isinstance(r, dict) and not r.get("ok")
+    ]
+
+    return {
+        "total_records": total_records,
+        "field_coverage": avg_coverage,
+        "field_completeness": field_completeness,
+        "quality_gate": quality_gate,
+        "quality_indicator": str(
+            quality_summary.get("quality_indicator")
+            or ("pass" if total_records > 0 and avg_coverage > 0.5 else "fail")
+        ).lower(),
+        "critical_failures": critical_failures,
+        "failed_actions": failed_actions,
+        "duplicate_rate": float(quality_summary.get("duplicate_rate") or 0),
+        "coverage_report": coverage_report,
+    }
+
+
+def _build_chain_evidence(
+    *,
+    action_result: dict[str, Any],
+    run_result: dict[str, Any],
+    profile_patch: dict[str, Any],
+    run_overrides: dict[str, Any],
+    run_started_at: str,
+    quality_diagnostics: dict[str, Any],
+) -> dict[str, Any]:
+    """Build a full action -> run chain evidence dict.
+
+    Links the actions that were taken to the results of the crawl run,
+    providing an auditable trail of what was changed and what effect it had.
+    """
+    action_results = action_result.get("results") or []
+    actions_summary = [
+        {
+            "action": str(r.get("action") or ""),
+            "ok": bool(r.get("ok")),
+            "summary": str(r.get("summary") or "")[:200],
+        }
+        for r in action_results
+        if isinstance(r, dict)
+    ]
+
+    # Extract patch keys applied to the profile
+    patch_keys = sorted(profile_patch.keys()) if profile_patch else []
+    override_keys = sorted(run_overrides.keys()) if run_overrides else []
+
+    # Run effect
+    run_status = str(run_result.get("status") or "unknown")
+    total_records = quality_diagnostics.get("total_records", 0)
+    field_coverage = quality_diagnostics.get("field_coverage", 0.0)
+
+    return {
+        "schema_version": "execute-and-run-chain/v1",
+        "actions_executed": actions_summary,
+        "action_count": len(actions_summary),
+        "patch_applied": {
+            "keys": patch_keys,
+            "override_keys": override_keys,
+        },
+        "run_effect": {
+            "status": run_status,
+            "total_records": total_records,
+            "field_coverage": field_coverage,
+            "quality_indicator": quality_diagnostics.get("quality_indicator", "unknown"),
+        },
+        "run_started_at": run_started_at,
+        "run_finished_at": datetime.now(timezone.utc).isoformat(),
+    }
 
 
 def _try_llm_plan_selection(
@@ -691,6 +1269,48 @@ def _execute_reanalyze_site(
         for key in ("selectors", "crawl_preferences", "access_config", "api_hints", "pagination_hints", "quality_expectations"):
             if isinstance(profile.get(key), dict):
                 patch[key] = profile[key]
+        # Remove speculative seed_urls from the patch â€?the analyzer guesses
+        # URLs like /shop, /sklep, /catalog that are usually wrong.  The
+        # caller's explicit seed_urls (or the API endpoint) should take
+        # priority.  We keep seed_kind and other crawl_preferences fields.
+        if isinstance(patch.get("crawl_preferences"), dict):
+            patch["crawl_preferences"].pop("seed_urls", None)
+
+        # Detect JSON API responses â€?if the page returns JSON (not HTML),
+        # set api_hints so the crawler uses the API extraction path.
+        if not patch.get("api_hints"):
+            import json as _json
+            url = str(action.params.get("target_url") or target_url)
+            try:
+                from autonomous_crawler.runners.product_workflow import fetch_best_html
+                fetch = fetch_best_html(url)
+                raw = str(fetch.html or "").strip()
+                if raw and raw[0] in "{[":
+                    try:
+                        data = _json.loads(raw)
+                        if isinstance(data, dict):
+                            items_key = None
+                            for k in ("products", "items", "data", "results", "records", "entries"):
+                                if isinstance(data.get(k), list):
+                                    items_key = k
+                                    break
+                            if items_key:
+                                patch["api_hints"] = {
+                                    "endpoint": url,
+                                    "method": "GET",
+                                    "kind": "api",
+                                    "items_path": items_key,
+                                    "format": "json",
+                                }
+                                cp = patch.get("crawl_preferences") or {}
+                                cp["seed_urls"] = [url]
+                                cp["seed_kind"] = "api"
+                                patch["crawl_preferences"] = cp
+                    except _json.JSONDecodeError:
+                        pass
+            except Exception:
+                pass
+
         return {
             "action": action.action,
             "ok": True,
@@ -978,8 +1598,28 @@ def _collect_access_probe_snapshot(
             "storage_state_path": str(profile_session.get("storage_state_path") or ""),
         },
     })
-    runtime = NativeBrowserRuntime()
-    response = runtime.render(probe_request)
+    try:
+        runtime = NativeBrowserRuntime()
+    except Exception as exc:
+        return {
+            "ok": False,
+            "error": f"Browser runtime unavailable: {exc}",
+            "probe_failed": True,
+            "failure_category": "playwright_missing",
+        }
+    try:
+        response = runtime.render(probe_request)
+    except Exception as exc:
+        try:
+            runtime.close()
+        except Exception:
+            pass
+        return {
+            "ok": False,
+            "error": f"Browser probe failed: {exc}",
+            "probe_failed": True,
+            "failure_category": "browser_probe_error",
+        }
     try:
         response_dict = response.to_dict()
     except Exception:
@@ -1375,20 +2015,13 @@ def _execute_render_with_browser(
 
     Used for SPA/JS-heavy sites that don't work with static fetch.
     """
-    from ..runtime.native_browser import NativeBrowserConfig
-
     url = str(action.params.get("target_url") or target_url)
     wait_until = str(action.params.get("wait_until") or "networkidle")
-    timeout_ms = int(action.params.get("timeout_ms") or 30000)
     max_items = int(action.params.get("max_items") or 0)
+    timeout_ms = int(action.params.get("timeout_ms") or 30000)
 
     try:
-        config = NativeBrowserConfig(
-            headless=True,
-            wait_until=wait_until,
-            timeout_ms=timeout_ms,
-        )
-        runtime = NativeBrowserRuntime(config=config)
+        runtime = NativeBrowserRuntime()
         request = RuntimeRequest(
             url=url,
             mode="browser",
@@ -2008,3 +2641,99 @@ def _deep_merge(base: dict[str, Any], patch: dict[str, Any]) -> dict[str, Any]:
         else:
             merged[key] = value
     return merged
+
+
+def _collect_pagination_urls_from_results(
+    results: list[dict[str, Any]],
+    extra_context: dict[str, Any],
+) -> list[str]:
+    """Extract pagination URLs from action results or extra_context.
+
+    Checks reanalyze_site / probe_fields / inspect_access patches for
+    pagination_hints, and also checks extra_context for pagination_urls.
+    """
+    urls: list[str] = []
+    for result in results:
+        patch = result.get("patch") if isinstance(result.get("patch"), dict) else {}
+        overrides = result.get("overrides") if isinstance(result.get("overrides"), dict) else {}
+        # Check for pagination_urls in overrides or patch
+        for source in (overrides, patch):
+            found = source.get("pagination_urls")
+            if isinstance(found, list):
+                urls.extend(str(u) for u in found if u)
+            # Check pagination_hints for next_page patterns
+            hints = source.get("pagination_hints") if isinstance(source.get("pagination_hints"), dict) else {}
+            if isinstance(hints, dict) and hints.get("next_page_url"):
+                urls.append(str(hints["next_page_url"]))
+    # Also check extra_context directly
+    ctx_urls = extra_context.get("pagination_urls")
+    if isinstance(ctx_urls, list):
+        urls.extend(str(u) for u in ctx_urls if u)
+    return list(dict.fromkeys(urls))  # dedupe preserving order
+
+
+def _detect_spa_from_results(results: list[dict[str, Any]]) -> bool:
+    """Check if action results indicate an SPA / JS-shell site.
+
+    Returns True if reanalyze_site or inspect_access results contain
+    signals that the page needs browser rendering (empty body, JS shell,
+    SPA framework detection, or low text content).
+
+    Does NOT trigger when inspect_access already used a live browser probe
+    (we already have rendered content in that case).
+    """
+    from autonomous_crawler.tools.access_diagnostics import looks_like_js_shell
+
+    for result in results:
+        act_name = str(result.get("action") or "")
+        if act_name not in {"reanalyze_site", "inspect_access"}:
+            continue
+
+        # Skip if inspect_access already did a live browser probe
+        # (we already have rendered content, no need to re-render)
+        evidence = result.get("evidence") if isinstance(result.get("evidence"), dict) else {}
+        snapshot = evidence.get("snapshot") if isinstance(evidence.get("snapshot"), dict) else {}
+        if act_name == "inspect_access" and snapshot.get("ok") and snapshot.get("xhr_samples"):
+            continue
+
+        # Check the analysis_summary or evidence for SPA signals
+        analysis = result.get("analysis_summary") if isinstance(result.get("analysis_summary"), dict) else {}
+        summary = snapshot.get("summary") if isinstance(snapshot.get("summary"), dict) else {}
+        recon = snapshot.get("recon_summary") if isinstance(snapshot.get("recon_summary"), dict) else {}
+
+        # 1. Check summary for explicit SPA / rendering indicators
+        rendering = str(summary.get("rendering") or recon.get("rendering") or "").lower()
+        framework = str(summary.get("framework") or recon.get("framework") or "").lower()
+        if rendering in {"spa", "csr", "client", "javascript", "js"}:
+            return True
+        if framework in {"react", "vue", "angular", "next", "nuxt", "gatsby", "svelte"}:
+            # SPA framework + low item count = likely shell
+            item_count = int(summary.get("dom_item_count") or recon.get("item_count") or 0)
+            if item_count == 0:
+                return True
+
+        # 2. Check if access_diagnostics signals match JS shell pattern
+        signals = {
+            "text_chars": int(summary.get("text_chars") or summary.get("html_chars") or 0),
+            "script_count": int(summary.get("script_count") or 0),
+            "app_root_count": int(summary.get("app_root_count") or 0),
+            "challenge": summary.get("challenge_like", False),
+        }
+        if looks_like_js_shell(signals):
+            return True
+
+        # 3. Check for empty body or very low content in HTML
+        html_chars = int(summary.get("html_chars") or 0)
+        dom_items = int(summary.get("dom_item_count") or recon.get("item_count") or 0)
+        if html_chars > 0 and dom_items == 0 and html_chars < 5000:
+            return True
+
+        # 4. Check analysis_summary recon for empty body pattern
+        if isinstance(analysis, dict):
+            recon_summary = analysis.get("recon_summary") if isinstance(analysis.get("recon_summary"), dict) else {}
+            if isinstance(recon_summary, dict):
+                rendering_r = str(recon_summary.get("rendering") or "").lower()
+                if rendering_r in {"spa", "csr", "client", "javascript", "js"}:
+                    return True
+
+    return False

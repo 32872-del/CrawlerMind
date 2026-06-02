@@ -6,6 +6,7 @@ import {
   PlayCircleOutlined,
   SettingOutlined
 } from '@ant-design/icons';
+import RocketOutlined from '@ant-design/icons/lib/icons/RocketOutlined';
 import type { ColumnsType } from 'antd/es/table';
 import { MetricStrip } from '../components/MetricStrip';
 import { StatusPill } from '../components/StatusPill';
@@ -68,7 +69,10 @@ export function DashboardPage() {
               />
             </div>
             <div className="quick-actions">
-              <Button type="primary" icon={<ExperimentOutlined />} onClick={() => setPage('wizard')}>
+              <Button type="primary" icon={<RocketOutlined />} onClick={() => setPage('oneClickCrawl')}>
+                一键 AI 采集
+              </Button>
+              <Button icon={<ExperimentOutlined />} onClick={() => setPage('wizard')}>
                 新建采集任务
               </Button>
               <Button icon={<HistoryOutlined />} onClick={() => setPage('history')}>

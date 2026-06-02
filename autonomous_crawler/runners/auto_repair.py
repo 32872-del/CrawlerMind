@@ -18,6 +18,7 @@ from .managed_actions import (
     ManagedActionPlan,
     ManagedCrawlAction,
     execute_managed_action_plan,
+    execute_and_run,
     build_deterministic_action_plan,
 )
 from .managed_state import build_managed_crawl_state, compact_managed_state_for_llm
@@ -44,20 +45,88 @@ class FailureCategory(str, Enum):
     UNKNOWN = "unknown"
 
 
-# Maps failure categories to repair action types
+# Maps failure categories to repair action types (ordered: low-cost first)
+# Each sequence tries the cheapest fix first, escalating only when needed.
 REPAIR_ACTION_MAP: dict[str, list[str]] = {
-    FailureCategory.NO_RECORDS: ["repair_selectors", "adjust_runtime", "inspect_access"],
-    FailureCategory.LOW_COVERAGE: ["probe_fields", "repair_selectors"],
-    FailureCategory.SELECTOR_MISS: ["repair_selectors", "reanalyze_site"],
-    FailureCategory.ACCESS_CHALLENGE: ["adjust_runtime", "inspect_access"],
-    FailureCategory.ACCESS_BLOCKED: ["adjust_runtime", "inspect_access"],
-    FailureCategory.API_REPLAY_FAILED: ["inspect_access", "adjust_runtime"],
-    FailureCategory.TIMEOUT: ["adjust_runtime"],
-    FailureCategory.BROWSER_CRASH: ["adjust_runtime"],
-    FailureCategory.EMPTY_HTML: ["adjust_runtime", "inspect_access"],
-    FailureCategory.PAGINATION_STUCK: ["inspect_access", "repair_selectors"],
-    FailureCategory.QUALITY_FAIL: ["evaluate_quality", "probe_fields"],
-    FailureCategory.PROXY_ERROR: ["adjust_runtime"],
+    FailureCategory.NO_RECORDS: [
+        "inspect_access",       # 1. understand why (low cost: read-only)
+        "repair_selectors",     # 2. fix selectors (medium cost: patch)
+        "adjust_runtime",       # 3. change runtime (higher cost: browser switch)
+        "reanalyze_site",       # 4. full re-analysis (highest cost)
+    ],
+    FailureCategory.LOW_COVERAGE: [
+        "probe_fields",        # 1. probe what's missing (low cost)
+        "repair_selectors",    # 2. fix field selectors (medium cost)
+        "reanalyze_site",      # 3. re-analyze if still low (high cost)
+    ],
+    FailureCategory.SELECTOR_MISS: [
+        "repair_selectors",    # 1. patch broken selectors (medium cost)
+        "reanalyze_site",      # 2. full re-analysis (high cost)
+    ],
+    FailureCategory.ACCESS_CHALLENGE: [
+        "inspect_access",      # 1. verify challenge type (low cost)
+        "adjust_runtime",      # 2. switch to protected browser (high cost)
+    ],
+    FailureCategory.ACCESS_BLOCKED: [
+        "inspect_access",      # 1. gather block evidence (low cost)
+        "adjust_runtime",      # 2. rotate proxy + protected mode (high cost)
+    ],
+    FailureCategory.API_REPLAY_FAILED: [
+        "inspect_access",      # 1. re-capture API evidence (low cost)
+        "adjust_runtime",      # 2. switch runtime mode (high cost)
+    ],
+    FailureCategory.TIMEOUT: [
+        "adjust_runtime",      # 1. increase timeout / simplify runtime
+    ],
+    FailureCategory.BROWSER_CRASH: [
+        "adjust_runtime",      # 1. fallback to static fetch
+    ],
+    FailureCategory.EMPTY_HTML: [
+        "inspect_access",      # 1. check access response (low cost)
+        "adjust_runtime",      # 2. switch to dynamic rendering (high cost)
+    ],
+    FailureCategory.PAGINATION_STUCK: [
+        "repair_selectors",    # 1. fix pagination selectors (medium cost)
+        "inspect_access",      # 2. inspect pagination mechanism (low cost)
+    ],
+    FailureCategory.QUALITY_FAIL: [
+        "probe_fields",        # 1. identify missing fields (low cost)
+        "evaluate_quality",    # 2. evaluate quality gate (low cost)
+        "repair_selectors",    # 3. fix field selectors (medium cost)
+    ],
+    FailureCategory.PROXY_ERROR: [
+        "adjust_runtime",      # 1. rotate/change proxy
+    ],
+}
+
+# Repair action cost levels (lower = cheaper/faster)
+REPAIR_ACTION_COST: dict[str, int] = {
+    "inspect_access": 1,
+    "probe_fields": 1,
+    "evaluate_quality": 1,
+    "repair_selectors": 2,
+    "adjust_runtime": 3,
+    "reanalyze_site": 4,
+    "prepare_rerun": 0,
+}
+
+# Severity-based repair strategy: what to do for each severity level
+SEVERITY_REPAIR_STRATEGY: dict[str, dict[str, Any]] = {
+    "critical": {
+        "max_actions": 5,
+        "allow_costly_repairs": True,
+        "prefer_full_reanalysis": True,
+    },
+    "warning": {
+        "max_actions": 3,
+        "allow_costly_repairs": False,
+        "prefer_full_reanalysis": False,
+    },
+    "info": {
+        "max_actions": 1,
+        "allow_costly_repairs": False,
+        "prefer_full_reanalysis": False,
+    },
 }
 
 # Priority order for failure diagnosis (check most specific first)
@@ -638,24 +707,57 @@ def _generate_repair_actions(
     profile: dict[str, Any],
     job: dict[str, Any],
 ) -> list[ManagedCrawlAction]:
-    """Generate concrete repair actions from diagnoses."""
-    actions: list[ManagedCrawlAction] = []
-    seen_actions: set[str] = set()
+    """Generate concrete repair actions from diagnoses.
 
+    Applies cost-based prioritisation: cheapest fixes first, costly repairs
+    only when severity warrants it.  Deduplicates across multiple diagnoses
+    and caps the total number of actions based on the worst severity.
+    """
+    # Determine worst severity across all diagnoses
+    worst_severity = "info"
+    for d in diagnoses:
+        if d.severity == "critical":
+            worst_severity = "critical"
+            break
+        if d.severity == "warning":
+            worst_severity = "warning"
+
+    strategy = SEVERITY_REPAIR_STRATEGY.get(worst_severity, SEVERITY_REPAIR_STRATEGY["info"])
+    max_actions = int(strategy.get("max_actions", 3))
+    allow_costly = bool(strategy.get("allow_costly_repairs", False))
+    cost_limit = 4 if allow_costly else 2  # cost 3+ only for critical
+
+    # Collect candidate actions from all diagnoses with dedup
+    candidates: list[tuple[int, str, FailureDiagnosis]] = []  # (cost, action_type, diagnosis)
+    seen: set[str] = set()
     for diagnosis in diagnoses:
         for action_type in diagnosis.repair_actions:
-            if action_type in seen_actions:
+            if action_type in seen:
                 continue
-            seen_actions.add(action_type)
+            seen.add(action_type)
+            cost = REPAIR_ACTION_COST.get(action_type, 2)
+            if cost <= cost_limit:
+                candidates.append((cost, action_type, diagnosis))
 
-            action = _build_repair_action(
-                action_type=action_type,
-                diagnosis=diagnosis,
-                profile=profile,
-                job=job,
-            )
-            if action:
-                actions.append(action)
+    # Sort by cost (cheapest first), then by diagnosis severity
+    severity_order = {"critical": 0, "warning": 1, "info": 2}
+    candidates.sort(key=lambda t: (
+        t[0],
+        severity_order.get(t[2].severity, 3),
+        -t[2].confidence,
+    ))
+
+    # Build actions, capped by max_actions
+    actions: list[ManagedCrawlAction] = []
+    for cost, action_type, diagnosis in candidates[:max_actions]:
+        action = _build_repair_action(
+            action_type=action_type,
+            diagnosis=diagnosis,
+            profile=profile,
+            job=job,
+        )
+        if action:
+            actions.append(action)
 
     # Always add a rerun at the end if we have repair actions
     if actions:
@@ -997,3 +1099,268 @@ def _deep_merge(base: dict[str, Any], overlay: dict[str, Any]) -> dict[str, Any]
         else:
             result[key] = value
     return result
+
+
+# ---------------------------------------------------------------------------
+# Diagnose-and-Repair Closed Loop
+# ---------------------------------------------------------------------------
+
+def diagnose_and_repair(
+    *,
+    job: dict[str, Any],
+    profile: dict[str, Any],
+    target_url: str,
+    run_spec: dict[str, Any] | None = None,
+    extra_context: dict[str, Any] | None = None,
+    max_cycles: int = 1,
+    batch_size: int = 20,
+    max_batches: int = 0,
+    item_workers: int = 4,
+    runtime_dir: str = "",
+    advisor: Any = None,
+) -> dict[str, Any]:
+    """Diagnose failures in a completed run, generate repair actions, and
+    re-execute the crawl with the repaired profile.
+
+    This is the **diagnose-and-repair** closed-loop entry point.  It:
+
+    1. Runs ``FailureDiagnoser`` against the current *job* state.
+    2. Generates a concrete repair ``ManagedActionPlan`` from diagnoses.
+    3. Calls ``execute_and_run()`` to apply patches and re-run the crawl.
+    4. Returns a before/after comparison dict.
+
+    When the job is already healthy the repair step is skipped and only the
+    diagnosis is returned.
+
+    Parameters
+    ----------
+    job:
+        Current job state (as returned by ``get_job()``).
+    profile:
+        Current site profile dict.
+    target_url:
+        Target URL for the crawl.
+    run_spec:
+        Optional run specification overrides.
+    extra_context:
+        Optional extra context forwarded to action execution.
+    max_cycles:
+        Maximum repair loop iterations (default 1 for single-shot).
+    batch_size, max_batches, item_workers, runtime_dir:
+        Crawl execution parameters forwarded to ``execute_and_run()``.
+    advisor:
+        Optional LLM advisor for smarter repair action selection.
+
+    Returns
+    -------
+    dict
+        A dict with keys: ``diagnosis``, ``repair_plan``, ``execute_result``,
+        ``before`` (progress snapshot), ``after`` (progress snapshot),
+        ``health_delta``, ``converged``.
+    """
+    from .managed_actions import (
+        ManagedActionPlan,
+        execute_and_run,
+    )
+    from .product_workflow import summarize_run_progress
+
+    # ------------------------------------------------------------------
+    # Step 1: Diagnose current state
+    # ------------------------------------------------------------------
+    diagnoser = FailureDiagnoser()
+    diagnosis = diagnoser.diagnose(job=job, profile=profile)
+    before_progress = summarize_run_progress(job)
+
+    before_quality = before_progress.get("quality") or {}
+    before_field_completeness = before_quality.get("field_completeness") or {}
+    if before_field_completeness:
+        _cv = [float(v) for v in before_field_completeness.values() if isinstance(v, (int, float))]
+        before_coverage = round(sum(_cv) / len(_cv), 4) if _cv else 0.0
+    else:
+        before_coverage = 0.0
+
+    before_snapshot = {
+        "records_saved": int(before_progress.get("records_saved") or 0),
+        "health": diagnosis.overall_health,
+        "quality_indicator": str(
+            before_progress.get("quality_indicator") or "unknown"
+        ),
+        "field_coverage": before_coverage,
+        "failure_buckets": dict(before_progress.get("failure_buckets") or {}),
+        "diagnosis_count": len(diagnosis.diagnoses),
+        "critical_count": diagnosis.critical_count,
+    }
+
+    # Short-circuit: already healthy
+    if diagnosis.overall_health in ("healthy",) and not diagnosis.has_failures:
+        return {
+            "schema_version": "diagnose-and-repair/v1",
+            "diagnosis": diagnosis.to_dict(),
+            "repair_plan": None,
+            "execute_result": None,
+            "before": before_snapshot,
+            "after": before_snapshot,
+            "health_delta": 0,
+            "converged": True,
+            "cycles_run": 0,
+        }
+
+    # ------------------------------------------------------------------
+    # Step 2: Build repair action plan
+    # ------------------------------------------------------------------
+    repair_actions = _generate_repair_actions(diagnosis.diagnoses, profile, job)
+    if not repair_actions:
+        return {
+            "schema_version": "diagnose-and-repair/v1",
+            "diagnosis": diagnosis.to_dict(),
+            "repair_plan": None,
+            "execute_result": None,
+            "before": before_snapshot,
+            "after": before_snapshot,
+            "health_delta": 0,
+            "converged": False,
+            "cycles_run": 0,
+            "reason": "no repair actions generated from diagnosis",
+        }
+
+    plan = ManagedActionPlan(actions=repair_actions, source="diagnose_and_repair")
+
+    # ------------------------------------------------------------------
+    # Step 3: Execute repair + re-run
+    # ------------------------------------------------------------------
+    execute_result = execute_and_run(
+        plan=plan,
+        target_url=target_url,
+        profile=profile,
+        run_spec=run_spec,
+        extra_context=extra_context,
+        batch_size=batch_size,
+        max_batches=max_batches,
+        item_workers=item_workers,
+        runtime_dir=runtime_dir,
+    )
+
+    # ------------------------------------------------------------------
+    # Step 4: Build after snapshot and compare
+    # ------------------------------------------------------------------
+    run_result = execute_result.get("run_result") or {}
+    after_records = int(
+        execute_result.get("records_saved")
+        or (run_result.get("product_stats") or {}).get("total")
+        or 0
+    )
+    run_status = str(execute_result.get("run_status") or run_result.get("status") or "unknown")
+
+    # Extract quality diagnostics from the execute-and-run result
+    quality_diag = execute_result.get("quality_diagnostics") or {}
+    after_field_coverage = float(quality_diag.get("field_coverage") or 0.0)
+    after_quality_indicator = str(quality_diag.get("quality_indicator") or ("pass" if after_records > 0 else "fail")).lower()
+    after_critical_failures = list(quality_diag.get("critical_failures") or [])
+
+    after_snapshot = {
+        "records_saved": after_records,
+        "health": "healthy" if after_records > 0 and run_status in ("completed",) and not after_critical_failures else "degraded",
+        "quality_indicator": after_quality_indicator,
+        "run_status": run_status,
+        "field_coverage": after_field_coverage,
+        "critical_failures": after_critical_failures,
+    }
+
+    # Health delta: positive = improvement
+    health_order = {"critical": 0, "degraded": 1, "unknown": 2, "healthy": 3}
+    before_score = health_order.get(before_snapshot["health"], 2)
+    after_score = health_order.get(after_snapshot["health"], 2)
+    health_delta = after_score - before_score
+
+    # Compute detailed delta between before and after
+    delta = _compute_repair_delta(
+        before=before_snapshot,
+        after=after_snapshot,
+        diagnosis=diagnosis,
+        execute_result=execute_result,
+    )
+
+    return {
+        "schema_version": "diagnose-and-repair/v1",
+        "diagnosis": diagnosis.to_dict(),
+        "repair_plan": plan.to_dict(),
+        "execute_result": execute_result,
+        "before": before_snapshot,
+        "after": after_snapshot,
+        "delta": delta,
+        "health_delta": health_delta,
+        "converged": after_snapshot["health"] == "healthy",
+        "cycles_run": 1,
+    }
+
+
+def _compute_repair_delta(
+    *,
+    before: dict[str, Any],
+    after: dict[str, Any],
+    diagnosis: DiagnosisReport,
+    execute_result: dict[str, Any],
+) -> dict[str, Any]:
+    """Compute a structured delta between before and after repair.
+
+    Returns a dict with per-metric deltas and an overall improvement flag.
+    """
+    before_records = int(before.get("records_saved") or 0)
+    after_records = int(after.get("records_saved") or 0)
+    records_delta = after_records - before_records
+
+    before_coverage = float(before.get("field_coverage") or 0.0)
+    after_coverage = float(after.get("field_coverage") or 0.0)
+    coverage_delta = round(after_coverage - before_coverage, 4)
+
+    before_health = str(before.get("health") or "unknown")
+    after_health = str(after.get("health") or "unknown")
+
+    health_order = {"critical": 0, "degraded": 1, "unknown": 2, "healthy": 3}
+    health_delta_val = health_order.get(after_health, 2) - health_order.get(before_health, 2)
+
+    # Determine if repair was effective
+    improved = records_delta > 0 or coverage_delta > 0.05 or health_delta_val > 0
+
+    # Extract repair actions taken
+    chain = execute_result.get("chain_evidence") or {}
+    actions_taken = [
+        a.get("action") for a in (chain.get("actions_executed") or [])
+        if isinstance(a, dict) and a.get("action") != "prepare_rerun"
+    ]
+
+    return {
+        "records_delta": records_delta,
+        "coverage_delta": coverage_delta,
+        "health_delta": health_delta_val,
+        "improved": improved,
+        "before_health": before_health,
+        "after_health": after_health,
+        "actions_taken": actions_taken,
+        "diagnoses_resolved": _count_resolved_diagnoses(
+            diagnosis=diagnosis,
+            after_records=after_records,
+            after_health=after_health,
+        ),
+    }
+
+
+def _count_resolved_diagnoses(
+    *,
+    diagnosis: DiagnosisReport,
+    after_records: int,
+    after_health: str,
+) -> int:
+    """Count how many diagnosed issues appear resolved after repair."""
+    resolved = 0
+    for d in diagnosis.diagnoses:
+        if d.category == FailureCategory.NO_RECORDS and after_records > 0:
+            resolved += 1
+        elif d.category in (FailureCategory.ACCESS_BLOCKED, FailureCategory.ACCESS_CHALLENGE):
+            if after_health in ("healthy", "degraded"):
+                resolved += 1
+        elif d.category == FailureCategory.LOW_COVERAGE:
+            if after_records > 0:
+                resolved += 1
+    return resolved
+

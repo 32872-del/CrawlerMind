@@ -1,0 +1,27 @@
+{
+  "site": "batch3_superdry",
+  "url": "https://www.superdry.com/",
+  "goal": "extract product names, prices, and categories from product listings",
+  "batch": 3,
+  "difficulty": "hard",
+  "status": "completed",
+  "records": 4,
+  "field_coverage": 100.0,
+  "quality": "pass",
+  "failures": [],
+  "repair_actions": [],
+  "elapsed_seconds": 6.46,
+  "notes": [
+    "Sample fields: ['url', 'index', 'title', 'price', 'image', 'link']",
+    "Price range detected in output: Women's Brands Bench New Athletic Essentials Women's Clothing Trending on TikTok New Jackets & Coats Hoodies & Sweatshirts Dresses New Tops Bottoms T-Shirts View All New Men's Brands Bench New Vintage Carhartt College Prep Men's Clothing Trending on TikTok New Jackets & Coats New Hoodies & Sweatshirts T-Shirts Tops & Shirts View All New"
+  ],
+  "raw_state": {
+    "status": "completed",
+    "retries": 0,
+    "llm_enabled": false,
+    "visited_urls": 1
+  },
+  "pagination_followed": false,
+  "spa_upgraded": false,
+  "price_range_ok": false
+}

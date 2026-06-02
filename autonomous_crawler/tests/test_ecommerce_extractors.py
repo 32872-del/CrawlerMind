@@ -16,6 +16,7 @@ from autonomous_crawler.tools.ecommerce_extractors import (
     extract_next_data_json_from_html,
     extract_next_data_product_wall_items,
     extract_shopify_product_grid_items,
+    parse_price_range,
     UnsupportedExtractorContract,
 )
 
@@ -499,6 +500,96 @@ class ShopifyProductGridExtractorTests(unittest.TestCase):
         contract = {"parser_strategy": {"name": "shopify_product_grid_extractor"}, "site": "shop.example.com"}
         items = extract_items_from_contract(_SHOPIFY_PRODUCTS_JSON, contract)
         self.assertEqual(len(items), 2)
+
+
+class PriceRangeParsingTests(unittest.TestCase):
+    """Tests for Bug 1: price range parsing fix.
+
+    Ensures \"£13 - £26\" is parsed as min=13.0, max=26.0 (not 1326.0).
+    """
+
+    def test_parse_price_range_pound_dash(self) -> None:
+        result = parse_price_range("£13 - £26")
+        self.assertIsNotNone(result)
+        self.assertEqual(result["min"], 13.0)
+        self.assertEqual(result["max"], 26.0)
+
+    def test_parse_price_range_dollar_dash(self) -> None:
+        result = parse_price_range("$10 - $20")
+        self.assertIsNotNone(result)
+        self.assertEqual(result["min"], 10.0)
+        self.assertEqual(result["max"], 20.0)
+
+    def test_parse_price_range_no_currency(self) -> None:
+        result = parse_price_range("13-26")
+        self.assertIsNotNone(result)
+        self.assertEqual(result["min"], 13.0)
+        self.assertEqual(result["max"], 26.0)
+
+    def test_parse_price_range_en_dash(self) -> None:
+        result = parse_price_range("15–30")
+        self.assertIsNotNone(result)
+        self.assertEqual(result["min"], 15.0)
+        self.assertEqual(result["max"], 30.0)
+
+    def test_parse_price_range_tilde(self) -> None:
+        result = parse_price_range("5~10")
+        self.assertIsNotNone(result)
+        self.assertEqual(result["min"], 5.0)
+        self.assertEqual(result["max"], 10.0)
+
+    def test_parse_price_range_with_spaces(self) -> None:
+        result = parse_price_range("£13 - £26")
+        self.assertIsNotNone(result)
+        self.assertEqual(result["min"], 13.0)
+        self.assertEqual(result["max"], 26.0)
+
+    def test_parse_price_range_decimal(self) -> None:
+        result = parse_price_range("£9.99 - £19.99")
+        self.assertIsNotNone(result)
+        self.assertEqual(result["min"], 9.99)
+        self.assertEqual(result["max"], 19.99)
+
+    def test_parse_price_range_reversed_order(self) -> None:
+        """Higher value first should still return min/max correctly."""
+        result = parse_price_range("£26 - £13")
+        self.assertIsNotNone(result)
+        self.assertEqual(result["min"], 13.0)
+        self.assertEqual(result["max"], 26.0)
+
+    def test_parse_price_range_single_number_returns_none(self) -> None:
+        self.assertIsNone(parse_price_range("£13"))
+
+    def test_parse_price_range_none_returns_none(self) -> None:
+        self.assertIsNone(parse_price_range(None))
+
+    def test_parse_price_range_integer_returns_none(self) -> None:
+        self.assertIsNone(parse_price_range(13))
+
+    def test_parse_price_range_empty_returns_none(self) -> None:
+        self.assertIsNone(parse_price_range(""))
+
+    def test_number_or_none_with_price_range_returns_min(self) -> None:
+        """_number_or_none should return the min price from a range."""
+        from autonomous_crawler.tools.ecommerce_extractors import _number_or_none
+        self.assertEqual(_number_or_none("£13 - £26"), 13.0)
+        self.assertEqual(_number_or_none("$10 - $20"), 10.0)
+        self.assertEqual(_number_or_none("13-26"), 13.0)
+
+    def test_number_or_none_single_price_still_works(self) -> None:
+        from autonomous_crawler.tools.ecommerce_extractors import _number_or_none
+        self.assertEqual(_number_or_none("£40"), 40.0)
+        self.assertEqual(_number_or_none("$9.99"), 9.99)
+        self.assertEqual(_number_or_none("42"), 42.0)
+        self.assertIsNone(_number_or_none(None))
+        self.assertIsNone(_number_or_none(""))
+
+    def test_number_or_none_not_concatenating_digits(self) -> None:
+        """Key regression test: '£13 - £26' must NOT become 1326.0."""
+        from autonomous_crawler.tools.ecommerce_extractors import _number_or_none
+        result = _number_or_none("£13 - £26")
+        self.assertNotEqual(result, 1326.0)
+        self.assertEqual(result, 13.0)
 
 
 class DemandwareProductTileExtractorTests(unittest.TestCase):

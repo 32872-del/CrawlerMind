@@ -1,0 +1,26 @@
+{
+  "site": "batch3_marksandspencer",
+  "url": "https://www.marksandspencer.com/",
+  "goal": "extract product names, prices, and categories from the homepage or product listings",
+  "batch": 3,
+  "difficulty": "hard",
+  "status": "completed",
+  "records": 10,
+  "field_coverage": 100.0,
+  "quality": "pass",
+  "failures": [],
+  "repair_actions": [],
+  "elapsed_seconds": 5.27,
+  "notes": [
+    "Sample fields: ['url', 'index', 'title', 'price', 'image', 'link']"
+  ],
+  "raw_state": {
+    "status": "completed",
+    "retries": 0,
+    "llm_enabled": false,
+    "visited_urls": 1
+  },
+  "pagination_followed": false,
+  "spa_upgraded": false,
+  "price_range_ok": true
+}

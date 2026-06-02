@@ -1,10 +1,18 @@
-import { Alert, Button, Card, Collapse, Descriptions, Empty, List, Space, Table, Tag, Typography } from 'antd';
-import { ReloadOutlined } from '@ant-design/icons';
+import { Alert, Badge, Button, Card, Collapse, Descriptions, Empty, List, Space, Steps, Table, Tag, Timeline, Typography } from 'antd';
+import ReloadOutlined from '@ant-design/icons/lib/icons/ReloadOutlined';
+import CheckCircleOutlined from '@ant-design/icons/lib/icons/CheckCircleOutlined';
+import CloseCircleOutlined from '@ant-design/icons/lib/icons/CloseCircleOutlined';
+import LoadingOutlined from '@ant-design/icons/lib/icons/LoadingOutlined';
+import ClockCircleOutlined from '@ant-design/icons/lib/icons/ClockCircleOutlined';
+import SyncOutlined from '@ant-design/icons/lib/icons/SyncOutlined';
 import type { ColumnsType } from 'antd/es/table';
 import type {
   ManagedActionRecord,
   ManagedAiPayload,
   ManagedAutoRepairRecord,
+  ManagedPipelineStage,
+  ManagedRepairResult,
+  ManagedRunResult,
   LlmTraceRecord,
   RunProgress,
   SettingsState
@@ -29,6 +37,10 @@ interface Props {
   managedAutoRepair?: ManagedAutoRepairRecord | null;
   parentTaskId?: string;
   repairSource?: string;
+  // New: closed-loop results
+  managedRunResult?: ManagedRunResult;
+  repairResult?: ManagedRepairResult;
+  pipelineStage?: ManagedPipelineStage;
   onManagedStep?: () => void;
   onManagedRepairRun?: () => void;
   repairLoading?: boolean;
@@ -563,6 +575,152 @@ const traceColumns: ColumnsType<LlmTraceRecord> = [
   }
 ];
 
+function pipelineStageLabel(stage: ManagedPipelineStage | undefined): string {
+  const labels: Record<string, string> = {
+    idle: '待启动',
+    analyzing: '分析站点结构',
+    planning: '生成执行计划',
+    executing_actions: '执行采集动作',
+    running: '运行采集中',
+    diagnosing: '诊断问题',
+    repairing: '修复执行中',
+    completed: '已完成',
+    failed: '执行失败'
+  };
+  return labels[String(stage || 'idle')] || String(stage || '待启动');
+}
+
+function pipelineStageColor(stage: ManagedPipelineStage | undefined): string {
+  if (!stage || stage === 'idle') return 'default';
+  if (stage === 'completed') return 'success';
+  if (stage === 'failed') return 'error';
+  return 'processing';
+}
+
+function pipelineStageIcon(stage: ManagedPipelineStage | undefined) {
+  if (!stage || stage === 'idle') return <ClockCircleOutlined />;
+  if (stage === 'completed') return <CheckCircleOutlined />;
+  if (stage === 'failed') return <CloseCircleOutlined />;
+  return <LoadingOutlined />;
+}
+
+function ClosedLoopStatusIndicator({ stage }: { stage?: ManagedPipelineStage }) {
+  return (
+    <Card size="small" className="section-gap">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {pipelineStageIcon(stage)}
+        <div>
+          <Typography.Text strong>闭环状态</Typography.Text>
+          <div>
+            <Tag color={pipelineStageColor(stage)}>{pipelineStageLabel(stage)}</Tag>
+          </div>
+        </div>
+        {stage && stage !== 'idle' && stage !== 'completed' && stage !== 'failed' && (
+          <div style={{ marginLeft: 'auto' }}>
+            <Steps
+              size="small"
+              current={
+                stage === 'analyzing' ? 0 :
+                stage === 'planning' ? 1 :
+                stage === 'executing_actions' ? 2 :
+                stage === 'running' ? 3 :
+                stage === 'diagnosing' ? 0 :
+                stage === 'repairing' ? 1 :
+                -1
+              }
+              items={
+                stage === 'diagnosing' || stage === 'repairing'
+                  ? [{ title: '诊断' }, { title: '修复' }]
+                  : [{ title: '分析' }, { title: '计划' }, { title: '执行' }, { title: '运行' }]
+              }
+            />
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function ActionTimelineDisplay({ actions }: { actions?: ManagedRunResult['actions'] }) {
+  if (!actions || !actions.length) return null;
+  return (
+    <Card size="small" title="Action 时间线" className="section-gap">
+      <Timeline
+        items={actions.map((action) => ({
+          color: action.status === 'success' ? 'green' : action.status === 'failed' ? 'red' : action.status === 'running' ? 'blue' : 'gray',
+          dot: action.status === 'success'
+            ? <CheckCircleOutlined style={{ color: '#52c41a' }} />
+            : action.status === 'failed'
+              ? <CloseCircleOutlined style={{ color: '#ff4d4f' }} />
+              : action.status === 'running'
+                ? <LoadingOutlined style={{ color: '#1677ff' }} />
+                : undefined,
+          children: (
+            <div>
+              <Space style={{ marginBottom: 4 }}>
+                <Typography.Text strong>{action.label}</Typography.Text>
+                <Tag color={action.status === 'success' ? 'success' : action.status === 'failed' ? 'error' : action.status === 'running' ? 'processing' : 'default'}>
+                  {action.status === 'success' ? '成功' : action.status === 'failed' ? '失败' : action.status === 'running' ? '执行中' : action.status === 'skipped' ? '跳过' : '等待'}
+                </Tag>
+                {action.duration_ms !== undefined && (
+                  <Typography.Text type="secondary">{action.duration_ms}ms</Typography.Text>
+                )}
+              </Space>
+              {action.started_at && (
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                  {new Date(action.started_at).toLocaleTimeString('zh-CN', { hour12: false })}
+                </Typography.Text>
+              )}
+              {action.result_summary && (
+                <Typography.Paragraph type="secondary" style={{ marginBottom: 0, marginTop: 4 }}>
+                  {action.result_summary}
+                </Typography.Paragraph>
+              )}
+              {action.error && (
+                <Typography.Paragraph type="danger" style={{ marginBottom: 0 }}>
+                  错误：{action.error}
+                </Typography.Paragraph>
+              )}
+            </div>
+          )
+        }))}
+      />
+    </Card>
+  );
+}
+
+function RepairHistoryDisplay({ repairResult, autoRepair }: { repairResult?: ManagedRepairResult; autoRepair?: ManagedAutoRepairRecord | null }) {
+  if (!repairResult && !autoRepair?.attempted) return null;
+  return (
+    <Card size="small" title="修复历史" className="section-gap">
+      {repairResult && (
+        <Descriptions size="small" column={3}>
+          <Descriptions.Item label="修复轮数">{repairResult.repair_cycles ?? '-'}</Descriptions.Item>
+          <Descriptions.Item label="记录变化">{repairResult.before_records ?? '?'} → {repairResult.after_records ?? repairResult.record_count ?? '?'}</Descriptions.Item>
+          <Descriptions.Item label="覆盖率变化">{repairResult.before_coverage !== undefined ? `${Math.round(repairResult.before_coverage * 100)}%` : '?'} → {repairResult.after_coverage !== undefined ? `${Math.round(repairResult.after_coverage * 100)}%` : '?'}</Descriptions.Item>
+          <Descriptions.Item label="是否收敛">
+            <Tag color={repairResult.converged ? 'success' : 'warning'}>{repairResult.converged ? '已收敛' : '未收敛'}</Tag>
+          </Descriptions.Item>
+          <Descriptions.Item label="最终健康">
+            <Tag color={repairResult.final_health === 'healthy' ? 'success' : repairResult.final_health === 'degraded' ? 'warning' : 'error'}>
+              {repairResult.final_health === 'healthy' ? '健康' : repairResult.final_health === 'degraded' ? '降级' : '异常'}
+            </Tag>
+          </Descriptions.Item>
+        </Descriptions>
+      )}
+      {autoRepair?.attempted && (
+        <Alert
+          className={repairResult ? 'section-gap-small' : ''}
+          type="success"
+          showIcon
+          message="全托管自动修复已触发"
+          description={`原因：${autoRepair.reason || '质量诊断需要重跑'}；子任务：${autoRepair.child_task_id || '等待后端返回'}`}
+        />
+      )}
+    </Card>
+  );
+}
+
 export function AiManagedPanel({
   title = 'AI 托管驾驶舱',
   settings,
@@ -581,6 +739,9 @@ export function AiManagedPanel({
   managedAutoRepair,
   parentTaskId,
   repairSource,
+  managedRunResult,
+  repairResult,
+  pipelineStage,
   onManagedStep,
   onManagedRepairRun,
   repairLoading,
@@ -652,6 +813,11 @@ export function AiManagedPanel({
       {!enabled ? (
         <Alert className="section-gap" type="info" showIcon message="当前任务按关闭模式运行；LLM 不参与运行计划、监控或修复建议。" />
       ) : null}
+
+      {/* Closed-Loop Status Indicator */}
+      {pipelineStage && pipelineStage !== 'idle' && (
+        <ClosedLoopStatusIndicator stage={pipelineStage} />
+      )}
 
       {managedAutoRepair?.attempted ? (
         <Alert
@@ -770,6 +936,16 @@ export function AiManagedPanel({
           )}
         </Card>
       </div>
+
+      {/* Action Timeline Display */}
+      {managedRunResult?.actions && managedRunResult.actions.length > 0 && (
+        <ActionTimelineDisplay actions={managedRunResult.actions} />
+      )}
+
+      {/* Repair History Display */}
+      {(repairResult || managedAutoRepair?.attempted) && (
+        <RepairHistoryDisplay repairResult={repairResult} autoRepair={managedAutoRepair} />
+      )}
 
       <div className="section-gap">
         <Card size="small" title="下一步建议动作">

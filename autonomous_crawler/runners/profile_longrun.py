@@ -153,7 +153,7 @@ def initial_requests_from_profile(
     """Build initial crawl requests from a profile without site-specific code."""
     requests: list[CrawlRequestEnvelope] = []
     endpoint = str(profile.api_hints.get("endpoint") or "").strip()
-    if endpoint and profile.pagination_type() in {"page", "offset", "cursor"}:
+    if endpoint and (profile.pagination_type() in {"page", "offset", "cursor"} or profile.api_hints.get("kind") == "api"):
         url = initial_api_url(profile)
         api_json = initial_api_json(profile)
         headers = api_headers_from_profile(profile, has_json=api_json is not None)

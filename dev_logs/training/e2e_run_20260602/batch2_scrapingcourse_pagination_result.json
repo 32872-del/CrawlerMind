@@ -1,0 +1,26 @@
+{
+  "site": "batch2_scrapingcourse_pagination",
+  "url": "https://www.scrapingcourse.com/pagination/",
+  "goal": "extract product names, prices from paginated product listings, follow all pages",
+  "batch": 2,
+  "difficulty": "medium",
+  "status": "completed",
+  "records": 12,
+  "field_coverage": 100.0,
+  "quality": "pass",
+  "failures": [],
+  "repair_actions": [],
+  "elapsed_seconds": 8.95,
+  "notes": [
+    "Sample fields: ['url', 'index', 'title', 'price', 'image', 'link']"
+  ],
+  "raw_state": {
+    "status": "completed",
+    "retries": 0,
+    "llm_enabled": false,
+    "visited_urls": 1
+  },
+  "pagination_followed": false,
+  "spa_upgraded": false,
+  "price_range_ok": true
+}

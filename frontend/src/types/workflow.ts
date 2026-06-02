@@ -1,5 +1,5 @@
 export type ApiMode = 'auto' | 'live' | 'mock';
-export type WorkbenchPage = 'dashboard' | 'wizard' | 'analysis' | 'detail' | 'history' | 'settings';
+export type WorkbenchPage = 'dashboard' | 'wizard' | 'analysis' | 'detail' | 'history' | 'settings' | 'oneClickCrawl';
 export type RunStatus = 'idle' | 'queued' | 'running' | 'paused' | 'cancelled' | 'completed' | 'failed' | 'unknown';
 export type ExportFormat = 'json' | 'csv' | 'xlsx' | 'sqlite' | 'db';
 export type UiMode = 'compact' | 'standard';
@@ -340,6 +340,80 @@ export interface WorkbenchTask {
   llm_traces?: LlmTraceRecord[];
   evidence_pack?: Record<string, unknown>;
   error?: string;
+  // Closed-loop results
+  managed_run_result?: ManagedRunResult;
+  repair_result?: ManagedRepairResult;
+}
+
+// ── 一键采集 / 一键修复 ──
+
+export type ManagedPipelineStage = 'idle' | 'analyzing' | 'planning' | 'executing_actions' | 'running' | 'diagnosing' | 'repairing' | 'completed' | 'failed';
+
+export interface ManagedActionTimelineEntry {
+  action: string;
+  label: string;
+  status: 'pending' | 'running' | 'success' | 'failed' | 'skipped';
+  started_at?: string;
+  finished_at?: string;
+  duration_ms?: number;
+  result_summary?: string;
+  error?: string;
+}
+
+export interface ManagedRunResult {
+  schema_version?: string;
+  task_id: string;
+  run_id: string;
+  status: RunStatus | string;
+  stage?: ManagedPipelineStage;
+  record_count?: number;
+  actions?: ManagedActionTimelineEntry[];
+  quality_gate?: {
+    severity: string;
+    passed: boolean;
+    reason?: string;
+  };
+  field_coverage?: number;
+  quality_score?: number;
+  error?: string;
+  profile_patch?: Record<string, unknown>;
+  run_overrides?: Record<string, unknown>;
+}
+
+export interface ManagedRepairResult {
+  schema_version?: string;
+  task_id: string;
+  run_id: string;
+  status: RunStatus | string;
+  stage?: ManagedPipelineStage;
+  record_count?: number;
+  repair_cycles?: number;
+  before_records?: number;
+  after_records?: number;
+  before_coverage?: number;
+  after_coverage?: number;
+  before_quality?: number;
+  after_quality?: number;
+  actions?: ManagedActionTimelineEntry[];
+  quality_gate?: {
+    severity: string;
+    passed: boolean;
+    reason?: string;
+  };
+  error?: string;
+  converged?: boolean;
+  final_health?: string;
+}
+
+export interface OneClickCrawlState {
+  targetUrl: string;
+  fieldGoal: string;
+  stage: ManagedPipelineStage;
+  result?: ManagedRunResult;
+  repairResult?: ManagedRepairResult;
+  error?: string;
+  startedAt?: string;
+  finishedAt?: string;
 }
 
 export interface WizardState {

@@ -9,6 +9,7 @@ from autonomous_crawler.runners.managed_actions import (
     ManagedActionPlan,
     build_deterministic_action_plan,
     execute_managed_action_plan,
+    execute_and_run,
 )
 from autonomous_crawler.runners.profile_longrun import initial_requests_from_profile, next_api_requests
 from autonomous_crawler.runners.site_profile import SiteProfile
@@ -879,6 +880,707 @@ class ManagedActionPlanTests(unittest.TestCase):
         self.assertFalse(result["results"][0]["ok"])
         self.assertEqual(result["results"][0]["error"], "missing extraction contract")
         self.assertFalse(result["rerun_ready"])
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+
+# ------------------------------------------------------------------
+# Bug 2: Pagination auto-append tests
+# ------------------------------------------------------------------
+
+
+class PaginationAutoAppendTests(unittest.TestCase):
+    """Tests for Bug 2: follow_pagination auto-appended when pagination detected."""
+
+    def test_pagination_urls_in_extra_context_triggers_follow_pagination(self) -> None:
+        """When extra_context has pagination_urls, follow_pagination is auto-appended."""
+        plan = ManagedActionPlan.from_dict({
+            "actions": [
+                {"action": "reanalyze_site", "params": {"target_url": "https://shop.test/list"}},
+            ]
+        })
+
+        result = execute_managed_action_plan(
+            plan=plan,
+            target_url="https://shop.test/list",
+            profile={"name": "shop", "selectors": {}, "crawl_preferences": {}},
+            run_spec={"selected_fields": ["title"]},
+            extra_context={
+                "pagination_urls": [
+                    "https://shop.test/list?page=2",
+                    "https://shop.test/list?page=3",
+                ],
+            },
+        )
+
+        actions_executed = [r.get("action") for r in result["results"]]
+        self.assertIn("follow_pagination", actions_executed)
+        pagination_result = next(r for r in result["results"] if r["action"] == "follow_pagination")
+        self.assertTrue(pagination_result["ok"])
+
+    def test_no_pagination_urls_skips_follow_pagination(self) -> None:
+        """When no pagination URLs found, follow_pagination is NOT auto-appended."""
+        plan = ManagedActionPlan.from_dict({
+            "actions": [
+                {"action": "adjust_runtime", "params": {"mode": "dynamic"}},
+            ]
+        })
+
+        result = execute_managed_action_plan(
+            plan=plan,
+            target_url="https://shop.test/page",
+            profile={"name": "shop"},
+            run_spec={},
+            extra_context={},
+        )
+
+        actions_executed = [r.get("action") for r in result["results"]]
+        self.assertNotIn("follow_pagination", actions_executed)
+
+    def test_follow_pagination_not_duplicated_when_already_in_plan(self) -> None:
+        """If follow_pagination is already in the plan, don't auto-append another."""
+        plan = ManagedActionPlan.from_dict({
+            "actions": [
+                {
+                    "action": "follow_pagination",
+                    "params": {"html": "<html></html>", "max_pages": 3},
+                },
+            ]
+        })
+
+        result = execute_managed_action_plan(
+            plan=plan,
+            target_url="https://shop.test/list",
+            profile={"name": "shop"},
+            run_spec={},
+            extra_context={
+                "pagination_urls": ["https://shop.test/list?page=2"],
+            },
+        )
+
+        pagination_count = sum(1 for r in result["results"] if r["action"] == "follow_pagination")
+        self.assertEqual(pagination_count, 1)
+
+    def test_pagination_urls_from_reanalyze_patch_triggers_follow(self) -> None:
+        """If reanalyze_site result patch contains pagination_hints, auto-append."""
+        plan = ManagedActionPlan.from_dict({
+            "actions": [
+                {"action": "probe_fields", "params": {"fields": ["title"]}},
+            ]
+        })
+
+        result = execute_managed_action_plan(
+            plan=plan,
+            target_url="https://shop.test/list",
+            profile={"name": "shop", "selectors": {}, "target_fields": ["title"]},
+            run_spec={"selected_fields": ["title"]},
+            extra_context={
+                "pagination_urls": ["https://shop.test/list?page=2"],
+            },
+        )
+
+        actions_executed = [r.get("action") for r in result["results"]]
+        self.assertIn("follow_pagination", actions_executed)
+
+
+# ------------------------------------------------------------------
+# Bug 3: SPA auto-upgrade tests
+# ------------------------------------------------------------------
+
+
+class SpaAutoUpgradeTests(unittest.TestCase):
+    """Tests for Bug 3: SPA detection auto-upgrades to browser runtime."""
+
+    @patch("autonomous_crawler.runners.managed_actions._execute_reanalyze_site")
+    def test_spa_detected_in_reanalyze_triggers_browser_upgrade(
+        self, mock_reanalyze: MagicMock
+    ) -> None:
+        """When reanalyze_site detects SPA rendering, auto-append adjust_runtime + render_with_browser."""
+        mock_reanalyze.return_value = {
+            "action": "reanalyze_site",
+            "ok": True,
+            "summary": "site analysis completed",
+            "analysis_summary": {
+                "recon_summary": {
+                    "rendering": "spa",
+                    "frontend_framework": "react",
+                },
+            },
+            "patch": {"selectors": {}, "crawl_preferences": {}},
+            "overrides": {},
+        }
+
+        plan = ManagedActionPlan.from_dict({
+            "actions": [
+                {"action": "reanalyze_site", "params": {"target_url": "https://nike.test/shoes"}},
+            ]
+        })
+
+        with patch(
+            "autonomous_crawler.runners.managed_actions._execute_render_with_browser"
+        ) as mock_render:
+            mock_render.return_value = {
+                "action": "render_with_browser",
+                "ok": True,
+                "patch": {"browser_rendered": True},
+                "overrides": {"use_browser": True},
+            }
+
+            result = execute_managed_action_plan(
+                plan=plan,
+                target_url="https://nike.test/shoes",
+                profile={"name": "nike"},
+                run_spec={"selected_fields": ["title"]},
+            )
+
+        actions_executed = [r.get("action") for r in result["results"]]
+        self.assertIn("adjust_runtime", actions_executed)
+        self.assertIn("render_with_browser", actions_executed)
+
+        # Verify adjust_runtime used dynamic mode
+        runtime_result = next(r for r in result["results"] if r["action"] == "adjust_runtime")
+        self.assertEqual(runtime_result["patch"]["access_config"]["mode"], "dynamic")
+        self.assertTrue(runtime_result["patch"]["access_config"]["browser_config"]["capture_api"])
+
+    def test_non_spa_site_does_not_trigger_browser_upgrade(self) -> None:
+        """SSR sites should NOT trigger adjust_runtime or render_with_browser."""
+        plan = ManagedActionPlan.from_dict({
+            "actions": [
+                {"action": "adjust_runtime", "params": {"mode": "dynamic"}},
+            ]
+        })
+
+        result = execute_managed_action_plan(
+            plan=plan,
+            target_url="https://ssr.test/page",
+            profile={"name": "ssr-shop"},
+            run_spec={},
+        )
+
+        actions_executed = [r.get("action") for r in result["results"]]
+        # adjust_runtime appears once (from plan), not twice (no auto-append)
+        self.assertEqual(actions_executed.count("adjust_runtime"), 1)
+        self.assertNotIn("render_with_browser", actions_executed)
+
+    @patch("autonomous_crawler.runners.managed_actions._execute_reanalyze_site")
+    def test_spa_framework_with_zero_items_triggers_upgrade(
+        self, mock_reanalyze: MagicMock
+    ) -> None:
+        """SPA framework (Vue/React) + 0 items = auto-upgrade."""
+        mock_reanalyze.return_value = {
+            "action": "reanalyze_site",
+            "ok": True,
+            "summary": "site analysis completed",
+            "analysis_summary": {},
+            "patch": {},
+            "overrides": {},
+        }
+
+        plan = ManagedActionPlan.from_dict({
+            "actions": [
+                {"action": "reanalyze_site", "params": {"target_url": "https://vue-spa.test"}},
+            ]
+        })
+
+        # Simulate the snapshot having SPA framework + 0 items
+        # This requires patching the result at a deeper level, so we test
+        # _detect_spa_from_results directly
+        from autonomous_crawler.runners.managed_actions import _detect_spa_from_results
+
+        spa_results = [
+            {
+                "action": "reanalyze_site",
+                "ok": True,
+                "evidence": {
+                    "snapshot": {
+                        "summary": {
+                            "framework": "vue",
+                            "rendering": "",
+                            "dom_item_count": 0,
+                            "html_chars": 1200,
+                            "text_chars": 100,
+                            "script_count": 8,
+                            "app_root_count": 1,
+                        },
+                        "recon_summary": {
+                            "framework": "vue",
+                            "rendering": "",
+                            "item_count": 0,
+                        },
+                    }
+                },
+            }
+        ]
+        self.assertTrue(_detect_spa_from_results(spa_results))
+
+    def test_detect_spa_from_results_identifies_ssr_as_non_spa(self) -> None:
+        """SSR results with items should NOT be detected as SPA."""
+        from autonomous_crawler.runners.managed_actions import _detect_spa_from_results
+
+        ssr_results = [
+            {
+                "action": "reanalyze_site",
+                "ok": True,
+                "evidence": {
+                    "snapshot": {
+                        "summary": {
+                            "framework": "next",
+                            "rendering": "ssr",
+                            "dom_item_count": 16,
+                            "html_chars": 50000,
+                            "text_chars": 5000,
+                            "script_count": 3,
+                            "app_root_count": 0,
+                        },
+                        "recon_summary": {
+                            "framework": "next",
+                            "rendering": "ssr",
+                            "item_count": 16,
+                        },
+                    }
+                },
+            }
+        ]
+        self.assertFalse(_detect_spa_from_results(ssr_results))
+
+    def test_detect_spa_identifies_js_shell(self) -> None:
+        """Low text + many scripts = JS shell = SPA."""
+        from autonomous_crawler.runners.managed_actions import _detect_spa_from_results
+
+        js_shell_results = [
+            {
+                "action": "inspect_access",
+                "ok": True,
+                "evidence": {
+                    "snapshot": {
+                        "summary": {
+                            "framework": "",
+                            "rendering": "",
+                            "dom_item_count": 0,
+                            "html_chars": 3000,
+                            "text_chars": 200,
+                            "script_count": 12,
+                            "app_root_count": 2,
+                        },
+                        "recon_summary": {},
+                    }
+                },
+            }
+        ]
+        self.assertTrue(_detect_spa_from_results(js_shell_results))
+
+
+# ------------------------------------------------------------------
+# Tests for execute_and_run() enhancements
+# ------------------------------------------------------------------
+
+
+class ExecuteAndRunTests(unittest.TestCase):
+    """Tests for execute_and_run() with quality diagnostics and chain evidence."""
+
+    def _make_mock_run_result(self, **overrides: Any) -> dict[str, Any]:
+        """Build a realistic ProfileLongRunResult.to_dict() mock."""
+        base = {
+            "accepted": True,
+            "run_id": "managed-test",
+            "profile_name": "shop",
+            "status": "completed",
+            "runner_summary": {
+                "claimed": 10,
+                "succeeded": 10,
+                "failed": 0,
+                "records_saved": 10,
+            },
+            "frontier_stats": {"done": 10, "queued": 0, "failed": 0},
+            "product_stats": {"total": 10, "records_saved": 10},
+            "quality_summary": {
+                "total_records": 10,
+                "field_completeness": {
+                    "title": 1.0,
+                    "highest_price": 0.8,
+                    "description": 0.5,
+                },
+                "quality_gate": {
+                    "passed": True,
+                    "checks": [
+                        {"name": "min_items", "passed": True, "severity": "pass"},
+                        {"name": "field:title", "passed": True, "severity": "pass"},
+                    ],
+                },
+                "quality_indicator": "pass",
+                "duplicate_rate": 0.0,
+            },
+            "report": {},
+            "sample_records": [],
+            "failures": [],
+        }
+        base.update(overrides)
+        return base
+
+    @patch("autonomous_crawler.runners.profile_longrun.run_profile_longrun")
+    def test_execute_and_run_returns_quality_diagnostics(self, mock_run: MagicMock) -> None:
+        """execute_and_run should include quality_diagnostics in the result."""
+        from autonomous_crawler.runners.profile_longrun import ProfileLongRunResult
+        from autonomous_crawler.runners.profile_longrun import BatchRunnerSummary
+
+        mock_result = MagicMock()
+        mock_result.to_dict.return_value = self._make_mock_run_result()
+        mock_run.return_value = mock_result
+
+        plan = ManagedActionPlan.from_dict({
+            "actions": [
+                {"action": "adjust_runtime", "params": {"mode": "dynamic"}},
+            ]
+        })
+
+        result = execute_and_run(
+            plan=plan,
+            target_url="https://shop.test",
+            profile={"name": "shop", "target_fields": ["title"]},
+            run_spec={"selected_fields": ["title"]},
+        )
+
+        self.assertIn("quality_diagnostics", result)
+        qd = result["quality_diagnostics"]
+        self.assertEqual(qd["total_records"], 10)
+        self.assertAlmostEqual(qd["field_coverage"], 0.7667, places=2)
+        self.assertEqual(qd["quality_indicator"], "pass")
+        self.assertEqual(qd["critical_failures"], [])
+        self.assertIn("quality_gate_result", qd)
+
+    @patch("autonomous_crawler.runners.profile_longrun.run_profile_longrun")
+    def test_execute_and_run_returns_chain_evidence(self, mock_run: MagicMock) -> None:
+        """execute_and_run should include chain_evidence linking actions to run results."""
+        mock_result = MagicMock()
+        mock_result.to_dict.return_value = self._make_mock_run_result()
+        mock_run.return_value = mock_result
+
+        plan = ManagedActionPlan.from_dict({
+            "actions": [
+                {"action": "repair_selectors", "params": {"fields": ["title"]}},
+                {"action": "adjust_runtime", "params": {"mode": "dynamic"}},
+            ]
+        })
+
+        result = execute_and_run(
+            plan=plan,
+            target_url="https://shop.test",
+            profile={"name": "shop", "selectors": {}, "target_fields": ["title"]},
+            run_spec={"selected_fields": ["title"]},
+        )
+
+        self.assertIn("chain_evidence", result)
+        chain = result["chain_evidence"]
+        self.assertEqual(chain["schema_version"], "execute-and-run-chain/v1")
+        self.assertGreater(chain["action_count"], 0)
+        self.assertEqual(chain["run_effect"]["status"], "completed")
+        self.assertEqual(chain["run_effect"]["total_records"], 10)
+        self.assertTrue(chain["run_started_at"])
+        self.assertTrue(chain["run_finished_at"])
+
+    @patch("autonomous_crawler.runners.profile_longrun.run_profile_longrun")
+    def test_execute_and_run_failed_run_has_failures_in_diagnostics(self, mock_run: MagicMock) -> None:
+        """When the run fails, quality_diagnostics should reflect failures."""
+        mock_result = MagicMock()
+        mock_result.to_dict.return_value = self._make_mock_run_result(
+            status="failed",
+            product_stats={"total": 0, "records_saved": 0},
+            quality_summary={
+                "total_records": 0,
+                "field_completeness": {},
+                "quality_gate": {
+                    "passed": False,
+                    "should_fail": True,
+                    "checks": [
+                        {"name": "min_items", "passed": False, "severity": "fail", "expected": 10, "actual": 0},
+                    ],
+                },
+                "quality_indicator": "fail",
+                "duplicate_rate": 0.0,
+            },
+        )
+        mock_run.return_value = mock_result
+
+        plan = ManagedActionPlan.from_dict({
+            "actions": [
+                {"action": "adjust_runtime", "params": {"mode": "dynamic"}},
+            ]
+        })
+
+        result = execute_and_run(
+            plan=plan,
+            target_url="https://shop.test",
+            profile={"name": "shop", "target_fields": ["title"]},
+            run_spec={"selected_fields": ["title"]},
+        )
+
+        qd = result["quality_diagnostics"]
+        self.assertEqual(qd["total_records"], 0)
+        self.assertEqual(qd["quality_indicator"], "fail")
+        self.assertIn("min_items", qd["critical_failures"])
+
+    def test_execute_and_run_skipped_run_has_default_diagnostics(self) -> None:
+        """When run is skipped (no patches), diagnostics should have default values."""
+        plan = ManagedActionPlan.from_dict({
+            "actions": [
+                {"action": "prepare_rerun", "params": {"run_kind": "test"}},
+            ]
+        })
+
+        result = execute_and_run(
+            plan=plan,
+            target_url="https://shop.test",
+            profile={"name": "shop"},
+            run_spec={},
+        )
+
+        self.assertTrue(result["skipped_run"])
+        self.assertIn("quality_diagnostics", result)
+        self.assertEqual(result["quality_diagnostics"]["total_records"], 0)
+        self.assertEqual(result["quality_diagnostics"]["quality_indicator"], "skip")
+        self.assertIn("chain_evidence", result)
+        self.assertEqual(result["chain_evidence"]["run_effect"]["status"], "skipped")
+
+    @patch("autonomous_crawler.runners.profile_longrun.run_profile_longrun")
+    def test_execute_and_run_action_evidence_context_injected(self, mock_run: MagicMock) -> None:
+        """Action evidence context should be injected into merged profile."""
+        mock_result = MagicMock()
+        mock_result.to_dict.return_value = self._make_mock_run_result()
+        mock_run.return_value = mock_result
+
+        plan = ManagedActionPlan.from_dict({
+            "actions": [
+                {"action": "repair_selectors", "params": {"fields": ["title", "highest_price"]}},
+                {"action": "adjust_runtime", "params": {"mode": "dynamic", "capture_api": True}},
+            ]
+        })
+
+        result = execute_and_run(
+            plan=plan,
+            target_url="https://shop.test",
+            profile={"name": "shop", "selectors": {}, "target_fields": ["title"]},
+            run_spec={"selected_fields": ["title"]},
+        )
+
+        merged = result["merged_profile"]
+        self.assertIn("_action_evidence", merged)
+        evidence = merged["_action_evidence"]
+        self.assertIn("selector_patches", evidence)
+        self.assertIn("runtime_adjustments", evidence)
+        self.assertIn("profile_patch_keys", evidence)
+
+    @patch("autonomous_crawler.runners.profile_longrun.run_profile_longrun")
+    def test_execute_and_run_chain_evidence_has_action_summaries(self, mock_run: MagicMock) -> None:
+        """Chain evidence should list each action with its ok/summary status."""
+        mock_result = MagicMock()
+        mock_result.to_dict.return_value = self._make_mock_run_result()
+        mock_run.return_value = mock_result
+
+        plan = ManagedActionPlan.from_dict({
+            "actions": [
+                {"action": "probe_fields", "params": {"fields": ["title"]}},
+                {"action": "adjust_runtime", "params": {"mode": "dynamic"}},
+            ]
+        })
+
+        result = execute_and_run(
+            plan=plan,
+            target_url="https://shop.test",
+            profile={"name": "shop", "selectors": {}, "target_fields": ["title"]},
+            run_spec={"selected_fields": ["title"]},
+        )
+
+        chain = result["chain_evidence"]
+        self.assertGreaterEqual(chain["action_count"], 1)
+        for action in chain["actions_executed"]:
+            self.assertIn("action", action)
+            self.assertIn("ok", action)
+            self.assertIn("summary", action)
+
+    @patch("autonomous_crawler.runners.profile_longrun.run_profile_longrun")
+    def test_execute_and_run_quality_gate_result_in_diagnostics(self, mock_run: MagicMock) -> None:
+        """Quality gate result should be embedded in quality_diagnostics."""
+        mock_result = MagicMock()
+        mock_result.to_dict.return_value = self._make_mock_run_result()
+        mock_run.return_value = mock_result
+
+        plan = ManagedActionPlan.from_dict({
+            "actions": [
+                {"action": "adjust_runtime", "params": {"mode": "dynamic"}},
+            ]
+        })
+
+        result = execute_and_run(
+            plan=plan,
+            target_url="https://shop.test",
+            profile={
+                "name": "shop",
+                "target_fields": ["title"],
+                "quality_expectations": {"min_items": 5},
+            },
+            run_spec={"selected_fields": ["title"]},
+        )
+
+        qgr = result["quality_diagnostics"]["quality_gate_result"]
+        self.assertIn("passed", qgr)
+        self.assertIn("reasons", qgr)
+        self.assertIn("checks", qgr)
+
+    @patch("autonomous_crawler.runners.profile_longrun.run_profile_longrun")
+    def test_execute_and_run_exception_produces_failed_diagnostics(self, mock_run: MagicMock) -> None:
+        """When run_profile_longrun raises, diagnostics should still be present."""
+        mock_run.side_effect = RuntimeError("browser launch failed")
+
+        plan = ManagedActionPlan.from_dict({
+            "actions": [
+                {"action": "adjust_runtime", "params": {"mode": "dynamic"}},
+            ]
+        })
+
+        result = execute_and_run(
+            plan=plan,
+            target_url="https://shop.test",
+            profile={"name": "shop", "target_fields": ["title"]},
+            run_spec={"selected_fields": ["title"]},
+        )
+
+        self.assertEqual(result["run_status"], "failed")
+        self.assertIn("quality_diagnostics", result)
+        self.assertIn("chain_evidence", result)
+
+
+# ------------------------------------------------------------------
+# Tests for QualityGate
+# ------------------------------------------------------------------
+
+
+class QualityGateTests(unittest.TestCase):
+    """Tests for the QualityGate class."""
+
+    def test_gate_passes_when_all_criteria_met(self) -> None:
+        from autonomous_crawler.runners.product_workflow import QualityGate
+
+        gate = QualityGate(min_records=5, min_coverage=0.5)
+        run_result = {
+            "product_stats": {"total": 10},
+            "quality_summary": {
+                "field_completeness": {"title": 1.0, "price": 0.8, "desc": 0.6},
+                "quality_gate": {"passed": True, "checks": []},
+                "duplicate_rate": 0.0,
+            },
+        }
+        result = gate.evaluate(run_result)
+        self.assertTrue(result.passed)
+        self.assertEqual(result.reasons, [])
+
+    def test_gate_fails_when_records_too_low(self) -> None:
+        from autonomous_crawler.runners.product_workflow import QualityGate
+
+        gate = QualityGate(min_records=10)
+        run_result = {
+            "product_stats": {"total": 3},
+            "quality_summary": {
+                "field_completeness": {"title": 1.0},
+                "quality_gate": {"passed": True, "checks": []},
+            },
+        }
+        result = gate.evaluate(run_result)
+        self.assertFalse(result.passed)
+        self.assertTrue(any("min_records" in r for r in result.reasons))
+
+    def test_gate_fails_when_coverage_too_low(self) -> None:
+        from autonomous_crawler.runners.product_workflow import QualityGate
+
+        gate = QualityGate(min_records=1, min_coverage=0.7)
+        run_result = {
+            "product_stats": {"total": 10},
+            "quality_summary": {
+                "field_completeness": {"title": 1.0, "price": 0.3, "desc": 0.2},
+                "quality_gate": {"passed": True, "checks": []},
+            },
+        }
+        result = gate.evaluate(run_result)
+        self.assertFalse(result.passed)
+        self.assertTrue(any("field_coverage" in r for r in result.reasons))
+
+    def test_gate_fails_on_critical_failures(self) -> None:
+        from autonomous_crawler.runners.product_workflow import QualityGate
+
+        gate = QualityGate(min_records=1, max_critical_failures=0)
+        run_result = {
+            "product_stats": {"total": 10},
+            "quality_summary": {
+                "field_completeness": {"title": 1.0},
+                "quality_gate": {
+                    "passed": False,
+                    "checks": [
+                        {"name": "min_items", "passed": False, "severity": "fail"},
+                    ],
+                },
+            },
+        }
+        result = gate.evaluate(run_result)
+        self.assertFalse(result.passed)
+        self.assertTrue(any("critical_failures" in r for r in result.reasons))
+
+    def test_gate_from_profile_uses_quality_expectations(self) -> None:
+        from autonomous_crawler.runners.product_workflow import QualityGate
+
+        profile = {
+            "quality_expectations": {
+                "min_items": 20,
+                "max_duplicate_rate": 0.1,
+                "required_fields": ["title", "price"],
+            },
+        }
+        gate = QualityGate.from_profile(profile)
+        self.assertEqual(gate.min_records, 20)
+        self.assertAlmostEqual(gate.max_duplicate_rate, 0.1)
+        self.assertIn("title", gate.required_fields)
+
+    def test_gate_result_serializable(self) -> None:
+        import json
+        from autonomous_crawler.runners.product_workflow import QualityGate
+
+        gate = QualityGate(min_records=5)
+        run_result = {
+            "product_stats": {"total": 10},
+            "quality_summary": {
+                "field_completeness": {"title": 1.0},
+                "quality_gate": {"passed": True, "checks": []},
+            },
+        }
+        result = gate.evaluate(run_result)
+        d = result.to_dict()
+        json.dumps(d)  # must be serializable
+        self.assertIn("passed", d)
+        self.assertIn("reasons", d)
+        self.assertIn("checks", d)
+
+    def test_gate_checks_required_fields(self) -> None:
+        from autonomous_crawler.runners.product_workflow import QualityGate
+
+        gate = QualityGate(min_records=1, required_fields=["title", "price", "image"])
+        run_result = {
+            "product_stats": {"total": 10},
+            "quality_summary": {
+                "field_completeness": {"title": 1.0, "price": 0.5},
+                "quality_gate": {"passed": True, "checks": []},
+            },
+        }
+        result = gate.evaluate(run_result)
+        self.assertFalse(result.passed)
+        self.assertTrue(any("required fields missing" in r for r in result.reasons))
+
+    def test_gate_handles_empty_run_result(self) -> None:
+        from autonomous_crawler.runners.product_workflow import QualityGate
+
+        gate = QualityGate(min_records=1)
+        result = gate.evaluate({})
+        self.assertFalse(result.passed)
+        self.assertEqual(result.checks["total_records"], 0)
 
 
 if __name__ == "__main__":

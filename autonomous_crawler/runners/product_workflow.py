@@ -1008,6 +1008,7 @@ def profile_from_run_spec(spec: CrawlRunSpec, *, limit: int | None = None) -> Si
     profile_data = dict(spec.profile or {})
     run_catalog_nodes = list(spec.catalog_nodes or [])
     selected_nodes = _flatten_catalog_nodes(run_catalog_nodes)
+    selected_nodes = _flatten_catalog_nodes(run_catalog_nodes)
     if not profile_data.get("api_hints") and selected_nodes and not any(node.get("graphql_category_uid") for node in selected_nodes):
         discovered_nodes = discover_catalog_from_site_fallbacks(spec.target_url)
         if discovered_nodes:
@@ -1468,6 +1469,161 @@ def build_run_evidence_pack(job: dict[str, Any]) -> dict[str, Any]:
         },
         "recommended_focus": _recommended_focus(progress, quality, supervision),
     }
+
+
+# ---------------------------------------------------------------------------
+# Quality Gate
+# ---------------------------------------------------------------------------
+
+@dataclass
+class QualityGateResult:
+    """Result of a quality gate evaluation."""
+    passed: bool
+    reasons: list[str] = field(default_factory=list)
+    checks: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "passed": self.passed,
+            "reasons": list(self.reasons),
+            "checks": dict(self.checks),
+        }
+
+
+class QualityGate:
+    """Evaluates whether a crawl run meets expected quality standards.
+
+    Usage::
+
+        gate = QualityGate(min_records=10, min_coverage=0.5)
+        result = gate.evaluate(run_result)
+        if not result.passed:
+            print(result.reasons)
+    """
+
+    def __init__(
+        self,
+        *,
+        min_records: int = 1,
+        min_coverage: float = 0.0,
+        max_critical_failures: int = 0,
+        max_duplicate_rate: float = 1.0,
+        required_fields: list[str] | None = None,
+        field_thresholds: dict[str, float] | None = None,
+    ) -> None:
+        self.min_records = min_records
+        self.min_coverage = min_coverage
+        self.max_critical_failures = max_critical_failures
+        self.max_duplicate_rate = max_duplicate_rate
+        self.required_fields = required_fields or []
+        self.field_thresholds = field_thresholds or {}
+
+    def evaluate(self, run_result: dict[str, Any]) -> QualityGateResult:
+        """Evaluate quality against a run result dict.
+
+        Accepts either a full ProfileLongRunResult.to_dict() or a
+        simplified dict with product_stats / quality_summary keys.
+
+        Returns a ``QualityGateResult`` with pass/fail and specific reasons.
+        """
+        reasons: list[str] = []
+        checks: dict[str, Any] = {}
+
+        product_stats = run_result.get("product_stats") or {}
+        quality_summary = run_result.get("quality_summary") or {}
+        quality_gate = quality_summary.get("quality_gate") or {}
+        field_completeness = quality_summary.get("field_completeness") or {}
+
+        # Total records
+        total_records = int(
+            product_stats.get("total")
+            or product_stats.get("records_saved")
+            or 0
+        )
+        checks["total_records"] = total_records
+        if total_records < self.min_records:
+            reasons.append(
+                f"records={total_records} < min_records={self.min_records}"
+            )
+
+        # Field coverage
+        if field_completeness:
+            coverage_values = [
+                float(v) for v in field_completeness.values()
+                if isinstance(v, (int, float))
+            ]
+            avg_coverage = round(
+                sum(coverage_values) / len(coverage_values), 4
+            ) if coverage_values else 0.0
+        else:
+            avg_coverage = 0.0
+        checks["field_coverage"] = avg_coverage
+        if avg_coverage < self.min_coverage:
+            reasons.append(
+                f"field_coverage={avg_coverage:.2%} < min_coverage={self.min_coverage:.2%}"
+            )
+
+        # Critical failures from quality gate
+        critical_failures: list[str] = []
+        if isinstance(quality_gate.get("checks"), list):
+            for check in quality_gate["checks"]:
+                if (
+                    isinstance(check, dict)
+                    and not check.get("passed")
+                    and check.get("severity") == "fail"
+                ):
+                    critical_failures.append(str(check.get("name") or ""))
+        checks["critical_failures"] = critical_failures
+        if len(critical_failures) > self.max_critical_failures:
+            reasons.append(
+                f"critical_failures={len(critical_failures)} > max={self.max_critical_failures}: "
+                + ", ".join(critical_failures[:5])
+            )
+
+        # Duplicate rate
+        duplicate_rate = float(quality_summary.get("duplicate_rate") or 0)
+        checks["duplicate_rate"] = duplicate_rate
+        if duplicate_rate > self.max_duplicate_rate:
+            reasons.append(
+                f"duplicate_rate={duplicate_rate:.2%} > max={self.max_duplicate_rate:.2%}"
+            )
+
+        # Required fields
+        if self.required_fields and field_completeness:
+            missing = [
+                f for f in self.required_fields
+                if float(field_completeness.get(f, 0)) < 0.01
+            ]
+            if missing:
+                reasons.append(f"required fields missing: {', '.join(missing[:5])}")
+
+        # Per-field thresholds
+        if self.field_thresholds and field_completeness:
+            for field_name, threshold in self.field_thresholds.items():
+                actual = float(field_completeness.get(field_name, 0))
+                if actual < threshold:
+                    reasons.append(
+                        f"field '{field_name}' coverage {actual:.2%} < threshold {threshold:.2%}"
+                    )
+
+        passed = len(reasons) == 0
+        return QualityGateResult(passed=passed, reasons=reasons, checks=checks)
+
+    @classmethod
+    def from_profile(cls, profile: dict[str, Any]) -> "QualityGate":
+        """Create a QualityGate from quality_expectations in a profile."""
+        expectations = profile.get("quality_expectations") or {}
+        return cls(
+            min_records=int(expectations.get("min_items") or 1),
+            min_coverage=0.0,
+            max_duplicate_rate=float(expectations.get("max_duplicate_rate") or 1.0),
+            required_fields=list(expectations.get("required_fields") or []),
+            field_thresholds={
+                str(k): float(v)
+                for k, v in dict(expectations.get("field_thresholds") or {}).items()
+            },
+        )
+
 
 
 def build_access_evidence_snapshot(job: dict[str, Any]) -> dict[str, Any]:

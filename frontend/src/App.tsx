@@ -8,10 +8,12 @@ import {
   ProfileOutlined,
   SettingOutlined
 } from '@ant-design/icons';
+import RocketOutlined from '@ant-design/icons/lib/icons/RocketOutlined';
 import { AnalysisPage } from './pages/AnalysisPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { NewTaskWizardPage } from './pages/NewTaskWizardPage';
+import { OneClickCrawlPage } from './pages/OneClickCrawlPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { TaskDetailPage } from './pages/TaskDetailPage';
 import { WorkbenchProvider, useWorkbench } from './store/workbench';
@@ -26,6 +28,7 @@ function Shell() {
 
   const items: MenuProps['items'] = [
     { key: 'dashboard', icon: <DashboardOutlined />, label: '工作台' },
+    { key: 'oneClickCrawl', icon: <RocketOutlined />, label: '一键采集' },
     { key: 'wizard', icon: <ExperimentOutlined />, label: '新建任务' },
     { key: 'analysis', icon: <ProfileOutlined />, label: '站点分析' },
     { key: 'detail', icon: <LineChartOutlined />, label: '任务详情' },
@@ -66,6 +69,7 @@ function Shell() {
 }
 
 function renderPage(page: string) {
+  if (page === 'oneClickCrawl') return <OneClickCrawlPage />;
   if (page === 'wizard') return <NewTaskWizardPage />;
   if (page === 'analysis') return <AnalysisPage />;
   if (page === 'detail') return <TaskDetailPage />;

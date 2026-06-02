@@ -215,3 +215,33 @@ class AutoRepairLoopRequest(BaseModel):
     max_cycles: int = 3
     llm: LLMConfig | None = None
     extra_context: dict[str, Any] | None = None
+
+
+class ManagedRunRequest(BaseModel):
+    """Request body for POST /runs/managed — the execute-and-run closed loop."""
+    target_url: str = Field(..., min_length=1)
+    profile: dict[str, Any] = Field(default_factory=dict)
+    run_spec: dict[str, Any] | None = None
+    llm_decide: bool = False
+    batch_size: int = Field(default=20, ge=1, le=200)
+    max_batches: int = Field(default=0, ge=0)
+    item_workers: int = Field(default=4, ge=1, le=128)
+    runtime_dir: str = ""
+    run_mode: str = "direct"
+    extra_context: dict[str, Any] = Field(default_factory=dict)
+    llm: LLMConfig | None = None
+    managed_ai: ManagedAIConfig | None = None
+
+
+class ManagedRepairRequest(BaseModel):
+    """Request body for POST /runs/managed/repair — diagnose-and-repair loop."""
+    target_url: str = Field(..., min_length=1)
+    profile: dict[str, Any] = Field(default_factory=dict)
+    run_spec: dict[str, Any] | None = None
+    max_cycles: int = Field(default=1, ge=1, le=5)
+    batch_size: int = Field(default=20, ge=1, le=200)
+    max_batches: int = Field(default=0, ge=0)
+    item_workers: int = Field(default=4, ge=1, le=128)
+    runtime_dir: str = ""
+    extra_context: dict[str, Any] = Field(default_factory=dict)
+    llm: LLMConfig | None = None

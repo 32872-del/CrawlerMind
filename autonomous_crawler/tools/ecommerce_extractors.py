@@ -958,6 +958,41 @@ def _text(value: Any) -> str:
     return str(value).strip()
 
 
+# Price range pattern: matches "£13 - £26", "$10-$20", "13-26", "13 - 26", etc.
+_PRICE_RANGE_RE = re.compile(
+    r"(?:£|\$|€|¥|￥)?\s*(\d+(?:[.,]\d+)?)\s*(?:-|–|—|~|to)\s*(?:£|\$|€|¥|￥)?\s*(\d+(?:[.,]\d+)?)"
+)
+
+
+def parse_price_range(value: Any) -> dict[str, float] | None:
+    """Detect and parse a price range string.
+
+    Returns a dict with \"min\" and \"max\" keys if a range is detected,
+    or None if the value is not a price range.
+
+    Handles patterns like:
+    - \"£13 - £26\", \"$10 - $20\", \"€15-€30\"
+    - \"13-26\", \"13 - 26\"
+    - \"13–26\" (en-dash), \"13~26\"
+    """
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    match = _PRICE_RANGE_RE.search(text)
+    if not match:
+        return None
+    try:
+        low = float(match.group(1).replace(",", "."))
+        high = float(match.group(2).replace(",", "."))
+        return {"min": min(low, high), "max": max(low, high)}
+    except (ValueError, IndexError):
+        return None
+
+
 def _number_or_none(value: Any) -> float | None:
     if value is None or isinstance(value, bool):
         return None
@@ -966,6 +1001,10 @@ def _number_or_none(value: Any) -> float | None:
     text = str(value).strip()
     if not text:
         return None
+    # First, check if this is a price range — return the lower bound.
+    price_range = parse_price_range(text)
+    if price_range is not None:
+        return price_range["min"]
     match = re.search(r"-?\d+(?:[.,]\d+)?", text)
     if not match:
         return None

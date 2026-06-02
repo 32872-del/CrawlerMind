@@ -22,11 +22,13 @@ from ...runners.managed_actions import (
     ManagedCrawlAction,
     build_deterministic_action_plan,
     execute_managed_action_plan,
+    execute_and_run,
     _execute_inspect_access,
 )
 from ...runners.auto_repair import (
     AutoRepairLoop,
     FailureDiagnoser,
+    diagnose_and_repair,
 )
 from ...runners.managed_state import build_managed_crawl_state, compact_managed_state_for_llm
 from ...runners.product_workflow import (
@@ -77,6 +79,8 @@ from ..schemas import (
     ManagedActionsRequest,
     ManagedControlLoopRequest,
     ManagedRepairRunRequest,
+    ManagedRepairRequest,
+    ManagedRunRequest,
     ManagedStepRequest,
     AccessProbeRequest,
     ProductRunRequest,
@@ -1655,3 +1659,139 @@ def _append_auto_repair_record(task_id: str, record: dict[str, Any]) -> None:
     records = list(job.get("auto_repair_history") or [])
     records.append(record)
     update_job(task_id, auto_repair_history=records[-50:])
+
+
+# ---------------------------------------------------------------------------
+# Standalone managed execute-and-run endpoint
+# ---------------------------------------------------------------------------
+
+
+@router.post("/runs/managed")
+def managed_execute_and_run(request: ManagedRunRequest) -> dict[str, Any]:
+    """Execute a managed action plan and run the crawl in one shot.
+
+    This is the **closed-loop** entry point: it builds an action plan,
+    executes it (applying profile patches), then immediately runs the
+    crawl with the patched profile.
+    """
+    from uuid import uuid4
+
+    task_id = "managed-" + uuid4().hex[:12]
+
+    # Build advisor if LLM config provided
+    advisor = None
+    if request.llm and request.llm.enabled:
+        try:
+            from ...llm import OpenAICompatibleAdvisor
+            advisor = OpenAICompatibleAdvisor(
+                base_url=request.llm.base_url,
+                model=request.llm.model,
+                api_key=request.llm.api_key or "",
+            )
+        except Exception as exc:
+            raise HTTPException(status_code=400, detail=f"LLM init failed: {exc}")
+
+    # Register job
+    try_register_job(
+        task_id,
+        job_type="managed_run",
+        target_url=request.target_url,
+        status="running",
+        managed_ai=managed_ai_public_config(request.managed_ai, request.llm),
+    )
+
+    try:
+        result = execute_and_run(
+            target_url=request.target_url,
+            profile=request.profile,
+            run_spec=request.run_spec,
+            advisor=advisor,
+            extra_context=request.extra_context,
+            llm_decide=request.llm_decide,
+            batch_size=request.batch_size,
+            max_batches=request.max_batches,
+            item_workers=request.item_workers,
+            runtime_dir=request.runtime_dir,
+            run_mode=request.run_mode,
+        )
+        update_job(
+            task_id,
+            status=result.get("run_status", "completed"),
+            managed_run_result=result,
+        )
+        return {"task_id": task_id, **result}
+    except Exception as exc:
+        update_job(task_id, status="failed", error=str(exc)[:500])
+        raise HTTPException(status_code=500, detail=str(exc)[:500])
+
+
+@router.post("/runs/managed/repair")
+def managed_diagnose_and_repair(request: ManagedRepairRequest) -> dict[str, Any]:
+    """Diagnose failures and auto-repair in one shot.
+
+    This endpoint takes a target URL + profile, runs the crawl,
+    diagnoses failures, generates repair actions, and re-runs.
+    """
+    from uuid import uuid4
+
+    task_id = "repair-" + uuid4().hex[:12]
+
+    advisor = None
+    if request.llm and request.llm.enabled:
+        try:
+            from ...llm import OpenAICompatibleAdvisor
+            advisor = OpenAICompatibleAdvisor(
+                base_url=request.llm.base_url,
+                model=request.llm.model,
+                api_key=request.llm.api_key or "",
+            )
+        except Exception as exc:
+            raise HTTPException(status_code=400, detail=f"LLM init failed: {exc}")
+
+    try_register_job(
+        task_id,
+        job_type="managed_repair",
+        target_url=request.target_url,
+        status="running",
+    )
+
+    try:
+        # First, do an initial run
+        initial_result = execute_and_run(
+            target_url=request.target_url,
+            profile=request.profile,
+            run_spec=request.run_spec,
+            advisor=advisor,
+            extra_context=request.extra_context,
+            batch_size=request.batch_size,
+            max_batches=request.max_batches,
+            item_workers=request.item_workers,
+            runtime_dir=request.runtime_dir,
+        )
+
+        # Then diagnose and repair
+        job = get_job(task_id) or {}
+        result = diagnose_and_repair(
+            job=job,
+            profile=request.profile,
+            target_url=request.target_url,
+            run_spec=request.run_spec,
+            extra_context=request.extra_context,
+            max_cycles=request.max_cycles,
+            batch_size=request.batch_size,
+            max_batches=request.max_batches,
+            item_workers=request.item_workers,
+            runtime_dir=request.runtime_dir,
+            advisor=advisor,
+        )
+
+        update_job(
+            task_id,
+            status="completed",
+            initial_run=initial_result,
+            repair_result=result,
+        )
+        return {"task_id": task_id, "initial_run": initial_result, "repair": result}
+    except Exception as exc:
+        update_job(task_id, status="failed", error=str(exc)[:500])
+        raise HTTPException(status_code=500, detail=str(exc)[:500])

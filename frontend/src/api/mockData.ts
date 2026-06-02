@@ -4,6 +4,8 @@ import type {
   FieldCandidate,
   FieldResolution,
   LlmModelListResponse,
+  ManagedRepairResult,
+  ManagedRunResult,
   RunEventsResponse,
   RunLaunchResponse,
   RunStatusResponse,
@@ -326,5 +328,117 @@ export function mockLlmModels(provider: string): LlmModelListResponse {
       { id: 'Qwen/Qwen2.5-72B-Instruct', label: 'Qwen2.5 72B Instruct', provider },
       { id: 'llama3.1:8b', label: 'llama3.1:8b', provider }
     ]
+  };
+}
+
+export function mockManagedRunResult(targetUrl: string): ManagedRunResult {
+  const taskId = `managed-${Math.random().toString(16).slice(2, 8)}`;
+  return {
+    schema_version: 'managed-run-result/v1',
+    task_id: taskId,
+    run_id: `managed-run-${taskId}`,
+    status: 'completed',
+    stage: 'completed',
+    record_count: 35,
+    actions: [
+      {
+        action: 'analyze_site',
+        label: '分析站点结构',
+        status: 'success',
+        started_at: new Date(Date.now() - 12000).toISOString(),
+        finished_at: new Date(Date.now() - 8000).toISOString(),
+        duration_ms: 4000,
+        result_summary: '发现 24 个目录节点，6 个字段候选'
+      },
+      {
+        action: 'plan_execution',
+        label: '生成执行计划',
+        status: 'success',
+        started_at: new Date(Date.now() - 8000).toISOString(),
+        finished_at: new Date(Date.now() - 6000).toISOString(),
+        duration_ms: 2000,
+        result_summary: '规划 3 个执行动作'
+      },
+      {
+        action: 'extract_from_contract',
+        label: '执行数据抽取',
+        status: 'success',
+        started_at: new Date(Date.now() - 6000).toISOString(),
+        finished_at: new Date(Date.now() - 3000).toISOString(),
+        duration_ms: 3000,
+        result_summary: '抽取 35 条商品记录'
+      },
+      {
+        action: 'run_crawler',
+        label: '运行采集任务',
+        status: 'success',
+        started_at: new Date(Date.now() - 3000).toISOString(),
+        finished_at: new Date().toISOString(),
+        duration_ms: 3000,
+        result_summary: '完成采集，保存 35 条记录'
+      }
+    ],
+    quality_gate: {
+      severity: 'pass',
+      passed: true,
+      reason: '所有字段覆盖率达标，无重复数据'
+    },
+    field_coverage: 0.92,
+    quality_score: 0.88
+  };
+}
+
+export function mockManagedRepairResult(targetUrl: string): ManagedRepairResult {
+  const taskId = `repair-${Math.random().toString(16).slice(2, 8)}`;
+  return {
+    schema_version: 'managed-repair-result/v1',
+    task_id: taskId,
+    run_id: `repair-run-${taskId}`,
+    status: 'completed',
+    stage: 'completed',
+    record_count: 48,
+    repair_cycles: 1,
+    before_records: 35,
+    after_records: 48,
+    before_coverage: 0.72,
+    after_coverage: 0.95,
+    before_quality: 0.65,
+    after_quality: 0.91,
+    actions: [
+      {
+        action: 'diagnose',
+        label: '诊断采集问题',
+        status: 'success',
+        started_at: new Date(Date.now() - 10000).toISOString(),
+        finished_at: new Date(Date.now() - 7000).toISOString(),
+        duration_ms: 3000,
+        result_summary: '发现字段提取和分页两个问题'
+      },
+      {
+        action: 'repair_selectors',
+        label: '修复字段选择器',
+        status: 'success',
+        started_at: new Date(Date.now() - 7000).toISOString(),
+        finished_at: new Date(Date.now() - 5000).toISOString(),
+        duration_ms: 2000,
+        result_summary: '修复了 colors 和 sizes 字段的选择器'
+      },
+      {
+        action: 'rerun',
+        label: '重跑采集任务',
+        status: 'success',
+        started_at: new Date(Date.now() - 5000).toISOString(),
+        finished_at: new Date().toISOString(),
+        duration_ms: 5000,
+        result_summary: '重跑完成，新增 13 条记录'
+      }
+    ],
+    quality_gate: {
+      severity: 'pass',
+      passed: true,
+      reason: '修复后所有指标达标'
+    },
+    converged: true,
+    final_health: 'healthy'
   };
 }

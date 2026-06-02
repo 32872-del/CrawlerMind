@@ -9,7 +9,9 @@ import type {
   FieldResolution,
   LlmModelListResponse,
   ManagedActionRequest,
+  ManagedRepairResult,
   ManagedRepairRunResponse,
+  ManagedRunResult,
   ManagedStepRequest,
   ManagedStepResponse,
   RunEventsResponse,
@@ -20,7 +22,7 @@ import type {
   SiteAnalysis
 } from '../types/workflow';
 import { exportFilename, fileSafeHost, joinExportPath, nowIso } from '../utils/format';
-import { mockCatalogTree, mockExport, mockFieldResolution, mockLlmModels, mockRunEvents, mockRunLaunch, mockRunStatus, mockSiteAnalysis } from './mockData';
+import { mockCatalogTree, mockExport, mockFieldResolution, mockLlmModels, mockManagedRepairResult, mockManagedRunResult, mockRunEvents, mockRunLaunch, mockRunStatus, mockSiteAnalysis } from './mockData';
 
 async function requestJson<T>(settings: SettingsState, path: string, init?: RequestInit, mock?: () => T): Promise<T> {
   if (settings.apiMode === 'mock') return mock ? mock() : Promise.reject(new Error('mock response missing'));
@@ -350,5 +352,46 @@ export async function runAutoRepairLoop(settings: SettingsState, taskId: string,
         }
       ]
     })
+  );
+}
+
+export async function managedExecuteAndRun(settings: SettingsState, payload: {
+  target_url: string;
+  profile?: Record<string, unknown>;
+  llm_decide?: boolean;
+  batch_size?: number;
+  max_batches?: number;
+  item_workers?: number;
+  run_mode?: string;
+  extra_context?: Record<string, unknown>;
+  llm?: { enabled: boolean; base_url: string; model: string; api_key: string };
+}): Promise<ManagedRunResult> {
+  return requestJson(
+    settings,
+    '/runs/managed',
+    {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    },
+    () => mockManagedRunResult(payload.target_url)
+  );
+}
+
+export async function managedDiagnoseAndRepair(settings: SettingsState, payload: {
+  target_url: string;
+  profile?: Record<string, unknown>;
+  max_cycles?: number;
+  batch_size?: number;
+  item_workers?: number;
+  llm?: { enabled: boolean; base_url: string; model: string; api_key: string };
+}): Promise<ManagedRepairResult> {
+  return requestJson(
+    settings,
+    '/runs/managed/repair',
+    {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    },
+    () => mockManagedRepairResult(payload.target_url)
   );
 }

@@ -1,6 +1,7 @@
-import { Alert, Button, Card, Descriptions, Empty, Input, List, Popconfirm, Progress, Select, Space, Table, Tag, Typography, message } from 'antd';
+import { Alert, Badge, Button, Card, Descriptions, Empty, Input, List, Popconfirm, Progress, Select, Space, Table, Tag, Timeline, Typography, message } from 'antd';
 import { useEffect, useMemo, useState, type ChangeEvent } from 'react';
-import { cancelRun, deleteRun, exportRun, fetchRunEvents, fetchRunStatus, managedRepairRun, managedStep } from '../api/client';
+import ToolOutlined from '@ant-design/icons/lib/icons/ToolOutlined';
+import { cancelRun, deleteRun, exportRun, fetchRunEvents, fetchRunStatus, managedRepairRun, managedStep, managedDiagnoseAndRepair } from '../api/client';
 import { AiManagedPanel } from '../components/AiManagedPanel';
 import { DiagnosisPanel } from '../components/DiagnosisPanel';
 import { EventTimeline } from '../components/EventTimeline';
@@ -9,7 +10,7 @@ import { StatusPill } from '../components/StatusPill';
 import { WorkflowOverview } from '../components/WorkflowOverview';
 import { useWorkbench } from '../store/workbench';
 import { formatTime, managedAiModeLabel, percent, qualitySeverityLabel, replaceExportPathSuffix, statusLabel, userFacingError } from '../utils/format';
-import type { ExportFormat, ManagedActionRecord, ManagedStepRecord } from '../types/workflow';
+import type { ExportFormat, ManagedActionRecord, ManagedRepairResult, ManagedRunResult, ManagedStepRecord } from '../types/workflow';
 import { seedUrlRows } from '../utils/runPayload';
 
 function isMissingRunError(error: unknown): boolean {
@@ -141,6 +142,11 @@ export function TaskDetailPage() {
   const selectedFields = payload?.selected_fields || wizard.selectedFields;
   const seedCount = payload ? seedUrlRows(payload).length : 0;
   const modelName = payload?.llm?.model || settings.llm.model || '未选择模型';
+
+  // Closed-loop results from managed API
+  const managedRunResult = task?.managed_run_result || (status as any)?.managed_run_result as ManagedRunResult | undefined;
+  const repairResult = task?.repair_result || (status as any)?.repair_result as ManagedRepairResult | undefined;
+  const qualityGate = managedRunResult?.quality_gate || (status?.progress?.quality as any)?.quality_gate;
 
   const qualityRows = useMemo(() => {
     const quality = progress?.quality || {};
@@ -437,6 +443,46 @@ export function TaskDetailPage() {
     }
   };
 
+  const triggerOneClickRepair = async () => {
+    if (!task) return;
+    setBusy(true);
+    try {
+      const response = await managedDiagnoseAndRepair(settings, {
+        target_url: task.target_url,
+        profile: payload?.profile,
+        max_cycles: 3,
+        item_workers: settings.runtime.item_workers,
+        llm: {
+          enabled: Boolean(settings.llm.base_url && settings.llm.model),
+          base_url: settings.llm.base_url,
+          model: settings.llm.model,
+          api_key: settings.llm.api_key
+        }
+      });
+      // Create child task for the repair result
+      const childTask = {
+        ...task,
+        task_id: response.task_id,
+        run_id: response.run_id,
+        status: response.status,
+        record_count: response.record_count || 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        parent_task_id: task.task_id,
+        repair_source: 'one_click_repair',
+        repair_result: response,
+        run_payload: task.run_payload
+      };
+      upsertTask(childTask as any);
+      setPolling(true);
+      message.success('一键修复完成');
+    } catch (error) {
+      message.error(userFacingError(error));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <Space direction="vertical" size={16} className="page-stack">
       <WorkflowOverview wizard={wizard} settings={settings} activeTask={task} compact />
@@ -447,6 +493,7 @@ export function TaskDetailPage() {
             <Button onClick={() => setPolling((value) => !value)}>{polling ? '暂停轮询' : '恢复轮询'}</Button>
             <Button loading={busy} onClick={() => refresh(false)}>立即刷新</Button>
             <Button loading={busy} disabled={isRunning} onClick={triggerManagedRepairRun}>AI 托管修复并重跑</Button>
+            <Button icon={<ToolOutlined />} loading={busy} disabled={isRunning} onClick={triggerOneClickRepair}>一键修复</Button>
             <Button danger loading={busy} disabled={!isRunning} onClick={triggerCancel}>终止任务</Button>
             <Popconfirm title="只清除工作台记录，不删除已导出的文件。确认清除？" onConfirm={triggerRemoveLocal}>
               <Button>清除记录</Button>
@@ -484,6 +531,112 @@ export function TaskDetailPage() {
 
       {status?.error ? <Alert type="error" showIcon message="任务运行失败" description={status.error} /> : null}
 
+      {/* Quality Gate Display */}
+      {qualityGate && (
+        <Alert
+          type={qualityGate.passed ? 'success' : qualityGate.severity === 'warn' ? 'warning' : 'error'}
+          showIcon
+          message={`质量门禁：${qualityGate.passed ? '通过' : qualityGate.severity === 'warn' ? '警告' : '未通过'}`}
+          description={qualityGate.reason || (qualityGate.passed ? '所有指标达标' : '部分指标未达标，请查看下方详情')}
+        />
+      )}
+
+      {/* Closed-Loop Execution Panel */}
+      {managedRunResult && managedRunResult.actions && managedRunResult.actions.length > 0 && (
+        <Card title="闭环执行链路" size="small">
+          <Descriptions size="small" column={3}>
+            <Descriptions.Item label="任务 ID">{managedRunResult.task_id}</Descriptions.Item>
+            <Descriptions.Item label="记录数">{managedRunResult.record_count ?? '-'}</Descriptions.Item>
+            <Descriptions.Item label="字段覆盖率">{managedRunResult.field_coverage !== undefined ? `${Math.round(managedRunResult.field_coverage * 100)}%` : '-'}</Descriptions.Item>
+            <Descriptions.Item label="质量评分">{managedRunResult.quality_score !== undefined ? `${Math.round(managedRunResult.quality_score * 100)}%` : '-'}</Descriptions.Item>
+            <Descriptions.Item label="阶段">{managedRunResult.stage || '-'}</Descriptions.Item>
+            <Descriptions.Item label="状态"><StatusPill status={String(managedRunResult.status)} /></Descriptions.Item>
+          </Descriptions>
+          <Timeline
+            className="section-gap"
+            items={managedRunResult.actions.map((action) => ({
+              color: action.status === 'success' ? 'green' : action.status === 'failed' ? 'red' : action.status === 'running' ? 'blue' : 'gray',
+              children: (
+                <div>
+                  <Space style={{ marginBottom: 4 }}>
+                    <Typography.Text strong>{action.label}</Typography.Text>
+                    <Tag color={action.status === 'success' ? 'success' : action.status === 'failed' ? 'error' : 'default'}>
+                      {action.status === 'success' ? '成功' : action.status === 'failed' ? '失败' : action.status === 'running' ? '执行中' : action.status === 'skipped' ? '跳过' : '等待'}
+                    </Tag>
+                    {action.duration_ms !== undefined && (
+                      <Typography.Text type="secondary">{action.duration_ms}ms</Typography.Text>
+                    )}
+                  </Space>
+                  {action.result_summary && <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>{action.result_summary}</Typography.Paragraph>}
+                  {action.error && <Typography.Paragraph type="danger" style={{ marginBottom: 0 }}>错误：{action.error}</Typography.Paragraph>}
+                </div>
+              )
+            }))}
+          />
+        </Card>
+      )}
+
+      {/* Repair Comparison Panel */}
+      {repairResult && (
+        <Card title="修复对比" size="small">
+          <Descriptions size="small" column={3}>
+            <Descriptions.Item label="修复轮数">{repairResult.repair_cycles ?? '-'}</Descriptions.Item>
+            <Descriptions.Item label="是否收敛">
+              <Tag color={repairResult.converged ? 'success' : 'warning'}>{repairResult.converged ? '已收敛' : '未收敛'}</Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="最终健康">
+              <Tag color={repairResult.final_health === 'healthy' ? 'success' : repairResult.final_health === 'degraded' ? 'warning' : 'error'}>
+                {repairResult.final_health === 'healthy' ? '健康' : repairResult.final_health === 'degraded' ? '降级' : '异常'}
+              </Tag>
+            </Descriptions.Item>
+          </Descriptions>
+          <div className="section-gap" style={{ display: 'grid', gridTemplateColumns: '1fr 120px 120px 80px', gap: '8px 16px', alignItems: 'center' }}>
+            <Typography.Text strong type="secondary">指标</Typography.Text>
+            <Typography.Text strong type="secondary">修复前</Typography.Text>
+            <Typography.Text strong type="secondary">修复后</Typography.Text>
+            <Typography.Text strong type="secondary">变化</Typography.Text>
+            <Typography.Text>记录数</Typography.Text>
+            <Typography.Text>{repairResult.before_records ?? '-'}</Typography.Text>
+            <Typography.Text strong>{repairResult.after_records ?? repairResult.record_count ?? '-'}</Typography.Text>
+            <Typography.Text type={(repairResult.after_records ?? 0) > (repairResult.before_records ?? 0) ? 'success' : 'secondary'}>
+              {(repairResult.after_records ?? 0) > (repairResult.before_records ?? 0) ? '↑' : '—'}
+            </Typography.Text>
+            <Typography.Text>字段覆盖率</Typography.Text>
+            <Typography.Text>{repairResult.before_coverage !== undefined ? `${Math.round(repairResult.before_coverage * 100)}%` : '-'}</Typography.Text>
+            <Typography.Text strong>{repairResult.after_coverage !== undefined ? `${Math.round(repairResult.after_coverage * 100)}%` : '-'}</Typography.Text>
+            <Typography.Text type={(repairResult.after_coverage ?? 0) > (repairResult.before_coverage ?? 0) ? 'success' : 'secondary'}>
+              {(repairResult.after_coverage ?? 0) > (repairResult.before_coverage ?? 0) ? '↑' : '—'}
+            </Typography.Text>
+            <Typography.Text>质量评分</Typography.Text>
+            <Typography.Text>{repairResult.before_quality !== undefined ? `${Math.round(repairResult.before_quality * 100)}%` : '-'}</Typography.Text>
+            <Typography.Text strong>{repairResult.after_quality !== undefined ? `${Math.round(repairResult.after_quality * 100)}%` : '-'}</Typography.Text>
+            <Typography.Text type={(repairResult.after_quality ?? 0) > (repairResult.before_quality ?? 0) ? 'success' : 'secondary'}>
+              {(repairResult.after_quality ?? 0) > (repairResult.before_quality ?? 0) ? '↑' : '—'}
+            </Typography.Text>
+          </div>
+          {repairResult.actions && repairResult.actions.length > 0 && (
+            <Timeline
+              className="section-gap"
+              items={repairResult.actions.map((action) => ({
+                color: action.status === 'success' ? 'green' : action.status === 'failed' ? 'red' : 'gray',
+                children: (
+                  <div>
+                    <Space style={{ marginBottom: 4 }}>
+                      <Typography.Text strong>{action.label}</Typography.Text>
+                      <Tag color={action.status === 'success' ? 'success' : action.status === 'failed' ? 'error' : 'default'}>
+                        {action.status === 'success' ? '成功' : action.status === 'failed' ? '失败' : '执行中'}
+                      </Tag>
+                      {action.duration_ms !== undefined && <Typography.Text type="secondary">{action.duration_ms}ms</Typography.Text>}
+                    </Space>
+                    {action.result_summary && <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>{action.result_summary}</Typography.Paragraph>}
+                  </div>
+                )
+              }))}
+            />
+          )}
+        </Card>
+      )}
+
       <AiManagedPanel
         title="AI 托管驾驶舱"
         settings={settings}
@@ -502,6 +655,8 @@ export function TaskDetailPage() {
         managedAutoRepair={managedAutoRepair}
         parentTaskId={parentTaskId}
         repairSource={repairSource}
+        managedRunResult={managedRunResult}
+        repairResult={repairResult}
         onManagedRepairRun={triggerManagedRepairRun}
         onManagedStep={triggerManagedStep}
         repairLoading={busy}
