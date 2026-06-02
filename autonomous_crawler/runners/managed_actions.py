@@ -841,7 +841,7 @@ def execute_and_run(
         try:
             browser_runtime = NativeBrowserRuntime()
         except Exception:
-            # Playwright not installed â€?fall back to static mode
+            # Playwright not installed ï¿½?fall back to static mode
             access_mode = "static"
             if isinstance(merged_profile.get("access_config"), dict):
                 merged_profile["access_config"]["mode"] = "static"
@@ -911,7 +911,7 @@ def execute_and_run(
     quality_diagnostics["quality_gate_result"] = quality_gate_result.to_dict()
 
     # ------------------------------------------------------------------
-    # Phase 6: Build chain evidence (action â†?run linkage)
+    # Phase 6: Build chain evidence (action ï¿½?run linkage)
     # ------------------------------------------------------------------
     chain_evidence = _build_chain_evidence(
         action_result=action_result,
@@ -1269,14 +1269,14 @@ def _execute_reanalyze_site(
         for key in ("selectors", "crawl_preferences", "access_config", "api_hints", "pagination_hints", "quality_expectations"):
             if isinstance(profile.get(key), dict):
                 patch[key] = profile[key]
-        # Remove speculative seed_urls from the patch â€?the analyzer guesses
+        # Remove speculative seed_urls from the patch ï¿½?the analyzer guesses
         # URLs like /shop, /sklep, /catalog that are usually wrong.  The
         # caller's explicit seed_urls (or the API endpoint) should take
         # priority.  We keep seed_kind and other crawl_preferences fields.
         if isinstance(patch.get("crawl_preferences"), dict):
             patch["crawl_preferences"].pop("seed_urls", None)
 
-        # Detect JSON API responses â€?if the page returns JSON (not HTML),
+        # Detect JSON API responses ï¿½?if the page returns JSON (not HTML),
         # set api_hints so the crawler uses the API extraction path.
         if not patch.get("api_hints"):
             import json as _json
@@ -1306,6 +1306,19 @@ def _execute_reanalyze_site(
                                 cp["seed_urls"] = [url]
                                 cp["seed_kind"] = "api"
                                 patch["crawl_preferences"] = cp
+                        elif isinstance(data, list) and len(data) > 0:
+                            # Plain JSON array (e.g. jsonplaceholder /posts)
+                            patch["api_hints"] = {
+                                "endpoint": url,
+                                "method": "GET",
+                                "kind": "api",
+                                "items_path": "",
+                                "format": "json",
+                            }
+                            cp = patch.get("crawl_preferences") or {}
+                            cp["seed_urls"] = [url]
+                            cp["seed_kind"] = "api"
+                            patch["crawl_preferences"] = cp
                     except _json.JSONDecodeError:
                         pass
             except Exception:
