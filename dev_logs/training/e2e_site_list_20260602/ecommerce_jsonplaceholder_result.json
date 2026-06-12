@@ -1,0 +1,18 @@
+{
+  "site": "ecommerce_jsonplaceholder",
+  "url": "https://jsonplaceholder.typicode.com/posts",
+  "category": "ecommerce",
+  "scenario": "json_api",
+  "difficulty": "easy",
+  "status": "completed",
+  "records": 0,
+  "field_coverage": 0.0,
+  "quality": "empty",
+  "elapsed_seconds": 23.7,
+  "api_hints_detected": false,
+  "browser_fallback": true,
+  "pagination_followed": false,
+  "diagnosis_only": false,
+  "errors": [],
+  "notes": []
+}

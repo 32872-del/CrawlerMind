@@ -1,0 +1,18 @@
+{
+  "site": "ecommerce_scrapingcourse",
+  "url": "https://www.scrapingcourse.com/ecommerce/",
+  "category": "ecommerce",
+  "scenario": "ssr",
+  "difficulty": "medium",
+  "status": "completed",
+  "records": 16,
+  "field_coverage": 50.0,
+  "quality": "pass",
+  "elapsed_seconds": 29.31,
+  "api_hints_detected": false,
+  "browser_fallback": true,
+  "pagination_followed": false,
+  "diagnosis_only": false,
+  "errors": [],
+  "notes": []
+}

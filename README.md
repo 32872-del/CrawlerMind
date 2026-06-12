@@ -277,20 +277,50 @@ python -m unittest autonomous_crawler.tests.test_real_browser_smoke -v
 
 ## Current Growth Areas
 
-- Scrapling absorption is not complete. The current adapter path is useful, but
-  CLM still needs native fetch/parser/browser/spider/checkpoint implementations
-  that absorb Scrapling's capabilities without making the product a thin wrapper
-  around the external package.
-- Dynamic sites, infinite scroll, and complex anti-bot pages need broader
-  real-site training and pressure tests.
+- Scrapling absorption has a CLM-native backend baseline. The remaining work is
+  production hardening on real sites: dynamic rendering, session-bound replay,
+  signed API requests, protected browser profile calibration, and large-run
+  stability.
+- The AI managed loop exists, but still needs real-site hardening so it improves
+  direct crawl success instead of occasionally overriding a working path with a
+  weaker repair choice.
+- Dynamic sites, infinite scroll, complex anti-bot pages, and browser/XHR-driven
+  ecommerce flows need broader pressure tests with Playwright installed.
 - CAPTCHA/OCR, visual recognition, protected browser profiles, and deeper JS
   reverse-engineering are active roadmap capabilities, not finished product
   paths yet.
-- API pagination is an MVP; it still needs broader real-site hardening.
-- FastAPI job registry is in-memory; state is lost on restart.
-- No frontend UI yet.
-- Site-specific quirks should become profiles or fixtures, not hard-coded core
-  behavior.
+- API pagination and GraphQL replay exist but need broader real-site hardening,
+  especially pure JSON array APIs, Firebase-like APIs, and GraphQL endpoints.
+- FastAPI job registry is still mostly local/in-memory for workbench jobs; state
+  durability across process restarts remains a priority.
+- The Chinese web workbench exists, but the one-click flow still needs usability
+  polish and stronger live progress/decision visibility.
+- Site-specific quirks should become profiles, fixtures, or training data, not
+  hard-coded core behavior.
+
+## Moving To A New Machine
+
+Use this runbook when changing development environments:
+
+[docs/runbooks/ENVIRONMENT_MIGRATION_2026_06_12.md](docs/runbooks/ENVIRONMENT_MIGRATION_2026_06_12.md)
+
+In short:
+
+```bash
+git clone https://github.com/32872-del/CrawlerMind.git
+cd CrawlerMind
+python -m pip install -r requirements.txt
+playwright install
+cd frontend && npm install && npm run build
+```
+
+Then run:
+
+```bash
+python clm.py check
+python clm.py crawl "collect product titles and prices" mock://catalog --output dev_logs/runtime/mock_result.json
+python -m unittest autonomous_crawler.tests.test_product_workflow_api.ProductWorkflowAPITests -v
+```
 
 ## Governance
 

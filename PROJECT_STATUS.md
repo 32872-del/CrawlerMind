@@ -15,15 +15,15 @@ whole architecture. Current development is converging on:
 AI managed workflow -> evidence/recon -> profile/runtime patch -> long-run execution -> quality/export
 ```
 
-Current maturity estimate as of 2026-05-20:
+Current maturity estimate as of 2026-06-12:
 
 ```text
 Level 1 skeleton: complete
 Level 2 usable MVP: complete
-Level 3 advanced crawler backend: 70% - 75%
-Level 4 visible AI decision loop: 45% - 55%
-Level 5 product workbench / long-run operations: 30% - 40%
-Overall distance to the target crawler agent: 55% - 65%
+Level 3 advanced crawler backend: 75% - 82%
+Level 4 visible AI decision loop: 58% - 68%
+Level 5 product workbench / long-run operations: 45% - 55%
+Overall distance to the target crawler agent: 68% - 75%
 ```
 
 The product target has been sharpened: CLM should become an agent that
@@ -52,6 +52,46 @@ The current cleanup/review checkpoint is recorded at:
 ```text
 docs/reviews/2026-05-20_ARCHITECTURE_AND_WORKSPACE_REVIEW.md
 ```
+
+Latest migration checkpoint:
+
+```text
+docs/runbooks/ENVIRONMENT_MIGRATION_2026_06_12.md
+```
+
+The repository is intended to be clone-and-run on a new development machine
+after installing Python dependencies, frontend dependencies, and Playwright
+browsers. Runtime databases, caches, browser artifacts, and local API-key
+configuration remain intentionally git-ignored.
+
+## Latest Checkpoint: 2026-06-12
+
+The current repository now includes the main backend and frontend pieces needed
+for the first AI-managed crawler workbench:
+
+- `execute_and_run()` connects managed action execution to profile longrun
+  execution and returns chain evidence, run result, and quality diagnostics.
+- `diagnose_and_repair()` provides the first closed-loop repair function:
+  diagnose failed/weak runs, build bounded repair actions, execute them, and
+  compare before/after results.
+- `QualityGate` evaluates minimum records, field coverage, required fields,
+  and critical failures.
+- `/runs/{task_id}/managed-control-loop`,
+  `/runs/managed/execute-and-run`, and
+  `/runs/managed/diagnose-and-repair` expose the managed loop to the workbench.
+- `/site/analyze` can return `extraction_contract_discovery` and
+  `extraction_context`; analyzed profiles can carry bounded evidence and a
+  best extraction contract into later managed actions.
+- The Chinese frontend workbench exists under `frontend/` and includes task
+  detail, AI managed panels, model configuration, export-path support, and
+  one-click workflow wiring.
+- E2E managed-loop training evidence from 2026-06-02 is preserved under
+  `dev_logs/training/e2e_site_list_20260602/`.
+
+The biggest recent finding is that the managed loop can now run, but on several
+sites it can still underperform the direct crawl path. The next hardening phase
+must ensure the loop enhances successful existing extraction paths instead of
+overriding them with weaker reanalysis/repair choices.
 
 ## Completed
 
