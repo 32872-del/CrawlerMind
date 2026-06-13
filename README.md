@@ -16,6 +16,27 @@ Crawler-Mind，简称 **CLM**，是一个正在快速迭代的 **AI 驱动数据
 
 当前项目仍处于工程开发阶段，但已经从早期 LangGraph 爬虫原型，发展成一个具备 CLI、FastAPI、中文 Web 工作台、CLM-native 采集后端、长跑 checkpoint、AI managed loop、真实网站训练记录的本地平台。
 
+## Community / Private Core 声明
+
+当前公开仓库是 **CLM Community**：用于公开展示、基础采集、开发验证、工作台体验和可复现 demo。
+
+CLM 的高级采集核心、真实站点训练资产、企业级策略、私有 profile、深度修复策略和长期积累的失败样本，由作者在独立私有核心包中维护。公开版会保持真实可运行，但不代表 CLM 的全部商业能力和全部训练资产已经公开。
+
+```text
+CLM Community:
+  - 可运行 CLI / API / 工作台
+  - 可复现 demo
+  - 基础采集 runtime
+  - 基础 managed workflow
+
+CLM Private Core:
+  - 高级 managed repair policy
+  - 真实站点 profile / playbook
+  - 深度 API/XHR/GraphQL replay 策略
+  - 高级 browser/session/proxy 策略
+  - 训练数据、失败样本和企业级扩展
+```
+
 ## 项目背景
 
 传统爬虫项目最大的问题不是“写一个请求”有多难，而是后续一连串工程问题很难稳定处理：
@@ -67,6 +88,41 @@ AI managed workflow
 ```
 
 下一阶段核心目标是 **AI Managed Crawl Loop v2**：让 AI 不只是参与站点分析，而是贯穿“分析、试跑、诊断、修复、重跑、导出”的完整采集闭环。
+
+## Quick Demo
+
+第一次看项目，建议先跑这个离线 demo：
+
+```bash
+python clm.py demo ecommerce
+```
+
+它不依赖外部网站，适合新环境、GitHub 访客和录屏展示。这个 demo 会展示：
+
+- profile-driven ecommerce collection。
+- pause / resume。
+- checkpoint store。
+- product store。
+- quality gate。
+- report generation。
+
+预期结果：
+
+```text
+Demo accepted
+records: 55
+status: completed
+```
+
+输出文件：
+
+```text
+dev_logs/runtime/clm_demo_ecommerce.json
+```
+
+更多稳定示例见：[examples/README.md](examples/README.md)
+
+录制展示流程见：[docs/runbooks/DEMO_RECORDING_GUIDE.md](docs/runbooks/DEMO_RECORDING_GUIDE.md)
 
 ## 架构演进
 
@@ -529,6 +585,19 @@ Final Status: completed
 Extracted Data: 2 items
 ```
 
+### 运行推荐 Demo
+
+```bash
+python clm.py demo ecommerce
+```
+
+其他 demo：
+
+```bash
+python clm.py demo mock
+python clm.py demo spider
+```
+
 ### 运行真实页面 smoke
 
 ```bash
@@ -632,6 +701,8 @@ dev_logs/
 - 当前状态：[PROJECT_STATUS.md](PROJECT_STATUS.md)
 - 当前主计划：[PLAN.md](PLAN.md)
 - AI managed loop 计划：[docs/plans/2026-05-20_AI_MANAGED_CRAWL_LOOP_V2_SHORT_TERM_PLAN.md](docs/plans/2026-05-20_AI_MANAGED_CRAWL_LOOP_V2_SHORT_TERM_PLAN.md)
+- 稳定示例：[examples/README.md](examples/README.md)
+- Demo 录制指南：[docs/runbooks/DEMO_RECORDING_GUIDE.md](docs/runbooks/DEMO_RECORDING_GUIDE.md)
 - 新环境迁移：[docs/runbooks/ENVIRONMENT_MIGRATION_2026_06_12.md](docs/runbooks/ENVIRONMENT_MIGRATION_2026_06_12.md)
 - 新手使用指南：[docs/runbooks/CLM_BEGINNER_USER_GUIDE_CN.md](docs/runbooks/CLM_BEGINNER_USER_GUIDE_CN.md)
 - Windows 快速开始：[docs/runbooks/QUICK_START_WINDOWS.md](docs/runbooks/QUICK_START_WINDOWS.md)

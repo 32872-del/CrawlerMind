@@ -95,6 +95,54 @@ class CLMEasyModeTests(unittest.TestCase):
             self.assertFalse(run_crawl.call_args.kwargs["use_llm"])
             self.assertTrue(output_path.exists())
 
+    def test_demo_mock_writes_report(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_path = Path(temp_dir) / "demo_mock.json"
+
+            with patch("clm.run_crawl") as run_crawl:
+                run_crawl.return_value = {
+                    "status": "completed",
+                    "extracted_data": {"items": [{"title": "A"}, {"title": "B"}]},
+                }
+                exit_code = clm.main(["demo", "mock", "--output", str(output_path)])
+
+            self.assertEqual(exit_code, 0)
+            run_crawl.assert_called_once()
+            self.assertEqual(run_crawl.call_args.args[0], "collect product titles and prices")
+            self.assertEqual(run_crawl.call_args.args[1], "mock://catalog")
+            self.assertFalse(run_crawl.call_args.kwargs["use_llm"])
+            payload = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["status"], "completed")
+            self.assertEqual(len(payload["extracted_data"]["items"]), 2)
+
+    def test_demo_ecommerce_uses_default_scenario(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_path = Path(temp_dir) / "demo_ecommerce.json"
+
+            class Result(dict):
+                pass
+
+            fake_summary = Result({
+                "accepted": True,
+                "runtime_dir": "",
+                "resume_pass": {
+                    "status": "completed",
+                    "product_stats": {"total": 55},
+                    "quality_summary": {"quality_gate": {"passed": True}},
+                },
+            })
+
+            with patch("run_profile_longrun_smoke_2026_05_16.run", return_value=fake_summary) as demo_run:
+                exit_code = clm.main(["demo", "--output", str(output_path)])
+
+            self.assertEqual(exit_code, 0)
+            demo_run.assert_called_once()
+            self.assertEqual(demo_run.call_args.kwargs["output_path"], output_path)
+            payload = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertTrue(payload["accepted"])
+            self.assertEqual(payload["scenario"], "ecommerce")
+            self.assertEqual(payload["records"], 55)
+
     def test_profile_run_invokes_longrun_executor(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             profile_path = Path(temp_dir) / "profile.json"

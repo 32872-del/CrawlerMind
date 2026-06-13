@@ -20,7 +20,7 @@ import { WorkbenchProvider, useWorkbench } from './store/workbench';
 import { apiModeLabel } from './utils/format';
 import './styles.css';
 
-const { Header, Sider, Content } = Layout;
+const { Header, Sider, Content, Footer } = Layout;
 
 function Shell() {
   const { page, setPage, settings, tasks } = useWorkbench();
@@ -63,6 +63,10 @@ function Shell() {
           </Space>
         </Header>
         <Content className="app-content">{renderPage(page)}</Content>
+        <Footer className="app-footer">
+          CLM Community 工作台用于公开演示、基础采集和开发验证。高级采集核心、真实站点训练资产、
+          企业级策略与私有扩展由作者在独立私有核心包中维护。
+        </Footer>
       </Layout>
     </Layout>
   );

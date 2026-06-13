@@ -76,6 +76,29 @@ def build_parser() -> argparse.ArgumentParser:
     crawl_parser.add_argument("--no-llm", action="store_true", help="force LLM off")
     crawl_parser.set_defaults(func=cmd_crawl)
 
+    demo_parser = subparsers.add_parser(
+        "demo",
+        help="run a polished offline demo that is safe for first-time users",
+    )
+    demo_parser.add_argument(
+        "scenario",
+        nargs="?",
+        choices=("mock", "ecommerce", "spider"),
+        default="ecommerce",
+        help="demo scenario to run; ecommerce is the recommended showcase",
+    )
+    demo_parser.add_argument(
+        "--output",
+        type=Path,
+        help="write the demo report JSON; defaults to dev_logs/runtime/clm_demo_<scenario>.json",
+    )
+    demo_parser.add_argument(
+        "--keep-runtime",
+        action="store_true",
+        help="keep temporary runtime databases for inspection when the scenario supports it",
+    )
+    demo_parser.set_defaults(func=cmd_demo)
+
     profile_run_parser = subparsers.add_parser(
         "profile-run",
         help="run a profile-driven long crawl",
@@ -229,6 +252,96 @@ def cmd_crawl(args: argparse.Namespace) -> int:
         _write_crawl_output(final_state, args.output)
         print(f"Output saved to: {args.output}")
     return 0 if final_state.get("status") == "completed" else 1
+
+
+def cmd_demo(args: argparse.Namespace) -> int:
+    _ensure_output_dirs()
+    scenario = args.scenario
+    output_path = args.output or (DEFAULT_OUTPUT_DIR / f"clm_demo_{scenario}.json")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    print("=" * 70)
+    print("Crawler-Mind Quick Demo")
+    print("=" * 70)
+    print(f"Scenario: {scenario}")
+    print(f"Output:   {output_path}")
+    print("-" * 70)
+
+    if scenario == "mock":
+        final_state = run_crawl(
+            "collect product titles and prices",
+            "mock://catalog",
+            use_llm=False,
+            advisor=None,
+        )
+        _write_crawl_output(final_state, output_path)
+        items = final_state.get("extracted_data", {}).get("items", [])
+        summary = {
+            "accepted": final_state.get("status") == "completed" and len(items) >= 2,
+            "scenario": scenario,
+            "status": final_state.get("status"),
+            "records": len(items),
+            "output": str(output_path),
+            "highlights": [
+                "Runs without network access.",
+                "Exercises the basic Planner -> Recon -> Strategy -> Executor -> Extractor -> Validator path.",
+            ],
+        }
+    elif scenario == "spider":
+        from run_spider_runtime_smoke_2026_05_14 import run as run_native_spider_smoke
+
+        summary = run_native_spider_smoke(
+            keep_db=bool(args.keep_runtime),
+            output_path=output_path,
+        )
+        summary = {
+            "accepted": bool(summary.get("accepted")),
+            "scenario": scenario,
+            "status": summary.get("checkpoint_latest", {}).get("run", {}).get("status", "unknown"),
+            "records": len(summary.get("items", [])),
+            "failures": len(summary.get("failures", [])),
+            "output": str(output_path),
+            "highlights": [
+                "Runs without public network access.",
+                "Demonstrates URL frontier, link discovery, checkpointing, pause/resume, product extraction, and failure buckets.",
+            ],
+            "raw_summary": summary,
+        }
+    else:
+        from run_profile_longrun_smoke_2026_05_16 import run as run_profile_demo
+
+        summary = run_profile_demo(
+            output_path=output_path,
+            keep_db=bool(args.keep_runtime),
+        )
+        resumed = summary.get("resume_pass", {}) if isinstance(summary, dict) else {}
+        product_stats = resumed.get("product_stats", {}) if isinstance(resumed, dict) else {}
+        quality = resumed.get("quality_summary", {}) if isinstance(resumed, dict) else {}
+        summary = {
+            "accepted": bool(summary.get("accepted")),
+            "scenario": scenario,
+            "status": resumed.get("status", "unknown") if isinstance(resumed, dict) else "unknown",
+            "records": product_stats.get("total", 0) if isinstance(product_stats, dict) else 0,
+            "quality_gate": quality.get("quality_gate", {}) if isinstance(quality, dict) else {},
+            "output": str(output_path),
+            "runtime_dir": summary.get("runtime_dir", "") if isinstance(summary, dict) else "",
+            "highlights": [
+                "Runs without public network access.",
+                "Demonstrates profile-driven ecommerce collection.",
+                "Shows pause/resume, checkpoint store, product store, quality gate, and report generation.",
+            ],
+            "source": "run_profile_longrun_smoke_2026_05_16",
+        }
+        output_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+
+    print(json.dumps(summary, ensure_ascii=True, indent=2, default=str))
+    if summary.get("accepted"):
+        print("-" * 70)
+        print("Demo accepted. CLM is ready for the next smoke or workbench test.")
+        return 0
+    print("-" * 70)
+    print("Demo failed. Inspect the JSON report above for details.")
+    return 1
 
 
 def cmd_profile_run(args: argparse.Namespace) -> int:
