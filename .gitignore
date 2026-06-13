@@ -17,6 +17,12 @@ autonomous_crawler/site_specs/*.tmp.json
 autonomous_crawler/site_specs/run_*.json
 dev_logs/runtime/
 dev_logs/exports/
+dev_logs/training/**
+!dev_logs/training/
+!dev_logs/training/README.md
+dev_logs/stress/**
+!dev_logs/stress/
+!dev_logs/stress/README.md
 dev_logs/**/skeleton_run_result.json
 dev_logs/*_debug.json
 dev_logs/*_probe*.json
