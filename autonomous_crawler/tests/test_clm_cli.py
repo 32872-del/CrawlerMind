@@ -39,6 +39,20 @@ class CLMEasyModeTests(unittest.TestCase):
 
             self.assertEqual(exit_code, 0)
 
+    def test_check_can_print_capabilities(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_path = Path(temp_dir) / "clm_config.json"
+            clm.main(["init", "--config", str(config_path)])
+
+            exit_code = clm.main(["check", "--config", str(config_path), "--capabilities"])
+
+            self.assertEqual(exit_code, 0)
+
+    def test_license_check_reports_unlicensed_private_features(self) -> None:
+        exit_code = clm.main(["license", "check", "--capability", "private.advanced_api_replay"])
+
+        self.assertEqual(exit_code, 1)
+
     def test_smoke_plan_is_non_network_command(self) -> None:
         exit_code = clm.main(["smoke", "--kind", "runner", "--plan"])
 

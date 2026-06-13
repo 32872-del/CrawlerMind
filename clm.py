@@ -18,6 +18,7 @@ if sys.platform == "win32":
     except Exception:
         pass
 
+from autonomous_crawler.capabilities import build_capability_gate
 from autonomous_crawler.llm import LLMConfigurationError
 from autonomous_crawler.runners import (
     ProfileLongRunConfig,
@@ -63,6 +64,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--llm",
         action="store_true",
         help="also make a real provider request using the configured LLM",
+    )
+    check_parser.add_argument(
+        "--capabilities",
+        action="store_true",
+        help="show Community/Private Core capability availability",
     )
     check_parser.set_defaults(func=cmd_check)
 
@@ -154,6 +160,20 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     train_parser.set_defaults(func=cmd_train)
+
+    license_parser = subparsers.add_parser("license", help="inspect transparent private capability licensing")
+    license_subparsers = license_parser.add_subparsers(dest="license_command", required=True)
+    license_check_parser = license_subparsers.add_parser("check", help="check a capability token")
+    license_check_parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG_PATH)
+    license_check_parser.add_argument("--token", default="", help="license token; defaults to env/config")
+    license_check_parser.add_argument("--secret", default="", help="verification secret; defaults to env/config")
+    license_check_parser.add_argument(
+        "--capability",
+        action="append",
+        default=[],
+        help="capability to check; may be repeated",
+    )
+    license_check_parser.set_defaults(func=cmd_license_check)
     return parser
 
 
@@ -226,6 +246,9 @@ def cmd_check(args: argparse.Namespace) -> int:
     llm = config.get("llm") or {}
     print(f"Config: {args.config if args.config.exists() else 'not found'}")
     print(f"LLM configured: {'yes' if llm.get('enabled') else 'no'}")
+
+    if args.capabilities:
+        _print_capability_summary(args.config)
 
     if args.llm:
         return check_llm_config(args.config)
@@ -475,6 +498,22 @@ def cmd_train(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_license_check(args: argparse.Namespace) -> int:
+    names = args.capability or _default_capability_checks()
+    gate = build_capability_gate(
+        config_path=args.config,
+        token=args.token or None,
+        secret=args.secret or None,
+    )
+    summary = gate.summary(names)
+    print(json.dumps(summary, ensure_ascii=True, indent=2, default=str))
+    private_statuses = [
+        item for item in summary["capabilities"]
+        if str(item.get("edition")) == "private"
+    ]
+    return 0 if all(item.get("available") for item in private_statuses) else 1
+
+
 def _build_advisor_for_crawl(
     config_path: Path,
     *,
@@ -490,6 +529,30 @@ def _build_advisor_for_crawl(
         llm["enabled"] = True
         config["llm"] = llm
     return build_simple_advisor(config)
+
+
+def _print_capability_summary(config_path: Path) -> None:
+    gate = build_capability_gate(config_path=config_path)
+    summary = gate.summary(_default_capability_checks())
+    print("Capabilities:")
+    for item in summary["capabilities"]:
+        marker = "yes" if item.get("available") else "no"
+        print(f"  {item.get('name')}: {marker} ({item.get('edition')}, {item.get('reason')})")
+
+
+def _default_capability_checks() -> list[str]:
+    return [
+        "community.demo",
+        "community.mock_crawl",
+        "community.basic_cli",
+        "community.basic_api",
+        "community.workbench",
+        "private.managed_repair_policy",
+        "private.site_profiles",
+        "private.advanced_api_replay",
+        "private.browser_profile_strategy",
+        "private.training_assets",
+    ]
 
 
 def _ensure_output_dirs() -> None:
